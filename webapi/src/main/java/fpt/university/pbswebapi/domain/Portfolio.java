@@ -1,9 +1,7 @@
 package fpt.university.pbswebapi.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,11 +21,13 @@ public class Portfolio {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "PHOTOGRAPHER_ID", referencedColumnName = "ID")
+    @JsonBackReference
     private Photographer photographer;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "portfolio")
+    @JsonManagedReference
     private List<Project> projects;
 
     public Portfolio(Long id, String name, Photographer photographer) {
