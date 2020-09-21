@@ -8,9 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableConfigurationProperties(AppProperties.class)
-public class PbsWebapiApplication {
+public class Main {
 
     public static void main(String[] args) {
-        SpringApplication.run(PbsWebapiApplication.class, args);
+        SpringApplication.run(Main.class, args);
     }
 }
