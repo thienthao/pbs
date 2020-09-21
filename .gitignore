@@ -44,6 +44,7 @@ captures/
 #team
 Documents/tasksheet.xlsx
 Documents/other-teams
+review-meetings
 
 # IntelliJ
 *.iml
