@@ -21,9 +21,21 @@ public class Photographer {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "rating_count")
+    private String ratingCount;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "mail")
+    private String mail;
+
+    @Column(name = "phone")
+    private String phone;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "photographer")
     @JsonManagedReference
-    private List<Portfolio> portfolios;
+    private List<Album> albums;
 
     public Photographer(Long id, String name) {
         this.id = id;

@@ -1,16 +1,15 @@
 package fpt.university.pbswebapi.security.oauth2;
 
 import fpt.university.pbswebapi.domain.AuthProvider;
-import fpt.university.pbswebapi.domain.User;
+import fpt.university.pbswebapi.domain.OAuthUser;
 import fpt.university.pbswebapi.exception.OAuth2AuthenticationProcessingException;
-import fpt.university.pbswebapi.repository.UserRepository;
+import fpt.university.pbswebapi.repository.OauthUserRepository;
 import fpt.university.pbswebapi.security.UserPrincipal;
 import fpt.university.pbswebapi.security.oauth2.user.OAuth2UserInfo;
 import fpt.university.pbswebapi.security.oauth2.user.OAuth2UserInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -24,7 +23,7 @@ import java.util.Optional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
-    private UserRepository userRepository;
+    private OauthUserRepository oauthUserRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -45,36 +44,36 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
         }
 
-        Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
-        User user;
+        Optional<OAuthUser> userOptional = oauthUserRepository.findByEmail(oAuth2UserInfo.getEmail());
+        OAuthUser OAuthUser;
         if(userOptional.isPresent()) {
-            user = userOptional.get();
-            if(!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
+            OAuthUser = userOptional.get();
+            if(!OAuthUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
                 throw new OAuth2AuthenticationProcessingException("Looks like you're signed up with " +
-                        user.getProvider() + " account. Please use your " + user.getProvider() +
+                        OAuthUser.getProvider() + " account. Please use your " + OAuthUser.getProvider() +
                         " account to login.");
             }
-            user = updateExistingUser(user, oAuth2UserInfo);
+            OAuthUser = updateExistingUser(OAuthUser, oAuth2UserInfo);
         } else {
-            user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
+            OAuthUser = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
         }
-        return UserPrincipal.create(user, oAuth2User.getAttributes());
+        return UserPrincipal.create(OAuthUser, oAuth2User.getAttributes());
     }
 
-    private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
-        User user = new User();
+    private OAuthUser registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
+        OAuthUser OAuthUser = new OAuthUser();
 
-        user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
-        user.setProviderId(oAuth2UserInfo.getId());
-        user.setName(oAuth2UserInfo.getName());
-        user.setEmail(oAuth2UserInfo.getEmail());
-        user.setImageUrl(oAuth2UserInfo.getImageUrl());
-        return userRepository.save(user);
+        OAuthUser.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
+        OAuthUser.setProviderId(oAuth2UserInfo.getId());
+        OAuthUser.setName(oAuth2UserInfo.getName());
+        OAuthUser.setEmail(oAuth2UserInfo.getEmail());
+        OAuthUser.setImageUrl(oAuth2UserInfo.getImageUrl());
+        return oauthUserRepository.save(OAuthUser);
     }
 
-    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
-        existingUser.setName(oAuth2UserInfo.getName());
-        existingUser.setImageUrl(oAuth2UserInfo.getImageUrl());
-        return userRepository.save(existingUser);
+    private OAuthUser updateExistingUser(OAuthUser existingOAuthUser, OAuth2UserInfo oAuth2UserInfo) {
+        existingOAuthUser.setName(oAuth2UserInfo.getName());
+        existingOAuthUser.setImageUrl(oAuth2UserInfo.getImageUrl());
+        return oauthUserRepository.save(existingOAuthUser);
     }
 }

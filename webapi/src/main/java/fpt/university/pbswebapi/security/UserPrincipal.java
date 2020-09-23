@@ -1,6 +1,6 @@
 package fpt.university.pbswebapi.security;
 
-import fpt.university.pbswebapi.domain.User;
+import fpt.university.pbswebapi.domain.OAuthUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,19 +25,19 @@ public class UserPrincipal implements OAuth2User, UserDetails {
         this.authorities = authorities;
     }
 
-    public static UserPrincipal create(User user) {
+    public static UserPrincipal create(OAuthUser OAuthUser) {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
         return new UserPrincipal(
-                user.getId(),
-                user.getEmail(),
-                user.getPassword(),
+                OAuthUser.getId(),
+                OAuthUser.getEmail(),
+                OAuthUser.getPassword(),
                 authorities
         );
     }
 
-    public static UserPrincipal create(User user, Map<String, Object> attributes) {
-        UserPrincipal userPrincipal = UserPrincipal.create(user);
+    public static UserPrincipal create(OAuthUser OAuthUser, Map<String, Object> attributes) {
+        UserPrincipal userPrincipal = UserPrincipal.create(OAuthUser);
         userPrincipal.setAttributes(attributes);
         return userPrincipal;
     }
