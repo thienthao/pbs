@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity(name = "photographers")
+@Entity
+@Table(name= "photographers")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +33,9 @@ public class Photographer {
 
     @Column(name = "phone")
     private String phone;
+
+    @Column(name = "avatar")
+    private String avatar;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "photographer")
     @JsonManagedReference

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity(name = "albums")
 @Data
@@ -16,14 +17,20 @@ public class Album {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "image_link")
-    private String imageLink;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "image_caption")
-    private String imageCaption;
+    @Column(name = "thumbnail")
+    private String thumbnail;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "PHOTOGRAPHER_ID", referencedColumnName = "ID")
     @JsonBackReference
     private Photographer photographer;
+
+    @OneToMany
+    private List<Photo> photos;
+
+    private String style;
+
 }
