@@ -1,6 +1,6 @@
 package fpt.university.pbswebapi.security.services;
 
-import fpt.university.pbswebapi.domain.User;
+import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;

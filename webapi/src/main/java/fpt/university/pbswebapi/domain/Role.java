@@ -2,7 +2,7 @@ package fpt.university.pbswebapi.domain;
 
 import javax.persistence.*;
 
-@Entity
+//@Entity
 @Table(name = "roles")
 public class Role {
     @Id

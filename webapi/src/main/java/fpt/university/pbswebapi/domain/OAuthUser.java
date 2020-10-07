@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
-@Entity
+//@Entity
 public class OAuthUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

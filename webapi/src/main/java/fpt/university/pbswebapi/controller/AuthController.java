@@ -1,8 +1,8 @@
 package fpt.university.pbswebapi.controller;
 
-import fpt.university.pbswebapi.domain.ERole;
-import fpt.university.pbswebapi.domain.Role;
-import fpt.university.pbswebapi.domain.User;
+import fpt.university.pbswebapi.entity.ERole;
+import fpt.university.pbswebapi.entity.Role;
+import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.payload.own.request.LoginRequest;
 import fpt.university.pbswebapi.payload.own.request.SignupRequest;
 import fpt.university.pbswebapi.payload.own.response.JwtResponse;
@@ -21,9 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -54,16 +52,15 @@ public class AuthController {
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+
+        String role = userDetails.getAuthorities().toArray()[0].toString();
 
         return ResponseEntity.ok(new JwtResponse(
                 jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
-                roles));
+                role));
     }
 
     @PostMapping("/signup")
@@ -84,41 +81,18 @@ public class AuthController {
                 signupRequest.getEmail(),
                 encoder.encode(signupRequest.getPassword()));
 
-        Set<String> strRoles = signupRequest.getRole();
-        Set<Role> roles = new HashSet<>();
+        String strRole = signupRequest.getRole();
+        Role role;
 
-        if(strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_CUSTOMER)
+        if(strRole == null) {
+            role = roleRepository.findByRole(ERole.ROLE_CUSTOMER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
         } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "customer":
-                        Role customerRole = roleRepository.findByName(ERole.ROLE_CUSTOMER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(customerRole);
-
-                        break;
-                    case "photographer":
-                        Role photographerRole = roleRepository.findByName(ERole.ROLE_PHOTOGRAPHER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(photographerRole);
-
-                        break;
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    default:
-                        break;
-                }
-            });
+            role = roleRepository.findByRole(ERole.valueOf(strRole))
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
         }
 
-        user.setRoles(roles);
+        user.setRole(role);
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));

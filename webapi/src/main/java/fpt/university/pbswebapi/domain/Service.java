@@ -5,13 +5,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
-//@Entity(name = "schedules")
+//@Entity
+@Table(name = "services")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Schedule {
+public class Service {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String name;
+
+    private Double price;
+
+    @OneToMany
+    private List<ServiceItem> serviceItems;
 }

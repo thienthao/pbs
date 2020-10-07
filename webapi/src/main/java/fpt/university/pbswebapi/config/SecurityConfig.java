@@ -1,14 +1,7 @@
 package fpt.university.pbswebapi.config;
 
-import fpt.university.pbswebapi.security.CustomUserDetailsService;
-import fpt.university.pbswebapi.security.RestAuthenticationEntryPoint;
-import fpt.university.pbswebapi.security.TokenAuthenticationFilter;
 import fpt.university.pbswebapi.security.jwt.AuthEntryPointJwt;
 import fpt.university.pbswebapi.security.jwt.AuthTokenFilter;
-import fpt.university.pbswebapi.security.oauth2.CustomOAuth2UserService;
-import fpt.university.pbswebapi.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
-import fpt.university.pbswebapi.security.oauth2.OAuth2AuthenticationFailureHandler;
-import fpt.university.pbswebapi.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import fpt.university.pbswebapi.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -34,27 +27,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
-
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
-
-    @Autowired
-    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-
-    @Autowired
-    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
-
-    @Autowired
-    private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
-
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter();
-    }
-
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
@@ -71,10 +43,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       the authorization request. But, since our service is stateless, we can't save it in
       the session. We'll save the request in a Base64 encoded cookie instead.
     */
-    @Bean
-    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
-        return new HttpCookieOAuth2AuthorizationRequestRepository();
-    }
 
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
+//@Entity
 @Table(name= "photographers")
 @Data
 @AllArgsConstructor
@@ -40,6 +40,9 @@ public class Photographer {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "photographer")
     @JsonManagedReference
     private List<Album> albums;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Service> services;
 
     public Photographer(Long id, String name) {
         this.id = id;

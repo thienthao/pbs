@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity(name = "albums")
+//@Entity(name = "albums")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,4 +33,11 @@ public class Album {
 
     private String style;
 
+    public Album(Long id, String name, String thumbnail, Photographer photographer, List<Photo> photos) {
+        this.id = id;
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.photographer = photographer;
+        this.photos = photos;
+    }
 }

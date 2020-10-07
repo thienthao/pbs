@@ -1,33 +1,44 @@
 package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.domain.Photographer;
+import fpt.university.pbswebapi.entity.ServicePackage;
+import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
-import fpt.university.pbswebapi.repository.PhotographerRepository;
+import fpt.university.pbswebapi.repository.ServicePackageRepository;
+import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.PhotographerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/photographers")
 public class PhotographerController {
-    private final PhotographerRepository photographerRepository;
+    private final UserRepository photographerRepository;
+    private final ServicePackageRepository packageRepository;
     private final PhotographerService phtrService;
 
     @Autowired
-    public PhotographerController(PhotographerRepository photographerRepository, PhotographerService phtrService) {
+    public PhotographerController(UserRepository photographerRepository, ServicePackageRepository packageRepository, PhotographerService phtrService) {
         this.photographerRepository = photographerRepository;
+        this.packageRepository = packageRepository;
         this.phtrService = phtrService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Photographer>> findAll() {
-        return new ResponseEntity<List<Photographer>>(phtrService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<User>> findAll() {
+        return new ResponseEntity<List<User>>(phtrService.findAll(), HttpStatus.OK);
     }
 
 //    @GetMapping("/{name}")
@@ -38,6 +49,36 @@ public class PhotographerController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findOne(@PathVariable("id") Long id) {
         return new ResponseEntity<>(phtrService.findOne(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/packages")
+    public ResponseEntity<Map<String, Object>> findPackagesByPtgId(
+            @PathVariable("id") Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        try {
+            List<ServicePackage> packages = new ArrayList<ServicePackage>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<ServicePackage> pagePackages;
+            if(name == null)
+                pagePackages = packageRepository.findServicePackageByPtgId(id, paging);
+            else
+                pagePackages = packageRepository.findServicePackageByPtgIdAndByNameContaining(name, id, paging);
+
+            packages = pagePackages.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("packages", packages);
+            response.put("currentPage", pagePackages.getNumber());
+            response.put("totalItems", pagePackages.getTotalElements());
+            response.put("totalPages", pagePackages.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping(value = "/{id}/upload",

@@ -1,11 +1,11 @@
 package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.bucket.BucketName;
-import fpt.university.pbswebapi.domain.Album;
 import fpt.university.pbswebapi.domain.Photographer;
+import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
-import fpt.university.pbswebapi.repository.PhotographerRepository;
+import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,22 +17,19 @@ import static org.apache.http.entity.ContentType.*;
 
 @Service
 public class PhotographerService {
-    private final PhotographerRepository phtrRepo;
+    private final UserRepository phtrRepo;
     private final FileStore fileStore;
 
     @Autowired
-    public PhotographerService(PhotographerRepository phtrRepo, FileStore fileStore) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
     }
 
-    public List<Photographer> findAll() {
+    public List<User> findAll() {
         return phtrRepo.findAll();
     }
 
-    public List<Photographer> findAllByNameContaining(String name) {
-        return phtrRepo.findAllByNameContaining(name);
-    }
 
     public String uploadAvatar(String id, MultipartFile file) {
         // check if file empty
@@ -55,13 +52,13 @@ public class PhotographerService {
         String filename = String.format("%s-%s", id, "avatar");
 
         // Get album to set thumbnail link
-        Optional<Photographer> phtrOptional = phtrRepo.findById(Long.parseLong(id));
+        Optional<User> phtrOptional = phtrRepo.findById(Long.parseLong(id));
         if(phtrOptional.isPresent()) {
             // save photo and save link to repo
             try {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
-                Photographer photographer = phtrOptional.get();
+                User photographer = phtrOptional.get();
                 photographer.setAvatar(fullpath);
                 phtrRepo.save(photographer);
                 return fullpath;
@@ -80,8 +77,8 @@ public class PhotographerService {
         return fileStore.download(path, id + "-avatar");
     }
 
-    public Photographer findOne(Long id) {
-        Optional<Photographer> photographer = phtrRepo.findById(id);
+    public User findOne(Long id) {
+        Optional<User> photographer = phtrRepo.findById(id);
         if(photographer.isPresent())
             return photographer.get();
         else

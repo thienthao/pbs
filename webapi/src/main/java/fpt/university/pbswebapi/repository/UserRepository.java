@@ -1,8 +1,7 @@
 package fpt.university.pbswebapi.repository;
 
-import fpt.university.pbswebapi.domain.User;
+import fpt.university.pbswebapi.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
