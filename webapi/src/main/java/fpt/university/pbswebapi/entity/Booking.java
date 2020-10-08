@@ -13,6 +13,10 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "booking_status")
+    private EBookingStatus bookingStatus;
+
     @Column(name = "start_date")
     private Date startDate;
 
