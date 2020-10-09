@@ -1,6 +1,12 @@
 - validate booking apis
 - exception handling booking apis
-- album
+// done- album
 - review
-- sort booking by date
+//done - sort booking by date
 - get review from booking where photographerid = ? and status = done
+- hien tai dang tao album truoc khi tao thumbnail -> co lam chung mot luc duoc khong, hay phai async cho` no wait roi moi duoc
+- get all albums of photographer
+- get all images of albums
+- album - like
+- update profile user
+- push notification

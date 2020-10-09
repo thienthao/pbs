@@ -92,6 +92,7 @@ public class BookingController {
     public ResponseEntity<Booking> book(@RequestBody Booking booking) {
         // require status
         // require .... validate
+        booking.setBookingStatus(EBookingStatus.PENDING);
         return new ResponseEntity<Booking>(bookingService.book(booking), HttpStatus.OK);
     }
 
