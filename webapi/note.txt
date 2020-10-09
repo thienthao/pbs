@@ -10,3 +10,5 @@
 - album - like
 - update profile user
 - push notification
+- setup heroku and rds again
+- up hinh + info cung luc co duoc ko

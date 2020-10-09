@@ -27,7 +27,8 @@ public class AlbumController {
     private UserRepository photographerRepository;
 
     @Autowired
-    public AlbumController(AlbumService albumService, UserRepository photographerRepository) {
+    public AlbumController(AlbumRepository albumRepository, AlbumService albumService, UserRepository photographerRepository) {
+        this.albumRepository = albumRepository;
         this.albumService = albumService;
         this.photographerRepository = photographerRepository;
     }
@@ -89,6 +90,23 @@ public class AlbumController {
         }
     }
 
+    @PostMapping(value = "/{ptgId}/{albumId}/images",
+                consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImages(@PathVariable("ptgId") String ptgId,
+                                          @PathVariable("albumId") String albumId,
+                                          @RequestParam("files") MultipartFile[] files) {
+        if(!albumRepository.findById(Long.parseLong(albumId)).isPresent())
+            throw new BadRequestException("Album not exists");
+
+        List<String> paths = albumService.uploadImages(ptgId, albumId, files);
+
+        if(paths != null) {
+            return new ResponseEntity<>(paths, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Fail", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping(value = "/{ptgId}/{albumId}/upload",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -115,6 +133,21 @@ public class AlbumController {
     public byte[] downloadAlbumThumbnail(@PathVariable("ptgId") String ptgId,
                                            @PathVariable("albumId") String albumId) {
         return albumService.downloadAlbumThumbnail(ptgId, albumId);
+    }
+
+    @GetMapping(value = "/{ptgId}/{albumId}/images",
+            produces = MediaType.IMAGE_JPEG_VALUE)
+    public List<byte[]> downloadAlbumImages(@PathVariable("ptgId") String ptgId,
+                                            @PathVariable("albumId") String albumId) {
+        return albumService.downloadAlbumImages(ptgId, albumId);
+    }
+
+    @GetMapping(value = "/{ptgId}/{albumId}/{imageId}",
+            produces = MediaType.IMAGE_JPEG_VALUE)
+    public byte[] downloadAlbumImages(@PathVariable("ptgId") String ptgId,
+                                            @PathVariable("albumId") String albumId,
+                                            @PathVariable("imageId") String imageId) {
+        return albumService.downloadImage(ptgId, albumId,imageId);
     }
 
     private Album map(AlbumDto albumDto) {
