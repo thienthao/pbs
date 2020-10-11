@@ -25,6 +25,8 @@ public class Album {
 
     private String thumbnail;
 
+    private String location;
+
     private String description;
 
     @Temporal(value = TemporalType.TIMESTAMP)
@@ -39,6 +41,13 @@ public class Album {
     @JoinColumn(name = "photographer_id", referencedColumnName = "id")
     private User photographer;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private Category category;
+
+    @Column(name = "likes")
+    private Integer likes;
+
     @ManyToMany
     @JoinTable(
             name = "albums_images",
@@ -46,4 +55,6 @@ public class Album {
             inverseJoinColumns = @JoinColumn(name = "image_id")
     )
     private List<Image> images;
+
+
 }

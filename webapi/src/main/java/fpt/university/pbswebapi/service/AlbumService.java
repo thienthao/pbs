@@ -30,8 +30,8 @@ public class AlbumService {
         this.imageRepository = imageRepository;
     }
 
-    public List<Album> findAll() {
-        return albumRepository.findAll();
+    public Page<Album> findAll(Pageable paging) {
+        return albumRepository.findAll(paging);
     }
 
     public Album createAlbum(Album album) {
@@ -153,5 +153,45 @@ public class AlbumService {
                 ptgId,
                 albumId);
         return fileStore.download(path, imageId + "-image");
+    }
+
+    public String uploadAlbumThumbnailTest(String ptgId, String albumId, MultipartFile file) {
+        // check if file empty
+        if(file.isEmpty()) {
+            throw new IllegalStateException("Cannot upload empty file [ " + file.getSize() + " ]");
+        }
+
+        // check if file not image
+        if(!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_PNG.getMimeType(), IMAGE_GIF.getMimeType()).contains(file.getContentType())) {
+            throw new IllegalStateException("File must be image [ " + file.getContentType() + " ]");
+        }
+
+        // metadata
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+
+        // format file name and path
+        String path = String.format("%s/%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), ptgId, albumId);
+        String filename = String.format("https://pbs-webapi.herokuapp.com/api/albums/%s/%s/download", ptgId, albumId);
+
+        // Get album to set thumbnail link
+        Optional<Album> albumOptional = albumRepository.findById(Long.parseLong(albumId));
+        if(albumOptional.isPresent()) {
+            // save photo and save link to repo
+            try {
+                fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+//                String fullpath = String.format("%s/%s", path, filename);
+                Album album = albumOptional.get();
+                album.setThumbnail(filename);
+                albumRepository.save(album);
+//                return fullpath;
+                return filename;
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            return null;
+        }
     }
 }

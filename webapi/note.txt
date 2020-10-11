@@ -12,3 +12,8 @@
 - push notification
 - setup heroku and rds again
 - up hinh + info cung luc co duoc ko
+- set icon link cho categories
+- get all categories set category icon link
+- update lai photographer album link (kem` ca? security)
+https://pbs-webapi.herokuapp.com/api/categories/1/download
+https://pbs-webapi.herokuapp.com/api/photographers/{id}/download

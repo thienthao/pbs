@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.domain.Photographer;
+import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
@@ -39,6 +40,31 @@ public class PhotographerController {
     @GetMapping
     public ResponseEntity<List<User>> findAll() {
         return new ResponseEntity<List<User>>(phtrService.findAll(), HttpStatus.OK);
+    }
+
+    @GetMapping("/byrating")
+    public ResponseEntity<Map<String, Object>> findPhotographersByRatingCount(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        try {
+            List<User> photographers = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<User> pageUser = phtrService.findPhotographersByRating(paging);
+            photographers = pageUser.getContent();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", photographers);
+            response.put("currentPage", pageUser.getNumber());
+            response.put("totalItems", pageUser.getTotalElements());
+            response.put("totalPages", pageUser.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 //    @GetMapping("/{name}")
@@ -101,5 +127,12 @@ public class PhotographerController {
                 produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] downloadAvatar(@PathVariable("id") String id) {
         return phtrService.downloadAvatar(id);
+    }
+
+    @GetMapping("/fakeAvatar")
+    public void fake(@RequestParam MultipartFile file) {
+        for(User user : phtrService.findAll()) {
+            phtrService.fakeAvatar(user.getId(), file);
+        }
     }
 }

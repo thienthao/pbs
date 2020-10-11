@@ -60,8 +60,27 @@ public class AlbumController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Album>> findAll() {
-        return new ResponseEntity<>(albumService.findAll(), HttpStatus.OK);
+    public ResponseEntity<Map<String, Object>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        try {
+            List<Album> albums = new ArrayList<Album>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Album> pageAlbums = albumService.findAll(paging);
+
+            albums = pageAlbums.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("albums", albums);
+            response.put("currentPage", pageAlbums.getNumber());
+            response.put("totalItems", pageAlbums.getTotalElements());
+            response.put("totalPages", pageAlbums.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping
@@ -160,6 +179,14 @@ public class AlbumController {
             return album;
         } else {
             return null;
+        }
+    }
+
+    @PostMapping("/fakethumbnail")
+    public void fakeThumbnail(@RequestParam("file") MultipartFile file) {
+        List<Album> albums= albumRepository.findAll();
+        for(Album album : albums) {
+            albumService.uploadAlbumThumbnailTest(album.getPhotographer().getId().toString(), album.getId().toString(), file);
         }
     }
 }

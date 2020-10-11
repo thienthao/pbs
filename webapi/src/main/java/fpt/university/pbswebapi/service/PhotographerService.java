@@ -7,6 +7,8 @@ import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,5 +85,49 @@ public class PhotographerService {
             return photographer.get();
         else
             throw new BadRequestException("Photographer not exists");
+    }
+
+    public Page<User> findPhotographersByRating(Pageable paging) {
+        return phtrRepo.findPhotographersByRating(paging, Long.parseLong("2"));
+    }
+
+
+    public String fakeAvatar(Long id, MultipartFile file) {
+        // check if file empty
+        if(file.isEmpty()) {
+            throw new IllegalStateException("Cannot upload empty file [ " + file.getSize() + " ]");
+        }
+
+        // check if file not image
+        if(!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_PNG.getMimeType(), IMAGE_GIF.getMimeType()).contains(file.getContentType())) {
+            throw new IllegalStateException("File must be image [ " + file.getContentType() + " ]");
+        }
+
+        // metadata
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+
+        // format file name and path
+        String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), id);
+        String filename = String.format("https://pbs-webapi.herokuapp.com/api/photographers/%s/download", id);
+
+        // Get album to set thumbnail link
+        Optional<User> phtrOptional = phtrRepo.findById(id);
+        if(phtrOptional.isPresent()) {
+            // save photo and save link to repo
+            try {
+                fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+                String fullpath = String.format("%s/%s", path, filename);
+                User photographer = phtrOptional.get();
+                photographer.setAvatar(filename);
+                phtrRepo.save(photographer);
+                return filename;
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            return null;
+        }
     }
 }
