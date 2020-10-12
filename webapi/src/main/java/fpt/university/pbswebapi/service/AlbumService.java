@@ -66,9 +66,9 @@ public class AlbumService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 Album album = albumOptional.get();
-                album.setThumbnail(fullpath);
+                album.setThumbnail("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId+ "/" + albumId +"/download");
                 albumRepository.save(album);
-                return fullpath;
+                return "https://pbs-webapi.herokuapp.com/api/albums/" + ptgId+ "/" + albumId +"/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -135,7 +135,7 @@ public class AlbumService {
                 image.setImageLink(fullpath);
                 image.setAlbums(new ArrayList<>(List.of(album)));
                 imageRepository.save(image);
-                paths.add(fullpath);
+                paths.add("https://pbs-webapi.herokuapp.com/" + ptgId + "/" + albumId + "/" + image.getId());
                 images.add(image);
             } catch (Exception e) {
                 imageRepository.delete(image);

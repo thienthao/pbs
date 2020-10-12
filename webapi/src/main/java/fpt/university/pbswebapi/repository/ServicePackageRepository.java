@@ -14,4 +14,7 @@ public interface ServicePackageRepository extends JpaRepository<ServicePackage, 
 
     @Query("FROM ServicePackage p where p.photographer.id = :ptgId and p.name LIKE :name")
     Page<ServicePackage> findServicePackageByPtgIdAndByNameContaining(String name, Long ptgId, Pageable pageable);
+
+    @Query("FROM ServicePackage p where p.photographer.id = :ptgId")
+    Page<ServicePackage> findAllOfPhotographer(Long ptgId, Pageable pageable);
 }

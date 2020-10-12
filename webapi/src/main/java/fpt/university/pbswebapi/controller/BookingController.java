@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.controller;
 
+import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.EBookingStatus;
 import fpt.university.pbswebapi.exception.BadRequestException;
@@ -86,6 +87,16 @@ public class BookingController {
             System.out.println(e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/photographer/{id}/comments")
+    public ResponseEntity<List<CommentDto>> getCommentsOfPhotographer(@PathVariable("id") Long photographerId) {
+        List<Booking> bookings = bookingRepository.findBookingsOfPhotographer(photographerId);
+        List<CommentDto> commentDtos = new ArrayList<>();
+        for(Booking booking : bookings) {
+            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getFullname()));
+        }
+        return new ResponseEntity<>(commentDtos, HttpStatus.OK);
     }
 
     @PostMapping

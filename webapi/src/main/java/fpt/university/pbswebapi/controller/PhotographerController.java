@@ -5,6 +5,7 @@ import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
+import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.PhotographerService;
@@ -74,7 +75,12 @@ public class PhotographerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findOne(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(phtrService.findOne(id), HttpStatus.OK);
+        return new ResponseEntity<>(DtoMapper.toPhotographerDto(phtrService.findOne(id)), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/split")
+    public ResponseEntity<?> findOneSplited(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(DtoMapper.toSplitedPhotographerDto(phtrService.findOne(id)), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/packages")
@@ -123,10 +129,32 @@ public class PhotographerController {
         }
     }
 
+    @PostMapping(value = "/{id}/cover/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> uploadCover(@PathVariable("id") String id,
+                                          @RequestParam("file") MultipartFile file) {
+        //check ptgId
+        if(!photographerRepository.findById(Long.parseLong(id)).isPresent())
+            throw new BadRequestException("Photographer not exists");
+        String fullpath = phtrService.uploadCover(id, file);
+        if(fullpath != null) {
+            return new ResponseEntity<>(fullpath, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Fail", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping(value = "/{id}/download",
                 produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] downloadAvatar(@PathVariable("id") String id) {
         return phtrService.downloadAvatar(id);
+    }
+
+    @GetMapping(value = "/{id}/cover/download",
+            produces = MediaType.IMAGE_JPEG_VALUE)
+    public byte[] downloadCover(@PathVariable("id") String id) {
+        return phtrService.downloadCover(id);
     }
 
     @GetMapping("/fakeAvatar")

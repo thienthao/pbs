@@ -27,4 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.customer.id = :userId or b.photographer.id = :userId")
     Page<Booking> all(Pageable paging, Long userId);
 
+    @Query("FROM Booking b where b.photographer.id = :photographerId")
+    List<Booking> findBookingsOfPhotographer(Long photographerId);
+
 }

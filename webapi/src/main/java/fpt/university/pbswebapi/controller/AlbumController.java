@@ -1,9 +1,11 @@
 package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.AlbumDto;
+import fpt.university.pbswebapi.dto.AlbumDto2;
 import fpt.university.pbswebapi.entity.Album;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
+import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.AlbumService;
@@ -49,6 +51,36 @@ public class AlbumController {
             albums = pageAlbums.getContent();
             Map<String, Object> response = new HashMap<>();
             response.put("albums", albums);
+            response.put("currentPage", pageAlbums.getNumber());
+            response.put("totalItems", pageAlbums.getTotalElements());
+            response.put("totalPages", pageAlbums.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/photographer/{id}/split")
+    public ResponseEntity<Map<String, Object>> findAllSplitByPhotographerId(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        try {
+            List<Album> albums = new ArrayList<Album>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Album> pageAlbums = albumService.findAllByPhotographerId(id, paging);
+
+            albums = pageAlbums.getContent();
+            List<AlbumDto2> albumDto2s = new ArrayList<>();
+            for(Album album : albums) {
+                albumDto2s.add(DtoMapper.toAlbumDto(album));
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("albums", albumDto2s);
             response.put("currentPage", pageAlbums.getNumber());
             response.put("totalItems", pageAlbums.getTotalElements());
             response.put("totalPages", pageAlbums.getTotalPages());

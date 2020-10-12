@@ -1,10 +1,15 @@
 package fpt.university.pbswebapi.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import fpt.university.pbswebapi.entity.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.IOException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -12,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
     @GetMapping("/all")
     public String allAccess() {
-        return "Public Content";
+        return "test";
     }
 
     @GetMapping("/customer")
