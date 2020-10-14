@@ -28,8 +28,12 @@ public class PhotographerService {
         this.fileStore = fileStore;
     }
 
-    public List<User> findAll() {
-        return phtrRepo.findAll();
+    public List<User> findAllPhotographers() {
+        return phtrRepo.findAllPhotographer(Long.parseLong("2"));
+    }
+
+    public List<User> findAllCustomers() {
+        return phtrRepo.findAllCustomers(Long.parseLong("1"));
     }
 
 
@@ -110,7 +114,7 @@ public class PhotographerService {
 
         // format file name and path
         String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), id);
-        String filename = String.format("https://pbs-webapi.herokuapp.com/api/photographers/%s/download", id);
+        String filename = String.format("%s-%s", id, "avatar");
 
         // Get album to set thumbnail link
         Optional<User> phtrOptional = phtrRepo.findById(id);
@@ -120,9 +124,9 @@ public class PhotographerService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 User photographer = phtrOptional.get();
-                photographer.setAvatar(filename);
+                photographer.setAvatar("https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/download");
                 phtrRepo.save(photographer);
-                return filename;
+                return "https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -175,5 +179,44 @@ public class PhotographerService {
                 BucketName.PROFILE_IMAGE.getBucketName(),
                 id);
         return fileStore.download(path, id + "-cover");
+    }
+
+    public String fakeCover(Long id, MultipartFile file) {
+        // check if file empty
+        if(file.isEmpty()) {
+            throw new IllegalStateException("Cannot upload empty file [ " + file.getSize() + " ]");
+        }
+
+        // check if file not image
+        if(!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_PNG.getMimeType(), IMAGE_GIF.getMimeType()).contains(file.getContentType())) {
+            throw new IllegalStateException("File must be image [ " + file.getContentType() + " ]");
+        }
+
+        // metadata
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+
+        // format file name and path
+        String path = String.format("%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), id);
+        String filename = String.format("%s-%s", id, "cover");
+
+        // Get album to set thumbnail link
+        Optional<User> phtrOptional = phtrRepo.findById(id);
+        if(phtrOptional.isPresent()) {
+            // save photo and save link to repo
+            try {
+                fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+                String fullpath = String.format("%s/%s", path, filename);
+                User photographer = phtrOptional.get();
+                photographer.setCover("https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/cover/download");
+                phtrRepo.save(photographer);
+                return "https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/cover/download";
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            return null;
+        }
     }
 }

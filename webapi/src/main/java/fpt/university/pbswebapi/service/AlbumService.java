@@ -194,4 +194,34 @@ public class AlbumService {
             return null;
         }
     }
+
+    public void fakeAlbumImage(String ptgId, String albumId, MultipartFile file, Image image) {
+        List<String> paths = new ArrayList<>();
+
+        if(file == null) {
+            throw new IllegalStateException("Cannot upload empty files");
+        }
+
+        if(!Arrays.asList(IMAGE_JPEG.getMimeType(), IMAGE_PNG.getMimeType(), IMAGE_GIF.getMimeType()).contains(file.getContentType())) {
+            throw new IllegalStateException("File must be image [ " + file.getContentType() + " ]");
+        }
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+
+        // format file name and path
+        String path = String.format("%s/%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), ptgId, albumId);
+        String filename = String.format("%s-%s", image.getId(), "image");
+        try {
+            fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+            String fullpath = String.format("%s/%s", path, filename);
+            image.setImageLink("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
+            imageRepository.save(image);
+            paths.add("https://pbs-webapi.herokuapp.com/api/albums" + ptgId + "/" + albumId + "/images/" + image.getId());
+        } catch (Exception e) {
+            imageRepository.delete(image);
+            throw new IllegalStateException(e);
+        }
+    }
 }

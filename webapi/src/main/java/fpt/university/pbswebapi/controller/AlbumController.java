@@ -3,10 +3,12 @@ package fpt.university.pbswebapi.controller;
 import fpt.university.pbswebapi.dto.AlbumDto;
 import fpt.university.pbswebapi.dto.AlbumDto2;
 import fpt.university.pbswebapi.entity.Album;
+import fpt.university.pbswebapi.entity.Image;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
+import fpt.university.pbswebapi.repository.ImageRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.AlbumService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,14 @@ public class AlbumController {
     private AlbumRepository albumRepository;
     private AlbumService albumService;
     private UserRepository photographerRepository;
+    private ImageRepository imageRepository;
 
     @Autowired
-    public AlbumController(AlbumRepository albumRepository, AlbumService albumService, UserRepository photographerRepository) {
+    public AlbumController(AlbumRepository albumRepository, AlbumService albumService, UserRepository photographerRepository, ImageRepository imageRepository) {
         this.albumRepository = albumRepository;
         this.albumService = albumService;
         this.photographerRepository = photographerRepository;
+        this.imageRepository = imageRepository;
     }
 
     //find all album of 1 particular photographer
@@ -193,7 +197,7 @@ public class AlbumController {
         return albumService.downloadAlbumImages(ptgId, albumId);
     }
 
-    @GetMapping(value = "/{ptgId}/{albumId}/{imageId}",
+    @GetMapping(value = "/{ptgId}/{albumId}/images/{imageId}",
             produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] downloadAlbumImages(@PathVariable("ptgId") String ptgId,
                                             @PathVariable("albumId") String albumId,
@@ -214,11 +218,25 @@ public class AlbumController {
         }
     }
 
+    @PostMapping(value = "/{ptgId}/{albumId}/fakeimages",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void fakeImages(@PathVariable("ptgId") String ptgId,
+                                          @PathVariable("albumId") String albumId,
+                                          @RequestParam("files") MultipartFile[] files) {
+        Album album = albumRepository.getOne(Long.parseLong(albumId));
+        int i = 0;
+        for (Image image : album.getImages()) {
+            albumService.fakeAlbumImage(ptgId, albumId, files[i], image);
+            i++;
+        }
+    }
+
     @PostMapping("/fakethumbnail")
-    public void fakeThumbnail(@RequestParam("file") MultipartFile file) {
+    public void fakeThumbnail(@RequestParam("file") MultipartFile[] file) {
         List<Album> albums= albumRepository.findAll();
+        int i = 0;
         for(Album album : albums) {
-            albumService.uploadAlbumThumbnailTest(album.getPhotographer().getId().toString(), album.getId().toString(), file);
+            albumService.uploadAlbumThumbnail(album.getPhotographer().getId().toString(), album.getId().toString(), file[i++]);
         }
     }
 }

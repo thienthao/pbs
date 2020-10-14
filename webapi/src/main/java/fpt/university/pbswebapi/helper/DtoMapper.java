@@ -1,10 +1,7 @@
 package fpt.university.pbswebapi.helper;
 
 import fpt.university.pbswebapi.dto.*;
-import fpt.university.pbswebapi.entity.Album;
-import fpt.university.pbswebapi.entity.Service;
-import fpt.university.pbswebapi.entity.ServicePackage;
-import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.entity.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +81,58 @@ public class DtoMapper {
                 service.getId(),
                 service.getName(),
                 service.getDescription()
+        );
+    }
+
+    public static Service toService(ServiceDto serviceDto) {
+        return new Service(
+          serviceDto.getName(),
+          serviceDto.getDescription()
+        );
+    }
+
+    public static ServicePackage toServicePackage(PackageJson packageJson) {
+        User photographer = new User();
+        photographer.setId(packageJson.getPhotographer());
+
+        List<Service> services = new ArrayList<>();
+        for(ServiceDto serviceDto : packageJson.getServices()) {
+            services.add(toService(serviceDto));
+        }
+
+        return new ServicePackage(
+                packageJson.getName(),
+                packageJson.getPrice(),
+                packageJson.getDescription(),
+                photographer,
+                services
+        );
+    }
+
+    public static Album toAlbum(AlbumJson albumJson) {
+        User photographer = new User();
+        photographer.setId(albumJson.getPhotographer());
+
+        List<Image> images = new ArrayList<>();
+        for(ImageJson imageJson : albumJson.getImages()) {
+            images.add(toImage(imageJson));
+        }
+
+        return new Album(
+                albumJson.getName(),
+                albumJson.getThumbnail(),
+                albumJson.getLocation(),
+                albumJson.getDescription(),
+                photographer,
+                images
+        );
+    }
+
+    public static Image toImage(ImageJson imageJson) {
+        return new Image(
+                imageJson.getDescription(),
+                imageJson.getImageLink(),
+                imageJson.getComment()
         );
     }
 }

@@ -3,7 +3,9 @@ package fpt.university.pbswebapi.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,6 +18,8 @@ import java.util.List;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
 )
+@AllArgsConstructor
+@NoArgsConstructor
 public class Album {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,7 +52,7 @@ public class Album {
     @Column(name = "likes")
     private Integer likes;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "albums_images",
             joinColumns = @JoinColumn(name = "album_id"),
@@ -56,5 +60,12 @@ public class Album {
     )
     private List<Image> images;
 
-
+    public Album(String name, String thumbnail, String location, String description, User photographer, List<Image> images) {
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.location = location;
+        this.description = description;
+        this.photographer = photographer;
+        this.images = images;
+    }
 }

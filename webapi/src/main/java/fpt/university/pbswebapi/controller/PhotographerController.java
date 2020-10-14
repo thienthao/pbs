@@ -40,7 +40,7 @@ public class PhotographerController {
 
     @GetMapping
     public ResponseEntity<List<User>> findAll() {
-        return new ResponseEntity<List<User>>(phtrService.findAll(), HttpStatus.OK);
+        return new ResponseEntity<List<User>>(phtrService.findAllPhotographers(), HttpStatus.OK);
     }
 
     @GetMapping("/byrating")
@@ -158,9 +158,29 @@ public class PhotographerController {
     }
 
     @GetMapping("/fakeAvatar")
-    public void fake(@RequestParam MultipartFile file) {
-        for(User user : phtrService.findAll()) {
-            phtrService.fakeAvatar(user.getId(), file);
+    public void fake(@RequestParam MultipartFile[] file) {
+        int i = 0;
+        for(User user : phtrService.findAllPhotographers()) {
+            phtrService.fakeAvatar(user.getId(), file[i]);
+            i++;
+        }
+    }
+
+    @GetMapping("/fakeCover")
+    public void fakeCover(@RequestParam MultipartFile[] file) {
+        int i = 0;
+        for(User user : phtrService.findAllPhotographers()) {
+            phtrService.fakeCover(user.getId(), file[i]);
+            i++;
+        }
+    }
+
+    @GetMapping("/fakeCustomerAvatar")
+    public void fakeCustomerAvatar(@RequestParam MultipartFile[] file) {
+        int i = 0;
+        for(User user : phtrService.findAllCustomers()) {
+            phtrService.fakeAvatar(user.getId(), file[i]);
+            i++;
         }
     }
 }

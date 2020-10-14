@@ -94,7 +94,7 @@ public class BookingController {
         List<Booking> bookings = bookingRepository.findBookingsOfPhotographer(photographerId);
         List<CommentDto> commentDtos = new ArrayList<>();
         for(Booking booking : bookings) {
-            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getFullname()));
+            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
         }
         return new ResponseEntity<>(commentDtos, HttpStatus.OK);
     }

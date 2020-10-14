@@ -47,6 +47,12 @@ public class Booking {
 
     private String comment;
 
+    private String location;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "comment_date")
+    private Date commentDate;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private User customer;

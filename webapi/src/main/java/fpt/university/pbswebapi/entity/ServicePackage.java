@@ -43,11 +43,19 @@ public class ServicePackage {
     @JoinColumn(name = "photographer_id", referencedColumnName = "id", nullable = true)
     private User photographer;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "packages_services",
             joinColumns = @JoinColumn(name = "package_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     private List<Service> services;
+
+    public ServicePackage(String name, Integer price, String description, User photographer, List<Service> services) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.photographer = photographer;
+        this.services = services;
+    }
 }
