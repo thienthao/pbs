@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.dto.AlbumJson;
+import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.dto.PackageJson;
 import fpt.university.pbswebapi.entity.Album;
 import fpt.university.pbswebapi.entity.ServicePackage;
@@ -10,14 +11,12 @@ import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
+import fpt.university.pbswebapi.service.FCMService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,16 +30,25 @@ public class TestController {
 
     private ServicePackageRepository packageRepository;
     private AlbumRepository albumRepository;
+    private FCMService fcmService;
 
-    @Autowired
-    public TestController(ServicePackageRepository packageRepository, AlbumRepository albumRepository) {
+    public TestController(ServicePackageRepository packageRepository, AlbumRepository albumRepository, FCMService fcmService) {
         this.packageRepository = packageRepository;
         this.albumRepository = albumRepository;
+        this.fcmService = fcmService;
     }
+
+    @Autowired
+
 
     @GetMapping("/all")
     public String allAccess() {
         return "test";
+    }
+
+    @PostMapping("/notify")
+    public String sendNotification(@RequestBody NotiRequest notiRequest) {
+        return fcmService.pushNotification(notiRequest);
     }
 
     @GetMapping("/packages")

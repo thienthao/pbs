@@ -132,10 +132,10 @@ public class AlbumService {
             try {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
-                image.setImageLink(fullpath);
+                image.setImageLink("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
                 image.setAlbums(new ArrayList<>(List.of(album)));
                 imageRepository.save(image);
-                paths.add("https://pbs-webapi.herokuapp.com/" + ptgId + "/" + albumId + "/" + image.getId());
+                paths.add("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
                 images.add(image);
             } catch (Exception e) {
                 imageRepository.delete(image);
@@ -218,7 +218,6 @@ public class AlbumService {
             String fullpath = String.format("%s/%s", path, filename);
             image.setImageLink("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
             imageRepository.save(image);
-            paths.add("https://pbs-webapi.herokuapp.com/api/albums" + ptgId + "/" + albumId + "/images/" + image.getId());
         } catch (Exception e) {
             imageRepository.delete(image);
             throw new IllegalStateException(e);

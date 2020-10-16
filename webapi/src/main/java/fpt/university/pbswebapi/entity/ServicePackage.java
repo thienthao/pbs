@@ -2,7 +2,9 @@ package fpt.university.pbswebapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,6 +17,8 @@ import java.util.List;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
 )
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServicePackage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
