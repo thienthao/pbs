@@ -1,22 +1,31 @@
 package fpt.university.pbswebapi.dto;
 
 public class NotiRequest {
-    private String fcmToken;
-    private String content;
+    private String token;
+    private String title;
+    private String body;
 
-    public String getFcmToken() {
-        return fcmToken;
+    public String getToken() {
+        return token;
     }
 
-    public void setFcmToken(String fcmToken) {
-        this.fcmToken = fcmToken;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public String getContent() {
-        return content;
+    public String getTitle() {
+        return title;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

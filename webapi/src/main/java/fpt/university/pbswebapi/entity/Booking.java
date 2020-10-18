@@ -1,13 +1,17 @@
 package fpt.university.pbswebapi.entity;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,4 +68,15 @@ public class Booking {
     @ManyToOne(optional = false)
     @JoinColumn(name = "package_id", referencedColumnName = "id")
     private ServicePackage servicePackage;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "booking_id", referencedColumnName = "id")
+    private List<BookingDetail> bookingDetails;
+
+    public Booking(Long id, User customer, User photographer, ServicePackage servicePackage) {
+        this.id = id;
+        this.customer = customer;
+        this.photographer = photographer;
+        this.servicePackage = servicePackage;
+    }
 }

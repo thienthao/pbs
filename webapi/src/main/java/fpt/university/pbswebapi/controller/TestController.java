@@ -32,13 +32,12 @@ public class TestController {
     private AlbumRepository albumRepository;
     private FCMService fcmService;
 
+    @Autowired
     public TestController(ServicePackageRepository packageRepository, AlbumRepository albumRepository, FCMService fcmService) {
         this.packageRepository = packageRepository;
         this.albumRepository = albumRepository;
         this.fcmService = fcmService;
     }
-
-    @Autowired
 
 
     @GetMapping("/all")

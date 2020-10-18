@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,35 @@ public class BookingController {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<Map<String, Object>> getAllByCustomer(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "5") int size,
+                                                                @PathVariable("customerId") Long customerId) {
+        try {
+            List<Booking> bookings = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings;
+            pageBookings = bookingRepository.getAllByCustomer(paging, customerId);
+
+            bookings = pageBookings.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("bookings", bookings);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
+        return new ResponseEntity<>(bookingRepository.findById(id).get(), HttpStatus.OK);
     }
 
     @GetMapping
@@ -112,9 +142,9 @@ public class BookingController {
         // if status not hop ly
         // check co dung nguoi ko
         Booking savedBooking = bookingRepository.getOne(booking.getId());
-        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-            throw new BadRequestException("Booking not found - Code 2");
-        }
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
 
         booking.setBookingStatus(EBookingStatus.CANCELED);
         return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
@@ -124,9 +154,9 @@ public class BookingController {
     public ResponseEntity<Booking> reject(@RequestBody Booking booking) {
         // if status not hop ly
         Booking savedBooking = bookingRepository.getOne(booking.getId());
-        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-            throw new BadRequestException("Booking not found - Code 1");
-        }
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 1");
+//        }
 
         booking.setBookingStatus(EBookingStatus.REJECTED);
         return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
@@ -135,10 +165,10 @@ public class BookingController {
     @PutMapping("/accept")
     public ResponseEntity<Booking> accept(@RequestBody Booking booking) {
         // if status not hop ly
-        Booking savedBooking = bookingRepository.getOne(booking.getId());
-        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-            throw new BadRequestException("Booking not found - Code 1");
-        }
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 1");
+//        }
 
         booking.setBookingStatus(EBookingStatus.ONGOING);
         return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
@@ -148,9 +178,9 @@ public class BookingController {
     public ResponseEntity<Booking> done(@RequestBody Booking booking) {
         // if status not hop ly
         Booking savedBooking = bookingRepository.getOne(booking.getId());
-        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-            throw new BadRequestException("Booking not found - Code 2");
-        }
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
 
         booking.setBookingStatus(EBookingStatus.DONE);
         return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
@@ -160,9 +190,9 @@ public class BookingController {
     public ResponseEntity<Booking> editing(@RequestBody Booking booking) {
         // if status not hop ly
         Booking savedBooking = bookingRepository.getOne(booking.getId());
-        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-            throw new BadRequestException("Booking not found - Code 2");
-        }
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
 
         booking.setBookingStatus(EBookingStatus.EDITING);
         return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);

@@ -23,10 +23,14 @@ public class FCMConfig {
     public void init() {
         logger.info("Init FCM");
         try {
-            FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(firebasePath).getInputStream())).build();
+           GoogleCredentials googleCredentials = GoogleCredentials
+                   .fromStream(new ClassPathResource(firebasePath).getInputStream());
+           FirebaseOptions firebaseOptions = FirebaseOptions
+                   .builder()
+                   .setCredentials(googleCredentials)
+                   .build();
             if(FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
+                FirebaseApp.initializeApp(firebaseOptions);
                 logger.info("Firebase app initialized");
             }
         } catch (Exception e) {
