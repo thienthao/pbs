@@ -7,12 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("FROM Booking b where b.customer.id = :userId and b.bookingStatus = :bookingStatus or b.photographer.id= :userId and b.bookingStatus = :bookingStatus")
     Page<Booking> byStatus(EBookingStatus bookingStatus, Pageable paging, Long userId);
+
+    @Query("FROM Booking b where b.bookingStatus = :bookingStatus")
+    Page<Booking> byStatusWithoutUserId(EBookingStatus bookingStatus, Pageable paging);
 
     @Query("FROM Booking b where b.startDate > current_date")
     Page<Booking> sortByStartDate(Pageable paging);
@@ -28,9 +29,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Page<Booking> all(Pageable paging, Long userId);
 
     @Query("FROM Booking b where b.photographer.id = :photographerId")
-    List<Booking> findBookingsOfPhotographer(Long photographerId);
+    Page<Booking> findBookingsOfPhotographer(Pageable paging, Long photographerId);
 
-    @Query("FROM Booking b where b.customer.id = :customerId")
+    @Query("FROM Booking b where b.customer.id = :customerId order by b.startDate desc")
     Page<Booking> getAllByCustomer(Pageable paging, Long customerId);
 
 }

@@ -88,8 +88,9 @@ public class BookingController {
         return new ResponseEntity<>(bookingRepository.findById(id).get(), HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/customer/{customerId}/status")
     public ResponseEntity<Map<String, Object>> findByStatus(
+            @PathVariable("customerId") Long customerId,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
@@ -103,7 +104,7 @@ public class BookingController {
                 pageBookings = bookingService.findAll(paging, getCurrentUserId());
             }
             else
-                pageBookings = bookingService.findByStatus(EBookingStatus.valueOf(status.toUpperCase()), paging, getCurrentUserId());
+                pageBookings = bookingService.findByStatus(EBookingStatus.valueOf(status.toUpperCase()), paging, customerId);
 
             bookings = pageBookings.getContent();
             Map<String, Object> response = new HashMap<>();
@@ -120,13 +121,29 @@ public class BookingController {
     }
 
     @GetMapping("/photographer/{id}/comments")
-    public ResponseEntity<List<CommentDto>> getCommentsOfPhotographer(@PathVariable("id") Long photographerId) {
-        List<Booking> bookings = bookingRepository.findBookingsOfPhotographer(photographerId);
-        List<CommentDto> commentDtos = new ArrayList<>();
-        for(Booking booking : bookings) {
-            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
+    public ResponseEntity<Map<String, Object>> getCommentsOfPhotographer(
+            @PathVariable("id") Long photographerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        try {
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings = bookingRepository.findBookingsOfPhotographer(paging, photographerId);
+            List<CommentDto> commentDtos = new ArrayList<>();
+            for(Booking booking : pageBookings.getContent()) {
+                commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
+            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("comments", commentDtos);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(commentDtos, HttpStatus.OK);
     }
 
     @PostMapping
