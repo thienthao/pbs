@@ -18,10 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -83,6 +80,83 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/customer/{customerId}/id")
+    public ResponseEntity<Map<String, Object>> getAllByCustomerSortById(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "5") int size,
+                                                                @PathVariable("customerId") Long customerId) {
+        try {
+            List<Booking> bookings = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings;
+            pageBookings = bookingRepository.getAllByCustomerSortById(paging, customerId);
+
+            bookings = pageBookings.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("bookings", bookings);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/photographer/{photographerId}/id")
+    public ResponseEntity<Map<String, Object>> getPhotographerPendingBookingSortById(@RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "5") int size,
+                                                                        @PathVariable("photographerId") Long photographerId) {
+        try {
+            List<Booking> bookings = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings;
+            pageBookings = bookingRepository.getPhotographerPendingBookingSortById(paging, photographerId);
+
+            bookings = pageBookings.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("bookings", bookings);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/photographer/{photographerId}/status")
+    public ResponseEntity<Map<String, Object>> getPhotographerByStatusSortById(@RequestParam(required = false) String status,
+                                                                               @RequestParam(defaultValue = "0") int page,
+                                                                               @RequestParam(defaultValue = "5") int size,
+                                                                               @PathVariable("photographerId") Long photographerId) {
+        try {
+            List<Booking> bookings = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings;
+            if(status == null) {
+                pageBookings = bookingService.findAllOfPhotographer(paging, photographerId);
+            }
+            else
+                pageBookings = bookingService.findAllOfPhotographerByStatus(EBookingStatus.valueOf(status.toUpperCase()), paging, photographerId);
+
+            bookings = pageBookings.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("bookings", bookings);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
         return new ResponseEntity<>(bookingRepository.findById(id).get(), HttpStatus.OK);
@@ -121,28 +195,23 @@ public class BookingController {
     }
 
     @GetMapping("/photographer/{id}/comments")
-    public ResponseEntity<Map<String, Object>> getCommentsOfPhotographer(
+    public ResponseEntity<List<CommentDto>> getCommentsOfPhotographer(
             @PathVariable("id") Long photographerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
+        List<Booking> bookings = bookingRepository.findBookingsOfPhotographer(photographerId);
+        List<CommentDto> commentDtos = new ArrayList<>();
+        for(Booking booking : bookings) {
+            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
+        }
+        int arrSize = commentDtos.size();
+        if(arrSize < size) {
+            size = arrSize;
+        }
         try {
-            Pageable paging = PageRequest.of(page, size);
-
-            Page<Booking> pageBookings = bookingRepository.findBookingsOfPhotographer(paging, photographerId);
-            List<CommentDto> commentDtos = new ArrayList<>();
-            for(Booking booking : pageBookings.getContent()) {
-                commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
-            }
-            Map<String, Object> response = new HashMap<>();
-            response.put("comments", commentDtos);
-            response.put("currentPage", pageBookings.getNumber());
-            response.put("totalItems", pageBookings.getTotalElements());
-            response.put("totalPages", pageBookings.getTotalPages());
-
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            System.out.println(e);
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(commentDtos.subList(0, size), HttpStatus.OK);
+        } catch (IndexOutOfBoundsException e) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
     }
 
@@ -158,25 +227,25 @@ public class BookingController {
     public ResponseEntity<Booking> cancel(@RequestBody Booking booking) {
         // if status not hop ly
         // check co dung nguoi ko
-        Booking savedBooking = bookingRepository.getOne(booking.getId());
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 //        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
 //            throw new BadRequestException("Booking not found - Code 2");
 //        }
 
-        booking.setBookingStatus(EBookingStatus.CANCELED);
-        return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
+        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
     @PutMapping("/reject")
     public ResponseEntity<Booking> reject(@RequestBody Booking booking) {
         // if status not hop ly
-        Booking savedBooking = bookingRepository.getOne(booking.getId());
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 //        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
 //            throw new BadRequestException("Booking not found - Code 1");
 //        }
 
-        booking.setBookingStatus(EBookingStatus.REJECTED);
-        return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
+        savedBooking.setBookingStatus(EBookingStatus.REJECTED);
+        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
     @PutMapping("/accept")
@@ -187,32 +256,32 @@ public class BookingController {
 //            throw new BadRequestException("Booking not found - Code 1");
 //        }
 
-        booking.setBookingStatus(EBookingStatus.ONGOING);
-        return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
+        savedBooking.setBookingStatus(EBookingStatus.ONGOING);
+        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
     @PutMapping("/done")
     public ResponseEntity<Booking> done(@RequestBody Booking booking) {
         // if status not hop ly
-        Booking savedBooking = bookingRepository.getOne(booking.getId());
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 //        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
 //            throw new BadRequestException("Booking not found - Code 2");
 //        }
 
-        booking.setBookingStatus(EBookingStatus.DONE);
-        return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
+        savedBooking.setBookingStatus(EBookingStatus.DONE);
+        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
     @PutMapping("/editing")
     public ResponseEntity<Booking> editing(@RequestBody Booking booking) {
         // if status not hop ly
-        Booking savedBooking = bookingRepository.getOne(booking.getId());
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 //        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
 //            throw new BadRequestException("Booking not found - Code 2");
 //        }
 
-        booking.setBookingStatus(EBookingStatus.EDITING);
-        return new ResponseEntity<Booking>(bookingService.save(booking), HttpStatus.OK);
+        savedBooking.setBookingStatus(EBookingStatus.EDITING);
+        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
     private Long getCurrentUserId() {
@@ -226,5 +295,18 @@ public class BookingController {
             return false;
         }
         return true;
+    }
+
+    public static <T> List<List<T>> getPages(Collection<T> c, Integer pageSize) {
+        if (c == null)
+            return Collections.emptyList();
+        List<T> list = new ArrayList<T>(c);
+        if (pageSize == null || pageSize <= 0 || pageSize > list.size())
+            pageSize = list.size();
+        int numPages = (int) Math.ceil((double)list.size() / (double)pageSize);
+        List<List<T>> pages = new ArrayList<List<T>>(numPages);
+        for (int pageNum = 0; pageNum < numPages;)
+            pages.add(list.subList(pageNum * pageSize, Math.min(++pageNum * pageSize, list.size())));
+        return pages;
     }
 }

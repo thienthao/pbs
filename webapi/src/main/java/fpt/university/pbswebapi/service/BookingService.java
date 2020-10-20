@@ -33,4 +33,12 @@ public class BookingService {
     public Booking save(Booking booking) {
         return bookingRepository.save(booking);
     }
+
+    public Page<Booking> findAllOfPhotographer(Pageable paging, Long photographerId) {
+        return bookingRepository.findAllOfPhotographer(paging, photographerId);
+    }
+
+    public Page<Booking> findAllOfPhotographerByStatus(EBookingStatus valueOf, Pageable paging, Long photographerId) {
+        return bookingRepository.findAllOfPhotographerByStatus(valueOf, paging, photographerId);
+    }
 }
