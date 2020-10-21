@@ -39,7 +39,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.customer.id = :customerId order by b.id desc")
     Page<Booking> getAllByCustomerSortById(Pageable paging, Long customerId);
 
-    @Query("FROM Booking b where b.photographer.id = :photographerId and b.bookingStatus='PENDING' order by b.id desc")
+    @Query("FROM Booking b where b.photographer.id = :photographerId order by b.id desc")
     Page<Booking> getPhotographerPendingBookingSortById(Pageable paging, Long photographerId);
 
     @Query("FROM Booking b where b.photographer.id = :photographerId")

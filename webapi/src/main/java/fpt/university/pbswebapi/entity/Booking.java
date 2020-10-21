@@ -69,6 +69,10 @@ public class Booking {
     @JoinColumn(name = "package_id", referencedColumnName = "id")
     private ServicePackage servicePackage;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "returning_type_id", referencedColumnName = "id")
+    private ReturningType returningType;
+
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "booking_id", referencedColumnName = "id")
     private List<BookingDetail> bookingDetails;

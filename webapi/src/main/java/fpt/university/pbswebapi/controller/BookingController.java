@@ -233,6 +233,8 @@ public class BookingController {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
+        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
@@ -245,6 +247,7 @@ public class BookingController {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.REJECTED);
+        savedBooking.setRejectedReason(booking.getRejectedReason());
         return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
@@ -269,6 +272,8 @@ public class BookingController {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.DONE);
+        savedBooking.setComment(booking.getComment());
+        savedBooking.setRating(booking.getRating());
         return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
