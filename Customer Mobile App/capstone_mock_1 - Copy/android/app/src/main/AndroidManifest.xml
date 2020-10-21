@@ -9,6 +9,8 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="capstone_mock_1"
         android:icon="@mipmap/ic_launcher">
+      <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDOowuoi1tXWkbBylnC0Pd2Qup7wv_Igv4"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

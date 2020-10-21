@@ -1,9 +1,10 @@
-import 'package:capstone_mock_1/models/comment_model.dart';
+import 'package:capstone_mock_1/models/comment_bloc_model.dart';
 import 'package:flutter/material.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart'; 
+import 'package:intl/intl.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class CommentWidget extends StatelessWidget {
-  final Comment comment;
+  final CommentBlocModel comment;
   const CommentWidget({this.comment});
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class CommentWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 CircleAvatar(
-                  backgroundImage: AssetImage(comment.avatar),
+                  backgroundImage: NetworkImage(comment.avatar),
                   radius: 28,
                 ),
                 Container(
@@ -36,17 +37,21 @@ class CommentWidget extends StatelessWidget {
                                 print('You have rate $v stars');
                               },
                               starCount: 5,
-                              rating: comment.rating,
+                              rating:
+                                  comment.rating == null ? 4.0 : comment.rating,
                               size: 15.0,
                               isReadOnly: true,
                               defaultIconData: Icons.star_border,
                               filledIconData: Icons.star,
                               halfFilledIconData: Icons.star_half,
                               color: Colors.amber,
-                              borderColor:  Colors.amber,
+                              borderColor: Colors.amber,
                               spacing: 0.0),
                           Text(
-                            comment.dateCreated,
+                            comment.createdAt == null
+                                ? 'Date'
+                                : DateFormat('dd/MM/yyyy')
+                                    .format(DateTime.parse(comment.createdAt)),
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: Colors.black,
@@ -68,9 +73,11 @@ class CommentWidget extends StatelessWidget {
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold)),
                             TextSpan(
-                                text: comment.commentorName,
+                                text: comment.fullname == null
+                                    ? 'Commentor'
+                                    : comment.fullname,
                                 style:
-                                TextStyle(fontWeight: FontWeight.normal)),
+                                    TextStyle(fontWeight: FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -86,9 +93,11 @@ class CommentWidget extends StatelessWidget {
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold)),
                             TextSpan(
-                                text: comment.location,
+                                text: comment.location == null
+                                    ? 'Locaton'
+                                    : comment.location,
                                 style:
-                                TextStyle(fontWeight: FontWeight.normal)),
+                                    TextStyle(fontWeight: FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -104,14 +113,15 @@ class CommentWidget extends StatelessWidget {
               text: TextSpan(
                 text: '',
                 style:
-                TextStyle(color: Colors.black54, fontFamily: 'Quicksand'),
+                    TextStyle(color: Colors.black54, fontFamily: 'Quicksand'),
                 children: <TextSpan>[
                   TextSpan(
                       text: 'Bình luận: ',
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                   TextSpan(
-                      text: comment.comment,
+                      text:
+                          comment.comment == null ? 'Comment' : comment.comment,
                       style: TextStyle(fontWeight: FontWeight.normal)),
                 ],
               ),

@@ -1,86 +1,104 @@
+import 'package:capstone_mock_1/models/package_bloc_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class ServiceTest {
-  int id;
-  String name;
-
-  ServiceTest(this.id, this.name);
-
-  static List<ServiceTest> getService() {
-    return <ServiceTest>[
-      ServiceTest(1, 'Gói chụp ảnh thời trang cơ bản'),
-      ServiceTest(2, 'Gói chụp ảnh thời trang nâng cao'),
-      ServiceTest(3, 'Gói chụp ảnh thời trang cao cấp'),
-    ];
-  }
-}
-
+// ignore: must_be_immutable
 class DropMenu extends StatefulWidget {
+  List<PackageBlocModel> blocPackages;
+  PackageBlocModel selectedPackage;
+  Function(PackageBlocModel) onSelectParam;
+  DropMenu({this.blocPackages, this.selectedPackage, this.onSelectParam});
 
   @override
   _DropMenuState createState() => _DropMenuState();
 }
 
 class _DropMenuState extends State<DropMenu> {
-  List<ServiceTest> services = ServiceTest.getService();
+  NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
+  List<DropdownMenuItem<PackageBlocModel>> dropDownMenuItems;
 
-  List<DropdownMenuItem<ServiceTest>> dropDownMenuItems;
-
-  ServiceTest selectedService;
+  PackageBlocModel selectedPackage;
 
   @override
   void initState() {
-    dropDownMenuItems = buildDropdownMenuItems(services);
-    selectedService = dropDownMenuItems[0].value;
+    dropDownMenuItems = buildDropdownMenuItems(widget.blocPackages);
+    selectedPackage = widget.selectedPackage;
     super.initState();
   }
 
-  List<DropdownMenuItem<ServiceTest>> buildDropdownMenuItems(List services) {
-    List<DropdownMenuItem<ServiceTest>> items = List();
-    for (ServiceTest service in services) {
+  List<DropdownMenuItem<PackageBlocModel>> buildDropdownMenuItems(
+      List packages) {
+    List<DropdownMenuItem<PackageBlocModel>> items = List();
+    for (PackageBlocModel package in packages) {
       items.add(
         DropdownMenuItem(
-          value: service,
-          child: Text(service.name),
+          value: package,
+          child: Text(package.name),
         ),
       );
     }
     return items;
   }
 
-  onChangeDropdownItem(ServiceTest newSelectedService) {
+  onChangeDropdownItem(PackageBlocModel newSelectedPackage) {
     setState(() {
-      selectedService = newSelectedService;
+      selectedPackage = newSelectedPackage;
+      widget.onSelectParam(selectedPackage);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return
-    //   DropdownButton(
-    //   value: selectedService,
-    //   items: dropDownMenuItems,
-    //   onChanged: onChangeDropdownItem,
-    //   icon: Icon(
-    //     Icons.keyboard_arrow_down,
-    //     color: Colors.pink,
-    //     size: 20.0,
-    //   ),
-    // );
-      DropdownButtonHideUnderline(
-        child: ButtonTheme(
-          alignedDropdown: true,
-          child: DropdownButton(
-            value: selectedService,
-            items: dropDownMenuItems,
-            onChanged: onChangeDropdownItem,
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              color: Colors.pink,
-              size: 20.0,
+    return Column(
+      children: [
+        DropdownButtonHideUnderline(
+          child: ButtonTheme(
+            alignedDropdown: true,
+            child: DropdownButton(
+              value: selectedPackage,
+              items: dropDownMenuItems,
+              onChanged: onChangeDropdownItem,
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.pink,
+                size: 20.0,
+              ),
             ),
           ),
         ),
-      );
+        SizedBox(
+          height: 10.0,
+        ),
+        Row(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                right: 15.0,
+                left: 55.0,
+              ),
+              child: Text(
+                'Tổng cộng:',
+                style: TextStyle(
+                  fontSize: 15.0,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: Text(
+                '${oCcy.format(selectedPackage.price)} đồng',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 30.0),
+      ],
+    );
   }
 }

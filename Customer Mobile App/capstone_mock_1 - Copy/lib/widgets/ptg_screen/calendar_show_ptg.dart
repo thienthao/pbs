@@ -9,6 +9,14 @@ class CalendarView extends StatefulWidget {
 class _CalendarViewState extends State<CalendarView> {
   CalendarController controller;
 
+  final Map<DateTime, List> _holidays = {
+    DateTime(2020, 10, 1): ['New Year\'s Day'],
+    DateTime(2020, 10, 6): ['Epiphany'],
+    DateTime(2020, 10, 15): ['Valentine\'s Day'],
+    DateTime(2020, 10, 21): ['Easter Sunday'],
+    DateTime(2020, 10, 22): ['Easter Monday'],
+  };
+
   @override
   void initState() {
     super.initState();
@@ -19,17 +27,6 @@ class _CalendarViewState extends State<CalendarView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.only(top: 20.0, bottom: 20.0, right: 140),
-          child: Text(
-            'Thời gian biểu',
-            style: TextStyle(
-              fontSize: 30.0,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-        ),
         Container(
           height: 350,
           margin: EdgeInsets.all(15.0),
@@ -46,11 +43,13 @@ class _CalendarViewState extends State<CalendarView> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
             child: TableCalendar(
+              holidays: _holidays,
               locale: 'vi_VN',
               calendarController: controller,
               startingDayOfWeek: StartingDayOfWeek.monday,
               initialCalendarFormat: CalendarFormat.month,
               formatAnimation: FormatAnimation.slide,
+              
               headerStyle: HeaderStyle(
                 centerHeaderTitle: true,
                 formatButtonVisible: false,
@@ -72,8 +71,16 @@ class _CalendarViewState extends State<CalendarView> {
                 rightChevronMargin: EdgeInsets.only(right: 40.0),
               ),
               calendarStyle: CalendarStyle(
-                todayColor: Colors.redAccent[200],
+                selectedColor: Colors.white,
+                selectedStyle: TextStyle().copyWith(color: Colors.black87),
+                todayColor: Colors.white,
+                todayStyle: TextStyle().copyWith(color: Colors.black87),
+                markersColor: Colors.pinkAccent,
                 outsideDaysVisible: false,
+                weekendStyle: TextStyle().copyWith(color: Colors.black87),
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekendStyle: TextStyle().copyWith(color: Colors.black87),
               ),
             ),
           ),

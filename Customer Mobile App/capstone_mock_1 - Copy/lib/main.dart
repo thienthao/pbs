@@ -1,11 +1,13 @@
+import 'package:capstone_mock_1/blocs/booking_blocs/bookings.dart';
+import 'package:capstone_mock_1/respositories/booking_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'blocs/album_blocs/album.dart';
 import 'blocs/bloc_observer.dart';
-import 'blocs/category_blocs/category.dart';
-import 'blocs/photographer_blocs/photographer.dart';
+import 'blocs/category_blocs/categories.dart';
+import 'blocs/photographer_blocs/photographers.dart';
 import 'respositories/album_respository.dart';
 import 'respositories/category_respository.dart';
 import 'respositories/photographer_respository.dart';
@@ -14,7 +16,7 @@ import 'screens/home_screen.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  initializeDateFormatting().then((_) {
+  initializeDateFormatting('vi_VN', null).then((_) {
     Bloc.observer = PBSBlocObserver();
 
     runApp(MyApp());
@@ -33,6 +35,9 @@ class _MyAppState extends State<MyApp> {
       PhotographerRepository(httpClient: http.Client());
   CategoryRepository _categoryRepository =
       CategoryRepository(httpClient: http.Client());
+
+  BookingRepository _bookingRepository =
+      BookingRepository(httpClient: http.Client());
   List _pageOptions = [];
 
   @override
@@ -51,16 +56,25 @@ class _MyAppState extends State<MyApp> {
               ..add(PhotographerEventFetch()),
           ),
           BlocProvider(
-            create: (context) => AlbumBloc(albumRepository: _albumRepository)
-              ..add(AlbumEventFetch()),
+            create: (context) => AlbumBloc(albumRepository: _albumRepository),
+          ),
+          BlocProvider(
+            create: (context) =>
+                BookingBloc(bookingRepository: _bookingRepository),
           ),
         ],
         child: HomeScreen(),
       ),
-      BlocProvider(
-          create: (context) => AlbumBloc(albumRepository: _albumRepository)
-            ..add(AlbumEventFetch()),
-          child: HomeScreen()),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                BookingBloc(bookingRepository: _bookingRepository)
+                  ..add(BookingEventFetch()),
+          ),
+        ],
+        child: BookHistory(),
+      ),
       BookHistory(),
       BookHistory(),
     ];
@@ -106,7 +120,7 @@ class _MyAppState extends State<MyApp> {
                     GButton(
                       icon: Icons.library_books,
                       iconColor: Colors.grey[600],
-                      text: 'Lịch sử',
+                      text: 'Hoạt động',
                       onPressed: () {
                         Navigator.pop(context);
                       },

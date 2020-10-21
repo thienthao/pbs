@@ -1,11 +1,9 @@
-
 import 'package:capstone_mock_1/respositories/album_respository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'album_event.dart';
 import 'album_state.dart';
-
 
 class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
   final AlbumRepository albumRepository;
@@ -20,6 +18,8 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
       final albums = await albumRepository.getListAlbum();
       yield AlbumStateSuccess(albums: albums);
       yield* _mapAlbumsLoadedToState();
+    } else if (albumEvent is AlbumByPhotographerIdEventFetch) {
+      yield* _mapAlbumsByPhotographerIdLoadedToState(albumEvent.id);
     } else if (albumEvent is AlbumEventLoadSuccess) {
       yield* _mapAlbumsLoadedToState();
     } else if (albumEvent is AlbumEventRequested) {
@@ -32,6 +32,15 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
   Stream<AlbumState> _mapAlbumsLoadedToState() async* {
     try {
       final albums = await this.albumRepository.getListAlbum();
+      yield AlbumStateSuccess(albums: albums);
+    } catch (_) {
+      yield AlbumStateFailure();
+    }
+  }
+
+  Stream<AlbumState> _mapAlbumsByPhotographerIdLoadedToState(int id) async* {
+    try {
+      final albums = await this.albumRepository.getAlbumOfPhotographer(id);
       yield AlbumStateSuccess(albums: albums);
     } catch (_) {
       yield AlbumStateFailure();

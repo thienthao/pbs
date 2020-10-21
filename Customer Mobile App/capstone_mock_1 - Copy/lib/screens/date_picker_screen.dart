@@ -1,9 +1,15 @@
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+// ignore: must_be_immutable
 class DatePicker extends StatefulWidget {
+  Function(DateTime) onSelecParam;
+  DatePicker({
+    this.onSelecParam,
+  });
   @override
   _DatePickerState createState() => _DatePickerState();
 }
@@ -11,10 +17,26 @@ class DatePicker extends StatefulWidget {
 class _DatePickerState extends State<DatePicker> {
   CalendarController controller;
   TimeOfDay _time = TimeOfDay.now();
+  DateTime _selectedDateTime = DateTime.now();
+
+  final Map<DateTime, List> _holidays = {
+    DateTime(2020, 10, 1): ['New Year\'s Day'],
+    DateTime(2020, 10, 6): ['Epiphany'],
+    DateTime(2020, 10, 15): ['Valentine\'s Day'],
+    DateTime(2020, 10, 21): ['Easter Sunday'],
+    DateTime(2020, 10, 22): ['Easter Monday'],
+  };
 
   void onTimeChanged(TimeOfDay newTime) {
     setState(() {
       _time = newTime;
+    });
+  }
+
+  void _onDaySelected(DateTime day, List events) {
+    print('CALLBACK: _onDaySelected');
+    setState(() {
+      _selectedDateTime = day;
     });
   }
 
@@ -30,15 +52,17 @@ class _DatePickerState extends State<DatePicker> {
     return Scaffold(
       body: Column(
         children: [
-          Container(
-            padding: EdgeInsets.only(top: 20.0),
-            margin: EdgeInsets.only(right: 110.0),
-            child: Text(
-              'Chọn thời gian chụp',
-              style: TextStyle(
-                fontSize: 25.0,
-                fontWeight: FontWeight.w600,
-                color: Colors.black54,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: EdgeInsets.only(left: 10, top: 20.0),
+              child: Text(
+                'Chọn thời gian ',
+                style: TextStyle(
+                  fontSize: 25.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black54,
+                ),
               ),
             ),
           ),
@@ -67,6 +91,8 @@ class _DatePickerState extends State<DatePicker> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
               child: TableCalendar(
+                onDaySelected: _onDaySelected,
+                holidays: _holidays,
                 locale: 'vi_VN',
                 calendarController: controller,
                 startingDayOfWeek: StartingDayOfWeek.monday,
@@ -91,6 +117,17 @@ class _DatePickerState extends State<DatePicker> {
                   ),
                   leftChevronMargin: EdgeInsets.only(left: 40.0),
                   rightChevronMargin: EdgeInsets.only(right: 40.0),
+                ),
+                calendarStyle: CalendarStyle(
+                  selectedColor: Theme.of(context).accentColor,
+                  todayStyle: TextStyle().copyWith(color: Colors.black87),
+                  markersColor: Colors.pinkAccent,
+                  outsideDaysVisible: false,
+                  weekendStyle: TextStyle().copyWith(color: Colors.black87),
+                  todayColor: Colors.white,
+                ),
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  weekendStyle: TextStyle().copyWith(color: Colors.black87),
                 ),
               ),
             ),
@@ -144,7 +181,9 @@ class _DatePickerState extends State<DatePicker> {
           SizedBox(height: 30.0),
           RaisedButton(
             onPressed: () {
-              Navigator.pop(context);
+              widget.onSelecParam(_selectedDateTime);
+              Navigator.pop(context,
+                  '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
             },
             textColor: Colors.white,
             color: Theme.of(context).primaryColor,

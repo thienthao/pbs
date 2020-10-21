@@ -8,15 +8,15 @@ class Status {
 
   static List<Status> getStatus() {
     return <Status>[
-      Status(1, 'Cuộc hẹn sắp diễn ra'),
-      Status(2, 'Cuộc hẹn đã diễn ra'),
-      Status(3, 'Đang chờ Thợ'),
+      Status(1, 'Tất cả'),
+      Status(1, 'Sắp diễn ra'),
+      Status(1, 'Đã diễn ra'),
+      Status(2, 'Đã hủy'),
     ];
   }
 }
 
 class DropMenu extends StatefulWidget {
-
   @override
   _DropMenuState createState() => _DropMenuState();
 }
@@ -61,8 +61,7 @@ class _DropMenuState extends State<DropMenu> {
       child: DropdownButtonHideUnderline(
         child: ButtonTheme(
           alignedDropdown: true,
-          child:
-          DropdownButton(
+          child: DropdownButton(
             value: selectedStatus,
             items: dropDownMenuItems,
             onChanged: onChangeDropdownItem,

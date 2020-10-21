@@ -1,4 +1,3 @@
-
 import 'package:capstone_mock_1/models/album_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,11 @@ abstract class AlbumEvent extends Equatable {
 }
 
 class AlbumEventFetch extends AlbumEvent {}
+
+class AlbumByPhotographerIdEventFetch extends AlbumEvent {
+  final int id;
+  AlbumByPhotographerIdEventFetch({@required this.id});
+}
 
 class AlbumEventLoadSuccess extends AlbumEvent {
   AlbumEventLoadSuccess(List<AlbumBlocModel> list);

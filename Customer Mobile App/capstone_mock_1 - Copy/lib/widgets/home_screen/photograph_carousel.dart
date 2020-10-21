@@ -1,5 +1,11 @@
-import 'package:capstone_mock_1/blocs/photographer_blocs/photographer.dart';
+import 'package:capstone_mock_1/blocs/album_blocs/album.dart';
+import 'package:capstone_mock_1/blocs/comment_blocs/comments.dart';
+import 'package:capstone_mock_1/blocs/package_blocs/packages.dart';
+import 'package:capstone_mock_1/blocs/photographer_blocs/photographers.dart';
 import 'package:capstone_mock_1/models/photographer_bloc_model.dart';
+import 'package:capstone_mock_1/respositories/album_respository.dart';
+import 'package:capstone_mock_1/respositories/comment_repository.dart';
+import 'package:capstone_mock_1/respositories/package_repository.dart';
 import 'package:capstone_mock_1/respositories/photographer_respository.dart';
 import 'package:capstone_mock_1/screens/photographer_detail.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +13,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 class PhotographCarousel extends StatefulWidget {
-  List<Photographer> bloc_photographers;
+  final List<Photographer> blocPhotographers;
 
-  PhotographCarousel({this.bloc_photographers});
+  PhotographCarousel({this.blocPhotographers});
 
   @override
   _PhotographCarouselState createState() => _PhotographCarouselState();
@@ -18,6 +24,11 @@ class PhotographCarousel extends StatefulWidget {
 class _PhotographCarouselState extends State<PhotographCarousel> {
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
+  AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
+  PackageRepository _packageRepository =
+      PackageRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -68,18 +79,43 @@ class _PhotographCarouselState extends State<PhotographCarousel> {
             child: ListView.builder(
               physics: BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
-              itemCount: widget.bloc_photographers.length,
+              itemCount: widget.blocPhotographers.length,
               itemBuilder: (BuildContext context, int index) {
-                Photographer photographer = widget.bloc_photographers[index];
+                Photographer photographer = widget.blocPhotographers[index];
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => BlocProvider(
-                        create: (context) =>
-                            PhotographerBloc(photographerRepository: _photographerRepository)..add(PhotographerbyIdEventFetch(id: photographer.id)),
+                      builder: (_) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => PhotographerBloc(
+                                photographerRepository: _photographerRepository)
+                              ..add(PhotographerbyIdEventFetch(
+                                  id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) =>
+                                AlbumBloc(albumRepository: _albumRepository)
+                                  ..add(AlbumByPhotographerIdEventFetch(
+                                      id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => PackageBloc(
+                                packageRepository: _packageRepository)
+                              ..add(PackageByPhotographerIdEventFetch(
+                                  id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => CommentBloc(
+                                commentRepository: _commentRepository)
+                              ..add(CommentByPhotographerIdEventFetch(
+                                  id: photographer.id)),
+                          ),
+                        ],
                         child: CustomerPhotographerDetail(
                           id: photographer.id,
+                          name: photographer.fullname,
                         ),
                       ),
                     ),

@@ -10,11 +10,11 @@ class Booking {
 
 final List<Booking> bookings = [
   Booking(
-      ptgname: 'Minh Khoa',
+      ptgname: 'Cao Tiến',
       status: 'Chờ xác nhận',
       address: 'Quảng trường Lâm Viên, Thành Phố Đà Lạt, Tỉnh Lâm Đồng',
-      time: '15/11/2020 - 8:00 AM',
-      package: 'Gói chụp ảnh thời trang cơ bản'),
+      time: '12:00 - 30/10/2020 ',
+      package: 'GÓI CHỤP 1 NGƯỜI'),
   Booking(
       ptgname: 'Quang Huy',
       status: 'Sắp diễn ra',

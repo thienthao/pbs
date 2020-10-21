@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:capstone_mock_1/models/album_model.dart';
-import 'package:capstone_mock_1/screens/album_detail_screen.dart';
+import 'package:capstone_mock_1/screens/album_detail_screen copy.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 
 class AlbumCarousel extends StatefulWidget {
   @override
@@ -9,6 +11,7 @@ class AlbumCarousel extends StatefulWidget {
 }
 
 class _AlbumCarouselState extends State<AlbumCarousel> {
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -136,7 +139,7 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                   children: <Widget>[
                                     CircleAvatar(
                                       backgroundImage:
-                                      AssetImage(album.avatarUrl),
+                                          AssetImage(album.avatarUrl),
                                     ),
                                     Text(
                                       album.ptgname,
@@ -167,7 +170,8 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                           letterSpacing: 1.2,
                                           shadows: [
                                             Shadow(
-                                                offset: Offset(1, 3), blurRadius: 6)
+                                                offset: Offset(1, 3),
+                                                blurRadius: 6)
                                           ]),
                                     ),
                                     SizedBox(height: 5.0),
@@ -189,8 +193,7 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                               Positioned(
                                 right: 15.0,
                                 bottom: 15.0,
-                                child:
-                                Row(
+                                child: Row(
                                   children: <Widget>[
                                     Icon(
                                       Icons.favorite,

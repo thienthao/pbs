@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:capstone_mock_1/models/album_bloc_model.dart';
 import 'package:capstone_mock_1/models/album_model.dart';
 import 'package:capstone_mock_1/screens/album_detail_screen.dart';
@@ -5,16 +7,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AlbumCarousel extends StatefulWidget {
-  List<AlbumBlocModel> bloc_albums;
+  final List<AlbumBlocModel> blocAlbums;
   AlbumCarousel({
-    @required this.bloc_albums,
+    @required this.blocAlbums,
   });
   @override
   _AlbumCarouselState createState() => _AlbumCarouselState();
 }
 
 class _AlbumCarouselState extends State<AlbumCarousel> {
-
+  Random _random = new Random();
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -65,9 +67,9 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
             child: ListView.builder(
               physics: BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
-              itemCount: widget.bloc_albums.length,
+              itemCount: widget.blocAlbums.length,
               itemBuilder: (BuildContext context, int index) {
-                AlbumBlocModel bloc_album = widget.bloc_albums[index];
+                AlbumBlocModel blocAlbum = widget.blocAlbums[index];
                 return GestureDetector(
                   onTap: () => Navigator.push(
                       context,
@@ -87,7 +89,9 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                           pageBuilder: (BuildContext context,
                               Animation<double> animation,
                               Animation<double> secAnimation) {
-                            return ImageFullScreen(album: albums[1]);
+                            return ImageFullScreen(
+                              album: blocAlbum,
+                            );
                           })),
                   child: Container(
                     margin: EdgeInsets.all(10.0),
@@ -108,11 +112,11 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                           child: Stack(
                             children: <Widget>[
                               Hero(
-                                tag: bloc_album.thumbnail,
+                                tag: blocAlbum.thumbnail,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20.0),
                                   child: Image(
-                                    image: NetworkImage(bloc_album.thumbnail),
+                                    image: NetworkImage(blocAlbum.thumbnail),
                                     height: 400.0,
                                     width: 240.0,
                                     fit: BoxFit.cover,
@@ -123,7 +127,7 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                 left: 15.0,
                                 top: 15.0,
                                 child: Text(
-                                  '${bloc_album.location}',
+                                  '${blocAlbum.location}',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 18.0,
@@ -142,11 +146,12 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
                                     CircleAvatar(
-                                      backgroundImage:
-                                      NetworkImage(bloc_album.photographer.avatar),
+                                      backgroundImage: NetworkImage(
+                                          blocAlbum.photographer.avatar),
                                     ),
                                     Text(
-                                      bloc_album.photographer.fullname ?? 'Ẩn danh',
+                                      blocAlbum.photographer.fullname ??
+                                          'Ẩn danh',
                                       style: TextStyle(
                                         color: Colors.white,
                                         shadows: [
@@ -166,7 +171,7 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      bloc_album.name,
+                                      blocAlbum.name,
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 24.0,
@@ -174,12 +179,13 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                           letterSpacing: 1.2,
                                           shadows: [
                                             Shadow(
-                                                offset: Offset(1, 3), blurRadius: 6)
+                                                offset: Offset(1, 3),
+                                                blurRadius: 6)
                                           ]),
                                     ),
                                     SizedBox(height: 5.0),
                                     Text(
-                                      bloc_album.category.category,
+                                      blocAlbum.category.category,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15.0,
@@ -196,8 +202,7 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                               Positioned(
                                 right: 15.0,
                                 bottom: 15.0,
-                                child:
-                                Row(
+                                child: Row(
                                   children: <Widget>[
                                     Icon(
                                       Icons.favorite,
@@ -206,7 +211,9 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                     ),
                                     SizedBox(width: 5.0),
                                     Text(
-                                      '${bloc_album.likes}',
+                                      blocAlbum.likes == null
+                                          ? _random.nextInt(1000).toString()
+                                          : '${blocAlbum.likes}',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 15.0,

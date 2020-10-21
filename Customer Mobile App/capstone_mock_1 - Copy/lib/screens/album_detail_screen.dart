@@ -1,10 +1,10 @@
-import 'package:capstone_mock_1/models/album_model.dart';
+import 'package:capstone_mock_1/models/album_bloc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:intl/intl.dart';
 
 class ImageFullScreen extends StatefulWidget {
-  final Album album;
+  final AlbumBlocModel album;
 
   const ImageFullScreen({this.album});
 
@@ -15,6 +15,12 @@ class ImageFullScreen extends StatefulWidget {
 class _ImageFullScreenState extends State<ImageFullScreen> {
   CardController controller;
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
+  int indexOfAlbum = 0;
+  @override
+  void initState() {
+    super.initState();
+    widget.album.images.length == 0 ? indexOfAlbum = 0 : indexOfAlbum = 1;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +29,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         title: Text(
-          '${widget.album.title}',
+          '${widget.album.name}',
           style: TextStyle(
             fontSize: 22.0,
             color: Colors.black,
@@ -44,53 +50,66 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                   children: [
                     SizedBox(width: 10.0),
                     CircleAvatar(
-                      backgroundImage: AssetImage(widget.album.avatarUrl),
+                      backgroundImage:
+                          NetworkImage(widget.album.photographer.avatar),
                     ),
                     SizedBox(width: 5.0),
-                    Text(widget.album.ptgname),
+                    Text(widget.album.photographer.fullname),
                   ],
                 ),
               ),
-              Hero(
-                tag: widget.album.imageUrl,
-                child: Center(
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.65,
-                    child: new TinderSwapCard(
-                      swipeUp: true,
-                      swipeDown: true,
-                      orientation: AmassOrientation.BOTTOM,
-                      totalNum: widget.album.images.length,
-                      stackNum: 3,
-                      swipeEdge: 1.0,
-                      maxWidth: MediaQuery.of(context).size.width * 0.9,
-                      maxHeight: MediaQuery.of(context).size.height * 0.9,
-                      minWidth: MediaQuery.of(context).size.width * 0.8,
-                      minHeight: MediaQuery.of(context).size.height * 0.8,
-                      cardBuilder: (context, index) => ClipRRect(
-                        borderRadius: BorderRadius.circular(0),
-                        child: Card(
-                          elevation: 2,
-                          child: Image.asset(
-                            '${widget.album.images[index]}',
-                            fit: BoxFit.cover,
+              GestureDetector(
+                onLongPress: () {
+                  print('long presssssssss');
+                },
+                child: Hero(
+                  tag: widget.album.id,
+                  child: Center(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.65,
+                      child: new TinderSwapCard(
+                        swipeUp: true,
+                        swipeDown: false,
+                        orientation: AmassOrientation.BOTTOM,
+                        totalNum: widget.album.images.length,
+                        stackNum: 4,
+                        swipeEdge: 0.5,
+                        maxWidth: MediaQuery.of(context).size.width * 0.9,
+                        maxHeight: MediaQuery.of(context).size.width * 1,
+                        minWidth: MediaQuery.of(context).size.width * 0.8,
+                        minHeight: MediaQuery.of(context).size.width * 0.95,
+                        cardBuilder: (context, index) => ClipRRect(
+                          borderRadius: BorderRadius.circular(0),
+                          child: Card(
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.network(
+                                '${widget.album.images[index].imageLink}',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
+                        cardController: controller = CardController(),
+                        swipeUpdateCallback:
+                            (DragUpdateDetails details, Alignment align) {
+                          if (align.x < 0) {
+                            //Card is LEFT swiping
+                          } else if (align.x > 0) {
+                            //Card is RIGHT swiping
+                          }
+                        },
+                        swipeCompleteCallback:
+                            (CardSwipeOrientation orientation, int index) {
+                          setState(() {
+                            if (indexOfAlbum < widget.album.images.length) {
+                              print(indexOfAlbum);
+                              indexOfAlbum = index + 2;
+                            }
+                          });
+                        },
                       ),
-                      cardController: controller = CardController(),
-                      swipeUpdateCallback:
-                          (DragUpdateDetails details, Alignment align) {
-                        /// Get swiping card's alignment
-                        if (align.x < 0) {
-                          //Card is LEFT swiping
-                        } else if (align.x > 0) {
-                          //Card is RIGHT swiping
-                        }
-                      },
-                      swipeCompleteCallback:
-                          (CardSwipeOrientation orientation, int index) {
-                        /// Get orientation & index of swiped card!
-                      },
                     ),
                   ),
                 ),
@@ -98,11 +117,42 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(30.0, 0.0, 40.0, 0.0),
+            padding: const EdgeInsets.fromLTRB(30.0, 0.0, 30.0, 0.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: RichText(
+                    text: TextSpan(
+                      text: '',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Quicksand',
+                      ),
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: indexOfAlbum.toString(),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold)),
+                        TextSpan(
+                          text: ' / ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                        TextSpan(
+                          text: widget.album.images.length.toString(),
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 SizedBox(height: 10.0),
                 Wrap(
                   children: [
@@ -116,7 +166,8 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                     Icon(
                       Icons.chat_bubble_outline_outlined,
                       size: 28,
-                    ),SizedBox(
+                    ),
+                    SizedBox(
                       width: 10,
                     ),
                     Icon(
@@ -129,7 +180,8 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                 RichText(
                   text: TextSpan(
                       text:
-                          '${oCcy.format(widget.album.ratingNum)} lượt yêu thích ',
+                          // '${oCcy.format(widget.album.likes)} lượt yêu thích ',
+                          '209 lượt yêu thích',
                       style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Quicksand',
@@ -158,7 +210,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold)),
                           TextSpan(
-                              text: '${widget.album.dateCreated}',
+                              text: widget.album.createAt == null
+                                  ? '20/12/2012'
+                                  : '${widget.album.createAt}',
                               style: TextStyle(fontWeight: FontWeight.normal)),
                         ],
                       ),
@@ -189,7 +243,7 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold)),
                             TextSpan(
-                                text: '${widget.album.categories}',
+                                text: '${widget.album.category.category}',
                                 style:
                                     TextStyle(fontWeight: FontWeight.normal)),
                           ]),
@@ -237,7 +291,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                       TextSpan(
                         text: 'Mô tả: ',
                         style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.0),
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0),
                       ),
                       TextSpan(
                         text: '${widget.album.description}',

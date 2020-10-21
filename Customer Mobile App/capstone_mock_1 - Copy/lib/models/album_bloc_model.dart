@@ -1,4 +1,5 @@
 import 'package:capstone_mock_1/models/category_bloc_model.dart';
+import 'package:capstone_mock_1/models/image_bloc_model.dart';
 import 'package:capstone_mock_1/models/photographer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 
@@ -13,7 +14,7 @@ class AlbumBlocModel extends Equatable {
   final Photographer photographer;
   final int likes;
   final CategoryBlocModel category;
-  final List<String> images;
+  final List<ImageBlocModel> images;
 
   const AlbumBlocModel(
       {this.id,

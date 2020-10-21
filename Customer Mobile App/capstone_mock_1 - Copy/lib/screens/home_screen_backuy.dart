@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             builder: (context, albumState) {
               print('albumState $albumState');
               if (albumState is AlbumStateSuccess) {
-                final currentState = albumState as AlbumStateSuccess;
+                final currentState = albumState;
                 if (currentState.albums.isEmpty) {
                   return Text(
                     'Đà Lạt',
@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 } else {
                   return Container(
                     child: AlbumCarousel(
-                      bloc_albums: currentState.albums,
+                      blocAlbums: currentState.albums,
                     ),
                   );
                 }
@@ -81,9 +81,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               final albums = (albumState as AlbumStateSuccess).albums;
               return RefreshIndicator(
                   child: Container(
-                    child: AlbumCarousel(
-                      // bloc_albums: albums,
-                    ),
+                    child: Text('Hi'),
                   ),
                   onRefresh: () {
                     BlocProvider.of<AlbumBloc>(context)

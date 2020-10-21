@@ -7,6 +7,7 @@ class Photographer extends Equatable {
   final String fullname;
   final String description;
   final String avatar;
+  final String cover;
   final String phone;
   final double ratingCount;
   final bool isBlocked;
@@ -22,6 +23,7 @@ class Photographer extends Equatable {
       this.fullname,
       this.description,
       this.avatar,
+      this.cover,
       this.phone,
       this.ratingCount,
       this.isBlocked,
@@ -40,6 +42,7 @@ class Photographer extends Equatable {
         fullname,
         description,
         avatar,
+        cover,
         phone,
         ratingCount,
         isBlocked,
@@ -56,6 +59,7 @@ class Photographer extends Equatable {
       fullname: 'fullname' ?? '',
       description: 'description' ?? DateTime.october,
       avatar: 'avatar' ?? 'avatar link',
+      cover: 'cover' ?? 'avatar link',
       phone: 'phone' ?? 'phone link',
       ratingCount: 'ratingCount' ?? 4.0,
       isBlocked: 'isBlocked' ?? false,
@@ -65,4 +69,8 @@ class Photographer extends Equatable {
       albums: 'albums' ?? [],
     );
   }
+
+  toMap() {}
+
+  static fromMap(map) {}
 }

@@ -290,7 +290,7 @@ class _CustomerPhotographerDetailState
                   pageBuilder: (BuildContext context,
                       Animation<double> animation,
                       Animation<double> secAnimation) {
-                    return ImageFullScreen(album: albums[index]);
+                    // return ImageFullScreen(album: albums[index]);
                   }));
         },
         child: Stack(

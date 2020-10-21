@@ -1,8 +1,11 @@
-import 'package:capstone_mock_1/models/booking_model.dart';
+import 'dart:async';
+
+import 'package:capstone_mock_1/blocs/booking_blocs/bookings.dart';
+import 'package:capstone_mock_1/widgets/history_screen/booking_widget.dart';
 import 'package:capstone_mock_1/widgets/history_screen/top_part_history.dart';
 import 'package:flutter/material.dart';
-
-import 'booking_detail_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
 class BookHistory extends StatefulWidget {
   @override
@@ -11,11 +14,180 @@ class BookHistory extends StatefulWidget {
 
 class _BookHistoryState extends State<BookHistory> {
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Completer<void> _completer;
+
+  @override
+  void initState() {
+    super.initState();
+    _completer = Completer<void>();
+  }
+
+  FutureOr onGoBack(dynamic value) {
+    _loadBookings();
+    setState(() {});
+  }
+
+  _loadBookings() async {
+    context.bloc<BookingBloc>().add(BookingEventFetch());
+  }
+
+  Widget refreshData() {
+    return Expanded(
+      child: Center(
+        child: BlocBuilder<BookingBloc, BookingState>(
+          builder: (context, bookingState) {
+            if (bookingState is BookingStateSuccess) {
+              if (bookingState.bookings.isEmpty) {
+                return Text(
+                  'Đà Lạt',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17.0,
+                    fontWeight: FontWeight.w400,
+                  ),
+                );
+              } else {
+                return RefreshIndicator(
+                  onRefresh: () {
+                    _loadBookings();
+                    return _completer.future;
+                  },
+                  child: Container(
+                    child: BookingWidget(
+                      blocBookings: bookingState.bookings,
+                      onGoBack: onGoBack,
+                    ),
+                  ),
+                );
+              }
+            }
+
+            if (bookingState is BookingStateLoading) {
+              return Shimmer.fromColors(
+                period: Duration(milliseconds: 1100),
+                baseColor: Colors.grey[300],
+                highlightColor: Colors.grey[500],
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
+                  width: double.infinity,
+                  child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    scrollDirection: Axis.vertical,
+                    itemCount: 3,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        margin: EdgeInsets.all(10.0),
+                        width: double.infinity,
+                        height: 160.0,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
+                          children: <Widget>[
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black26,
+                                        offset: Offset(0.0, 2.0),
+                                        blurRadius: 6.0)
+                                  ]),
+                              child: Stack(
+                                children: <Widget>[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Colors.grey[400],
+                                            Colors.grey[300],
+                                          ], // whitish to gray
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(1.0),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 15.0,
+                                    bottom: 15.0,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[400],
+                                            borderRadius:
+                                                BorderRadius.circular(1.0),
+                                          ),
+                                          width: 100,
+                                          height: 24,
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[400],
+                                                borderRadius:
+                                                    BorderRadius.circular(1.0),
+                                              ),
+                                              width: 35,
+                                              height: 15,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            }
+
+            if (bookingState is BookingStateFailure) {
+              return Text(
+                'Đã xảy ra lỗi khi tải dữ liệu',
+                style: TextStyle(color: Colors.red[300], fontSize: 16),
+              );
+            }
+            final bookings = (bookingState as BookingStateSuccess).bookings;
+            return RefreshIndicator(
+                child: Container(child: BookingWidget()),
+                onRefresh: () {
+                  // BlocProvider.of<BookingBloc>(context)
+                  //     .add(BookingEventRefresh(booking: bookings[0]));
+                  return _completer.future;
+                });
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Lịch sử cuộc hẹn',
+          'Hoạt động của tôi',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -32,229 +204,13 @@ class _BookHistoryState extends State<BookHistory> {
       ),
       body: Column(
         children: [
+          //////////////////////////////////////////////////////// Filter
           TopPart(),
+          ///////////////////////////////////////////////////////////////
           SizedBox(
             height: 20.0,
           ),
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(top: 10.0, bottom: 15.0),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: bookings.length,
-              itemBuilder: (BuildContext context, int index) {
-                Booking booking = bookings[index];
-                return Stack(
-                  children: <Widget>[
-                    GestureDetector(
-                      onTap:() {
-                        Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                                transitionDuration: Duration(milliseconds: 500),
-                                transitionsBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secAnimation,
-                                    Widget child) {
-                                  animation = CurvedAnimation(
-                                      parent: animation, curve: Curves.elasticInOut);
-                                  return ScaleTransition(
-                                      scale: animation,
-                                      child: child,
-                                      alignment: Alignment.center);
-                                },
-                                pageBuilder: (BuildContext context,
-                                    Animation<double> animation,
-                                    Animation<double> secAnimation) {
-                                  return BookingDetailScreen();
-                                }));
-                      },
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              offset: Offset(0, 4),
-                              blurRadius: 5,
-                              color: Colors.grey.withOpacity(0.5),
-                            ),
-                          ],
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Container(
-                                    width: 120.0,
-                                    child: Text(
-                                      'Chụp ảnh với ${booking.ptgname}',
-                                      style: TextStyle(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                  Column(
-                                    children: <Widget>[
-                                      Text(
-                                        'Trang thái:',
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      Text(
-                                        booking.status,
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontWeight: FontWeight.w600,
-                                          color: booking.status == 'Sắp diễn ra'
-                                              ? Colors.blueAccent
-                                              : booking.status == 'Chờ xác nhận'
-                                                  ? Colors.amber
-                                                  : booking.status == 'Bị từ chối'
-                                                      ? Colors.redAccent
-                                                      : booking.status ==
-                                                              'Hoàn thành'
-                                                          ? Colors.lightGreen[400]
-                                                          : Colors.black87,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10.0),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 10.0),
-                                    child: Icon(
-                                      Icons.timer,
-                                      size: 15,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      right: 10.0,
-                                    ),
-                                    child: Text(
-                                      'Thời gian:',
-                                      style: TextStyle(
-                                        fontSize: 15.0,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                    child: Text(
-                                      booking.time,
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 5.0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 10.0),
-                                    child: Icon(
-                                      Icons.loyalty,
-                                      size: 15,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      right: 10.0,
-                                    ),
-                                    child: Text(
-                                      'Gói:',
-                                      style: TextStyle(
-                                        fontSize: 15.0,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 10),
-                                      child: Text(
-                                        booking.package,
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 5.0),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(right: 10.0),
-                                    child: Icon(
-                                      Icons.location_on,
-                                      size: 15,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      right: 10.0,
-                                    ),
-                                    child: Text(
-                                      'Địa điểm:',
-                                      style: TextStyle(
-                                        fontSize: 15.0,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 10),
-                                      child: Text(
-                                        booking.address,
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+          refreshData(),
         ],
       ),
     );
