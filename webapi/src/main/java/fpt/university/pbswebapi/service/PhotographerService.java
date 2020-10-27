@@ -7,6 +7,7 @@ import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -91,6 +92,7 @@ public class PhotographerService {
             throw new BadRequestException("Photographer not exists");
     }
 
+    @Cacheable("photographers")
     public Page<User> findPhotographersByRating(Pageable paging) {
         return phtrRepo.findPhotographersByRating(paging, Long.parseLong("2"));
     }

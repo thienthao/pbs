@@ -104,7 +104,7 @@ public class AlbumController {
             List<Album> albums = new ArrayList<Album>();
             Pageable paging = PageRequest.of(page, size);
 
-            Page<Album> pageAlbums = albumService.findAll(paging);
+            Page<Album> pageAlbums = albumService.findAllSortByLike(paging);
 
             albums = pageAlbums.getContent();
             Map<String, Object> response = new HashMap<>();
