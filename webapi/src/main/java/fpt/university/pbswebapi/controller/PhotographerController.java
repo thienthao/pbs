@@ -68,6 +68,25 @@ public class PhotographerController {
         }
     }
 
+    @GetMapping("/byfactors")
+    public ResponseEntity<Map<String, Object>> findPhotographersByFactors() {
+        try {
+            List<User> photographers = phtrService.findPhotographersByFactors();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", photographers);
+//            response.put("currentPage", 0);
+//            response.put("totalItems", 0);
+//            response.put("totalPages", pageUser.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println("zo");
+            System.out.println(e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 //    @GetMapping("/{name}")
 //    public ResponseEntity<List<Photographer>> findAllByNameContaining(@PathVariable String name) {
 //        return new ResponseEntity<List<Photographer>>(phtrService.findAllByNameContaining(name), HttpStatus.OK);

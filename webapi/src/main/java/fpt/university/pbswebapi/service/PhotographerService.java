@@ -2,6 +2,7 @@ package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.domain.Photographer;
+import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import static java.util.Collections.reverseOrder;
 
 import java.io.IOException;
 import java.util.*;
@@ -220,5 +222,69 @@ public class PhotographerService {
         } else {
             return null;
         }
+    }
+
+    public List<User> findPhotographersByFactors() {
+        List<User> photographers =  phtrRepo.findAllPhotographer(Long.parseLong("2"));
+        List<User> sorted = new ArrayList<>();
+        Map<Long, Float> result = new HashMap<>();
+        int sumPrice = 0;
+        float sumDistance = 0;
+
+        for(int i = 0; i < photographers.size(); i++) {
+            // cal sum distance
+            // cal sum price
+            if(photographers.get(i).getPackages() != null) {
+                if(photographers.get(i).getPackages().size() > 0) {
+                    if (photographers.get(i).getPackages().get(0).getPrice() != null)
+                        sumPrice += photographers.get(i).getPackages().get(0).getPrice();
+                }
+            }
+        }
+
+        for(int i = 0; i < photographers.size(); i++) {
+            //cal rating
+            float rating = 0;
+            if(photographers.get(i).getRatingCount() != null)
+                rating = (float) (0.2 * (photographers.get(i).getRatingCount() / 5.0));
+            //cal distance
+
+            //cal price
+            float price = (float) (0 * 0.6);
+            float tile = 0;
+            float tru = 0;
+            if(photographers.get(i).getPackages() != null) {
+                if(photographers.get(i).getPackages().size() > 0) {
+                    if (photographers.get(i).getPackages().get(0).getPrice() != null)
+                        tile =  ((float)photographers.get(i).getPackages().get(0).getPrice() / (float)sumPrice);
+                        tru =  (float) 1.0 - tile;
+                        price = (float) (0.6 * tru);
+                }
+            }
+
+            //score
+            float score = (float) (rating + price + 0.2);
+            result.put(photographers.get(i).getId(), score);
+            System.out.println(score);
+        }
+        result = sortByValue(result);
+        result.forEach((id, score) -> {
+            System.out.println(id);
+            // add to sorted where id = id
+            sorted.add(phtrRepo.findById(id).get());
+        });
+        return sorted;
+    }
+
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+        list.sort(reverseOrder(Map.Entry.comparingByValue()));
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+
+        return result;
     }
 }

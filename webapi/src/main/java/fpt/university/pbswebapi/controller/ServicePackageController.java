@@ -97,4 +97,14 @@ public class ServicePackageController {
         // validate
         return new ResponseEntity<>(packageService.createPackage(servicePackage), HttpStatus.OK);
     }
+
+    @DeleteMapping("/packages/{ptgId}/{packageId}")
+    public ResponseEntity<?> removePackage(@PathVariable("ptgId") Long ptgId,
+                                           @PathVariable("packageId") Long packageId) {
+        try {
+            return new ResponseEntity<Object>(packageService.removePackage(packageId), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
