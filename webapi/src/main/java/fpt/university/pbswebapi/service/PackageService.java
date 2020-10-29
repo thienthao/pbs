@@ -16,12 +16,13 @@ public class PackageService {
     }
 
     public ServicePackage createPackage(ServicePackage servicePackage) {
+        servicePackage.setIsAvailable(Boolean.TRUE);
         return packageRepository.save(servicePackage);
     }
 
     public Object removePackage(Long packageId) {
         ServicePackage servicePackage = packageRepository.findById(packageId).get();
-        servicePackage.setIsAvailable(Boolean.TRUE);
+        servicePackage.setIsAvailable(Boolean.FALSE);
         return packageRepository.save(servicePackage);
     }
 }
