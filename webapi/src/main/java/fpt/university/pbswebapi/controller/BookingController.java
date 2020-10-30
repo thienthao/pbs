@@ -129,7 +129,7 @@ public class BookingController {
     }
 
     @GetMapping("/photographer/{photographerId}/date")
-    public ResponseEntity<Map<String, Object>> getPhotographerPendingBookingByDate(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Map<String, Object>> getPhotographerBookingByDate(@RequestParam(defaultValue = "0") int page,
                                                                                    @RequestParam(defaultValue = "5") int size,
                                                                                    @RequestParam(defaultValue = "") String date,
                                                                                    @PathVariable("photographerId") Long photographerId) {
@@ -151,6 +151,13 @@ public class BookingController {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/photographer/{ptgId}/daterange")
+    public ResponseEntity<Map<Date, List<Booking>>> getPhotographerBookingByDateRange(@RequestParam("from") String from,
+                                                                          @RequestParam("to") String to,
+                                                                          @PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(bookingService.getPhotographerBookingByDateRange(ptgId, from, to), HttpStatus.OK);
     }
 
     @GetMapping("/photographer/{photographerId}/status")

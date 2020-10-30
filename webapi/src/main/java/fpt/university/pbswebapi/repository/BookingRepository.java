@@ -52,4 +52,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.photographer.id =:photographerId and b.startDate between :date1 and :date2 and b.bookingStatus='ONGOING'" +
             "or b.photographer.id =:photographerId and b.startDate between :date1 and :date2 and b.bookingStatus='EDITING'")
     Page<Booking> findPhotographerBookingByDate(Pageable paging, Date date1, Date date2, Long photographerId);
+
+    @Query("FROM Booking b where b.photographer.id =:photographerId and b.startDate between :date1 and :date2 and b.bookingStatus='ONGOING'" +
+            "or b.photographer.id =:photographerId and b.startDate between :date1 and :date2 and b.bookingStatus='EDITING'")
+    List<Booking> findPhotographerBookingByDate(Date date1, Date date2, Long photographerId);
 }

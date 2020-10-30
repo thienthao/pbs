@@ -2,10 +2,13 @@ package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.domain.Photographer;
+import fpt.university.pbswebapi.entity.BusyDay;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
+import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.repository.BusyDayRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import static java.util.Collections.reverseOrder;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.apache.http.entity.ContentType.*;
@@ -24,11 +29,13 @@ import static org.apache.http.entity.ContentType.*;
 public class PhotographerService {
     private final UserRepository phtrRepo;
     private final FileStore fileStore;
+    private final BusyDayRepository busyDayRepository;
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
+        this.busyDayRepository = busyDayRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -286,5 +293,43 @@ public class PhotographerService {
         }
 
         return result;
+    }
+
+    public BusyDay addBusyDays(Long ptgId, BusyDay busyDay) {
+        return busyDayRepository.save(busyDay);
+    }
+
+    public List<BusyDay> getBusyDays(Long ptgId, String fromString, String toString) {
+        Date from;
+        Date to;
+        List<BusyDay> results = new ArrayList<>();
+        try {
+            fromString = fromString + " 00:00";
+            toString = toString + " 23:59";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime localFrom = LocalDateTime.parse(fromString, formatter);
+            LocalDateTime localTo = LocalDateTime.parse(toString, formatter);
+            from = DateHelper.convertToDateViaInstant(localFrom);
+            to = DateHelper.convertToDateViaInstant(localTo);
+            return busyDayRepository.findByPhotographerIdBetweenStartDateEndDate(ptgId, from, to);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return results;
+    }
+
+    public List<BusyDay> getBusyDaysSince(Long ptgId, String sinceString) {
+        Date since;
+        List<BusyDay> results = new ArrayList<>();
+        try {
+            sinceString = sinceString + " 00:00";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime localSince = LocalDateTime.parse(sinceString, formatter);
+            since = DateHelper.convertToDateViaInstant(localSince);
+            return busyDayRepository.findByPhotographerIdSinceStartDate(ptgId, since);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return results;
     }
 }
