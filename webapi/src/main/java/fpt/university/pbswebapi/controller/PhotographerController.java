@@ -45,13 +45,19 @@ public class PhotographerController {
     @GetMapping("/byrating")
     public ResponseEntity<Map<String, Object>> findPhotographersByRatingCount(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "1") long categoryId
     ) {
         try {
             List<User> photographers = new ArrayList<>();
             Pageable paging = PageRequest.of(page, size);
+            Page<User> pageUser;
 
-            Page<User> pageUser = phtrService.findPhotographersByRating(paging);
+            if(categoryId != 1) {
+                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId);
+            } else {
+                pageUser = phtrService.findPhotographersByRating(paging);
+            }
             photographers = pageUser.getContent();
 
             Map<String, Object> response = new HashMap<>();
@@ -138,7 +144,7 @@ public class PhotographerController {
         return new ResponseEntity<>(phtrService.getBusyDays(ptgId, from, to), HttpStatus.OK);
     }
 
-    @GetMapping("/{ptgId}/busydays")
+    @GetMapping("/{ptgId}/busydays/since")
     public ResponseEntity<?> getBusyDaysSince(@RequestParam("since") String since,
                                               @PathVariable("ptgId") Long ptgId) {
         return new ResponseEntity<>(phtrService.getBusyDaysSince(ptgId, since), HttpStatus.OK);

@@ -20,6 +20,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("FROM User photographer where photographer.role.id =:roleId")
     List<User> findAllPhotographer(Long roleId);
 
-    @Query("FROM User photographer where photographer.role.id =:roleId")
+    @Query("FROM User customer where customer.role.id =:roleId")
     List<User> findAllCustomers(Long roleId);
+
+    @Query("select distinct photographer from User photographer " +
+            "inner join photographer.packages package " +
+            "inner join package.category category " +
+            "where category.id =:categoryId " +
+            "order by photographer.ratingCount desc")
+    Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId);
 }

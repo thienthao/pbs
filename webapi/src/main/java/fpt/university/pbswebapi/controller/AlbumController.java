@@ -98,13 +98,19 @@ public class AlbumController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> findAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(name = "categoryId",defaultValue = "1") int categoryId
     ) {
         try {
             List<Album> albums = new ArrayList<Album>();
             Pageable paging = PageRequest.of(page, size);
+            Page<Album> pageAlbums;
 
-            Page<Album> pageAlbums = albumService.findAllSortByLike(paging);
+            if(categoryId != 1) {
+                pageAlbums = albumService.findByCategoryIdSortByLike(paging, categoryId);
+            } else {
+                pageAlbums = albumService.findAllSortByLike(paging);
+            }
 
             albums = pageAlbums.getContent();
             Map<String, Object> response = new HashMap<>();

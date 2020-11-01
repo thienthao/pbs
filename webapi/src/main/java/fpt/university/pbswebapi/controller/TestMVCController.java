@@ -29,19 +29,19 @@ public class TestMVCController {
     private String message = "Hello Thymeleaf";
     private String errorMessage = "First name and username is required";
 
-    @RequestMapping(value = {"/admin/", "/admin/index"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/ad/", "/admi"}, method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("message", message);
         return "index";
     }
 
-    @RequestMapping(value = {"/admin/userList"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/a"}, method = RequestMethod.GET)
     public String userList(Model model) {
         model.addAttribute("users", users);
         return "userList";
     }
 
-    @RequestMapping(value = {"/admin/addUser"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/ar"}, method = RequestMethod.GET)
     public String showAddUserPage(Model model) {
         UserForm userForm = new UserForm();
         model.addAttribute("userForm", userForm);

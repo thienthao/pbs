@@ -226,4 +226,8 @@ public class AlbumService {
             throw new IllegalStateException(e);
         }
     }
+
+    public Page<Album> findByCategoryIdSortByLike(Pageable paging, int categoryId) {
+        return albumRepository.findByCategoryIdSortByLike(paging, categoryId);
+    }
 }

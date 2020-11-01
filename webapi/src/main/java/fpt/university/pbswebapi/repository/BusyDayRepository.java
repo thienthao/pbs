@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface BusyDayRepository extends JpaRepository<BusyDay, Long> {
 
-    @Query("from BusyDay busyday where busyday.photographer.id =: ptgId and busyday.startDate between :from and :to")
+    @Query("from BusyDay busyday where busyday.photographer.id =:ptgId and busyday.startDate between :from and :to")
     List<BusyDay> findByPhotographerIdBetweenStartDateEndDate(Long ptgId, Date from, Date to);
 
-    @Query("from BusyDay busyday where busyday.photographer.id =: ptgId and busyday.startDate >:since")
+    @Query("from BusyDay busyday where busyday.photographer.id =:ptgId and busyday.startDate >:since")
     List<BusyDay> findByPhotographerIdSinceStartDate(Long ptgId, Date since);
 }

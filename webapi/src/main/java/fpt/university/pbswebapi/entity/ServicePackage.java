@@ -54,6 +54,10 @@ public class ServicePackage {
     )
     private List<Service> services;
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private Category category;
+
     public ServicePackage(String name, Integer price, String description, User photographer, List<Service> services) {
         this.name = name;
         this.price = price;

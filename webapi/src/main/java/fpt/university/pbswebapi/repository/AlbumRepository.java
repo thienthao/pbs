@@ -13,4 +13,7 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
 
     @Query("from Album album order by album.likes desc ")
     Page<Album> findAllSortByLike(Pageable paging);
+
+    @Query("from Album album where album.category.id =:categoryId order by album.likes desc ")
+    Page<Album> findByCategoryIdSortByLike(Pageable paging, int categoryId);
 }

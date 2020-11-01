@@ -7,7 +7,6 @@ import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.dto.PackageJson;
 import fpt.university.pbswebapi.entity.Album;
 import fpt.university.pbswebapi.entity.ServicePackage;
-import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
@@ -42,7 +41,7 @@ public class TestController {
 
     @GetMapping("/all")
     public String allAccess() {
-        return "test";
+        return "test again for chac chan";
     }
 
     @PostMapping("/notify")
@@ -89,4 +88,5 @@ public class TestController {
     public String adminAccess() {
         return "Admin content";
     }
+
 }

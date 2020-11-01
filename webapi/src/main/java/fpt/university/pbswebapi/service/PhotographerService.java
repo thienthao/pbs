@@ -332,4 +332,8 @@ public class PhotographerService {
         }
         return results;
     }
+
+    public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId) {
+        return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
+    }
 }

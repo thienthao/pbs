@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.utraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Admin</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style th:replace="/admin/shared/style"></style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <div th:replace="/admin/shared/header"></div>
+
+    <div th:replace="/admin/shared/left_side"></div>
+
+    <div class="content-wrapper">
+        <div layout:fragment="content">
+
+
+
+        </div>
+    </div>
+
+    <div th:replace="/admin/shared/footer"></div>
+
+    <div th:replace="/admin/shared/script"></div>
+
+    <div th:fragment="script"></div>
+</div>
+</body>
+</html>
