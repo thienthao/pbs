@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 public interface ServicePackageRepository extends JpaRepository<ServicePackage, Long> {
     Page<ServicePackage> findByNameContaining(String name, Pageable pageable);
 
-    @Query("FROM ServicePackage p where p.photographer.id = :ptgId")
+    @Query("FROM ServicePackage p where p.photographer.id = :ptgId and p.isAvailable=true")
     Page<ServicePackage> findServicePackageByPtgId(Long ptgId, Pageable pageable);
 
-    @Query("FROM ServicePackage p where p.photographer.id = :ptgId and p.name LIKE :name")
+    @Query("FROM ServicePackage p where p.photographer.id = :ptgId and p.name LIKE :name and p.isAvailable=true")
     Page<ServicePackage> findServicePackageByPtgIdAndByNameContaining(String name, Long ptgId, Pageable pageable);
 
-    @Query("FROM ServicePackage p where p.photographer.id = :ptgId")
+    @Query("FROM ServicePackage p where p.photographer.id = :ptgId and p.isAvailable=true")
     Page<ServicePackage> findAllOfPhotographer(Long ptgId, Pageable pageable);
 }

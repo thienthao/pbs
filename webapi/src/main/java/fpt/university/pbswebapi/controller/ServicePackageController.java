@@ -4,6 +4,7 @@ import fpt.university.pbswebapi.dto.ServicePackageDto;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
+import fpt.university.pbswebapi.service.PackageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,14 @@ public class ServicePackageController {
 
     @Autowired
     private ServicePackageRepository packageRepository;
+
+    @Autowired
+    PackageService packageService;
+
+    public ServicePackageController(ServicePackageRepository packageRepository, PackageService packageService) {
+        this.packageRepository = packageRepository;
+        this.packageService = packageService;
+    }
 
     @GetMapping("/packages")
     public ResponseEntity<Map<String, Object>> getAllPackages(
@@ -78,6 +87,22 @@ public class ServicePackageController {
             response.put("totalPages", pagePackages.getTotalPages());
 
             return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/packages")
+    public ResponseEntity<ServicePackage> createPackage(@RequestBody ServicePackage servicePackage) {
+        // validate
+        return new ResponseEntity<>(packageService.createPackage(servicePackage), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/packages/{ptgId}/{packageId}")
+    public ResponseEntity<?> removePackage(@PathVariable("ptgId") Long ptgId,
+                                           @PathVariable("packageId") Long packageId) {
+        try {
+            return new ResponseEntity<Object>(packageService.removePackage(packageId), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -1,7 +1,6 @@
 package fpt.university.pbswebapi.controller;
 
-import fpt.university.pbswebapi.domain.Photographer;
-import fpt.university.pbswebapi.entity.Category;
+import fpt.university.pbswebapi.entity.BusyDay;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
@@ -68,6 +67,25 @@ public class PhotographerController {
         }
     }
 
+    @GetMapping("/byfactors")
+    public ResponseEntity<Map<String, Object>> findPhotographersByFactors() {
+        try {
+            List<User> photographers = phtrService.findPhotographersByFactors();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", photographers);
+//            response.put("currentPage", 0);
+//            response.put("totalItems", 0);
+//            response.put("totalPages", pageUser.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println("zo");
+            System.out.println(e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 //    @GetMapping("/{name}")
 //    public ResponseEntity<List<Photographer>> findAllByNameContaining(@PathVariable String name) {
 //        return new ResponseEntity<List<Photographer>>(phtrService.findAllByNameContaining(name), HttpStatus.OK);
@@ -113,6 +131,19 @@ public class PhotographerController {
         }
     }
 
+    @GetMapping("/{ptgId}/busydays")
+    public ResponseEntity<?> getBusyDays(@RequestParam("from") String from,
+                                         @RequestParam("to") String to,
+                                         @PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.getBusyDays(ptgId, from, to), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/busydays")
+    public ResponseEntity<?> getBusyDaysSince(@RequestParam("since") String since,
+                                              @PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.getBusyDaysSince(ptgId, since), HttpStatus.OK);
+    }
+
     @PostMapping(value = "/{id}/upload",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
                 produces = MediaType.APPLICATION_JSON_VALUE)
@@ -143,6 +174,11 @@ public class PhotographerController {
         } else {
             return new ResponseEntity<>("Fail", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/{ptgId}/busydays")
+    public ResponseEntity<?> addBusyDays(@PathVariable("ptgId") Long ptgId, @RequestBody BusyDay busyDay) {
+        return new ResponseEntity<>(phtrService.addBusyDays(ptgId, busyDay), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/download",

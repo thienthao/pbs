@@ -7,6 +7,7 @@ import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.AlbumRepository;
 import fpt.university.pbswebapi.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,9 @@ public class AlbumService {
         this.imageRepository = imageRepository;
     }
 
-    public Page<Album> findAll(Pageable paging) {
-        return albumRepository.findAll(paging);
+    @Cacheable("albums")
+    public Page<Album> findAllSortByLike(Pageable paging) {
+        return albumRepository.findAllSortByLike(paging);
     }
 
     public Album createAlbum(Album album) {
@@ -98,6 +100,7 @@ public class AlbumService {
         return images;
     }
 
+    @Cacheable("albums")
     public Page<Album> findAllByPhotographerId(Long id, Pageable paging) {
         return albumRepository.findAllByPhotographerId(id, paging);
     }

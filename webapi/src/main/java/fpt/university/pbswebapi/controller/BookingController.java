@@ -128,6 +128,38 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/photographer/{photographerId}/date")
+    public ResponseEntity<Map<String, Object>> getPhotographerBookingByDate(@RequestParam(defaultValue = "0") int page,
+                                                                                   @RequestParam(defaultValue = "5") int size,
+                                                                                   @RequestParam(defaultValue = "") String date,
+                                                                                   @PathVariable("photographerId") Long photographerId) {
+        try {
+            List<Booking> bookings = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings;
+            pageBookings = bookingService.findPhotographerBookingByDate(date, paging, photographerId);
+
+            bookings = pageBookings.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("bookings", bookings);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/photographer/{ptgId}/daterange")
+    public ResponseEntity<Map<Date, List<Booking>>> getPhotographerBookingByDateRange(@RequestParam("from") String from,
+                                                                          @RequestParam("to") String to,
+                                                                          @PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(bookingService.getPhotographerBookingByDateRange(ptgId, from, to), HttpStatus.OK);
+    }
+
     @GetMapping("/photographer/{photographerId}/status")
     public ResponseEntity<Map<String, Object>> getPhotographerByStatusSortById(@RequestParam(required = false) String status,
                                                                                @RequestParam(defaultValue = "0") int page,
@@ -233,6 +265,8 @@ public class BookingController {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
+        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
@@ -245,6 +279,7 @@ public class BookingController {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.REJECTED);
+        savedBooking.setRejectedReason(booking.getRejectedReason());
         return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
@@ -269,6 +304,8 @@ public class BookingController {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.DONE);
+        savedBooking.setComment(booking.getComment());
+        savedBooking.setRating(booking.getRating());
         return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
     }
 
