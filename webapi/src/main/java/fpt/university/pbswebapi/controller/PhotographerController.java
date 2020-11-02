@@ -74,9 +74,10 @@ public class PhotographerController {
     }
 
     @GetMapping("/byfactors")
-    public ResponseEntity<Map<String, Object>> findPhotographersByFactors() {
+    public ResponseEntity<Map<String, Object>> findPhotographersByFactors(@RequestParam(name = "lat", defaultValue = "10.7757") double lat,
+                                                                          @RequestParam(name = "long", defaultValue = "106.7004") double lon) {
         try {
-            List<User> photographers = phtrService.findPhotographersByFactors();
+            List<User> photographers = phtrService.findPhotographersByFactors(lat, lon);
 
             Map<String, Object> response = new HashMap<>();
             response.put("users", photographers);

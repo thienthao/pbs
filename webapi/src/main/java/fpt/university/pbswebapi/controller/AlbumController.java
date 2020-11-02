@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.dto.AlbumDto;
 import fpt.university.pbswebapi.dto.AlbumDto2;
 import fpt.university.pbswebapi.entity.Album;
@@ -30,6 +31,9 @@ public class AlbumController {
     private AlbumService albumService;
     private UserRepository photographerRepository;
     private ImageRepository imageRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     public AlbumController(AlbumRepository albumRepository, AlbumService albumService, UserRepository photographerRepository, ImageRepository imageRepository) {
@@ -127,11 +131,18 @@ public class AlbumController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createAlbum(@RequestBody AlbumDto albumDto,
+    public ResponseEntity<?> createAlbum(@RequestParam String stringAlbumDto,
                                          @RequestParam("file") MultipartFile file,
                                          @RequestParam("files") MultipartFile[] files) {
         // Check principal xem dung thang photographer do hay ko
         // Check album co thumbnail/caption hay ko
+        AlbumDto albumDto = null;
+        try {
+            albumDto = objectMapper.readValue(stringAlbumDto, AlbumDto.class);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
         if(albumDto.getPtgId() == null) {
             throw new BadRequestException("Photographer Id cannot be null");
         }

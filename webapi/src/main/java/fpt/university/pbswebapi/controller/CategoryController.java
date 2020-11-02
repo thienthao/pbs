@@ -4,6 +4,7 @@ import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.repository.CategoryRepository;
 import fpt.university.pbswebapi.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ public class CategoryController {
     }
 
     @GetMapping
+    @Cacheable("categories")
     public ResponseEntity<?> getAll() {
         return new ResponseEntity<>(categoryRepository.findAll(), HttpStatus.OK);
     }

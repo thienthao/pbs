@@ -4,21 +4,21 @@ import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.domain.Photographer;
 import fpt.university.pbswebapi.dto.BusyDayDto;
 import fpt.university.pbswebapi.dto.BusyDayDto1;
-import fpt.university.pbswebapi.entity.Booking;
-import fpt.university.pbswebapi.entity.BusyDay;
-import fpt.university.pbswebapi.entity.ServicePackage;
-import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.helper.MapHelper;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.BusyDayRepository;
+import fpt.university.pbswebapi.repository.LocationRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import static java.util.Collections.reverseOrder;
 
@@ -35,13 +35,15 @@ public class PhotographerService {
     private final FileStore fileStore;
     private final BusyDayRepository busyDayRepository;
     private final BookingRepository bookingRepository;
+    private final LocationRepository locationRepository;
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
         this.bookingRepository = bookingRepository;
+        this.locationRepository = locationRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -237,15 +239,25 @@ public class PhotographerService {
         }
     }
 
-    public List<User> findPhotographersByFactors() {
+    @Cacheable("photographers")
+    public List<User> findPhotographersByFactors(double lat, double lon) {
         List<User> photographers =  phtrRepo.findAllPhotographer(Long.parseLong("2"));
         List<User> sorted = new ArrayList<>();
         Map<Long, Float> result = new HashMap<>();
         int sumPrice = 0;
-        float sumDistance = 0;
+        double sumDistance = 0;
 
         for(int i = 0; i < photographers.size(); i++) {
             // cal sum distance
+            List<Location> locations = locationRepository.findAllByUserId(photographers.get(i).getId());
+            double tmpDistance = 100;
+            for (Location location : locations) {
+                double distance = MapHelper.distance(lat, location.getLatitude(), lon, location.getLongitude());
+                if(distance < tmpDistance)
+                    tmpDistance = distance;
+            }
+            sumDistance += tmpDistance;
+
             // cal sum price
             if(photographers.get(i).getPackages() != null) {
                 if(photographers.get(i).getPackages().size() > 0) {
@@ -260,7 +272,19 @@ public class PhotographerService {
             float rating = 0;
             if(photographers.get(i).getRatingCount() != null)
                 rating = (float) (0.2 * (photographers.get(i).getRatingCount() / 5.0));
+
             //cal distance
+            List<Location> locations = locationRepository.findAllByUserId(photographers.get(i).getId());
+            double tmpDistance = 100;
+            for (Location location : locations) {
+                double distance = MapHelper.distance(lat, location.getLatitude(), lon, location.getLongitude());
+                if(distance < tmpDistance)
+                    tmpDistance = distance;
+            }
+            double distanceRatio = tmpDistance / sumDistance;
+            double distanceSub = (double) 1.0 - distanceRatio;
+            double distance = (double) (0.2 * distanceSub);
+            System.out.println(distance);
 
             //cal price
             float price = (float) (0 * 0.6);
@@ -276,7 +300,7 @@ public class PhotographerService {
             }
 
             //score
-            float score = (float) (rating + price + 0.2);
+            float score = (float) (rating + price + distance);
             result.put(photographers.get(i).getId(), score);
             System.out.println(score);
         }
@@ -339,6 +363,7 @@ public class PhotographerService {
         return results;
     }
 
+    @Cacheable("photographers")
     public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId) {
         return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
     }
