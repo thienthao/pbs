@@ -227,7 +227,7 @@ public class AlbumService {
         }
     }
 
-    public Page<Album> findByCategoryIdSortByLike(Pageable paging, int categoryId) {
+    public Page<Album> findByCategoryIdSortByLike(Pageable paging, long categoryId) {
         return albumRepository.findByCategoryIdSortByLike(paging, categoryId);
     }
 }

@@ -99,7 +99,7 @@ public class AlbumController {
     public ResponseEntity<Map<String, Object>> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(name = "categoryId",defaultValue = "1") int categoryId
+            @RequestParam(name = "categoryId",defaultValue = "1") long categoryId
     ) {
         try {
             List<Album> albums = new ArrayList<Album>();
@@ -121,12 +121,15 @@ public class AlbumController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
+            System.out.println(e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> createAlbum(@RequestBody AlbumDto albumDto) {
+    public ResponseEntity<?> createAlbum(@RequestBody AlbumDto albumDto,
+                                         @RequestParam("file") MultipartFile file,
+                                         @RequestParam("files") MultipartFile[] files) {
         // Check principal xem dung thang photographer do hay ko
         // Check album co thumbnail/caption hay ko
         if(albumDto.getPtgId() == null) {
@@ -142,8 +145,11 @@ public class AlbumController {
 
         if(album != null) {
             Album returnedAlbum = albumService.createAlbum(album);
-            if(returnedAlbum != null)
+            if(returnedAlbum != null) {
+                albumService.uploadAlbumThumbnail(albumDto.getPtgId().toString(), returnedAlbum.getId().toString(), file);
+                albumService.uploadImages(albumDto.getPtgId().toString(), returnedAlbum.getId().toString(), files);
                 return new ResponseEntity<>(returnedAlbum, HttpStatus.CREATED);
+            }
             else
                 return new ResponseEntity<>("Fail", HttpStatus.BAD_REQUEST);
         } else {

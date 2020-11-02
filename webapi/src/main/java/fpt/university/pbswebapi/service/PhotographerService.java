@@ -2,12 +2,16 @@ package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.domain.Photographer;
+import fpt.university.pbswebapi.dto.BusyDayDto;
+import fpt.university.pbswebapi.dto.BusyDayDto1;
+import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BusyDay;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.BusyDayRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +34,14 @@ public class PhotographerService {
     private final UserRepository phtrRepo;
     private final FileStore fileStore;
     private final BusyDayRepository busyDayRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -335,5 +341,40 @@ public class PhotographerService {
 
     public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId) {
         return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
+    }
+
+    public List<BusyDay> getBusyDays(Long ptgId) {
+        return busyDayRepository.findAllByPhotographerId(ptgId);
+    }
+
+    public BusyDayDto getUnavailableDays(Long ptgId) {
+        List<Date> busyDays = new ArrayList<>();
+        List<Date> bookedDays = new ArrayList<>();
+
+        List<BusyDay> busyDaysObj = busyDayRepository.findAllByPhotographerId(ptgId);
+        List<Booking> bookings = bookingRepository.findBookingsByPhotographerId(ptgId);
+        for (BusyDay busyDay : busyDaysObj) {
+            busyDays.add(busyDay.getStartDate());
+        }
+        for (Booking booking : bookings) {
+            bookedDays.add(booking.getStartDate());
+        }
+        return new BusyDayDto(busyDays, bookedDays);
+    }
+
+    public BusyDayDto1 getSchedule(Long ptgId) {
+        List<Date> busyDays = new ArrayList<>();;
+
+        Map<Date, Booking> bookedDays = new HashMap<>();
+
+        List<BusyDay> busyDaysObj = busyDayRepository.findAllByPhotographerId(ptgId);
+        List<Booking> bookings = bookingRepository.findBookingsByPhotographerId(ptgId);
+        for (BusyDay busyDay : busyDaysObj) {
+            busyDays.add(busyDay.getStartDate());
+        }
+        for (Booking booking : bookings) {
+            bookedDays.put(booking.getStartDate(), booking);
+        }
+        return new BusyDayDto1(busyDays, bookedDays);
     }
 }

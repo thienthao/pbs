@@ -138,9 +138,12 @@ public class PhotographerController {
     }
 
     @GetMapping("/{ptgId}/busydays")
-    public ResponseEntity<?> getBusyDays(@RequestParam("from") String from,
-                                         @RequestParam("to") String to,
+    public ResponseEntity<?> getBusyDays(@RequestParam(value = "from", defaultValue = "") String from,
+                                         @RequestParam(value = "to", defaultValue = "") String to,
                                          @PathVariable("ptgId") Long ptgId) {
+        if(from.equalsIgnoreCase("") && to.equalsIgnoreCase("")) {
+            return new ResponseEntity<>(phtrService.getBusyDays(ptgId), HttpStatus.OK);
+        }
         return new ResponseEntity<>(phtrService.getBusyDays(ptgId, from, to), HttpStatus.OK);
     }
 
@@ -148,6 +151,16 @@ public class PhotographerController {
     public ResponseEntity<?> getBusyDaysSince(@RequestParam("since") String since,
                                               @PathVariable("ptgId") Long ptgId) {
         return new ResponseEntity<>(phtrService.getBusyDaysSince(ptgId, since), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/days")
+    public ResponseEntity<?> getUnavailableDays(@PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.getUnavailableDays(ptgId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/schedule")
+    public ResponseEntity<?> getSchedule(@PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.getSchedule(ptgId), HttpStatus.OK);
     }
 
     @PostMapping(value = "/{id}/upload",
@@ -224,5 +237,10 @@ public class PhotographerController {
             phtrService.fakeAvatar(user.getId(), file[i]);
             i++;
         }
+    }
+
+    @PutMapping
+    public ResponseEntity<?> editProfile(@RequestBody User user) {
+        return new ResponseEntity<>(photographerRepository.save(user), HttpStatus.OK);
     }
 }

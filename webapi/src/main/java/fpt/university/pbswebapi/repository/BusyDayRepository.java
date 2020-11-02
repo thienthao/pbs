@@ -14,4 +14,7 @@ public interface BusyDayRepository extends JpaRepository<BusyDay, Long> {
 
     @Query("from BusyDay busyday where busyday.photographer.id =:ptgId and busyday.startDate >:since")
     List<BusyDay> findByPhotographerIdSinceStartDate(Long ptgId, Date since);
+
+    @Query("from BusyDay busyday where busyday.photographer.id =:ptgId order by busyday.startDate asc")
+    List<BusyDay> findAllByPhotographerId(Long ptgId);
 }
