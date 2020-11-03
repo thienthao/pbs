@@ -73,6 +73,10 @@ public class User {
     @OneToMany(mappedBy = "photographer")
     private List<ServicePackage> packages;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Location> locations;
+
     public User(String username, String email, String password) {
         this.username = username;
         this.password = password;

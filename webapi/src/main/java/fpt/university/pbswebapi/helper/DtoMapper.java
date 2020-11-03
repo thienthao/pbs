@@ -135,4 +135,54 @@ public class DtoMapper {
                 imageJson.getComment()
         );
     }
+
+    public static User toPhotographer(PhotographerInfoDto photographerInfoDto) {
+        User user = new User();
+        user.setId(photographerInfoDto.getId());
+        user.setDescription(photographerInfoDto.getDescription());
+        user.setEmail(photographerInfoDto.getEmail());
+        user.setPhone(photographerInfoDto.getPhone());
+        return user;
+    }
+
+    public static PhotographerInfoDto toPhotographerInfoDto(User photographer) {
+        PhotographerInfoDto photographerInfoDto = new PhotographerInfoDto();
+        photographerInfoDto.setId(photographer.getId());
+        photographerInfoDto.setDescription(photographer.getDescription());
+        photographerInfoDto.setEmail(photographer.getEmail());
+        photographerInfoDto.setFullname(photographer.getFullname());
+        photographerInfoDto.setPhone(photographer.getPhone());
+
+        List<LocationDto> locationDtos = new ArrayList<>();
+        for (Location location: photographer.getLocations()) {
+            locationDtos.add(toLocationDto(location));
+        }
+        photographerInfoDto.setLocations(locationDtos);
+        return photographerInfoDto;
+    }
+
+    public static LocationDto toLocationDto(Location location) {
+        return new LocationDto(
+                location.getId(),
+                location.getFormattedAddress(),
+                location.getLatitude(),
+                location.getLongitude(),
+                location.getUser().getId());
+    }
+
+    public static List<Location> toLocation(List<LocationDto> locationDtos) {
+        List<Location> locations = new ArrayList<>();
+        for(LocationDto locationDto : locationDtos) {
+            Location location = new Location();
+            location.setId(locationDto.getId());
+            location.setFormattedAddress(locationDto.getFormattedAddress());
+            location.setLatitude(locationDto.getLatitude());
+            location.setLongitude(locationDto.getLongitude());
+            User user = new User();
+            user.setId(locationDto.getUserId());
+            location.setUser(user);
+            locations.add(location);
+        }
+        return locations;
+    }
 }

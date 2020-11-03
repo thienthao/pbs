@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.controller;
 
+import fpt.university.pbswebapi.dto.PhotographerInfoDto;
 import fpt.university.pbswebapi.entity.BusyDay;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
@@ -241,7 +242,7 @@ public class PhotographerController {
     }
 
     @PutMapping
-    public ResponseEntity<?> editProfile(@RequestBody User user) {
-        return new ResponseEntity<>(photographerRepository.save(user), HttpStatus.OK);
+    public ResponseEntity<?> editProfile(@RequestBody PhotographerInfoDto photographerDto) {
+        return new ResponseEntity<>(phtrService.editInfo(photographerDto), HttpStatus.OK);
     }
 }

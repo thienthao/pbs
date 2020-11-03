@@ -4,10 +4,12 @@ import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.domain.Photographer;
 import fpt.university.pbswebapi.dto.BusyDayDto;
 import fpt.university.pbswebapi.dto.BusyDayDto1;
+import fpt.university.pbswebapi.dto.PhotographerInfoDto;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.helper.MapHelper;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.BusyDayRepository;
@@ -401,5 +403,16 @@ public class PhotographerService {
             bookedDays.put(booking.getStartDate(), booking);
         }
         return new BusyDayDto1(busyDays, bookedDays);
+    }
+
+    public PhotographerInfoDto editInfo(PhotographerInfoDto photographerDto) {
+        User photographer = phtrRepo.findById(photographerDto.getId()).get();
+        photographer.setDescription(photographerDto.getDescription());
+        photographer.setEmail(photographerDto.getEmail());
+        photographer.setFullname(photographerDto.getFullname());
+        photographer.setPhone(photographerDto.getPhone());
+        photographer.setLocations(DtoMapper.toLocation(photographerDto.getLocations()));
+        User returned = phtrRepo.save(photographer);
+        return DtoMapper.toPhotographerInfoDto(returned);
     }
 }
