@@ -15,8 +15,9 @@ public class FCMService {
                 .setToken(notiRequest.getToken())
                 .setNotification(Notification.builder().setTitle(notiRequest.getTitle())
                     .setBody(notiRequest.getBody()).build())
-                .putData("content", notiRequest.getTitle())
-                .putData("body", notiRequest.getBody())
+                .putData("view", "booking_history")
+                .putData("click_action", "FLUTTER_NOTIFICATION_CLICK")
+                .putData("bookingId", "11")
                 .build();
         String response = null;
         try {

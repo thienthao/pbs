@@ -29,4 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "where category.id =:categoryId " +
             "order by photographer.ratingCount desc")
     Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId);
+
+    @Query("FROM User photographer where photographer.role.id =:roleId and photographer.fullname like %:search% order by photographer.ratingCount desc")
+    Page<User> searchPhotographerNameContaining(String search, Pageable paging, long roleId);
 }

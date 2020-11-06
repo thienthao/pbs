@@ -77,6 +77,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Location> locations;
 
+    @Column(name = "device_token")
+    private String deviceToken;
+
     public User(String username, String email, String password) {
         this.username = username;
         this.password = password;

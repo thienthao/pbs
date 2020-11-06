@@ -1,34 +1,34 @@
 package fpt.university.pbswebapi.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.bucket.BucketName;
-import fpt.university.pbswebapi.domain.Photographer;
-import fpt.university.pbswebapi.dto.BusyDayDto;
-import fpt.university.pbswebapi.dto.BusyDayDto1;
-import fpt.university.pbswebapi.dto.PhotographerInfoDto;
+import fpt.university.pbswebapi.dto.*;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.helper.MapHelper;
-import fpt.university.pbswebapi.repository.BookingRepository;
-import fpt.university.pbswebapi.repository.BusyDayRepository;
-import fpt.university.pbswebapi.repository.LocationRepository;
-import fpt.university.pbswebapi.repository.UserRepository;
+import fpt.university.pbswebapi.helper.StringUtils;
+import fpt.university.pbswebapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import static java.util.Collections.reverseOrder;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static java.util.Collections.reverseOrder;
 import static org.apache.http.entity.ContentType.*;
 
 @Service
@@ -38,14 +38,19 @@ public class PhotographerService {
     private final BusyDayRepository busyDayRepository;
     private final BookingRepository bookingRepository;
     private final LocationRepository locationRepository;
+    private final ServicePackageRepository packageRepository;
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .build();
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
         this.bookingRepository = bookingRepository;
         this.locationRepository = locationRepository;
+        this.packageRepository = packageRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -414,5 +419,57 @@ public class PhotographerService {
         photographer.setLocations(DtoMapper.toLocation(photographerDto.getLocations()));
         User returned = phtrRepo.save(photographer);
         return DtoMapper.toPhotographerInfoDto(returned);
+    }
+
+    public SearchDto searchPhotographer(String search, int page, int size) {
+        Pageable paging = PageRequest.of(page, size);
+        Page<User> photographers = phtrRepo.searchPhotographerNameContaining(search, paging, (long) 2);
+        Page<ServicePackage> packages = packageRepository.findByNameContaining(search, paging);
+        SearchDto searchDto = new SearchDto();
+        searchDto.setPackages(packages.getContent());
+        searchDto.setPhotographers(photographers.getContent());
+        return searchDto;
+    }
+
+    //filter photographer theo location (load các photographer ở trong khu vực)
+    public List<User> filterByLocation(double lat, double lon, List<User> photographers) {
+        List<User> results = new ArrayList<>();
+        try {
+            // get lat lon location
+            String uri = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lon + "&key=AIzaSyBP8cODYx872X1l-6jqxTjLClHXdIoAUi4";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(URI.create(uri))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            ObjectMapper objectMapper = new ObjectMapper();
+            SearchLocationRequest locationRequest = objectMapper.readValue(response.body(), SearchLocationRequest.class);
+
+            String location = locationRequest.getPlusCode().getCompoundCode();
+
+            // filter photographer có vị trí phù hợp
+            for(User photographer : photographers) {
+                if(isPhotographerInLocation(photographer, location)) {
+                    results.add(photographer);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return results;
+    }
+
+    private boolean isPhotographerInLocation(User photographer, String location) {
+        try {
+            for(Location locationObj : photographer.getLocations()) {
+                if(StringUtils.ContainsWord(location, locationObj.getFormattedAddress().split(","))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
     }
 }

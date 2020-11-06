@@ -12,6 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import javax.annotation.PostConstruct;
 
+@Configuration
 public class FCMConfig {
     private Logger logger = LoggerFactory.getLogger(Logger.class);
 

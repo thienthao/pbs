@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.PhotographerInfoDto;
+import fpt.university.pbswebapi.dto.SearchDto;
 import fpt.university.pbswebapi.entity.BusyDay;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
@@ -47,7 +48,9 @@ public class PhotographerController {
     public ResponseEntity<Map<String, Object>> findPhotographersByRatingCount(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "1") long categoryId
+            @RequestParam(defaultValue = "1") long categoryId,
+            @RequestParam(defaultValue = "0") double lat,
+            @RequestParam(defaultValue = "0") double lon
     ) {
         try {
             List<User> photographers = new ArrayList<>();
@@ -59,7 +62,11 @@ public class PhotographerController {
             } else {
                 pageUser = phtrService.findPhotographersByRating(paging);
             }
-            photographers = pageUser.getContent();
+            if(lat != 0) {
+                photographers = phtrService.filterByLocation(lat, lon, pageUser.getContent());
+            } else {
+                photographers = pageUser.getContent();
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("users", photographers);
@@ -163,6 +170,18 @@ public class PhotographerController {
     @GetMapping("/{ptgId}/schedule")
     public ResponseEntity<?> getSchedule(@PathVariable("ptgId") Long ptgId) {
         return new ResponseEntity<>(phtrService.getSchedule(ptgId), HttpStatus.OK);
+    }
+
+    // Search photographer by fullname and packagename
+    @GetMapping("/search")
+    public ResponseEntity<?> searchPhotographer(@RequestParam(value = "search", defaultValue = "") String search,
+                                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                                @RequestParam(value = "size", defaultValue = "10") int size) {
+        // query photographer containing name
+        // query package containing name
+        SearchDto searchDto = phtrService.searchPhotographer(search, page, size);
+        // return 1 object co 2 property la list photographer va list package
+        return new ResponseEntity<>(searchDto, HttpStatus.OK);
     }
 
     @PostMapping(value = "/{id}/upload",
