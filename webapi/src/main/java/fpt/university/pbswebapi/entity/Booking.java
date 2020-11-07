@@ -54,6 +54,10 @@ public class Booking {
     private String location;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "edit_deadline")
+    private Date editDeadline;
+
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "comment_date")
     private Date commentDate;
 
@@ -76,6 +80,10 @@ public class Booking {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "booking_id", referencedColumnName = "id")
     private List<BookingDetail> bookingDetails;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "booking_id", referencedColumnName = "id")
+    private List<TimeLocationDetail> timeLocationDetails;
 
     public Booking(Long id, User customer, User photographer, ServicePackage servicePackage) {
         this.id = id;
