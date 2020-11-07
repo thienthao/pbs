@@ -1,0 +1,153 @@
+import 'package:cus_2_11_app/blocs/booking_blocs/bookings.dart';
+import 'package:cus_2_11_app/respositories/booking_repository.dart';
+import 'package:cus_2_11_app/screens/forum_screen/forum_screen.dart';
+import 'package:cus_2_11_app/screens/profile_screens/profile_screen.dart';
+import 'package:cus_2_11_app/shared/loading_line.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'blocs/album_blocs/album.dart';
+import 'blocs/bloc_observer.dart';
+import 'blocs/category_blocs/categories.dart';
+import 'blocs/photographer_alg_blocs/photographers_alg.dart';
+import 'blocs/photographer_blocs/photographers.dart';
+import 'respositories/album_respository.dart';
+import 'respositories/category_respository.dart';
+import 'respositories/photographer_respository.dart';
+import 'screens/history_screens/history_screen.dart';
+import 'screens/home_screens/home_screen.dart';
+import 'package:cus_2_11_app/globals.dart' as globals;
+import 'package:http/http.dart' as http;
+
+
+// ignore: must_be_immutable
+class NavScreen extends StatefulWidget {
+  @override
+  _NavScreenState createState() => _NavScreenState();
+}
+
+class _NavScreenState extends State<NavScreen> {
+  AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
+  PhotographerRepository _photographerRepository =
+  PhotographerRepository(httpClient: http.Client());
+  CategoryRepository _categoryRepository =
+  CategoryRepository(httpClient: http.Client());
+
+  BookingRepository _bookingRepository =
+  BookingRepository(httpClient: http.Client());
+  List _pageOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    globals.selectedTabGlobal = 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _pageOptions = [
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+            CategoryBloc(categoryRepository: _categoryRepository)
+              ..add(CategoryEventFetch()),
+          ),
+          BlocProvider(
+            create: (context) => PhotographerBloc(
+                photographerRepository: _photographerRepository),
+          ),
+          BlocProvider(
+            create: (context) => PhotographerAlgBloc(
+                photographerRepository: _photographerRepository),
+          ),
+          BlocProvider(
+            create: (context) => AlbumBloc(albumRepository: _albumRepository),
+          ),
+          BlocProvider(
+            create: (context) =>
+                BookingBloc(bookingRepository: _bookingRepository),
+          ),
+        ],
+        child: HomeScreen(),
+      ),
+      ForumPage(),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+            BookingBloc(bookingRepository: _bookingRepository)
+              ..add(BookingEventFetch()),
+          ),
+        ],
+        child: BookHistory(),
+      ),
+      Profile(),
+    ];
+    return MaterialApp(
+      title: 'Flutter User UI',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Quicksand',
+        primaryColor: Color(0xFFF88F8F),
+        accentColor: Color(0xFFFFBDAC),
+        scaffoldBackgroundColor: Color(0xFFF3F5F7),
+      ),
+      home: Scaffold(
+        body: _pageOptions[globals.selectedTabGlobal],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.black.withOpacity(.1),
+            ),
+          ]),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+              child: GNav(
+                  gap: 2,
+                  activeColor: Colors.white,
+                  iconSize: 24,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  duration: Duration(seconds: 1),
+                  tabBackgroundColor: Color(0xFFF88F8F),
+                  tabs: [
+                    GButton(
+                      icon: Icons.home,
+                      iconColor: Colors.grey[600],
+                      text: 'Trang chủ',
+                    ),
+                    GButton(
+                      icon: Icons.style,
+                      iconColor: Colors.grey[600],
+                      text: 'Diễn đàn',
+                    ),
+                    GButton(
+                      icon: Icons.library_books,
+                      iconColor: Colors.grey[600],
+                      text: 'Lịch sử',
+                      onPressed: () {
+                        // Navigator.pop(context);
+                      },
+                    ),
+                    GButton(
+                      icon: Icons.account_circle_sharp,
+                      iconColor: Colors.grey[600],
+                      text: 'Profile',
+                    ),
+                  ],
+                  selectedIndex: globals.selectedTabGlobal,
+                  onTabChange: (index) {
+                    setState(() {
+                      globals.selectedTabGlobal = index;
+                    });
+                  }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
