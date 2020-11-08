@@ -7,21 +7,22 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
-@Entity(name = "threads")
+@Entity
+@Table(name = "thread_topics")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Thread {
+public class ThreadTopic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private String title;
+    private String topic;
 
-    private String content;
+    @Column(name = "created_by")
+    private String createdBy;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
@@ -31,15 +32,4 @@ public class Thread {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
-    private User owner;
-
-    @ManyToOne
-    @JoinColumn(name = "topic_id", referencedColumnName = "id")
-    private ThreadTopic topic;
-
-    @OneToMany
-    @JoinColumn(name = "thread_id", referencedColumnName = "id")
-    private List<ThreadComment> comments;
 }

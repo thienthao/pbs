@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/threads")
+@RequestMapping("/api")
 public class ThreadController {
 
     private final ThreadService threadService;
@@ -19,8 +19,13 @@ public class ThreadController {
         this.threadService = threadService;
     }
 
-    @GetMapping
+    @GetMapping("/threads")
     public ResponseEntity<?> all() {
         return new ResponseEntity<>(threadService.all(), HttpStatus.OK);
+    }
+
+    @GetMapping("/thread-topics")
+    public ResponseEntity<?> allTopics() {
+        return new ResponseEntity<>(threadService.allTopics(), HttpStatus.OK);
     }
 }

@@ -35,7 +35,7 @@ public class ServicePackage {
     private Boolean isAvailable;
 
     @Column(name = "support_multi_days")
-    private boolean supportMultiDays;
+    private Boolean supportMultiDays;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "created_at")
