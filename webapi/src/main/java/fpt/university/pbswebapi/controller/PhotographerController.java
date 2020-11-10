@@ -184,6 +184,12 @@ public class PhotographerController {
         return new ResponseEntity<>(searchDto, HttpStatus.OK);
     }
 
+    // api get lich (sau khi them goi nhieu ngay)
+    @GetMapping("/{ptgId}/calendar")
+    public ResponseEntity<?> getCalendar(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getCalendar(ptgId), HttpStatus.OK);
+    }
+
     @PostMapping(value = "/{id}/upload",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
                 produces = MediaType.APPLICATION_JSON_VALUE)

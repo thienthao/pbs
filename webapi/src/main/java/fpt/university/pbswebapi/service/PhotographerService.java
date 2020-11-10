@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.dto.*;
+import fpt.university.pbswebapi.dto.Calendar;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
@@ -471,5 +472,31 @@ public class PhotographerService {
             return false;
         }
         return false;
+    }
+
+    public Calendar getCalendar(long ptgId) {
+        Calendar result = new Calendar();
+        List<BookingDate> bookingDates = new ArrayList<BookingDate>();
+
+        //query booking ongoing + editing
+        List<Booking> bookings = bookingRepository.findOnGoingNEditingBookingsBetween(ptgId);
+        // map booking to bookinginfo
+        for(Booking b : bookings) {
+            for(TimeLocationDetail tld : b.getTimeLocationDetails()) {
+                BookingInfo bInfo = DtoMapper.toBookingInfo(b, tld);
+                BookingDate bDate = new BookingDate(tld.getStart(), bInfo);
+                bookingDates.add(bDate);
+            }
+        }
+
+        // query busy days
+        List<BusyDay> busyDays = busyDayRepository.findAllByPhotographerId(ptgId);
+
+        // query working days
+
+        // add to calendar
+        result.setBookingDates(bookingDates);
+        result.setBusyDays(busyDays);
+        return result;
     }
 }

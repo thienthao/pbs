@@ -18,5 +18,7 @@ public class ServicePackageDto {
 
     private String description;
 
+    private Boolean supportMultiDays;
+
     private List<ServiceDto> serviceDtos;
 }

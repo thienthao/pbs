@@ -27,4 +27,8 @@ public class ThreadService {
     public List<ThreadTopic> allTopics() {
         return topicRepository.findAll();
     }
+
+    public Thread save(Thread thread) {
+        return threadRepository.save(thread);
+    }
 }
