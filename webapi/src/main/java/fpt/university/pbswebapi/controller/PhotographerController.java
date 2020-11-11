@@ -53,23 +53,17 @@ public class PhotographerController {
             @RequestParam(defaultValue = "0") double lon
     ) {
         try {
-            List<User> photographers = new ArrayList<>();
             Pageable paging = PageRequest.of(page, size);
             Page<User> pageUser;
 
             if(categoryId != 1) {
-                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId);
+                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId, lat, lon);
             } else {
-                pageUser = phtrService.findPhotographersByRating(paging);
-            }
-            if(lat != 0) {
-                photographers = phtrService.filterByLocation(lat, lon, pageUser.getContent());
-            } else {
-                photographers = pageUser.getContent();
+                pageUser = phtrService.findPhotographersByRating(paging, lat, lon);
             }
 
             Map<String, Object> response = new HashMap<>();
-            response.put("users", photographers);
+            response.put("users", pageUser.getContent());
             response.put("currentPage", pageUser.getNumber());
             response.put("totalItems", pageUser.getTotalElements());
             response.put("totalPages", pageUser.getTotalPages());
@@ -95,7 +89,6 @@ public class PhotographerController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println("zo");
             System.out.println(e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
