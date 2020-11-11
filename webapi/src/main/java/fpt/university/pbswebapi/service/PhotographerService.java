@@ -25,9 +25,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.reverseOrder;
 import static org.apache.http.entity.ContentType.*;
@@ -40,18 +42,20 @@ public class PhotographerService {
     private final BookingRepository bookingRepository;
     private final LocationRepository locationRepository;
     private final ServicePackageRepository packageRepository;
+    private final WorkingDayRepository workingDayRepository;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .build();
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository, WorkingDayRepository workingDayRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
         this.bookingRepository = bookingRepository;
         this.locationRepository = locationRepository;
         this.packageRepository = packageRepository;
+        this.workingDayRepository = workingDayRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -476,23 +480,42 @@ public class PhotographerService {
 
     public Calendar getCalendar(long ptgId) {
         Calendar result = new Calendar();
-        List<BookingDate> bookingDates = new ArrayList<BookingDate>();
+        List<Date> bookingDates = new ArrayList<>();
+        List<Date> busyDays = new ArrayList<>();
 
         //query booking ongoing + editing
         List<Booking> bookings = bookingRepository.findOnGoingNEditingBookingsBetween(ptgId);
         // map booking to bookinginfo
         for(Booking b : bookings) {
+            bookingDates.add(b.getEditDeadline());
             for(TimeLocationDetail tld : b.getTimeLocationDetails()) {
-                BookingInfo bInfo = DtoMapper.toBookingInfo(b, tld);
-                BookingDate bDate = new BookingDate(tld.getStart(), bInfo);
-                bookingDates.add(bDate);
+                bookingDates.add(tld.getStart());
             }
         }
 
         // query busy days
-        List<BusyDay> busyDays = busyDayRepository.findAllByPhotographerId(ptgId);
+        List<BusyDay> busyQuery = busyDayRepository.findAllByPhotographerId(ptgId);
+        for(BusyDay busyDay : busyQuery) {
+            busyDays.add(busyDay.getStartDate());
+        }
+
+        // add not working days to busy days
 
         // query working days
+        List<DayOfWeek> workingDays = workingDayRepository.findNotWorkingDayByPhotographerId(ptgId);
+        List<java.time.DayOfWeek> dows = new ArrayList<>();
+        for(DayOfWeek dow : workingDays) {
+            dows.add(DateHelper.getNotWorkingDay(dow));
+        }
+
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31));
+        for(LocalDate date : datesBetween) {
+            for(java.time.DayOfWeek dow : dows) {
+                if(DateHelper.isDateDayOfWeek(date, dow)) {
+                    busyDays.add(DateHelper.convertToDateViaInstant(date));
+                }
+            }
+        }
 
         // add to calendar
         result.setBookingDates(bookingDates);

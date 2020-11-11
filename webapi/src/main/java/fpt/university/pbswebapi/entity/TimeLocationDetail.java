@@ -30,9 +30,11 @@ public class TimeLocationDetail {
     private String formattedAddress;
 
     @Column(name = "start")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date start;
 
     @Column(name = "end")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date end;
 
 }

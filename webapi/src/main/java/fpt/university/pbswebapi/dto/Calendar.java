@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.dto;
 
 import fpt.university.pbswebapi.entity.BusyDay;
+import fpt.university.pbswebapi.entity.DayOfWeek;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Calendar {
 
-    private List<BookingDate> bookingDates;
+    private List<Date> bookingDates;
 
-    private List<BusyDay> busyDays;
+    private List<Date> busyDays;
 }

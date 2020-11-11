@@ -18,5 +18,4 @@ public class BookingDate {
 
     private Date bookedDate;
 
-    private BookingInfo bookingInfo;
 }
