@@ -522,4 +522,39 @@ public class PhotographerService {
         result.setBusyDays(busyDays);
         return result;
     }
+
+    public DayEvent getPhotographerEventOnDay(long ptgId, String date) {
+        DayEvent dayEvent = new DayEvent();
+        Date from;
+        Date to;
+        List<BusyDay> busyDays = new ArrayList<>();
+        List<Booking> bookings = new ArrayList<>();
+        List<BookingInfo> bookingInfos = new ArrayList<>();
+        try {
+            String fromStr = date + " 00:00";
+            String toStr = date + " 23:59";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime localFrom = LocalDateTime.parse(fromStr, formatter);
+            LocalDateTime localTo = LocalDateTime.parse(toStr, formatter);
+            from = DateHelper.convertToDateViaInstant(localFrom);
+            to = DateHelper.convertToDateViaInstant(localTo);
+            busyDays = busyDayRepository.findByPhotographerIdBetweenStartDateEndDate(ptgId, from, to);
+
+            if(busyDays.size() > 0) {
+                dayEvent.setBusyDays(busyDays);
+                dayEvent.setBusyDay(true);
+            } else {
+                bookings = bookingRepository.findPhotographerBookingByDate(from, to, ptgId);
+                for(Booking booking : bookings) {
+                    for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
+                        bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                    }
+                }
+                dayEvent.setBookingInfos(bookingInfos);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return dayEvent;
+    }
 }

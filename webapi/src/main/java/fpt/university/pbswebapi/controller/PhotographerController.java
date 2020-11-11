@@ -266,6 +266,11 @@ public class PhotographerController {
         }
     }
 
+    @GetMapping("/{ptgId}/on-day")
+    public ResponseEntity<?> getPhotographerEventOnDay(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
+        return new ResponseEntity<>(phtrService.getPhotographerEventOnDay(ptgId, date), HttpStatus.OK);
+    }
+
     @PutMapping
     public ResponseEntity<?> editProfile(@RequestBody PhotographerInfoDto photographerDto) {
         return new ResponseEntity<>(phtrService.editInfo(photographerDto), HttpStatus.OK);
