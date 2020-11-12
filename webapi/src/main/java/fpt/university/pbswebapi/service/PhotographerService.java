@@ -518,7 +518,16 @@ public class PhotographerService {
         for(LocalDate date : datesBetween) {
             for(java.time.DayOfWeek dow : dows) {
                 if(DateHelper.isDateDayOfWeek(date, dow)) {
-                    busyDays.add(DateHelper.convertToDateViaInstant(date));
+                    String fromString = date.toString() + " 00:00";
+                    String toString = date.toString() + " 23:59";
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    LocalDateTime localFrom = LocalDateTime.parse(fromString, formatter);
+                    LocalDateTime localTo = LocalDateTime.parse(toString, formatter);
+                    if(bookingRepository.countOngoingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                        if(bookingRepository.countEditBookingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                            busyDays.add(DateHelper.convertToDateViaInstant(date));
+                        }
+                    }
                 }
             }
         }
@@ -533,8 +542,8 @@ public class PhotographerService {
         DayEvent dayEvent = new DayEvent();
         Date from;
         Date to;
-        List<BusyDay> busyDays = new ArrayList<>();
-        List<Booking> bookings = new ArrayList<>();
+        List<BusyDay> busyDays;
+        List<Booking> bookings;
         List<BookingInfo> bookingInfos = new ArrayList<>();
         try {
             String fromStr = date + " 00:00";
@@ -550,12 +559,20 @@ public class PhotographerService {
                 dayEvent.setBusyDays(busyDays);
                 dayEvent.setBusyDay(true);
             } else {
-                bookings = bookingRepository.findPhotographerBookingByDate(from, to, ptgId);
+                // find on going booking
+                bookings = bookingRepository.findOngoingBookingOnDate(from, to, ptgId);
                 for(Booking booking : bookings) {
                     for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
                         bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
                     }
                 }
+
+                // find editing booking
+                bookings = bookingRepository.findEditingBookingOnDate(from, to, ptgId);
+                for(Booking booking : bookings) {
+                    bookingInfos.add(DtoMapper.toBookingInfo(booking));
+                }
+
                 dayEvent.setBookingInfos(bookingInfos);
             }
         } catch (Exception e) {

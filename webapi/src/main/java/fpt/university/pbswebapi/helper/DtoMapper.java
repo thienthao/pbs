@@ -202,4 +202,18 @@ public class DtoMapper {
         bInfo.setEnd(tld.getEnd());
         return bInfo;
     }
+
+    // for editing booking only
+    public static BookingInfo toBookingInfo(Booking b) {
+        BookingInfo bInfo = new BookingInfo();
+        bInfo.setId(b.getId());
+        bInfo.setStatus(b.getBookingStatus().toString());
+        bInfo.setPackageName(b.getServiceName());
+        bInfo.setPackagePrice(b.getPrice());
+        bInfo.setCustomerId(b.getCustomer().getId());
+        bInfo.setCustomerName(b.getCustomer().getFullname());
+        bInfo.setStart(b.getEditDeadline());
+        bInfo.setEnd(b.getEditDeadline());
+        return bInfo;
+    }
 }

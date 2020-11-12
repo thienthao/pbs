@@ -15,13 +15,13 @@ public class DateHelper {
 
     public static Date convertToDateViaInstant(LocalDate dateToConvert) {
         return java.util.Date.from(dateToConvert.atStartOfDay()
-                .atZone(ZoneId.systemDefault())
+                .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
                 .toInstant());
     }
 
     public static Date convertToDateViaInstant(LocalDateTime dateToConvert) {
         return java.util.Date
-                .from(dateToConvert.atZone(ZoneId.systemDefault())
+                .from(dateToConvert.atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
                         .toInstant());
     }
 

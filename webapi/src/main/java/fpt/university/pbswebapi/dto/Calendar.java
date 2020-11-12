@@ -1,7 +1,5 @@
 package fpt.university.pbswebapi.dto;
 
-import fpt.university.pbswebapi.entity.BusyDay;
-import fpt.university.pbswebapi.entity.DayOfWeek;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
