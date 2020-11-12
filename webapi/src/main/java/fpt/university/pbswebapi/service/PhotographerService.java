@@ -122,8 +122,11 @@ public class PhotographerService {
     }
 
     @Cacheable("photographers")
-    public Page<User> findPhotographersByRating(Pageable paging, double lat, double lon) {
-        return phtrRepo.findPhotographersByRating(paging, Long.parseLong("2"), "Ho Chi Minh City");
+    public Page<User> findPhotographersByRating(Pageable paging, String city) {
+        if(city.equalsIgnoreCase("")) {
+            return phtrRepo.findPhotographersOrderByRating(paging, Long.parseLong("2"));
+        }
+        return phtrRepo.findPhotographersInCityOrderByRating(paging, Long.parseLong("2"), city);
     }
 
 
@@ -376,8 +379,11 @@ public class PhotographerService {
     }
 
     @Cacheable("photographers")
-    public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId, double lat, double lon) {
-        return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId, "Ho Chi Minh City");
+    public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId, String city) {
+        if(city.equalsIgnoreCase("")) {
+            return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
+        }
+        return phtrRepo.findPhotographersByCategoryAndCitySortByRating(paging, categoryId, city);
     }
 
     public List<BusyDay> getBusyDays(Long ptgId) {

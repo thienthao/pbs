@@ -50,16 +50,17 @@ public class PhotographerController {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "1") long categoryId,
             @RequestParam(defaultValue = "0") double lat,
-            @RequestParam(defaultValue = "0") double lon
+            @RequestParam(defaultValue = "0") double lon,
+            @RequestParam(defaultValue = "") String city
     ) {
         try {
             Pageable paging = PageRequest.of(page, size);
             Page<User> pageUser;
 
-            if(categoryId != 1) {
-                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId, lat, lon);
+            if(categoryId == 1) {
+                pageUser = phtrService.findPhotographersByRating(paging, city);
             } else {
-                pageUser = phtrService.findPhotographersByRating(paging, lat, lon);
+                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId, city);
             }
 
             Map<String, Object> response = new HashMap<>();

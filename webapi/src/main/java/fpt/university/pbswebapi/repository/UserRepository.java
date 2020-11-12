@@ -20,7 +20,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "where photographer.role.id =:roleId " +
             "and location.formattedAddress like %:city% " +
             "order by photographer.ratingCount desc")
-    Page<User> findPhotographersByRating(Pageable paging, Long roleId, String city);
+    Page<User> findPhotographersInCityOrderByRating(Pageable paging, Long roleId, String city);
+
+    @Query("select distinct photographer " +
+            "from User photographer " +
+            "where photographer.role.id =:roleId " +
+            "order by photographer.ratingCount desc")
+    Page<User> findPhotographersOrderByRating(Pageable paging, Long roleId);
 
     @Query("FROM User photographer where photographer.role.id =:roleId")
     List<User> findAllPhotographer(Long roleId);
@@ -35,7 +41,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "where category.id =:categoryId " +
             "and location.formattedAddress like %:city% " +
             "order by photographer.ratingCount desc")
-    Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId, String city);
+    Page<User> findPhotographersByCategoryAndCitySortByRating(Pageable paging, long categoryId, String city);
+
+    @Query("select distinct photographer from User photographer " +
+            "inner join photographer.packages package " +
+            "inner join package.category category " +
+            "where category.id =:categoryId " +
+            "order by photographer.ratingCount desc")
+    Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId);
 
     @Query("FROM User photographer where photographer.role.id =:roleId and photographer.fullname like %:search% order by photographer.ratingCount desc")
     Page<User> searchPhotographerNameContaining(String search, Pageable paging, long roleId);
