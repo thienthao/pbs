@@ -56,7 +56,6 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
         final albums = await this
             .albumRepository
             .getInfiniteListAlbum(0, NUMBER_OF_ALBUMS_PER_PAGE);
-        print('album in bloc $albums');
         yield AlbumStateInifiniteFetchedSuccess(
             albums: albums, hasReachedEnd: false);
       } else {

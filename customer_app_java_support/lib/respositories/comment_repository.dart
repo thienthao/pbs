@@ -1,8 +1,8 @@
 import 'dart:convert';
+
 import 'package:customer_app_java_support/models/comment_bloc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/';
 
@@ -20,9 +20,6 @@ class CommentRepository {
               id.toString() +
               '/comments?size=3',
         );
-    final temp =
-        baseUrl + 'bookings/photographer/' + id.toString() + '/comments';
-    print('url $temp');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;

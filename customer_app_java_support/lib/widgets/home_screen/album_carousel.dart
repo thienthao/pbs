@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:customer_app_java_support/models/album_model.dart';
 import 'package:customer_app_java_support/screens/album_screens/album_detail_screen%20copy.dart';
 import 'package:flutter/cupertino.dart';

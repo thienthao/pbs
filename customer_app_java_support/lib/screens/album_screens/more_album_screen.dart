@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
-import 'package:customer_app_java_support/models/album_model.dart';
 import 'package:customer_app_java_support/shared/loading_line.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import 'album_detail_screen.dart';
 
@@ -290,7 +288,8 @@ class _MoreAlbumScreenState extends State<MoreAlbumScreen> {
                   _hasReachedEnd = albumState.hasReachedEnd;
                   return RefreshIndicator(
                     onRefresh: () {
-                      BlocProvider.of<AlbumBloc>(context).add(AlbumRestartEvent());
+                      BlocProvider.of<AlbumBloc>(context)
+                          .add(AlbumRestartEvent());
                       _loadAlbumsInfinite();
                       return _completer.future;
                     },

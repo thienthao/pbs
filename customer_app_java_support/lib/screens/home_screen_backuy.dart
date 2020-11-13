@@ -40,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Center(
           child: BlocBuilder<AlbumBloc, AlbumState>(
             builder: (context, albumState) {
-              print('albumState $albumState');
               if (albumState is AlbumStateSuccess) {
                 final currentState = albumState;
                 if (currentState.albums.isEmpty) {

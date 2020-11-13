@@ -4,6 +4,12 @@ import 'package:search_map_place/search_map_place.dart';
 import 'package:geocoder/geocoder.dart';
 
 class MapPicker extends StatefulWidget {
+  final double currentLatitude;
+  final double currentLongitude;
+  final Function(LatLng) onSelectedLatLgn;
+  const MapPicker(
+      {this.currentLatitude, this.currentLongitude, this.onSelectedLatLgn});
+
   @override
   _MapPickerState createState() => _MapPickerState();
 }
@@ -20,6 +26,28 @@ class _MapPickerState extends State<MapPicker> {
     var first = addresses.first;
     print('${first.addressLine} ${first.coordinates}');
     returnLocation = '${first.addressLine} ';
+    widget.onSelectedLatLgn(location);
+  }
+
+  getCurrentLocationCity() async {
+    final coordinates =
+        new Coordinates(widget.currentLatitude, widget.currentLongitude);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print('${first.addressLine} ${first.coordinates}');
+    returnLocation = '${first.addressLine}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentLocationCity();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -35,7 +63,7 @@ class _MapPickerState extends State<MapPicker> {
               });
             },
             initialCameraPosition: CameraPosition(
-              target: LatLng(11.939346, 108.445173),
+              target: LatLng(widget.currentLatitude, widget.currentLongitude),
               zoom: 16,
             ),
             markers: _markers.values.toSet(),

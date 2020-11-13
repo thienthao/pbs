@@ -14,15 +14,9 @@ class PackageRepository {
   }) : assert(httpClient != null);
 
   Future<List<PackageBlocModel>> getPackagesByPhotographerId(int id) async {
-    print('packages of photographer');
     final response = await this.httpClient.get(
           baseUrl + 'packages/photographer/' + id.toString() + '/split',
         );
-    final temp = baseUrl +
-        'packages/photographer/' +
-        id.toString() +
-        '/split?page=2&size=5';
-    print('url $temp');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
@@ -39,6 +33,7 @@ class PackageRepository {
           id: package['id'],
           name: package['name'].toString(),
           price: package['price'],
+          supportMultiDays: package['supportMultiDays'],
           description: package['description'].toString(),
           serviceDtos: services,
         );

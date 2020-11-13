@@ -122,12 +122,9 @@ class AlbumRepository {
   }
 
   Future<List<AlbumBlocModel>> getAlbumOfPhotographer(int id) async {
-    print('photograper os album');
     final response = await this.httpClient.get(
           baseUrl + 'albums/photographer/' + id.toString(),
         );
-    final temp = baseUrl + 'albums/photographer/' + id.toString();
-    print('url $temp');
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['albums'] as List;

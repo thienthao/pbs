@@ -1,16 +1,15 @@
 import 'dart:convert';
 
-import 'package:equatable/equatable.dart';
-
-import 'package:customer_app_java_support/models/category_bloc_model.dart';
-import 'package:customer_app_java_support/models/image_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
+import 'package:equatable/equatable.dart';
 
 class BookingBlocModel extends Equatable {
   final int id;
   final String status;
   final String startDate;
+  final String editDeadLine;
   final String endDate;
   final String serviceName;
   final int price;
@@ -21,7 +20,7 @@ class BookingBlocModel extends Equatable {
   final String rejectedReason;
   final double rating;
   final String comment;
-  final String location;
+  final String address;
   final double latitude;
   final double longitude;
   final String commentDate;
@@ -29,13 +28,17 @@ class BookingBlocModel extends Equatable {
   final Photographer photographer;
   final PackageBlocModel package;
   final int returningType;
+  final bool isMultiday;
   final List<String> services;
+  final List<TimeAndLocationBlocModel> listTimeAndLocations;
 
   BookingBlocModel(
       {this.id,
+      this.isMultiday,
       this.status,
       this.startDate,
       this.endDate,
+      this.editDeadLine,
       this.serviceName,
       this.price,
       this.createdAt,
@@ -45,7 +48,7 @@ class BookingBlocModel extends Equatable {
       this.rejectedReason,
       this.rating,
       this.comment,
-      this.location,
+      this.address,
       this.latitude,
       this.longitude,
       this.commentDate,
@@ -53,7 +56,8 @@ class BookingBlocModel extends Equatable {
       this.photographer,
       this.package,
       this.returningType,
-      this.services});
+      this.services,
+      this.listTimeAndLocations});
 
   @override
   List<Object> get props {
@@ -71,7 +75,7 @@ class BookingBlocModel extends Equatable {
       rejectedReason,
       rating,
       comment,
-      location,
+      address,
       latitude,
       longitude,
       commentDate,
@@ -81,61 +85,4 @@ class BookingBlocModel extends Equatable {
       services
     ];
   }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'status': status,
-      'startDate': startDate,
-      'endDate': endDate,
-      'serviceName': serviceName,
-      'price': price,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'customerCanceledReason': customerCanceledReason,
-      'photographerCanceledReason': photographerCanceledReason,
-      'rejectedReason': rejectedReason,
-      'rating': rating,
-      'comment': comment,
-      'location': location,
-      'latitude': latitude,
-      'longitude': longitude,
-      'commentDate': commentDate,
-      'services': services,
-      'photographer': photographer?.toMap(),
-      'package': package?.toMap(),
-    };
-  }
-
-  factory BookingBlocModel.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
-    return BookingBlocModel(
-      id: map['id'],
-      status: map['status'],
-      startDate: map['startDate'],
-      endDate: map['endDate'],
-      serviceName: map['serviceName'],
-      price: map['price'],
-      createdAt: map['createdAt'],
-      updatedAt: map['updatedAt'],
-      customerCanceledReason: map['customerCanceledReason'],
-      photographerCanceledReason: map['photographerCanceledReason'],
-      rejectedReason: map['rejectedReason'],
-      rating: map['rating'],
-      comment: map['comment'],
-      location: map['location'],
-      latitude: map['latitude'],
-      longitude: map['longitude'],
-      commentDate: map['commentDate'],
-      services: map['servicePackage']['services'],
-      photographer: Photographer.fromMap(map['photographer']),
-      package: PackageBlocModel.fromMap(map['package']),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory BookingBlocModel.fromJson(String source) =>
-      BookingBlocModel.fromMap(json.decode(source));
 }

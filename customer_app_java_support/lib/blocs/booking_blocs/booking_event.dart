@@ -1,4 +1,3 @@
-import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +25,13 @@ class BookingEventCreate extends BookingEvent {
 class BookingEventCancel extends BookingEvent {
   final BookingBlocModel booking;
   BookingEventCancel({this.booking});
+}
+
+class BookingEventGetBookingOnDate extends BookingEvent {
+  final int ptgId;
+  final String date;
+
+  BookingEventGetBookingOnDate({this.ptgId,this.date});
 }
 
 class BookingEventLoadSuccess extends BookingEvent {

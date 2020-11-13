@@ -12,6 +12,7 @@ import 'package:customer_app_java_support/widgets/home_screen/photograph_carouse
 import 'package:customer_app_java_support/widgets/home_screen/sliver_items.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:http/http.dart' as http;
 
@@ -24,7 +25,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
   String ptgServiceResult = '';
-
+  LatLng selectedLatlng = LatLng(0.0, 0.0);
+  int selectedCategory = 1;
   @override
   void dispose() {
     super.dispose();
@@ -37,8 +39,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _completer = Completer<void>();
+
     _loadAlbums(1);
-    _loadPhotographers(1);
+    _loadPhotographers(1, selectedLatlng);
 
     Timer(Duration(seconds: 5), () {
       BlocProvider.of<PhotographerAlgBloc>(context)
@@ -51,14 +54,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         .add(AlbumEventFetch(categoryId: _categoryId));
   }
 
-  _loadPhotographers(int _categoryId) async {
+  _loadPhotographers(int _categoryId, LatLng _latLng) async {
     BlocProvider.of<PhotographerBloc>(context)
-        .add(PhotographerEventFetch(categoryId: _categoryId));
+        .add(PhotographerEventFetch(categoryId: _categoryId, latLng: _latLng));
   }
 
-  _filteredByCategoryId(_categoryId) async {
-    _loadAlbums(_categoryId);
-    _loadPhotographers(_categoryId);
+  _filteredByCategoryId(_categoryId, _latLng) async {
+    _loadAlbums(
+      _categoryId,
+    );
+    _loadPhotographers(_categoryId, _latLng);
   }
 
   @override
@@ -75,7 +80,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             actions: <Widget>[
               IconButton(
-                icon: Icon(Icons.search),
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -94,7 +102,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             flexibleSpace: FlexibleSpaceBar(
               background: SliverItems(
                 onChangeLocation: (Map result) {
-                  print('current location selected: $result');
+                  double _lat = result['lat'];
+                  double _long = result['long'];
+                  selectedLatlng = LatLng(_lat, _long);
+                  _filteredByCategoryId(selectedCategory, selectedLatlng);
                 },
               ),
             ),
@@ -122,8 +133,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               blocCategories: categoryState.categories,
                               onSelectedCategory: (int _selectedCategory) {
                                 setState(() {
-                                  print('$_selectedCategory is selected!!');
-                                  _filteredByCategoryId(_selectedCategory);
+                                  selectedCategory = _selectedCategory;
+                                  _filteredByCategoryId(
+                                      selectedCategory, selectedLatlng);
                                 });
                               },
                             ),
@@ -274,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           return Padding(
                             padding: const EdgeInsets.all(40.0),
                             child: Text(
-                              'Hiện tại chưa có Photographer nào theo thể loại này',
+                              'Hiện tại chưa có Photographer nào phù hợp với ý của bạn',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.black,
@@ -468,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           return Padding(
                             padding: const EdgeInsets.all(40.0),
                             child: Text(
-                              'Hiện tại chưa có Photographer nào theo thể loại này',
+                              'Hiện tại chưa có Photographer nào theo ý của bạn',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.black,

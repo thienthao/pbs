@@ -103,6 +103,8 @@ class _RatingScreenState extends State<RatingScreen>
           ),
           key: Key('Tuyệt vời'),
         );
+      default:
+        return Text('');
     }
   }
 

@@ -1,5 +1,4 @@
 import 'package:customer_app_java_support/models/comment_bloc_model.dart';
-import 'package:customer_app_java_support/models/comment_model.dart';
 import 'package:flutter/material.dart';
 
 import 'comment.dart';
@@ -63,9 +62,7 @@ class _CommentShowState extends State<CommentShow> {
                         color: Color(0xFFF77474), fontWeight: FontWeight.w700),
                     textAlign: TextAlign.right,
                   ),
-                  onTap: () {
-                    print('Xem thêm is click');
-                  },
+                  onTap: () {},
                 ),
               ],
             ),

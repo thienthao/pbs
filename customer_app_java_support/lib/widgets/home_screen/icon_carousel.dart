@@ -63,8 +63,6 @@ class _IconCarouselState extends State<IconCarousel> {
                       onTap: () {
                         setState(() {
                           selected = index;
-                          print(
-                              'Selected on category ${widget.blocCategories[index].id}');
                           widget.onSelectedCategory(
                               widget.blocCategories[index].id);
                         });

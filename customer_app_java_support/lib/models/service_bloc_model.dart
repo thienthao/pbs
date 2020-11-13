@@ -1,5 +1,3 @@
-import 'package:customer_app_java_support/models/category_bloc_model.dart';
-import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 
 class ServiceBlocModel extends Equatable {

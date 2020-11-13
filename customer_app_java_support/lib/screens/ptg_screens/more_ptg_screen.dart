@@ -43,7 +43,6 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
     _scrollController.addListener(() {
       final maxScrollExtent = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
-      print(maxScrollExtent - currentScroll);
       if (maxScrollExtent - currentScroll <= _scrollThreshold) {
         _loadPhotographerInfinite();
       }
@@ -57,7 +56,8 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
   }
 
   _loadPhotographerInfinite() {
-    BlocProvider.of<PhotographerBloc>(context).add(PhotographerEventFetchInfinite());
+    BlocProvider.of<PhotographerBloc>(context)
+        .add(PhotographerEventFetchInfinite());
   }
 
   Widget listPhotographers(List<Photographer> _photographers) {
@@ -70,7 +70,6 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
           _hasReachedEnd ? _photographers.length : _photographers.length + 1,
       itemBuilder: (BuildContext context, int index) {
         if (index >= _photographers.length) {
-          print(index);
           return Padding(
             padding: const EdgeInsets.all(25.0),
             child: Container(
@@ -318,8 +317,7 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                   _hasReachedEnd = photographerState.hasReachedEnd;
                   return RefreshIndicator(
                     onRefresh: () {
-                      context
-                          .bloc<PhotographerBloc>()
+                     BlocProvider.of<PhotographerBloc>(context)
                           .add(PhotographerRestartEvent());
                       _loadPhotographerInfinite();
                       return _completer.future;

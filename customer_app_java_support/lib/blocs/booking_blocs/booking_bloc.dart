@@ -22,10 +22,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       yield* _mapBookingCreatedtoState(bookingEvent.booking);
     } else if (bookingEvent is BookingEventCancel) {
       yield* _mapBookingCanceledtoState(bookingEvent.booking);
-    } else if (bookingEvent is BookingEventLoadSuccess) {
-    } else if (bookingEvent is BookingEventRequested) {
-    } else if (bookingEvent is BookingEventRefresh) {
-      yield* _mapBookingsLoadedToState();
+    } else if (bookingEvent is BookingEventGetBookingOnDate) {
+      yield* _mapGetBookingByDayToState(bookingEvent.ptgId, bookingEvent.date);
     }
   }
 
@@ -67,6 +65,18 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.cancelBooking(booking);
       yield BookingStateCanceledSuccess(isSuccess: isSuccess);
+    } catch (_) {
+      yield BookingStateFailure();
+    }
+  }
+
+  Stream<BookingState> _mapGetBookingByDayToState(
+      int ptgId, String date) async* {
+    yield BookingStateLoading();
+    try {
+      final listBookings =
+          await this.bookingRepository.getBookingsByDate(ptgId, date);
+      yield BookingStateGetBookingByDateSuccess(listBookings: listBookings);
     } catch (_) {
       yield BookingStateFailure();
     }

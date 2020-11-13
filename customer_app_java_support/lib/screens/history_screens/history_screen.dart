@@ -167,14 +167,7 @@ class _BookHistoryState extends State<BookHistory> {
                 style: TextStyle(color: Colors.red[300], fontSize: 16),
               );
             }
-            final bookings = (bookingState as BookingStateSuccess).bookings;
-            return RefreshIndicator(
-                child: Container(child: BookingWidget()),
-                onRefresh: () {
-                  // BlocProvider.of<BookingBloc>(context)
-                  //     .add(BookingEventRefresh(booking: bookings[0]));
-                  return _completer.future;
-                });
+            return Text('');
           },
         ),
       ),

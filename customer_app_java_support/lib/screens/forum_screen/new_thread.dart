@@ -151,7 +151,8 @@ class _NewThreadState extends State<NewThread> {
                           icon: Icon(
                             Icons.add,
                             color: Colors.black54,
-                          ), onPressed: () {  },
+                          ),
+                          onPressed: () {},
                         ),
                       ),
                     ),
