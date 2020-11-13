@@ -72,6 +72,7 @@ public class DtoMapper {
                 servicePackage.getName(),
                 servicePackage.getPrice(),
                 servicePackage.getDescription(),
+                servicePackage.getSupportMultiDays(),
                 serviceDtos
         );
     }
@@ -184,5 +185,35 @@ public class DtoMapper {
             locations.add(location);
         }
         return locations;
+    }
+
+    public static BookingInfo toBookingInfo(Booking b, TimeLocationDetail tld) {
+        BookingInfo bInfo = new BookingInfo();
+        bInfo.setId(b.getId());
+        bInfo.setStatus(b.getBookingStatus().toString());
+        bInfo.setAddress(tld.getFormattedAddress());
+        bInfo.setLat(tld.getLat());
+        bInfo.setLon(tld.getLon());
+        bInfo.setPackageName(b.getServiceName());
+        bInfo.setPackagePrice(b.getPrice());
+        bInfo.setCustomerId(b.getCustomer().getId());
+        bInfo.setCustomerName(b.getCustomer().getFullname());
+        bInfo.setStart(tld.getStart());
+        bInfo.setEnd(tld.getEnd());
+        return bInfo;
+    }
+
+    // for editing booking only
+    public static BookingInfo toBookingInfo(Booking b) {
+        BookingInfo bInfo = new BookingInfo();
+        bInfo.setId(b.getId());
+        bInfo.setStatus(b.getBookingStatus().toString());
+        bInfo.setPackageName(b.getServiceName());
+        bInfo.setPackagePrice(b.getPrice());
+        bInfo.setCustomerId(b.getCustomer().getId());
+        bInfo.setCustomerName(b.getCustomer().getFullname());
+        bInfo.setStart(b.getEditDeadline());
+        bInfo.setEnd(b.getEditDeadline());
+        return bInfo;
     }
 }

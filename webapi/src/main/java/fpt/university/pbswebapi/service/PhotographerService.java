@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.dto.*;
+import fpt.university.pbswebapi.dto.Calendar;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
@@ -24,9 +25,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.reverseOrder;
 import static org.apache.http.entity.ContentType.*;
@@ -39,18 +42,20 @@ public class PhotographerService {
     private final BookingRepository bookingRepository;
     private final LocationRepository locationRepository;
     private final ServicePackageRepository packageRepository;
+    private final WorkingDayRepository workingDayRepository;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .build();
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository, WorkingDayRepository workingDayRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
         this.bookingRepository = bookingRepository;
         this.locationRepository = locationRepository;
         this.packageRepository = packageRepository;
+        this.workingDayRepository = workingDayRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -117,8 +122,11 @@ public class PhotographerService {
     }
 
     @Cacheable("photographers")
-    public Page<User> findPhotographersByRating(Pageable paging) {
-        return phtrRepo.findPhotographersByRating(paging, Long.parseLong("2"));
+    public Page<User> findPhotographersByRating(Pageable paging, String city) {
+        if(city.equalsIgnoreCase("")) {
+            return phtrRepo.findPhotographersOrderByRating(paging, Long.parseLong("2"));
+        }
+        return phtrRepo.findPhotographersInCityOrderByRating(paging, Long.parseLong("2"), city);
     }
 
 
@@ -371,8 +379,11 @@ public class PhotographerService {
     }
 
     @Cacheable("photographers")
-    public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId) {
-        return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
+    public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId, String city) {
+        if(city.equalsIgnoreCase("")) {
+            return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
+        }
+        return phtrRepo.findPhotographersByCategoryAndCitySortByRating(paging, categoryId, city);
     }
 
     public List<BusyDay> getBusyDays(Long ptgId) {
@@ -471,5 +482,134 @@ public class PhotographerService {
             return false;
         }
         return false;
+    }
+
+    public Calendar getCalendar(long ptgId) {
+        Calendar result = new Calendar();
+        List<Date> bookingDates = new ArrayList<>();
+        List<Date> busyDays = new ArrayList<>();
+
+        //query booking ongoing + editing
+        List<Booking> bookings = bookingRepository.findOnGoingNEditingBookingsBetween(ptgId);
+        // map booking to bookinginfo
+        for(Booking b : bookings) {
+            bookingDates.add(b.getEditDeadline());
+            for(TimeLocationDetail tld : b.getTimeLocationDetails()) {
+                bookingDates.add(tld.getStart());
+            }
+        }
+
+        // query busy days
+        List<BusyDay> busyQuery = busyDayRepository.findAllByPhotographerId(ptgId);
+        for(BusyDay busyDay : busyQuery) {
+            busyDays.add(busyDay.getStartDate());
+        }
+
+        // add not working days to busy days
+
+        // query working days
+        List<DayOfWeek> workingDays = workingDayRepository.findNotWorkingDayByPhotographerId(ptgId);
+        List<java.time.DayOfWeek> dows = new ArrayList<>();
+        for(DayOfWeek dow : workingDays) {
+            dows.add(DateHelper.getNotWorkingDay(dow));
+        }
+
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31));
+        for(LocalDate date : datesBetween) {
+            for(java.time.DayOfWeek dow : dows) {
+                if(DateHelper.isDateDayOfWeek(date, dow)) {
+                    String fromString = date.toString() + " 00:00";
+                    String toString = date.toString() + " 23:59";
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    LocalDateTime localFrom = LocalDateTime.parse(fromString, formatter);
+                    LocalDateTime localTo = LocalDateTime.parse(toString, formatter);
+                    if(bookingRepository.countOngoingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                        if(bookingRepository.countEditBookingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                            busyDays.add(DateHelper.convertToDateViaInstant(date));
+                        }
+                    }
+                }
+            }
+        }
+
+        // add to calendar
+        result.setBookingDates(bookingDates);
+        result.setBusyDays(busyDays);
+        return result;
+    }
+
+    public DayEvent getPhotographerEventOnDay(long ptgId, String date) {
+        DayEvent dayEvent = new DayEvent();
+        Date from;
+        Date to;
+        List<BusyDay> busyDays;
+        List<Booking> bookings;
+        List<BookingInfo> bookingInfos = new ArrayList<>();
+        try {
+            String fromStr = date + " 00:00";
+            String toStr = date + " 23:59";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime localFrom = LocalDateTime.parse(fromStr, formatter);
+            LocalDateTime localTo = LocalDateTime.parse(toStr, formatter);
+            from = DateHelper.convertToDateViaInstant(localFrom);
+            to = DateHelper.convertToDateViaInstant(localTo);
+            busyDays = busyDayRepository.findByPhotographerIdBetweenStartDateEndDate(ptgId, from, to);
+
+            if(busyDays.size() > 0) {
+                dayEvent.setBusyDays(busyDays);
+                dayEvent.setBusyDay(true);
+            } else {
+                // find on going booking
+                bookings = bookingRepository.findOngoingBookingOnDate(from, to, ptgId);
+                for(Booking booking : bookings) {
+                    for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
+                        bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                    }
+                }
+
+                // find editing booking
+                bookings = bookingRepository.findEditingBookingOnDate(from, to, ptgId);
+                for(Booking booking : bookings) {
+                    bookingInfos.add(DtoMapper.toBookingInfo(booking));
+                }
+
+                dayEvent.setBookingInfos(bookingInfos);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return dayEvent;
+    }
+
+    public List<DayOfWeek> editWorkingDay(long ptgId, List<DayOfWeek> dows) {
+        List<DayOfWeek> results = new ArrayList<>();
+        for(DayOfWeek dow : dows) {
+            try {
+                //query where photographer_id = and dow = dow
+
+                //chua co -> create
+                if(workingDayRepository.checkDowExists(ptgId, dow.getDay()) == 0) {
+                    DayOfWeek dayOfWeek = new DayOfWeek();
+                    dayOfWeek.setDay(dow.getDay());
+                    dayOfWeek.setWorkingDay(dow.isWorkingDay());
+                    User photographer = phtrRepo.findById(ptgId).get();
+                    dayOfWeek.setPhotographer(photographer);
+                    results.add(workingDayRepository.save(dayOfWeek));
+                } else {
+                    DayOfWeek dayOfWeek = workingDayRepository.findByPhotographerIdAndDay(ptgId, dow.getDay());
+                    dayOfWeek.setWorkingDay(dow.isWorkingDay());
+                    dayOfWeek.setStartTime(dow.getStartTime());
+                    dayOfWeek.setEndTime(dow.getEndTime());
+                    results.add(workingDayRepository.save(dayOfWeek));
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        return results;
+    }
+
+    public List<DayOfWeek> getWorkingDay(long ptgId) {
+        return workingDayRepository.findAllByPhotographerId(ptgId);
     }
 }

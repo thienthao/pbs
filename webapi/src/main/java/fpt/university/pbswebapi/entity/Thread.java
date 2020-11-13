@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity(name = "threads")
 @Getter
@@ -33,4 +34,12 @@ public class Thread {
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private User owner;
+
+    @ManyToOne
+    @JoinColumn(name = "topic_id", referencedColumnName = "id")
+    private ThreadTopic topic;
+
+    @OneToMany
+    @JoinColumn(name = "thread_id", referencedColumnName = "id")
+    private List<ThreadComment> comments;
 }

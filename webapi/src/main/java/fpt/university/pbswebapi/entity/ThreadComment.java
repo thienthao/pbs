@@ -9,32 +9,27 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "time_location_detail")
+@Table(name = "thread_comments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TimeLocationDetail {
-
+public class ThreadComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "latitude")
-    private Double lat;
+    private String comment;
 
-    @Column(name = "longitude")
-    private Double lon;
-
-    @Column(name = "formatted_address")
-    private String formattedAddress;
-
-    @Column(name = "start")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date start;
+    @Column(name = "created_at")
+    private Date createdAt;
 
-    @Column(name = "end")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date end;
+    @Column(name = "updated_at")
+    private Date updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    private User owner;
 }

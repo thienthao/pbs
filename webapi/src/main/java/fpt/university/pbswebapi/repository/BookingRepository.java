@@ -61,4 +61,35 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.photographer.id =:photographerId and b.startDate between :date1 and :date2 and b.bookingStatus='ONGOING'" +
             "or b.photographer.id =:photographerId and b.startDate between :date1 and :date2 and b.bookingStatus='EDITING'")
     List<Booking> findPhotographerBookingByDate(Date date1, Date date2, Long photographerId);
+
+    @Query("From Booking b " +
+            "inner join b.timeLocationDetails ltd " +
+            "where b.photographer.id =:ptgId and b.bookingStatus='ONGOING' " +
+            "or b.photographer.id =:ptgId and b.bookingStatus='EDITING' " +
+            "order by ltd.start asc")
+    List<Booking> findOnGoingNEditingBookingsBetween(long ptgId);
+
+    @Query("select count(b) " +
+            "from Booking b " +
+            "inner join b.timeLocationDetails tld " +
+            "where tld.start>=:from and tld.start<=:to")
+    Long countOngoingOnDate(Date from, Date to);
+
+    @Query("select count(b) " +
+            "from Booking b " +
+            "where b.editDeadline>=:from and b.editDeadline<=:to")
+    Long countEditBookingOnDate(Date from, Date to);
+
+    @Query("FROM Booking b " +
+            "inner join b.timeLocationDetails tld " +
+            "where b.photographer.id =:photographerId and tld.start>=:from and tld.start<=:to " +
+            "and b.bookingStatus='ONGOING'")
+    List<Booking> findOngoingBookingOnDate(Date from, Date to, Long photographerId);
+
+    @Query("FROM Booking b " +
+            "where b.photographer.id =:photographerId and b.editDeadline>=:from and b.editDeadline<=:to " +
+            "and b.bookingStatus='EDITING'")
+    List<Booking> findEditingBookingOnDate(Date from, Date to, Long photographerId);
+
+
 }

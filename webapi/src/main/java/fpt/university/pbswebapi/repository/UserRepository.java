@@ -14,14 +14,34 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
 
-    @Query("FROM User photographer where photographer.role.id =:roleId order by photographer.ratingCount desc")
-    Page<User> findPhotographersByRating(Pageable paging, Long roleId);
+    @Query("select distinct photographer " +
+            "from User photographer " +
+            "inner join photographer.locations location " +
+            "where photographer.role.id =:roleId " +
+            "and location.formattedAddress like %:city% " +
+            "order by photographer.ratingCount desc")
+    Page<User> findPhotographersInCityOrderByRating(Pageable paging, Long roleId, String city);
+
+    @Query("select distinct photographer " +
+            "from User photographer " +
+            "where photographer.role.id =:roleId " +
+            "order by photographer.ratingCount desc")
+    Page<User> findPhotographersOrderByRating(Pageable paging, Long roleId);
 
     @Query("FROM User photographer where photographer.role.id =:roleId")
     List<User> findAllPhotographer(Long roleId);
 
     @Query("FROM User customer where customer.role.id =:roleId")
     List<User> findAllCustomers(Long roleId);
+
+    @Query("select distinct photographer from User photographer " +
+            "inner join photographer.packages package " +
+            "inner join package.category category " +
+            "inner join photographer.locations location " +
+            "where category.id =:categoryId " +
+            "and location.formattedAddress like %:city% " +
+            "order by photographer.ratingCount desc")
+    Page<User> findPhotographersByCategoryAndCitySortByRating(Pageable paging, long categoryId, String city);
 
     @Query("select distinct photographer from User photographer " +
             "inner join photographer.packages package " +

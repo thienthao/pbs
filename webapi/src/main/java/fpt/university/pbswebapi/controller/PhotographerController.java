@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.controller;
 import fpt.university.pbswebapi.dto.PhotographerInfoDto;
 import fpt.university.pbswebapi.dto.SearchDto;
 import fpt.university.pbswebapi.entity.BusyDay;
+import fpt.university.pbswebapi.entity.DayOfWeek;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
@@ -50,26 +51,21 @@ public class PhotographerController {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "1") long categoryId,
             @RequestParam(defaultValue = "0") double lat,
-            @RequestParam(defaultValue = "0") double lon
+            @RequestParam(defaultValue = "0") double lon,
+            @RequestParam(defaultValue = "") String city
     ) {
         try {
-            List<User> photographers = new ArrayList<>();
             Pageable paging = PageRequest.of(page, size);
             Page<User> pageUser;
 
-            if(categoryId != 1) {
-                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId);
+            if(categoryId == 1) {
+                pageUser = phtrService.findPhotographersByRating(paging, city);
             } else {
-                pageUser = phtrService.findPhotographersByRating(paging);
-            }
-            if(lat != 0) {
-                photographers = phtrService.filterByLocation(lat, lon, pageUser.getContent());
-            } else {
-                photographers = pageUser.getContent();
+                pageUser = phtrService.findPhotographersByCategorySortByRating(paging, categoryId, city);
             }
 
             Map<String, Object> response = new HashMap<>();
-            response.put("users", photographers);
+            response.put("users", pageUser.getContent());
             response.put("currentPage", pageUser.getNumber());
             response.put("totalItems", pageUser.getTotalElements());
             response.put("totalPages", pageUser.getTotalPages());
@@ -95,7 +91,6 @@ public class PhotographerController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println("zo");
             System.out.println(e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -184,6 +179,12 @@ public class PhotographerController {
         return new ResponseEntity<>(searchDto, HttpStatus.OK);
     }
 
+    // api get lich (sau khi them goi nhieu ngay)
+    @GetMapping("/{ptgId}/calendar")
+    public ResponseEntity<?> getCalendar(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getCalendar(ptgId), HttpStatus.OK);
+    }
+
     @PostMapping(value = "/{id}/upload",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
                 produces = MediaType.APPLICATION_JSON_VALUE)
@@ -258,6 +259,21 @@ public class PhotographerController {
             phtrService.fakeAvatar(user.getId(), file[i]);
             i++;
         }
+    }
+
+    @GetMapping("/{ptgId}/on-day")
+    public ResponseEntity<?> getPhotographerEventOnDay(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
+        return new ResponseEntity<>(phtrService.getPhotographerEventOnDay(ptgId, date), HttpStatus.OK);
+    }
+
+    @PostMapping("/{ptgId}/working-days")
+    public ResponseEntity<?> editWorkingDay(@PathVariable("ptgId") long ptgId, @RequestBody List<DayOfWeek> dows) {
+        return new ResponseEntity<>(phtrService.editWorkingDay(ptgId, dows), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/working-days")
+    public ResponseEntity<?> getWorkingDay(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getWorkingDay(ptgId), HttpStatus.OK);
     }
 
     @PutMapping
