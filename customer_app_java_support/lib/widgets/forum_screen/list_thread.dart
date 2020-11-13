@@ -1,7 +1,7 @@
-import 'package:customer_app_java_support/models/item_model.dart';
+import 'package:customer_app_java_support/models/thread_model.dart';
 import 'package:flutter/material.dart';
 
-Widget listThread(Item item) {
+Widget listThread(Thread thread) {
   return Card(
     elevation: 0.0,
     child: Padding(
@@ -11,7 +11,7 @@ Widget listThread(Item item) {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            item.title,
+            thread.title,
             style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
           ),
           SizedBox(
@@ -20,7 +20,7 @@ Widget listThread(Item item) {
           Row(
             children: [
               Text(
-                item.date,
+                thread.createdAt,
                 style: TextStyle(fontSize: 11.0, color: Colors.grey),
               ),
               SizedBox(width: 5.0),
@@ -30,7 +30,7 @@ Widget listThread(Item item) {
               ),
               SizedBox(width: 5.0),
               Text(
-                item.author,
+                thread.owner.fullname,
                 style: TextStyle(fontSize: 11.0, color: Colors.grey),
               ),
             ],

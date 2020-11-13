@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "389514123999",
+    "firebase_url": "https://pbs-webapi.firebaseio.com",
+    "project_id": "pbs-webapi",
+    "storage_bucket": "pbs-webapi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389514123999:android:3ade3c6a3a93f4f508e76a",
+        "android_client_info": {
+          "package_name": "com.example.customer_app_1_11"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4gwS_YxnbF6yMrX13LJBdi9eKv0timiw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389514123999:android:84c46e7bae1738d808e76a",
+        "android_client_info": {
+          "package_name": "com.example.customer_app_java_support"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4gwS_YxnbF6yMrX13LJBdi9eKv0timiw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389514123999:android:71d236491081260508e76a",
+        "android_client_info": {
+          "package_name": "com.example.photographer_app_v211"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4gwS_YxnbF6yMrX13LJBdi9eKv0timiw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,4 @@
-import 'package:customer_app_java_support/models/topic_model.dart';
+import 'package:customer_app_java_support/models/thread_model.dart';
 import 'package:flutter/material.dart';
 
 Widget listTopic(Topic topic) {
@@ -19,7 +19,7 @@ Widget listTopic(Topic topic) {
           ),
           SizedBox(width: 20.0),
           Text(
-            topic.title,
+            topic.topic,
             style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
           ),
         ],

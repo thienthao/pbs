@@ -1,18 +1,18 @@
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/login_form.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_repository.dart';
-import 'package:customer_app_java_support/widgets/profile_screen/profile_body.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:customer_app_java_support/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class Profile extends StatefulWidget {
-  @override
-  _ProfileState createState() => _ProfileState();
-}
+class LoginPage extends StatelessWidget {
+  final UserRepository userRepository;
 
-class _ProfileState extends State<Profile> {
-  final userRepository = UserRepository();
+  LoginPage({Key key, @required this.userRepository})
+      : assert(userRepository != null),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class _ProfileState extends State<Profile> {
             userRepository: userRepository,
           );
         },
-        child: Body(),
+        child: LoginScreen(),
       ),
     );
   }
