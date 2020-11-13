@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.controller;
 import fpt.university.pbswebapi.dto.PhotographerInfoDto;
 import fpt.university.pbswebapi.dto.SearchDto;
 import fpt.university.pbswebapi.entity.BusyDay;
+import fpt.university.pbswebapi.entity.DayOfWeek;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
@@ -263,6 +264,16 @@ public class PhotographerController {
     @GetMapping("/{ptgId}/on-day")
     public ResponseEntity<?> getPhotographerEventOnDay(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
         return new ResponseEntity<>(phtrService.getPhotographerEventOnDay(ptgId, date), HttpStatus.OK);
+    }
+
+    @PostMapping("/{ptgId}/working-days")
+    public ResponseEntity<?> editWorkingDay(@PathVariable("ptgId") long ptgId, @RequestBody List<DayOfWeek> dows) {
+        return new ResponseEntity<>(phtrService.editWorkingDay(ptgId, dows), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/working-days")
+    public ResponseEntity<?> getWorkingDay(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getWorkingDay(ptgId), HttpStatus.OK);
     }
 
     @PutMapping

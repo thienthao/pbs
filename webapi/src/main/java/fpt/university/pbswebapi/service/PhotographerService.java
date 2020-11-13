@@ -580,4 +580,36 @@ public class PhotographerService {
         }
         return dayEvent;
     }
+
+    public List<DayOfWeek> editWorkingDay(long ptgId, List<DayOfWeek> dows) {
+        List<DayOfWeek> results = new ArrayList<>();
+        for(DayOfWeek dow : dows) {
+            try {
+                //query where photographer_id = and dow = dow
+
+                //chua co -> create
+                if(workingDayRepository.checkDowExists(ptgId, dow.getDay()) == 0) {
+                    DayOfWeek dayOfWeek = new DayOfWeek();
+                    dayOfWeek.setDay(dow.getDay());
+                    dayOfWeek.setWorkingDay(dow.isWorkingDay());
+                    User photographer = phtrRepo.findById(ptgId).get();
+                    dayOfWeek.setPhotographer(photographer);
+                    results.add(workingDayRepository.save(dayOfWeek));
+                } else {
+                    DayOfWeek dayOfWeek = workingDayRepository.findByPhotographerIdAndDay(ptgId, dow.getDay());
+                    dayOfWeek.setWorkingDay(dow.isWorkingDay());
+                    dayOfWeek.setStartTime(dow.getStartTime());
+                    dayOfWeek.setEndTime(dow.getEndTime());
+                    results.add(workingDayRepository.save(dayOfWeek));
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        return results;
+    }
+
+    public List<DayOfWeek> getWorkingDay(long ptgId) {
+        return workingDayRepository.findAllByPhotographerId(ptgId);
+    }
 }
