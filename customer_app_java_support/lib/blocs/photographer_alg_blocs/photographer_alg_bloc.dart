@@ -1,6 +1,4 @@
 import 'package:customer_app_java_support/blocs/photographer_alg_blocs/photographers_alg.dart';
-import 'package:customer_app_java_support/blocs/photographer_blocs/photographer_event.dart';
-import 'package:customer_app_java_support/blocs/photographer_blocs/photographer_state.dart';
 import 'package:customer_app_java_support/respositories/photographer_respository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

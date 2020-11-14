@@ -1,19 +1,21 @@
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographer_event.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographer_state.dart';
-import 'package:customer_app_java_support/models/search_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/photographer_respository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
   static const NUMBER_OF_PHOTOGRAPHERS_PER_PAGE = 10;
   final PhotographerRepository photographerRepository;
+
   PhotographerBloc({
     @required this.photographerRepository,
   })  : assert(PhotographerRepository != null),
         super(PhotographerStateLoading());
 
   int photographerCurrentPage = 0;
+
   @override
   Stream<PhotographerState> mapEventToState(
       PhotographerEvent photographerEvent) async* {
@@ -21,7 +23,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
         (state is PhotographerStateInifiniteFetchedSuccess &&
             (state as PhotographerStateInifiniteFetchedSuccess).hasReachedEnd);
     if (photographerEvent is PhotographerEventFetch) {
-      yield* _mapPhotographersLoadedToState(photographerEvent.categoryId);
+      yield* _mapPhotographersLoadedToState(
+          photographerEvent.categoryId, photographerEvent.latLng);
     } else if (photographerEvent is PhotographerEventFetchByFactorAlg) {
       yield* _mapPhotographersFetchByFactorAlgToState();
     } else if (photographerEvent is PhotographerEventFetchInfinite &&
@@ -41,12 +44,12 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
   }
 
   Stream<PhotographerState> _mapPhotographersLoadedToState(
-      int categoryId) async* {
+      int categoryId, LatLng latLng) async* {
     yield PhotographerStateLoading();
     try {
       final photographers = await this
           .photographerRepository
-          .getListPhotographerByRating(categoryId);
+          .getListPhotographerByRating(categoryId, latLng);
       yield PhotographerStateSuccess(photographers: photographers);
     } catch (_) {
       yield PhotographerStateFailure();
@@ -69,7 +72,6 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
     try {
       final photographer =
           await this.photographerRepository.getPhotographerbyId(id);
-      print('it goes here!');
       yield PhotographerIDStateSuccess(photographer: photographer);
     } catch (_) {
       yield PhotographerStateFailure();
@@ -82,7 +84,6 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
         final photographers = await this
             .photographerRepository
             .getInfiniteListPhotographer(0, NUMBER_OF_PHOTOGRAPHERS_PER_PAGE);
-        print('photographer in bloc $photographers');
         yield PhotographerStateInifiniteFetchedSuccess(
             photographers: photographers, hasReachedEnd: false);
       } else {
@@ -108,16 +109,13 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
 
   Stream<PhotographerState> _mapFindPhotographerAndPackagesToState(
       String search) async* {
+    yield PhotographerStateLoading();
     try {
-      if (state is PhotographerStateLoading) {
-        final searchModel = await this
-            .photographerRepository
-            .findPhotographerAndPackages(
-                search, 0, NUMBER_OF_PHOTOGRAPHERS_PER_PAGE);
-        print('photographer in bloc $searchModel');
-        yield PhotographerStateSearchSuccess(
-            searchModel: searchModel, hasReachedEnd: false);
-      }
+      final searchModel = await this
+          .photographerRepository
+          .findPhotographerAndPackages(search, 0, 15);
+      yield PhotographerStateSearchSuccess(
+          searchModel: searchModel, hasReachedEnd: false);
     } catch (_) {
       yield PhotographerStateFailure();
     }

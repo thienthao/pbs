@@ -1,26 +1,48 @@
+import 'package:customer_app_java_support/models/calendar_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarView extends StatefulWidget {
+  final CalendarModel photographerDays;
+
+  const CalendarView({this.photographerDays});
   @override
   _CalendarViewState createState() => _CalendarViewState();
 }
 
 class _CalendarViewState extends State<CalendarView> {
   CalendarController controller;
+  final Map<DateTime, List> _holidays = {};
 
-  final Map<DateTime, List> _holidays = {
-    DateTime(2020, 10, 1): ['New Year\'s Day'],
-    DateTime(2020, 10, 6): ['Epiphany'],
-    DateTime(2020, 10, 15): ['Valentine\'s Day'],
-    DateTime(2020, 10, 21): ['Easter Sunday'],
-    DateTime(2020, 10, 22): ['Easter Monday'],
-  };
+  final Map<DateTime, List> _events = {};
 
   @override
   void initState() {
     super.initState();
     controller = CalendarController();
+    for (String day in widget.photographerDays.bookedDays) {
+      _events[DateTime.parse(day)] = [day];
+    }
+    for (String day in widget.photographerDays.busyDays) {
+      _holidays[DateTime.parse(day)] = [day];
+    }
+  }
+
+  bool _predicate(DateTime day) {
+    DateFormat dateFormat = DateFormat('yyyy/MM/dd');
+    if ((day.isBefore(DateTime.now()))) {
+      return false;
+    }
+    for (var item in widget.photographerDays.busyDays) {
+      if (dateFormat
+              .format(day)
+              .compareTo(dateFormat.format(DateTime.parse(item))) ==
+          0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
@@ -42,6 +64,8 @@ class _CalendarViewState extends State<CalendarView> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
             child: TableCalendar(
+              enabledDayPredicate: _predicate,
+              events: _events,
               holidays: _holidays,
               locale: 'vi_VN',
               calendarController: controller,

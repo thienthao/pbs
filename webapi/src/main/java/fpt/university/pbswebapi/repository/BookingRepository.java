@@ -69,6 +69,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "order by ltd.start asc")
     List<Booking> findOnGoingNEditingBookingsBetween(long ptgId);
 
+    @Query("From Booking b " +
+            "inner join b.timeLocationDetails ltd " +
+            "where b.photographer.id =:ptgId and b.bookingStatus='ONGOING' " +
+            "order by ltd.start asc")
+    List<Booking> findOnGoingBookingsBetween(long ptgId);
+
     @Query("select count(b) " +
             "from Booking b " +
             "inner join b.timeLocationDetails tld " +

@@ -1,4 +1,3 @@
-import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 
 class CommentBlocModel extends Equatable {
@@ -21,7 +20,6 @@ class CommentBlocModel extends Equatable {
   });
 
   @override
-  // TODO: implement props
   List<Object> get props => [
         username,
         fullname,

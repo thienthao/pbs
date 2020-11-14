@@ -42,9 +42,25 @@ class _DatePickerState extends State<DatePicker> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     controller = CalendarController();
+  }
+
+  bool _predicate(DateTime day) {
+    DateFormat dateFormat = DateFormat('yyyy/MM/dd');
+    print(dateFormat
+        .format(day)
+        .compareTo(dateFormat.format(DateTime.parse('2020-11-20 20:18:04Z'))));
+    if ((day.isAfter(DateTime.now()))) {
+      if (dateFormat.format(day).compareTo(
+              dateFormat.format(DateTime.parse('2020-11-20 20:18:04Z'))) ==
+          0) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -76,7 +92,7 @@ class _DatePickerState extends State<DatePicker> {
             height: 3.0,
           ),
           Container(
-            height: 350,
+            height: 390,
             margin: EdgeInsets.all(15.0),
             padding: EdgeInsets.all(7.0),
             decoration: BoxDecoration(
@@ -118,6 +134,7 @@ class _DatePickerState extends State<DatePicker> {
                   leftChevronMargin: EdgeInsets.only(left: 40.0),
                   rightChevronMargin: EdgeInsets.only(right: 40.0),
                 ),
+                enabledDayPredicate: _predicate,
                 calendarStyle: CalendarStyle(
                   selectedColor: Theme.of(context).accentColor,
                   todayStyle: TextStyle().copyWith(color: Colors.black87),
@@ -125,7 +142,10 @@ class _DatePickerState extends State<DatePicker> {
                   outsideDaysVisible: false,
                   weekendStyle: TextStyle().copyWith(color: Colors.black87),
                   todayColor: Colors.white,
-                  holidayStyle: TextStyle().copyWith(color: Colors.black87, decoration: TextDecoration.lineThrough,),
+                  holidayStyle: TextStyle().copyWith(
+                    color: Colors.black87,
+                    decoration: TextDecoration.lineThrough,
+                  ),
                 ),
                 daysOfWeekStyle: DaysOfWeekStyle(
                   weekendStyle: TextStyle().copyWith(color: Colors.black87),

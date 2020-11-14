@@ -20,27 +20,36 @@ class _SearchLocationState extends State<SearchLocation> {
   var returnLocation = {};
 
   getUserLocation(LatLng location) async {
-    final coordinates = new Coordinates(location.latitude, location.longitude);
-    var addresses =
-        await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var first = addresses.first;
-    print('${first.adminArea} ${first.coordinates}');
-    returnLocation = {'name': first.adminArea, 'latlng': first.coordinates};
+    try {
+      final coordinates =
+          new Coordinates(location.latitude, location.longitude);
+      var addresses =
+          await Geocoder.local.findAddressesFromCoordinates(coordinates);
+      var first = addresses.first;
+      print('${first.adminArea} ${first.coordinates}');
+      returnLocation = {
+        'name': '${first.adminArea}',
+        'latlng': first.coordinates,
+        'lat': coordinates.latitude,
+        'long': coordinates.longitude,
+      };
+    } catch (e) {}
   }
 
   getCurrentLocationCity() async {
-    final coordinates =
-        new Coordinates(widget.currentLatitude, widget.currentLongitude);
-    var addresses =
-        await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var first = addresses.first;
-    print('${first.coordinates} ${first.coordinates}');
-    returnLocation = {'name': first.adminArea, 'latlng': first.coordinates};
+    try {
+      final coordinates =
+          new Coordinates(widget.currentLatitude, widget.currentLongitude);
+      var addresses =
+          await Geocoder.local.findAddressesFromCoordinates(coordinates);
+      var first = addresses.first;
+      print('${first.coordinates} ${first.coordinates}');
+      returnLocation = {'name': first.adminArea, 'latlng': first.coordinates};
+    } catch (e) {}
   } // thêm để check null
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentLocationCity();
   }

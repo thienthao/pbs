@@ -6,6 +6,7 @@ import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/search_bloc_model.dart';
 import 'package:customer_app_java_support/models/service_bloc_model.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/photographers/';
@@ -17,13 +18,18 @@ class PhotographerRepository {
     @required this.httpClient,
   }) : assert(httpClient != null);
 
-  Future<List<Photographer>> getListPhotographerByRating(int categoryId) async {
+  Future<List<Photographer>> getListPhotographerByRating(
+      int categoryId, LatLng latLng) async {
     final response = await this.httpClient.get(
-        baseUrl + 'byrating?page=0&size=5&categoryId=$categoryId',
+        baseUrl +
+            'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}',
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer ' +
               'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
         });
+
+        print( baseUrl +
+            'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}');
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;
@@ -38,6 +44,7 @@ class PhotographerRepository {
               : photographer['ratingCount'],
         );
       }).toList();
+      print(photographers);
       return photographers;
     } else {
       throw Exception('Error getting list of photographers');
@@ -150,17 +157,24 @@ class PhotographerRepository {
       }).toList();
 
       final List<PackageBlocModel> packages = listPackages.map((package) {
-        final listServices = package['serviceDtos'] as List;
+        final listServices = package['services'] as List;
 
         final services = listServices.map((service) {
           return ServiceBlocModel(id: service['id'], name: service['name']);
         }).toList();
+
+        final tempPhotographer = package['photographer'] as Map;
+        final ptg = Photographer(
+            id: tempPhotographer['id'],
+            avatar: tempPhotographer['avatar'],
+            fullname: tempPhotographer['fullname']);
 
         return PackageBlocModel(
           id: package['id'],
           name: package['name'].toString(),
           price: package['price'],
           description: package['description'].toString(),
+          photographer: ptg,
           serviceDtos: services,
         );
       }).toList();

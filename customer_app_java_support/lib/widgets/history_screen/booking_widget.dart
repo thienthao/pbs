@@ -143,44 +143,6 @@ class _BookingWidgetState extends State<BookingWidget> {
                       ),
                       SizedBox(height: 10.0),
                       Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(right: 10.0),
-                            child: Icon(
-                              Icons.timer,
-                              size: 15,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              right: 10.0,
-                            ),
-                            child: Text(
-                              'Thời gian:',
-                              style: TextStyle(
-                                fontSize: 15.0,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: Text(
-                              booking.startDate == null
-                                  ? ''
-                                  : DateFormat('dd/MM/yyyy hh:mm a').format(
-                                      DateTime.parse(booking.startDate)),
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 5.0),
-                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
@@ -221,12 +183,55 @@ class _BookingWidgetState extends State<BookingWidget> {
                       ),
                       SizedBox(height: 5.0),
                       Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: 10.0),
+                            child: Icon(
+                              Icons.timer,
+                              size: 15,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: 10.0,
+                            ),
+                            child: Text(
+                              'Thời gian:',
+                              style: TextStyle(
+                                fontSize: 15.0,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: booking.isMultiday
+                                ? Text('Nhiều mốc thời gian khác nhau')
+                                : Text(
+                                    booking.startDate == null
+                                        ? ''
+                                        : DateFormat('dd/MM/yyyy hh:mm a')
+                                            .format(DateTime.parse(
+                                                booking.listTimeAndLocations[0].start)),
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 5.0),
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
                             padding: EdgeInsets.only(right: 10.0),
                             child: Icon(
-                              Icons.location_on,
+                              booking.isMultiday
+                                  ? Icons.not_listed_location_outlined
+                                  : Icons.location_on,
                               size: 15,
                               color: Theme.of(context).primaryColor,
                             ),
@@ -247,18 +252,48 @@ class _BookingWidgetState extends State<BookingWidget> {
                           Flexible(
                             child: Padding(
                               padding: EdgeInsets.only(right: 10),
-                              child: Text(
-                                booking.location == null
-                                    ? ''
-                                    : booking.location,
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
+                              child: booking.isMultiday
+                                  ? Text('Nhiều địa điểm khác nhau')
+                                  : Text(
+                                      booking.listTimeAndLocations[0].formattedAddress == null
+                                          ? ''
+                                          : booking.listTimeAndLocations[0].formattedAddress,
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
                       ),
+                      SizedBox(height: 5),
+                      booking.isMultiday ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: 10.0),
+                            child: Icon(
+                              Icons.assistant_photo_outlined,
+                              size: 17,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              right: 10.0,
+                            ),
+                            child: Text(
+                              'Chụp nhiều ngày',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        
+                        ],
+                      ):SizedBox(),
                     ],
                   ),
                 ),

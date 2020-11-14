@@ -514,7 +514,60 @@ public class PhotographerService {
             dows.add(DateHelper.getNotWorkingDay(dow));
         }
 
-        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31));
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 7, 1), LocalDate.of(2021, 3, 31));
+        for(LocalDate date : datesBetween) {
+            for(java.time.DayOfWeek dow : dows) {
+                if(DateHelper.isDateDayOfWeek(date, dow)) {
+                    String fromString = date.toString() + " 00:00";
+                    String toString = date.toString() + " 23:59";
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+                    LocalDateTime localFrom = LocalDateTime.parse(fromString, formatter);
+                    LocalDateTime localTo = LocalDateTime.parse(toString, formatter);
+                    if(bookingRepository.countOngoingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                        if(bookingRepository.countEditBookingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                            busyDays.add(DateHelper.convertToDateViaInstant(date));
+                        }
+                    }
+                }
+            }
+        }
+
+        // add to calendar
+        result.setBookingDates(bookingDates);
+        result.setBusyDays(busyDays);
+        return result;
+    }
+
+    public Calendar getCalendarForCustomer(long ptgId) {
+        Calendar result = new Calendar();
+        List<Date> bookingDates = new ArrayList<>();
+        List<Date> busyDays = new ArrayList<>();
+
+        //query booking ongoing + editing
+        List<Booking> bookings = bookingRepository.findOnGoingBookingsBetween(ptgId);
+        // map booking to bookinginfo
+        for(Booking b : bookings) {
+            for(TimeLocationDetail tld : b.getTimeLocationDetails()) {
+                bookingDates.add(tld.getStart());
+            }
+        }
+
+        // query busy days
+        List<BusyDay> busyQuery = busyDayRepository.findAllByPhotographerId(ptgId);
+        for(BusyDay busyDay : busyQuery) {
+            busyDays.add(busyDay.getStartDate());
+        }
+
+        // add not working days to busy days
+
+        // query working days
+        List<DayOfWeek> workingDays = workingDayRepository.findNotWorkingDayByPhotographerId(ptgId);
+        List<java.time.DayOfWeek> dows = new ArrayList<>();
+        for(DayOfWeek dow : workingDays) {
+            dows.add(DateHelper.getNotWorkingDay(dow));
+        }
+
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 7, 1), LocalDate.of(2021, 3, 31));
         for(LocalDate date : datesBetween) {
             for(java.time.DayOfWeek dow : dows) {
                 if(DateHelper.isDateDayOfWeek(date, dow)) {
@@ -573,7 +626,48 @@ public class PhotographerService {
                     bookingInfos.add(DtoMapper.toBookingInfo(booking));
                 }
 
-                dayEvent.setBookingInfos(bookingInfos);
+                if(bookingInfos.size() > 0) {
+                    dayEvent.setBookingInfos(bookingInfos);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return dayEvent;
+    }
+
+    public DayEvent getPhotographerEventOnDayForCustomer(long ptgId, String date) {
+        DayEvent dayEvent = new DayEvent();
+        Date from;
+        Date to;
+        List<BusyDay> busyDays;
+        List<Booking> bookings;
+        List<BookingInfo> bookingInfos = new ArrayList<>();
+        try {
+            String fromStr = date + " 00:00";
+            String toStr = date + " 23:59";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime localFrom = LocalDateTime.parse(fromStr, formatter);
+            LocalDateTime localTo = LocalDateTime.parse(toStr, formatter);
+            from = DateHelper.convertToDateViaInstant(localFrom);
+            to = DateHelper.convertToDateViaInstant(localTo);
+            busyDays = busyDayRepository.findByPhotographerIdBetweenStartDateEndDate(ptgId, from, to);
+
+            if(busyDays.size() > 0) {
+                dayEvent.setBusyDays(busyDays);
+                dayEvent.setBusyDay(true);
+            } else {
+                // find on going booking
+                bookings = bookingRepository.findOngoingBookingOnDate(from, to, ptgId);
+                for(Booking booking : bookings) {
+                    for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
+                        bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                    }
+                }
+
+                if(bookingInfos.size() > 0) {
+                    dayEvent.setBookingInfos(bookingInfos);
+                }
             }
         } catch (Exception e) {
             System.out.println(e);

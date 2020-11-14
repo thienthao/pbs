@@ -1,3 +1,4 @@
+import 'package:customer_app_java_support/constant/city_location.dart';
 import 'package:customer_app_java_support/screens/home_screens/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,13 +15,12 @@ class _SliverItemsState extends State<SliverItems> {
   var locationResult = {};
   double cuLat = 0;
   double cuLong = 0;
-  double destinationLat = 11.939346;
-  double destinationLong = 108.445173;
+  String image;
 
   getCurrentLocation() async {
     try {
-      Position position =
-          await getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       setState(() {
         cuLat = position.latitude;
         cuLong = position.longitude;
@@ -36,13 +36,27 @@ class _SliverItemsState extends State<SliverItems> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
         Positioned.fill(
-          child: Image.asset(
-            'assets/images/dalat.jpg',
-            fit: BoxFit.cover,
+          child: Container(
+            decoration: BoxDecoration(
+                color: Colors.black,
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.7), BlendMode.dstATop),
+                  image: NetworkImage(
+                    image ??
+                        'https://i.pinimg.com/564x/52/d2/94/52d294e56bd9dbf4ebb46099753e69ba.jpg',
+                  ),
+                )),
           ),
         ),
         Container(
@@ -81,7 +95,18 @@ class _SliverItemsState extends State<SliverItems> {
                     setState(() {
                       locationResult = pageResult;
                       widget.onChangeLocation(locationResult);
-                      print(locationResult);
+                      for (var city in listCityLocations) {
+                        print(locationResult['name'].toString());
+                        if (locationResult['name']
+                                .toString()
+                                .compareTo(city.name) ==
+                            0) {
+                          return image = city.image;
+                        } else {
+                          image =
+                              'https://pix10.agoda.net/hotelImages/4410136/-1/0048c77b8b106c212bb7a6690c14d7b9.jpg?s=1024x768';
+                        }
+                      }
                     });
                   },
                   shape: RoundedRectangleBorder(

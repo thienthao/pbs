@@ -7,6 +7,7 @@ class DropMenu extends StatefulWidget {
   List<PackageBlocModel> blocPackages;
   PackageBlocModel selectedPackage;
   Function(PackageBlocModel) onSelectParam;
+
   DropMenu({this.blocPackages, this.selectedPackage, this.onSelectParam});
 
   @override
@@ -16,12 +17,18 @@ class DropMenu extends StatefulWidget {
 class _DropMenuState extends State<DropMenu> {
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   List<DropdownMenuItem<PackageBlocModel>> dropDownMenuItems;
+  List<PackageBlocModel> listPackages = List<PackageBlocModel>();
 
   PackageBlocModel selectedPackage;
 
   @override
   void initState() {
-    dropDownMenuItems = buildDropdownMenuItems(widget.blocPackages);
+    for (PackageBlocModel package in widget.blocPackages) {
+      if (!package.supportMultiDays) {
+        listPackages.add(package);
+      }
+    }
+    dropDownMenuItems = buildDropdownMenuItems(listPackages);
     selectedPackage = widget.selectedPackage;
     super.initState();
   }

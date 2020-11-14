@@ -59,4 +59,16 @@ class BookingStateSuccess extends BookingState {
   String toString() => 'BookingsLoadSuccess { Booking: $bookings }';
 }
 
+class BookingStateGetBookingByDateSuccess extends BookingState {
+  final List<BookingBlocModel> listBookings;
+  const BookingStateGetBookingByDateSuccess({@required this.listBookings})
+      : assert(listBookings != null);
+  @override
+  List<Object> get props => [listBookings];
+
+  @override
+  String toString() =>
+      'BookingStateGetBookingByDateSuccess { listBookingByDate: $listBookings }';
+}
+
 class BookingStateFailure extends BookingState {}

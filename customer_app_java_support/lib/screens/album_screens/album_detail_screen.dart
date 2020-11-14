@@ -160,7 +160,6 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                           (CardSwipeOrientation orientation, int index) {
                         setState(() {
                           if (indexOfAlbum < widget.album.images.length) {
-                            print(indexOfAlbum);
                             indexOfAlbum = index + 2;
                           }
                         });

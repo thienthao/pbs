@@ -34,7 +34,7 @@ class Photographer extends Equatable {
       this.albums});
 
   @override
-  // TODO: implement props
+  
   List<Object> get props => [
         id,
         username,

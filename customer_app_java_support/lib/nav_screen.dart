@@ -1,14 +1,15 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/globals.dart' as globals;
+import 'package:customer_app_java_support/plane_indicator.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/screens/forum_screen/forum_screen.dart';
 import 'package:customer_app_java_support/screens/profile_screens/profile_screen.dart';
-import 'package:customer_app_java_support/shared/loading_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:http/http.dart' as http;
+
 import 'blocs/album_blocs/album.dart';
-import 'blocs/bloc_observer.dart';
 import 'blocs/category_blocs/categories.dart';
 import 'blocs/photographer_alg_blocs/photographers_alg.dart';
 import 'blocs/photographer_blocs/photographers.dart';
@@ -17,8 +18,6 @@ import 'respositories/category_respository.dart';
 import 'respositories/photographer_respository.dart';
 import 'screens/history_screens/history_screen.dart';
 import 'screens/home_screens/home_screen.dart';
-import 'package:customer_app_java_support/globals.dart' as globals;
-import 'package:http/http.dart' as http;
 
 // ignore: must_be_immutable
 class NavScreen extends StatefulWidget {
@@ -69,7 +68,7 @@ class _NavScreenState extends State<NavScreen> {
                 BookingBloc(bookingRepository: _bookingRepository),
           ),
         ],
-        child: HomeScreen(),
+        child: PlaneIndicator(child: HomeScreen()),
       ),
       ForumPage(),
       MultiBlocProvider(

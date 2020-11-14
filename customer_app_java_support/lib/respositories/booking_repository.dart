@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/';
 
@@ -27,14 +27,30 @@ class BookingRepository {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['bookings'] as List;
 
-      print('get list booking $list');
       final List<BookingBlocModel> bookings = list.map((booking) {
         final tempPhotographer = booking['photographer'] as Map;
+        final tempTimeAndLocations = booking['timeLocationDetails'] as List;
+        bool isMultiDay = false;
+        if(tempTimeAndLocations.length >1) {
+          isMultiDay = true;
+        }
         Photographer photographer = Photographer(
             id: tempPhotographer['id'],
             fullname: tempPhotographer['fullname'],
             ratingCount: tempPhotographer['ratingCount'],
             avatar: tempPhotographer['avatar']);
+
+       final List<TimeAndLocationBlocModel> listTimeAndLocations =
+          tempTimeAndLocations.map((item) {
+        return TimeAndLocationBlocModel(
+            id: item['id'],
+            start: item['start'],
+            end: item['end'],
+            formattedAddress: item['formattedAddress'],
+            latitude: item['lat'],
+            longitude: item['lon']);
+      }).toList();
+
         return BookingBlocModel(
           id: booking['id'],
           status: booking['bookingStatus'],
@@ -51,15 +67,15 @@ class BookingRepository {
           rejectedReason: booking['rejectedReason'],
           rating: booking['rating'] ?? 0.0,
           comment: booking['comment'],
-          location: booking['location'] ?? '',
+          address: booking['location'] ?? '',
+          isMultiday: isMultiDay,
           commentDate: booking['commentDate'],
+          listTimeAndLocations: listTimeAndLocations,
           photographer: photographer,
         );
       }).toList();
-      print('Tất cả các bookings $bookings');
       return bookings;
     } else {
-      throw Exception('Error getting list of bookings');
     }
   }
 
@@ -92,6 +108,20 @@ class BookingRepository {
       for (final service in tempServices) {
         services.add(service['name']);
       }
+
+      final tempTimeAndLocations = data['timeLocationDetails'] as List;
+
+      final List<TimeAndLocationBlocModel> listTimeAndLocations =
+          tempTimeAndLocations.map((item) {
+        return TimeAndLocationBlocModel(
+            id: item['id'],
+            start: item['start'],
+            end: item['end'],
+            formattedAddress: item['formattedAddress'],
+            latitude: item['lat'],
+            longitude: item['lon']);
+      }).toList();
+
       final booking = BookingBlocModel(
         id: data['id'],
         status: data['bookingStatus'],
@@ -106,10 +136,14 @@ class BookingRepository {
         rejectedReason: data['rejectedReason'] ?? '',
         rating: data['rating'] ?? 0.0,
         comment: data['comment'] ?? '',
-        location: data['location'] ?? '',
+        address: data['location'] ?? '',
         commentDate: data['commentDate'],
         photographer: photographer,
         services: services ?? [],
+        isMultiday: data['servicePackage']['supportMultiDays'],
+        editDeadLine: data['editDeadline'],
+        returningType: data['returningType']['id'],
+        listTimeAndLocations: listTimeAndLocations,
         packageDescription: data['servicePackage']['description'] ?? '',
         package: package ?? [],
       );
@@ -121,6 +155,7 @@ class BookingRepository {
   }
 
   Future<bool> createBooking(BookingBlocModel booking) async {
+    print(booking.listTimeAndLocations[0].formattedAddress);
     var resBody = {};
     var ptgResBody = {};
     var cusResBody = {};
@@ -128,35 +163,43 @@ class BookingRepository {
     var bookingDetailResBody = [];
     var serviceResBody = {};
     var returningTypeResBody = {};
+    var timeLocationDetailsResbody = [];
+    var timeLocationDetailObject = {};
 
-    resBody["startDate"] = booking.startDate;
-    resBody["endDate"] = booking.endDate;
     resBody["serviceName"] = booking.serviceName;
+
     resBody["price"] = booking.price;
-    resBody["location"] = booking.location;
 
-    ptgResBody["id"] = booking.photographer.id;
-    resBody["photographer"] = ptgResBody;
-
-    for (var service in booking.package.serviceDtos) {
-      serviceResBody["serviceName"] = service.name;
-      serviceResBody["serviceDescription"] = service.description;
-      bookingDetailResBody.add(serviceResBody);
-    }
-    packageResBody["id"] = booking.package.id;
-    resBody["servicePackage"] = packageResBody;
-
-    resBody["bookingDetails"] = bookingDetailResBody;
+    resBody["editDeadline"] = booking.editDeadLine;
 
     cusResBody["id"] = "2";
     resBody["customer"] = cusResBody;
 
+    ptgResBody["id"] = booking.photographer.id;
+    resBody["photographer"] = ptgResBody;
+
+    packageResBody["id"] = booking.package.id;
+    resBody["servicePackage"] = packageResBody;
+
     returningTypeResBody["id"] = booking.returningType;
     resBody["returningType"] = returningTypeResBody;
 
-    String str = json.encode(resBody);
-    print(str);
+    for (var service in booking.package.serviceDtos) {
+      serviceResBody["serviceName"] = service.name;
+      bookingDetailResBody.add(serviceResBody);
+    }
+    resBody["bookingDetails"] = bookingDetailResBody;
 
+    for (var item in booking.listTimeAndLocations) {
+      timeLocationDetailObject["lat"] = item.latitude;
+      timeLocationDetailObject["lon"] = item.longitude;
+      timeLocationDetailObject["formattedAddress"] = item.formattedAddress;
+      timeLocationDetailObject["start"] = item.start;
+      timeLocationDetailObject["end"] = item.end;
+      timeLocationDetailsResbody.add(timeLocationDetailObject);
+    }
+    resBody["timeLocationDetails"] = timeLocationDetailsResbody;
+    String str = json.encode(resBody);
     final response = await httpClient.post(baseUrl + 'bookings',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
@@ -165,7 +208,6 @@ class BookingRepository {
 
     bool result = false;
     if (response.statusCode == 200) {
-      print('create $result');
       result = true;
     } else {
       throw Exception('Error Create a Booking');
@@ -194,7 +236,6 @@ class BookingRepository {
     resBody["customer"] = cusResBody;
 
     String str = json.encode(resBody);
-    print(str);
 
     final response = await httpClient.put(baseUrl + 'bookings/cancel',
         headers: {
@@ -210,5 +251,31 @@ class BookingRepository {
     }
 
     return result;
+  }
+
+  Future<List<BookingBlocModel>> getBookingsByDate(int id, String date) async {
+    final response = await this
+        .httpClient
+        .get(baseUrl + 'photographers/$id/on-day?date=$date', headers: {
+      HttpHeaders.authorizationHeader: 'Bearer ' +
+          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
+    });
+    print(baseUrl + 'photographers/$id/on-day?date=$date');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      final bookingInfos = data['bookingInfos'] as List;
+      print(bookingInfos.length);
+      List<BookingBlocModel> listBookings = bookingInfos.map((booking) {
+        return BookingBlocModel(
+            id: booking['id'],
+            latitude: booking['lat'],
+            startDate: booking['start'],
+            endDate: booking['end']);
+      }).toList();
+
+      return listBookings;
+    } else {
+      throw Exception('Error getting Photographer Calendar');
+    }
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/screens/history_screens/location_guide.dart';
 import 'package:customer_app_java_support/screens/rating_screen/rating_screen.dart';
@@ -77,7 +78,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 10),
+              padding: EdgeInsets.only(left: 10),
               child: Text(
                 'Nhận xét của tôi',
                 style: TextStyle(
@@ -88,39 +89,42 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                        transitionDuration: Duration(milliseconds: 1000),
-                        transitionsBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secAnimation,
-                            Widget child) {
-                          animation = CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.fastLinearToSlowEaseIn);
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1, 0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        pageBuilder: (BuildContext context,
-                            Animation<double> animation,
-                            Animation<double> secAnimation) {
-                          return RatingScreen();
-                        }));
-              },
-              child: Text(
-                'Nhận xét',
-                style: TextStyle(
-                    color: Colors.cyan,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15.0),
+            Padding(
+              padding: EdgeInsets.only(right: 20),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                          transitionDuration: Duration(milliseconds: 1000),
+                          transitionsBuilder: (BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secAnimation,
+                              Widget child) {
+                            animation = CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.fastLinearToSlowEaseIn);
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(1, 0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            );
+                          },
+                          pageBuilder: (BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secAnimation) {
+                            return RatingScreen();
+                          }));
+                },
+                child: Text(
+                  'Nhận xét',
+                  style: TextStyle(
+                      color: Colors.cyan,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15.0),
+                ),
               ),
             ),
           ],
@@ -375,7 +379,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     width: 10.0,
                   ),
                   Text(
-                    'Giao hàng qua ứng dụng',
+                    bookingObj.returningType == 1
+                        ? 'Giao hàng qua ứng dụng'
+                        : 'Gặp mặt',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -640,8 +646,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             FlatButton(
               child: Text('Xác nhận'),
               onPressed: () {
-                print(
-                    '${bookingObj.id} ${bookingObj.photographer.id}, ${bookingObj.package.id}');
                 BookingBlocModel booking = BookingBlocModel(
                     id: bookingObj.id,
                     customerCanceledReason: _reasonTextController.text,
@@ -694,12 +698,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
 
   getCurrentLocation() async {
-    Position position =
-        await getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       cuLat = position.latitude;
       cuLong = position.longitude;
-      print('${cuLat} + ${cuLat}');
+      print('cuLat + cuLat');
     });
   }
 
@@ -713,9 +717,418 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   _loadBookingDetail() async {
-    context
-        .bloc<BookingBloc>()
+    BlocProvider.of<BookingBloc>(context)
         .add(BookingEventDetailFetch(id: widget.bookingId));
+  }
+
+  Widget _buildTimeAndLocationList(
+      List<TimeAndLocationBlocModel> listTimeAndLocation) {
+    return Column(
+      children: listTimeAndLocation.asMap().entries.map((MapEntry mapEntry) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+                context,
+                PageRouteBuilder(
+                    transitionDuration: Duration(milliseconds: 1000),
+                    transitionsBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secAnimation,
+                        Widget child) {
+                      animation = CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.fastLinearToSlowEaseIn);
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+                    pageBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secAnimation) {
+                      return Guide(
+                        currentLatitude: cuLat,
+                        currentLongitude: cuLong,
+                        destinationLatitude:
+                            listTimeAndLocation[mapEntry.key].latitude,
+                        destinationLongtitude:
+                            listTimeAndLocation[mapEntry.key].longitude,
+                      );
+                    }));
+          },
+          child: Container(
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.grey[300],
+                    offset: Offset(-1.0, 2.0),
+                    blurRadius: 6.0)
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  height: 90.0,
+                  width: 70.0,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).accentColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Ngày ${mapEntry.key + 1}',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.0),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Theme.of(context).primaryColor,
+                            size: 15.0,
+                          ),
+                          SizedBox(width: 5.0),
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.50,
+                            child: Text(
+                              listTimeAndLocation[mapEntry.key]
+                                  .formattedAddress,
+                              maxLines: null,
+                              style: TextStyle(
+                                fontSize: 13.0,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 5.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.timer,
+                            color: Theme.of(context).primaryColor,
+                            size: 15.0,
+                          ),
+                          SizedBox(width: 5.0),
+                          Text(
+                            DateFormat("dd/MM/yyyy HH:mm a").format(
+                                DateTime.parse(
+                                    listTimeAndLocation[mapEntry.key].start)),
+                            maxLines: 3,
+                            style: TextStyle(
+                              fontSize: 13.0,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTimeAndLocationInfoMultiDay(BookingBlocModel bookingBlocModel) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey[300],
+              offset: Offset(-1.0, 2.0),
+              blurRadius: 6.0)
+        ],
+      ),
+      padding: EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Trạng thái:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      statusFormat(bookingBlocModel.status),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Thời gian bắt đầu:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      TextSpan(
+                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                              DateTime.parse(bookingBlocModel.startDate)),
+                          style: TextStyle(fontWeight: FontWeight.normal)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Thời gian nhận ảnh:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      TextSpan(
+                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                              DateTime.parse(bookingBlocModel.editDeadLine)
+                                  .add(Duration(days: 5))),
+                          style: TextStyle(fontWeight: FontWeight.normal)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text('Địa điểm và thời gian cụ thể:   ',
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold)),
+                SizedBox(
+                  height: 10,
+                ),
+                _buildTimeAndLocationList(
+                    bookingBlocModel.listTimeAndLocations),
+                SizedBox(
+                  height: 10,
+                ),
+                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
+                SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeAndLocationInfoSingleDay(BookingBlocModel bookingBlocModel) {
+    return Container(
+      margin: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey[300],
+              offset: Offset(-1.0, 2.0),
+              blurRadius: 6.0)
+        ],
+      ),
+      padding: EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 0.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Trạng thái:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      statusFormat(bookingBlocModel.status),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Thời gian chụp:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      TextSpan(
+                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                              DateTime.parse(bookingBlocModel.startDate)),
+                          style: TextStyle(fontWeight: FontWeight.normal)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Thời gian tác nghiệp dự kiến:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      TextSpan(
+                          text: '6 giờ',
+                          style: TextStyle(fontWeight: FontWeight.normal)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: '',
+                    style:
+                        TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: 'Thời gian nhận ảnh:   ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                      TextSpan(
+                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                              DateTime.parse(bookingBlocModel.editDeadLine)),
+                          style: TextStyle(fontWeight: FontWeight.normal)),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: RichText(
+                        text: TextSpan(
+                          text: '',
+                          style: TextStyle(
+                              color: Colors.black, fontFamily: 'Quicksand'),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: 'Địa điểm:  ',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold)),
+                            TextSpan(
+                                text: bookingBlocModel.listTimeAndLocations[0].formattedAddress,
+                                style:
+                                    TextStyle(fontWeight: FontWeight.normal)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Guide(
+                                    currentLatitude: cuLat,
+                                    currentLongitude: cuLong,
+                                    destinationLatitude: bookingBlocModel.listTimeAndLocations[0].latitude,
+                                    destinationLongtitude: bookingBlocModel.listTimeAndLocations[0].longitude,
+                                  )),
+                        );
+                      },
+                      child: Icon(
+                        Icons.location_pin,
+                        size: 30,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
+                SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -743,7 +1156,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               builder: (context, bookingState) {
                 if (bookingState is BookingDetailStateSuccess) {
                   bookingObj = bookingState.booking;
-                  print(bookingObj.comment);
                   if (bookingState.booking == null) {
                     return Text(
                       'Đà Lạt',
@@ -777,205 +1189,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ),
                             ),
                           ),
+///////////////////////////////////info
 
-                          Container(
-                            margin: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.grey[300],
-                                    offset: Offset(-1.0, 2.0),
-                                    blurRadius: 6.0)
-                              ],
-                            ),
-                            padding: EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                      10.0, 10.0, 10.0, 0.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          text: '',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: 'Quicksand'),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text: 'Trạng thái:   ',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            statusFormat(
-                                                bookingState.booking.status),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      RichText(
-                                        text: TextSpan(
-                                          text: '',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: 'Quicksand'),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text: 'Thời gian chụp:   ',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            TextSpan(
-                                                text: DateFormat(
-                                                        'dd/MM/yyyy hh:mm a')
-                                                    .format(DateTime.parse(
-                                                        bookingState.booking
-                                                            .startDate)),
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal)),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      RichText(
-                                        text: TextSpan(
-                                          text: '',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: 'Quicksand'),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text:
-                                                    'Thời gian tác nghiệp dự kiến:   ',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            TextSpan(
-                                                text: '6 giờ',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal)),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      RichText(
-                                        text: TextSpan(
-                                          text: '',
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: 'Quicksand'),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                                text: 'Thời gian nhận ảnh:   ',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            TextSpan(
-                                                text: DateFormat(
-                                                        'dd/MM/yyyy hh:mm a')
-                                                    .format(DateTime.parse(
-                                                        bookingState
-                                                            .booking.endDate)),
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal)),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Flexible(
-                                            child: RichText(
-                                              text: TextSpan(
-                                                text: '',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontFamily: 'Quicksand'),
-                                                children: <TextSpan>[
-                                                  TextSpan(
-                                                      text: 'Địa điểm:  ',
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  TextSpan(
-                                                      text: bookingState
-                                                          .booking.location,
-                                                      style: TextStyle(
-                                                          fontWeight: FontWeight
-                                                              .normal)),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) => Guide(
-                                                          currentLatitude:
-                                                              cuLat,
-                                                          currentLongitude:
-                                                              cuLong,
-                                                          destinationLatitude:
-                                                              destinationLat,
-                                                          destinationLongtitude:
-                                                              destinationLong,
-                                                        )),
-                                              );
-                                            },
-                                            child: Icon(
-                                              Icons.location_pin,
-                                              size: 30,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      displayCancelReasonBasedOnStatus(
-                                          bookingState.booking.status),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          bookingState.booking.isMultiday
+                              ? _buildTimeAndLocationInfoMultiDay(
+                                  bookingState.booking)
+                              : _buildTimeAndLocationInfoSingleDay(
+                                  bookingState.booking),
                           SizedBox(
                             height: 20,
                           ),

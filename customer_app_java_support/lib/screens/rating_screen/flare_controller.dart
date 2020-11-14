@@ -4,7 +4,7 @@ import 'package:flare_flutter/flare_controller.dart';
 import 'dart:math' as math;
 
 class FlareRateController extends FlareController {
-  FlutterActorArtboard _artboard;
+  // FlutterActorArtboard _artboard;
   ActorAnimation _rateAnimation;
 
   double _slidePercent = 0.0;
@@ -18,7 +18,7 @@ class FlareRateController extends FlareController {
   @override
   void initialize(FlutterActorArtboard artboard) {
     if (artboard.name.compareTo('Artboard') == 0) {
-      _artboard = artboard;
+      // _artboard = artboard;
       _rateAnimation = artboard.getAnimation('slide');
     }
   }
@@ -39,6 +39,5 @@ class FlareRateController extends FlareController {
 
   @override
   void setViewTransform(Mat2D viewTransform) {
-    // TODO: implement setViewTransform
   }
 }

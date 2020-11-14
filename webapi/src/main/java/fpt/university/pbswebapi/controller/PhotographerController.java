@@ -179,12 +179,6 @@ public class PhotographerController {
         return new ResponseEntity<>(searchDto, HttpStatus.OK);
     }
 
-    // api get lich (sau khi them goi nhieu ngay)
-    @GetMapping("/{ptgId}/calendar")
-    public ResponseEntity<?> getCalendar(@PathVariable("ptgId") long ptgId) {
-        return new ResponseEntity<>(phtrService.getCalendar(ptgId), HttpStatus.OK);
-    }
-
     @PostMapping(value = "/{id}/upload",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
                 produces = MediaType.APPLICATION_JSON_VALUE)
@@ -261,9 +255,25 @@ public class PhotographerController {
         }
     }
 
+    // api get lich (sau khi them goi nhieu ngay)
+    @GetMapping("/{ptgId}/calendar")
+    public ResponseEntity<?> getCalendar(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getCalendar(ptgId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/calendar/for-customer")
+    public ResponseEntity<?> getCalendarForCustomer(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getCalendarForCustomer(ptgId), HttpStatus.OK);
+    }
+
     @GetMapping("/{ptgId}/on-day")
     public ResponseEntity<?> getPhotographerEventOnDay(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
         return new ResponseEntity<>(phtrService.getPhotographerEventOnDay(ptgId, date), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/on-day/for-customer")
+    public ResponseEntity<?> getPhotographerEventOnDayForCustomer(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
+        return new ResponseEntity<>(phtrService.getPhotographerEventOnDayForCustomer(ptgId, date), HttpStatus.OK);
     }
 
     @PostMapping("/{ptgId}/working-days")

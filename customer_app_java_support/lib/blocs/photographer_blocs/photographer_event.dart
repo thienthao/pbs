@@ -1,6 +1,7 @@
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 abstract class PhotographerEvent extends Equatable {
   const PhotographerEvent();
@@ -11,8 +12,9 @@ abstract class PhotographerEvent extends Equatable {
 
 class PhotographerEventFetch extends PhotographerEvent {
   final int categoryId;
+  final LatLng latLng;
 
-  PhotographerEventFetch({this.categoryId});
+  PhotographerEventFetch({this.categoryId, this.latLng});
 }
 
 class PhotographerRestartEvent extends PhotographerEvent {}

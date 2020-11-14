@@ -65,7 +65,6 @@ class _SearchPtgServiceState extends State<SearchPtgService>
   }
 
   void onSubmitted(String value) {
-    print('$value');
     _searchPhotographerAndPackage(value);
   }
 
@@ -194,6 +193,7 @@ Widget listService(List<PackageBlocModel> listPackages) {
   } else {
     return ListView.builder(
       itemCount: listPackages.length,
+      physics: BouncingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
         PackageBlocModel package = listPackages[index];
         return Card(
@@ -212,23 +212,27 @@ Widget listService(List<PackageBlocModel> listPackages) {
                   child: Icon(Icons.category),
                 ),
                 SizedBox(width: 20.0),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      package.name,
-                      style: TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold),
+                Container(
+                  child: Flexible(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          package.name,
+                          style: TextStyle(
+                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Text(
+                          ' tạo bởi ${package.photographer.fullname}',
+                          style: TextStyle(fontSize: 11.0, color: Colors.grey),
+                        ),
+                      ],
                     ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    Text(
-                      ' tạo bởi ${package.id}',
-                      style: TextStyle(fontSize: 11.0, color: Colors.grey),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),

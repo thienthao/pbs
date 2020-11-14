@@ -1,5 +1,4 @@
 import 'package:customer_app_java_support/models/comment_bloc_model.dart';
-import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
