@@ -2,9 +2,11 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
+import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.repository.BookingRepository;
+import fpt.university.pbswebapi.repository.CommentRepository;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
 import fpt.university.pbswebapi.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,20 +233,8 @@ public class BookingController {
             @PathVariable("id") Long photographerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        List<Booking> bookings = bookingRepository.findBookingsOfPhotographer(photographerId);
-        List<CommentDto> commentDtos = new ArrayList<>();
-        for(Booking booking : bookings) {
-            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
-        }
-        int arrSize = commentDtos.size();
-        if(arrSize < size) {
-            size = arrSize;
-        }
-        try {
-            return new ResponseEntity<>(commentDtos.subList(0, size), HttpStatus.OK);
-        } catch (IndexOutOfBoundsException e) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-        }
+        Pageable pageable = PageRequest.of(page, size);
+        return new ResponseEntity<List<CommentDto>>(bookingService.findCommentsOfPhotographer(photographerId, pageable) ,HttpStatus.OK);
     }
 
     @PostMapping
@@ -325,6 +315,21 @@ public class BookingController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
         return user.getId();
+    }
+
+    @GetMapping("/{bookingId}/comments")
+    public ResponseEntity<?> findCommentsOfBooking(@PathVariable("bookingId") long bookingId) {
+        return new ResponseEntity<>(bookingService.findCommentsOfBooking(bookingId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{bookingId}/comments/json")
+    public ResponseEntity<?> findCommentsOfBookingTest(@PathVariable("bookingId") long bookingId) {
+        return new ResponseEntity<>(bookingService.getCommentJson(bookingId), HttpStatus.OK);
+    }
+
+    @PostMapping("/{bookingId}/comments")
+    public ResponseEntity<?> findCommentsOfBooking(@PathVariable("bookingId") long bookingId, @RequestBody BookingComment comment) {
+        return new ResponseEntity<>(bookingService.comment(comment), HttpStatus.OK);
     }
 
     private Boolean isBookingOfUser(Long bookingUserId) {

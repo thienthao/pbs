@@ -1,9 +1,13 @@
 package fpt.university.pbswebapi.service;
 
+import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
+import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
 import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.BookingRepository;
+import fpt.university.pbswebapi.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,19 +16,18 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class BookingService {
 
     private BookingRepository bookingRepository;
+    private CommentRepository commentRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     public Booking book(Booking booking) {
@@ -90,6 +93,32 @@ public class BookingService {
             }
         } catch (Exception e) {
             System.out.println(e);
+        }
+        return result;
+    }
+
+    public List<CommentDto> findCommentsOfBooking(long bookingId) {
+        List<BookingComment> comments = commentRepository.findAllByBookingId(bookingId);
+        List<CommentDto> result = new ArrayList<>();
+        for(BookingComment comment : comments) {
+            result.add(DtoMapper.toCommentDto(comment));
+        }
+        return result;
+    }
+
+    public List<BookingComment> getCommentJson(long bookingId) {
+        return commentRepository.findAllByBookingId(bookingId);
+    }
+
+    public BookingComment comment(BookingComment comment) {
+        return commentRepository.save(comment);
+    }
+
+    public List<CommentDto> findCommentsOfPhotographer(Long photographerId, Pageable pageable) {
+        List<BookingComment> comments = commentRepository.findCommentOfPhotographer(photographerId, pageable);
+        List<CommentDto> result = new ArrayList<>();
+        for(BookingComment comment : comments) {
+            result.add(DtoMapper.toCommentDto(comment));
         }
         return result;
     }
