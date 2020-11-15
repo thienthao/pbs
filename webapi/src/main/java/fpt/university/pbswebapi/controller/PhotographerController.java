@@ -216,6 +216,16 @@ public class PhotographerController {
         return new ResponseEntity<>(phtrService.addBusyDays(ptgId, busyDay), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{ptgId}/busydays")
+    public ResponseEntity<?> deleteBusyDays(@PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.deleteBusyDay(ptgId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/busydays/json")
+    public ResponseEntity<?> testBusyDays(@PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.testBusyDays(ptgId), HttpStatus.OK);
+    }
+
     @GetMapping(value = "/{id}/download",
                 produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] downloadAvatar(@PathVariable("id") String id) {

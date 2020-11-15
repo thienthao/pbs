@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.dto.CommentDto;
+import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
@@ -21,17 +22,136 @@ import java.util.*;
 @Service
 public class BookingService {
 
-    private BookingRepository bookingRepository;
-    private CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
+    private final FCMService fcmService;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, FCMService fcmService) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.fcmService = fcmService;
     }
 
     public Booking book(Booking booking) {
-        return bookingRepository.save(booking);
+        Booking result = bookingRepository.save(booking);
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Yêu cầu đặt hẹn mới");
+        notiRequest.setBody("Bạn nhận được yêu cầu đặt hẹn từ " + result.getCustomer().getFullname());
+        notiRequest.setToken(result.getPhotographer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+        return result;
+    }
+
+    public Booking accept(Booking booking) {
+        // if status not hop ly
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 1");
+//        }
+        savedBooking.setBookingStatus(EBookingStatus.ONGOING);
+        Booking result = bookingRepository.save(savedBooking);
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Đặt hẹn thành công");
+        notiRequest.setBody(result.getPhotographer().getFullname() + " đã chấp nhận yêu cầu từ bạn.");
+        notiRequest.setToken(result.getPhotographer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+        return result;
+    }
+
+    public Booking reject(Booking booking) {
+        // if status not hop ly
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 1");
+//        }
+
+        savedBooking.setBookingStatus(EBookingStatus.REJECTED);
+        savedBooking.setRejectedReason(booking.getRejectedReason());
+        Booking result = bookingRepository.save(savedBooking);
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Rất tiếc, đặt hẹn thất bại");
+        notiRequest.setBody(result.getPhotographer().getFullname() + " đã không thể chấp nhận yêu cầu từ bạn.");
+        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+        return result;
+    }
+
+    public Booking cancelForCustomer(Booking booking) {
+        // if status not hop ly
+        // check co dung nguoi ko
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
+
+        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
+        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
+        Booking result = bookingRepository.save(savedBooking);
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
+        notiRequest.setBody(result.getCustomer().getFullname() + " đã hủy cuộc hẹn.");
+        notiRequest.setToken(result.getPhotographer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+        return result;
+    }
+
+    public Booking cancelForPhotographer(Booking booking) {
+        // if status not hop ly
+        // check co dung nguoi ko
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
+
+        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
+        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
+        Booking result = bookingRepository.save(savedBooking);
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
+        notiRequest.setBody(result.getPhotographer().getFullname() + " đã hủy cuộc hẹn.");
+        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+        return result;
+    }
+
+    public Booking editing(Booking booking) {
+        // if status not hop ly
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
+
+        savedBooking.setBookingStatus(EBookingStatus.EDITING);
+        Booking result = bookingRepository.save(savedBooking);
+        return result;
+    }
+
+    public Booking done(Booking booking) {
+        // if status not hop ly
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
+//            throw new BadRequestException("Booking not found - Code 2");
+//        }
+
+        savedBooking.setBookingStatus(EBookingStatus.DONE);
+        savedBooking.setComment(booking.getComment());
+        savedBooking.setRating(booking.getRating());
+        Booking result = bookingRepository.save(savedBooking);
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Đơn chụp hình thành công");
+        notiRequest.setBody("Đơn chụp hình với " + savedBooking.getPhotographer().getFullname() + " đã hoàn tất.");
+        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        return result;
     }
 
     public Page<Booking> findByStatus(EBookingStatus status, Pageable paging, Long userId) {

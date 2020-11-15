@@ -706,4 +706,13 @@ public class PhotographerService {
     public List<DayOfWeek> getWorkingDay(long ptgId) {
         return workingDayRepository.findAllByPhotographerId(ptgId);
     }
+
+    public List<BusyDay> testBusyDays(Long ptgId) {
+        return busyDayRepository.findAllByPhotographerId(ptgId);
+    }
+
+    public String deleteBusyDay(Long ptgId) {
+        busyDayRepository.deleteById(ptgId);
+        return "Delete success";
+    }
 }

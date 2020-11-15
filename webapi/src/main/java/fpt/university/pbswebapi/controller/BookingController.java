@@ -245,70 +245,34 @@ public class BookingController {
         return new ResponseEntity<Booking>(bookingService.book(booking), HttpStatus.OK);
     }
 
-    @PutMapping("/cancel")
-    public ResponseEntity<Booking> cancel(@RequestBody Booking booking) {
-        // if status not hop ly
-        // check co dung nguoi ko
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
+    @PutMapping("/cancel/customer")
+    public ResponseEntity<Booking> cancelForCustomer(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.cancelForCustomer(booking), HttpStatus.OK);
+    }
 
-        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
-        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
-        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+    @PutMapping("/cancel/photographer")
+    public ResponseEntity<Booking> cancelForPhotographer(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.cancelForPhotographer(booking), HttpStatus.OK);
     }
 
     @PutMapping("/reject")
     public ResponseEntity<Booking> reject(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 1");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.REJECTED);
-        savedBooking.setRejectedReason(booking.getRejectedReason());
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.reject(booking), HttpStatus.OK);
     }
 
     @PutMapping("/accept")
     public ResponseEntity<Booking> accept(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 1");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.ONGOING);
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.accept(booking), HttpStatus.OK);
     }
 
     @PutMapping("/done")
     public ResponseEntity<Booking> done(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.DONE);
-        savedBooking.setComment(booking.getComment());
-        savedBooking.setRating(booking.getRating());
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.done(booking), HttpStatus.OK);
     }
 
     @PutMapping("/editing")
     public ResponseEntity<Booking> editing(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.EDITING);
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.editing(booking), HttpStatus.OK);
     }
 
     private Long getCurrentUserId() {
