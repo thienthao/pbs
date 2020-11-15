@@ -29,7 +29,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.reverseOrder;
 import static org.apache.http.entity.ContentType.*;
@@ -711,8 +710,17 @@ public class PhotographerService {
         return busyDayRepository.findAllByPhotographerId(ptgId);
     }
 
-    public String deleteBusyDay(Long ptgId) {
-        busyDayRepository.deleteById(ptgId);
+    public String deleteBusyDay(Long busyDayId) {
+        busyDayRepository.deleteById(busyDayId);
         return "Delete success";
+    }
+
+    public List<Location> getPhotographerLocations() {
+        return locationRepository.findAll();
+    }
+
+    public Location addLocation(long ptgId, Location location) {
+        Location result = locationRepository.save(location);
+        return result;
     }
 }

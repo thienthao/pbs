@@ -17,4 +17,7 @@ public interface ServicePackageRepository extends JpaRepository<ServicePackage, 
 
     @Query("FROM ServicePackage p where p.photographer.id = :ptgId and p.isAvailable=true")
     Page<ServicePackage> findAllOfPhotographer(Long ptgId, Pageable pageable);
+
+//    @Query("select count(pc) from ServicePackage pc inner join Booking b where pc.id=:packageId")
+//    long countPackageBeingUsed(long packageId);
 }

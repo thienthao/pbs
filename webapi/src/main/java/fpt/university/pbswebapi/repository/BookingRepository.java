@@ -97,5 +97,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and b.bookingStatus='EDITING'")
     List<Booking> findEditingBookingOnDate(Date from, Date to, Long photographerId);
 
+    @Query("select count(b) from Booking b inner join b.servicePackage pc where pc.id=:packageId and b.bookingStatus<>'DONE'")
+    long countPackageBeingUsed(long packageId);
+
 
 }

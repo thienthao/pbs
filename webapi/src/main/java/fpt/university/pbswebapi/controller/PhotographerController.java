@@ -2,10 +2,7 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.PhotographerInfoDto;
 import fpt.university.pbswebapi.dto.SearchDto;
-import fpt.university.pbswebapi.entity.BusyDay;
-import fpt.university.pbswebapi.entity.DayOfWeek;
-import fpt.university.pbswebapi.entity.ServicePackage;
-import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
@@ -216,9 +213,9 @@ public class PhotographerController {
         return new ResponseEntity<>(phtrService.addBusyDays(ptgId, busyDay), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{ptgId}/busydays")
-    public ResponseEntity<?> deleteBusyDays(@PathVariable("ptgId") Long ptgId) {
-        return new ResponseEntity<>(phtrService.deleteBusyDay(ptgId), HttpStatus.OK);
+    @DeleteMapping("/{ptgId}/busydays/{busyDayId}")
+    public ResponseEntity<?> deleteBusyDays(@PathVariable("ptgId") Long ptgId, @PathVariable("busyDayId") long busyDayId) {
+        return new ResponseEntity<>(phtrService.deleteBusyDay(busyDayId), HttpStatus.OK);
     }
 
     @GetMapping("/{ptgId}/busydays/json")
@@ -299,5 +296,15 @@ public class PhotographerController {
     @PutMapping
     public ResponseEntity<?> editProfile(@RequestBody PhotographerInfoDto photographerDto) {
         return new ResponseEntity<>(phtrService.editInfo(photographerDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/locations")
+    public ResponseEntity<?> getPhotographerLocations() {
+        return new ResponseEntity<>(phtrService.getPhotographerLocations(), HttpStatus.OK);
+    }
+
+    @PostMapping("/{ptgId}/locations")
+    public ResponseEntity<?> addLocation(@PathVariable("ptgId") long ptgId, @RequestBody Location location) {
+        return new ResponseEntity<>(phtrService.addLocation(ptgId, location), HttpStatus.OK);
     }
 }
