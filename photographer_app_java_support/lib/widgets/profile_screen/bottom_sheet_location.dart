@@ -1,8 +1,8 @@
-import 'package:photographer_app_java_support/models/location.dart';
+import 'package:photographer_app_java_support/constant/city_location.dart';
 import 'package:flutter/material.dart';
 
 class BottomSheetLocation extends StatefulWidget {
-  final Location location;
+  final CityLocation location;
 
   BottomSheetLocation({this.location});
 
@@ -12,7 +12,7 @@ class BottomSheetLocation extends StatefulWidget {
 
 class _BottomSheetLocationState extends State<BottomSheetLocation> {
   bool sort = false;
-  List<Location> selectedLocation;
+  List<CityLocation> selectedLocation;
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
                         onSortColumn(columnIndex, ascending);
                       }),
                 ],
-                rows: locations
+                rows: listCityLocations
                     .map(
                       (location) => DataRow(
                         selected: selectedLocation.contains(location),
@@ -75,7 +75,7 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
                         },
                         cells: [
                           DataCell(
-                            Text(location.city),
+                            Text(location.name),
                           ),
                         ],
                       ),
@@ -107,14 +107,14 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
   onSortColumn(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       if (ascending) {
-        locations.sort((a, b) => a.city.compareTo(b.city));
+        listCityLocations.sort((a, b) => a.name.compareTo(b.name));
       } else {
-        locations.sort((a, b) => b.city.compareTo(a.city));
+        listCityLocations.sort((a, b) => b.name.compareTo(a.name));
       }
     }
   }
 
-  onSelectedRow(bool selected, Location location) async {
+  onSelectedRow(bool selected, CityLocation location) async {
     setState(() {
       if (selected) {
         selectedLocation.add(location);

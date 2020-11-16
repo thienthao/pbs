@@ -30,7 +30,6 @@ class _CalendarShowState extends State<CalendarShow> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     final _selectedDay = DateTime.now();
     widget.onSelectedDate(getFormatDate(_selectedDay));
@@ -46,6 +45,7 @@ class _CalendarShowState extends State<CalendarShow> {
   }
 
   void onTimeChanged(TimeOfDay newTime) {
+
     setState(() {
       _time = newTime;
     });

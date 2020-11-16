@@ -66,8 +66,8 @@ class BuildTask extends StatelessWidget {
                       SizedBox(height: 20.0),
                       Text(
                         booking.status == 'ONGOING'
-                            ? '${DateFormat("HH:mm").format(DateTime.parse(booking.startDate))}'
-                            : '${DateFormat("HH:mm").format(DateTime.parse(booking.endDate))}',
+                            ? '${DateFormat("HH:mm").format(DateTime.parse(booking.startDate).toLocal())}'
+                            : '${DateFormat("HH:mm").format(DateTime.parse(booking.endDate).toLocal())}',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 19.0,
@@ -179,15 +179,21 @@ class BuildTask extends StatelessWidget {
                               ),
                               Container(
                                 height: 25.0,
-                                width: 80.0,
+                                width: 85.0,
                                 decoration: BoxDecoration(
-                                  color: Colors.lightBlueAccent,
+                                  color: booking.status == 'ONGOING'
+                                      ? Colors.lightBlueAccent
+                                      : Colors.greenAccent,
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                                 child: Center(
                                     child: Text(
-                                  "Sắp diễn ra",
-                                  style: TextStyle(color: Colors.white),
+                                  booking.status == 'ONGOING'
+                                      ? "Sắp diễn ra"
+                                      : "Đang hậu kì",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 )),
                               ),
                             ],
@@ -266,43 +272,45 @@ class BuildTask extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: 5.0),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(right: 10.0),
-                                child: Icon(
-                                  Icons.location_on,
-                                  size: 15,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  right: 10.0,
-                                ),
-                                child: Text(
-                                  'Địa điểm:',
-                                  style: TextStyle(
-                                    fontSize: 15.0,
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Flexible(
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: 10),
-                                  child: Text(
-                                    booking.location,
-                                    style: TextStyle(
-                                      color: Colors.grey,
+                          booking.status == 'ONGOING'
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(right: 10.0),
+                                      child: Icon(
+                                        Icons.location_on,
+                                        size: 15,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        right: 10.0,
+                                      ),
+                                      child: Text(
+                                        'Địa điểm:',
+                                        style: TextStyle(
+                                          fontSize: 15.0,
+                                          color: Colors.black54,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 10),
+                                        child: Text(
+                                          booking.location ?? '',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox(),
                         ],
                       ),
                     ),

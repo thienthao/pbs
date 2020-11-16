@@ -179,8 +179,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   _loadBookingDetail() async {
-    context
-        .bloc<BookingBloc>()
+    BlocProvider.of<BookingBloc>(context)
         .add(BookingEventDetailFetch(id: widget.bookingId));
   }
 
@@ -199,8 +198,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         customer: CustomerBlocModel(id: _booking.customer.id),
         package: _booking.package);
     print('${bookingTemp.customer.id}');
-    context
-        .bloc<BookingBloc>()
+    BlocProvider.of<BookingBloc>(context)
         .add(BookingEventMoveToEdit(booking: bookingTemp));
   }
 
@@ -210,8 +208,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         customer: CustomerBlocModel(id: _booking.customer.id),
         package: _booking.package);
     print('${bookingTemp.customer.id}');
-    context
-        .bloc<BookingBloc>()
+    BlocProvider.of<BookingBloc>(context)
         .add(BookingEventMoveToDone(booking: bookingTemp));
   }
 
@@ -237,11 +234,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   getCurrentLocation() async {
     Position position =
-        await getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+        await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     setState(() {
       cuLat = position.latitude;
       cuLong = position.longitude;
-      print('${cuLat} + ${cuLat}');
     });
   }
 

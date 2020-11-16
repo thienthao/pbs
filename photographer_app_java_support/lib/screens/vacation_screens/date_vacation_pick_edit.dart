@@ -5,12 +5,15 @@ import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dar
 import 'package:photographer_app_java_support/models/busy_day_bloc_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class VacationPicker extends StatefulWidget {
+class VacationPickerEdit extends StatefulWidget {
+  final BusyDayBlocModel busyDayBlocModel;
+
+  const VacationPickerEdit({this.busyDayBlocModel});
   @override
-  _VacationPickerState createState() => _VacationPickerState();
+  _VacationPickerEditState createState() => _VacationPickerEditState();
 }
 
-class _VacationPickerState extends State<VacationPicker> {
+class _VacationPickerEditState extends State<VacationPickerEdit> {
   CalendarController controller;
   TextEditingController titleTxtController = TextEditingController();
   TextEditingController descriptionTxtController = TextEditingController();
@@ -20,10 +23,11 @@ class _VacationPickerState extends State<VacationPicker> {
     daySelected = day;
   }
 
-  _createBusyDay() async {
-    BlocProvider.of<BusyDayBloc>(context).add(BusyDayEventCreate(
+  _updateBusyDay() async {
+    BlocProvider.of<BusyDayBloc>(context).add(BusyDayEventUpdate(
         ptgId: 168,
         busyDayBlocModel: BusyDayBlocModel(
+          id: widget.busyDayBlocModel.id,
           title: titleTxtController.text,
           description: descriptionTxtController.text,
           startDate:
@@ -31,10 +35,18 @@ class _VacationPickerState extends State<VacationPicker> {
         )));
   }
 
+  _deleteBusyDay() async {
+    BlocProvider.of<BusyDayBloc>(context).add(
+        BusyDayEventDelete(ptgId: 168, busyDayId: widget.busyDayBlocModel.id));
+  }
+
   @override
   void initState() {
     super.initState();
     controller = CalendarController();
+    titleTxtController.text = widget.busyDayBlocModel.title;
+    descriptionTxtController.text = widget.busyDayBlocModel.description;
+    daySelected = DateTime.parse(widget.busyDayBlocModel.startDate);
   }
 
   @override
@@ -142,6 +154,7 @@ class _VacationPickerState extends State<VacationPicker> {
                   child: TableCalendar(
                     locale: 'vi_VN',
                     calendarController: controller,
+                    initialSelectedDay: daySelected,
                     onDaySelected: _onDaySelected,
                     startingDayOfWeek: StartingDayOfWeek.monday,
                     initialCalendarFormat: CalendarFormat.month,
@@ -181,27 +194,69 @@ class _VacationPickerState extends State<VacationPicker> {
                 ),
               ),
               SizedBox(height: 5.0),
-              RaisedButton(
-                onPressed: () {
-                  _createBusyDay();
-                },
-                textColor: Colors.white,
-                color: Theme.of(context).primaryColor,
-                padding:
-                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 100.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Text(
-                  'Xác nhận',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  FlatButton(
+                    minWidth: 150.0,
+                    height: 60.0,
+                    color: Colors.white,
+                    onPressed: () {
+                      _deleteBusyDay();
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Xoá',
+                        style: TextStyle(fontSize: 21.0, color: Colors.black87),
+                      ),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                  ),
+                  ButtonTheme(
+                    buttonColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    minWidth: 180.0,
+                    height: 60.0,
+                    child: RaisedButton(
+                      onPressed: () {
+                        _updateBusyDay();
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Cập nhật',
+                          style: TextStyle(fontSize: 21.0, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               BlocBuilder<BusyDayBloc, BusyDayState>(
                 builder: (context, state) {
                   if (state is BusyDayStateCreatedSuccess) {
                     return Text('Created Success!!');
                   }
+                  if (state is BusyDayStateUpdatedSuccess) {
+                    return Text('Updated Success!!');
+                  }
+                  if (state is BusyDayStateDeletedSuccess) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pop(context);
+                    });
+                  }
+                  // if (state is BusyDayStateLoading) {
+                  //   return Padding(
+                  //     padding: const EdgeInsets.symmetric(vertical: 10),
+                  //     child: LinearProgressIndicator(),
+                  //   );
+                  // }
+
                   return Container();
                 },
               )

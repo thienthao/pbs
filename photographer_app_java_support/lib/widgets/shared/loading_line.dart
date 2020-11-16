@@ -26,10 +26,12 @@ class _LoadingLineState extends State<LoadingLine> {
   _changeLines() {
     try {
       _timer = new Timer(const Duration(milliseconds: 1500), () {
-        setState(() {
-          listInt.shuffle();
-          listInt.add(50);
-        });
+        if (mounted) {
+          setState(() {
+            listInt.shuffle();
+            listInt.add(50);
+          });
+        }
       });
     } catch (e) {}
   }
@@ -37,10 +39,12 @@ class _LoadingLineState extends State<LoadingLine> {
   _changeLines2() {
     try {
       _timer = new Timer(const Duration(milliseconds: 4000), () {
-        setState(() {
-          listInt.shuffle();
-          listInt.add(50);
-        });
+        if (mounted) {
+          setState(() {
+            listInt.shuffle();
+            listInt.add(50);
+          });
+        }
       });
     } catch (e) {}
   }
