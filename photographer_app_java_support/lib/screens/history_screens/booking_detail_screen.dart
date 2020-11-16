@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/constant/chat_name.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photographer_app_java_support/screens/chat_screens/chat_screen.dart';
 import 'package:photographer_app_java_support/screens/history_screens/location_guide.dart';
+import 'package:photographer_app_java_support/services/chat_service.dart';
 import 'package:photographer_app_java_support/widgets/shared/loading_line.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,6 +25,34 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  getChatRoomId(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
+
+  sendMessage(String userName) {
+    List<String> users = [Constants.myName, userName];
+
+    String chatRoomId = getChatRoomId(Constants.myName, userName);
+
+    Map<String, dynamic> chatRoom = {
+      "users": users,
+      "chatRoomId": chatRoomId,
+    };
+
+    ChatMethods().addChatRoom(chatRoom, chatRoomId);
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatPage(
+                  chatRoomId: chatRoomId,
+                )));
+  }
+
   double cuLat = 0;
   double cuLong = 0;
   double destinationLat = 11.939346;
@@ -189,7 +220,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         customer: CustomerBlocModel(id: _booking.customer.id),
         package: _booking.package);
     print('${bookingTemp.customer.id}');
-    BlocProvider.of<BookingBloc>(context).add(BookingEventAccept(booking: bookingTemp));
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventAccept(booking: bookingTemp));
   }
 
   _moveToEditBooking(BookingBlocModel _booking) async {
@@ -219,7 +251,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         customer: CustomerBlocModel(id: _booking.customer.id),
         package: _booking.package);
     print('${bookingTemp.customer.id}');
-    BlocProvider.of<BookingBloc>(context).add(BookingEventReject(booking: bookingTemp));
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventReject(booking: bookingTemp));
   }
 
   _cancelBooking(BookingBlocModel _booking, String _cancelReason) async {
@@ -229,12 +262,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         customer: CustomerBlocModel(id: _booking.customer.id),
         package: _booking.package);
     print('${bookingTemp.customer.id}');
-    BlocProvider.of<BookingBloc>(context).add(BookingEventCancel(booking: bookingTemp));
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventCancel(booking: bookingTemp));
   }
 
   getCurrentLocation() async {
-    Position position =
-        await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     setState(() {
       cuLat = position.latitude;
       cuLong = position.longitude;
@@ -1124,9 +1158,26 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                   'tel://${bookingState.booking.customer.phone}'),
                                             ),
                                             IconButton(
-                                                icon: Icon(
-                                                    Icons.comment_outlined),
-                                                onPressed: null),
+                                              icon:
+                                                  Icon(Icons.comment_outlined),
+                                              onPressed: () {
+                                                if (ChatMethods()
+                                                        .checkChatRoomExist(
+                                                            'Uyển Nhi_Cao Tiến') ==
+                                                    true) {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              ChatPage(
+                                                                chatRoomId:
+                                                                    "Uyển Nhi_Cao Tiến",
+                                                              )));
+                                                } else {
+                                                  sendMessage('Uyển Nhi');
+                                                }
+                                              },
+                                            ),
                                           ],
                                         ),
                                       ],

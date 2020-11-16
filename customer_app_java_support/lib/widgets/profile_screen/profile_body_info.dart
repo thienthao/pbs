@@ -43,10 +43,15 @@ class _InfoState extends State<Info> {
               height: 290.0,
               width: double.infinity,
               color: Theme.of(context).accentColor,
-              child: _cover != null ? Image.file(_cover, fit: BoxFit.cover,) : Image.asset(
-                'assets/covers/phaohoa.JPG',
-                fit: BoxFit.cover,
-              ),
+              child: _cover != null
+                  ? Image.file(
+                      _cover,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      'assets/covers/IMG_0051.JPG',
+                      fit: BoxFit.cover,
+                    ),
             ),
           ),
           Padding(
@@ -87,7 +92,9 @@ class _InfoState extends State<Info> {
                         ),
                         image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: _avatar != null ? FileImage(_avatar) : AssetImage('assets/avatars/man.jpg'),
+                          image: _avatar != null
+                              ? FileImage(_avatar)
+                              : AssetImage('assets/avatars/girl.jpg'),
                         ),
                       ),
                     ),
@@ -107,7 +114,7 @@ class _InfoState extends State<Info> {
                   ],
                 ),
                 Text(
-                  'Trương Vô Kị',
+                  'Uyển Nhi',
                   style: TextStyle(
                     fontSize: 22.0, // 22
                     color: Colors.black87,

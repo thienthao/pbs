@@ -5,6 +5,7 @@ import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/search_bloc_model.dart';
 import 'package:customer_app_java_support/models/service_bloc_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -21,7 +22,7 @@ class PhotographerRepository {
   Future<List<Photographer>> getListPhotographerByRating(
       int categoryId, LatLng latLng, String city) async {
     final response = await this.httpClient.get(
-        baseUrl +
+        BaseApi.PHOTOGRAPHER_URL +
             'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}&city=$city',
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer ' +

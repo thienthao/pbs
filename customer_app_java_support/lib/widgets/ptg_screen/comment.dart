@@ -20,7 +20,7 @@ class CommentWidget extends StatelessWidget {
               children: <Widget>[
                 CircleAvatar(
                   backgroundImage: NetworkImage(comment.avatar),
-                  radius: 28,
+                  radius: 25,
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 10.0),
@@ -81,26 +81,26 @@ class CommentWidget extends StatelessWidget {
                           ],
                         ),
                       ),
-                      RichText(
-                        text: TextSpan(
-                          text: '',
-                          style: TextStyle(
-                              color: Colors.black54, fontFamily: 'Quicksand'),
-                          children: <TextSpan>[
-                            TextSpan(
-                                text: 'Địa điểm: ',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold)),
-                            TextSpan(
-                                text: comment.location == null
-                                    ? 'Locaton'
-                                    : comment.location,
-                                style:
-                                    TextStyle(fontWeight: FontWeight.normal)),
-                          ],
-                        ),
-                      ),
+                      // RichText(
+                      //   text: TextSpan(
+                      //     text: '',
+                      //     style: TextStyle(
+                      //         color: Colors.black54, fontFamily: 'Quicksand'),
+                      //     children: <TextSpan>[
+                      //       TextSpan(
+                      //           text: 'Địa điểm: ',
+                      //           style: TextStyle(
+                      //               color: Colors.black,
+                      //               fontWeight: FontWeight.bold)),
+                      //       TextSpan(
+                      //           text: comment.location == null
+                      //               ? 'Location'
+                      //               : comment.location,
+                      //           style:
+                      //               TextStyle(fontWeight: FontWeight.normal)),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

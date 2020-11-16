@@ -10,6 +10,7 @@ import 'router.dart' as router;
 import './services/navigation_service.dart';
 import 'blocs/bloc_observer.dart';
 import './blocs/authen_blocs/authen_export.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
@@ -41,6 +42,10 @@ class _AppState extends State<App> {
   void initState() {
     _pushNotificationService.init();
     super.initState();
+    Firebase.initializeApp().whenComplete(() {
+      print("completed");
+      setState(() {});
+    });
   }
 
   @override
@@ -50,6 +55,7 @@ class _AppState extends State<App> {
             AuthenticationBloc(userRepository: widget.userRepository)
               ..add(AppStarted()),
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
           builder: BotToastInit(),
           navigatorObservers: [BotToastNavigatorObserver()],
           navigatorKey: locator<NavigationService>().navigatorKey,
