@@ -10,14 +10,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class FCMService {
 
-    public String pushNotification(NotiRequest notiRequest) {
+    //                .setToken(notiRequest.getToken())
+    public String pushNotification(NotiRequest notiRequest, Long bookingId) {
         Message message = Message.builder()
-                .setToken(notiRequest.getToken())
+                .setTopic("topic")
                 .setNotification(Notification.builder().setTitle(notiRequest.getTitle())
                     .setBody(notiRequest.getBody()).build())
                 .putData("view", "booking_history")
                 .putData("click_action", "FLUTTER_NOTIFICATION_CLICK")
-                .putData("bookingId", "11")
+                .putData("bookingId", bookingId.toString())
                 .build();
         String response = null;
         try {

@@ -69,6 +69,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "order by ltd.start asc")
     List<Booking> findOnGoingNEditingBookingsBetween(long ptgId);
 
+    @Query("From Booking b " +
+            "inner join b.timeLocationDetails ltd " +
+            "where b.photographer.id =:ptgId and b.bookingStatus='ONGOING' " +
+            "order by ltd.start asc")
+    List<Booking> findOnGoingBookingsBetween(long ptgId);
+
     @Query("select count(b) " +
             "from Booking b " +
             "inner join b.timeLocationDetails tld " +
@@ -90,6 +96,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where b.photographer.id =:photographerId and b.editDeadline>=:from and b.editDeadline<=:to " +
             "and b.bookingStatus='EDITING'")
     List<Booking> findEditingBookingOnDate(Date from, Date to, Long photographerId);
+
+    @Query("select count(b) from Booking b inner join b.servicePackage pc where pc.id=:packageId and b.bookingStatus<>'DONE'")
+    long countPackageBeingUsed(long packageId);
 
 
 }

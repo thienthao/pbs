@@ -2,10 +2,7 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.PhotographerInfoDto;
 import fpt.university.pbswebapi.dto.SearchDto;
-import fpt.university.pbswebapi.entity.BusyDay;
-import fpt.university.pbswebapi.entity.DayOfWeek;
-import fpt.university.pbswebapi.entity.ServicePackage;
-import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
@@ -179,12 +176,6 @@ public class PhotographerController {
         return new ResponseEntity<>(searchDto, HttpStatus.OK);
     }
 
-    // api get lich (sau khi them goi nhieu ngay)
-    @GetMapping("/{ptgId}/calendar")
-    public ResponseEntity<?> getCalendar(@PathVariable("ptgId") long ptgId) {
-        return new ResponseEntity<>(phtrService.getCalendar(ptgId), HttpStatus.OK);
-    }
-
     @PostMapping(value = "/{id}/upload",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
                 produces = MediaType.APPLICATION_JSON_VALUE)
@@ -220,6 +211,16 @@ public class PhotographerController {
     @PostMapping("/{ptgId}/busydays")
     public ResponseEntity<?> addBusyDays(@PathVariable("ptgId") Long ptgId, @RequestBody BusyDay busyDay) {
         return new ResponseEntity<>(phtrService.addBusyDays(ptgId, busyDay), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{ptgId}/busydays/{busyDayId}")
+    public ResponseEntity<?> deleteBusyDays(@PathVariable("ptgId") Long ptgId, @PathVariable("busyDayId") long busyDayId) {
+        return new ResponseEntity<>(phtrService.deleteBusyDay(busyDayId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/busydays/json")
+    public ResponseEntity<?> testBusyDays(@PathVariable("ptgId") Long ptgId) {
+        return new ResponseEntity<>(phtrService.testBusyDays(ptgId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/download",
@@ -261,9 +262,25 @@ public class PhotographerController {
         }
     }
 
+    // api get lich (sau khi them goi nhieu ngay)
+    @GetMapping("/{ptgId}/calendar")
+    public ResponseEntity<?> getCalendar(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getCalendar(ptgId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/calendar/for-customer")
+    public ResponseEntity<?> getCalendarForCustomer(@PathVariable("ptgId") long ptgId) {
+        return new ResponseEntity<>(phtrService.getCalendarForCustomer(ptgId), HttpStatus.OK);
+    }
+
     @GetMapping("/{ptgId}/on-day")
     public ResponseEntity<?> getPhotographerEventOnDay(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
         return new ResponseEntity<>(phtrService.getPhotographerEventOnDay(ptgId, date), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/on-day/for-customer")
+    public ResponseEntity<?> getPhotographerEventOnDayForCustomer(@PathVariable("ptgId") long ptgId, @RequestParam("date") String date) {
+        return new ResponseEntity<>(phtrService.getPhotographerEventOnDayForCustomer(ptgId, date), HttpStatus.OK);
     }
 
     @PostMapping("/{ptgId}/working-days")
@@ -279,5 +296,15 @@ public class PhotographerController {
     @PutMapping
     public ResponseEntity<?> editProfile(@RequestBody PhotographerInfoDto photographerDto) {
         return new ResponseEntity<>(phtrService.editInfo(photographerDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/locations")
+    public ResponseEntity<?> getPhotographerLocations() {
+        return new ResponseEntity<>(phtrService.getPhotographerLocations(), HttpStatus.OK);
+    }
+
+    @PostMapping("/{ptgId}/locations")
+    public ResponseEntity<?> addLocation(@PathVariable("ptgId") long ptgId, @RequestBody Location location) {
+        return new ResponseEntity<>(phtrService.addLocation(ptgId, location), HttpStatus.OK);
     }
 }

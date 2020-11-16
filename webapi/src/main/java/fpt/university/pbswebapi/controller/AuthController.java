@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.controller;
 import fpt.university.pbswebapi.entity.ERole;
 import fpt.university.pbswebapi.entity.Role;
 import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.payload.own.request.LoginRequest;
 import fpt.university.pbswebapi.payload.own.request.SignupRequest;
 import fpt.university.pbswebapi.payload.own.response.JwtResponse;
@@ -45,9 +46,17 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
+        Authentication authentication = null;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+            );
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Tên đăng nhập hoặc mật khẩu không chính xác"));
+        }
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
@@ -68,13 +77,13 @@ public class AuthController {
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: username exists"));
+                    .body(new MessageResponse("Tên đăng nhập đã tồn tại"));
         }
 
         if(userRepository.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: email exists"));
+                    .body(new MessageResponse("Email đã tồn tại"));
         }
 
         User user = new User(signupRequest.getUsername(),

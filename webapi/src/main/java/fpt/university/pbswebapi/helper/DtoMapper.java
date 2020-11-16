@@ -216,4 +216,16 @@ public class DtoMapper {
         bInfo.setEnd(b.getEditDeadline());
         return bInfo;
     }
+
+    public static CommentDto toCommentDto(BookingComment comment) {
+        CommentDto commentDto = new CommentDto();
+        commentDto.setUsername(comment.getUser().getUsername());
+        commentDto.setFullname(comment.getUser().getFullname());
+        commentDto.setAvatar(comment.getUser().getAvatar());
+        commentDto.setCreatedAt(comment.getCommentedAt());
+        commentDto.setLocation("");
+        commentDto.setRating(comment.getRating());
+        commentDto.setComment(comment.getComment());
+        return commentDto;
+    }
 }

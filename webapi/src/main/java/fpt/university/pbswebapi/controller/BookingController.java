@@ -2,8 +2,8 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
+import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
-import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
 import fpt.university.pbswebapi.service.BookingService;
@@ -17,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.*;
 
 @RestController
@@ -231,20 +230,8 @@ public class BookingController {
             @PathVariable("id") Long photographerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        List<Booking> bookings = bookingRepository.findBookingsOfPhotographer(photographerId);
-        List<CommentDto> commentDtos = new ArrayList<>();
-        for(Booking booking : bookings) {
-            commentDtos.add(new CommentDto(booking.getComment(), booking.getRating(), booking.getCustomer().getUsername(), booking.getCustomer().getFullname(), booking.getCommentDate(), booking.getLocation(), booking.getCustomer().getAvatar()));
-        }
-        int arrSize = commentDtos.size();
-        if(arrSize < size) {
-            size = arrSize;
-        }
-        try {
-            return new ResponseEntity<>(commentDtos.subList(0, size), HttpStatus.OK);
-        } catch (IndexOutOfBoundsException e) {
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-        }
+        Pageable pageable = PageRequest.of(page, size);
+        return new ResponseEntity<List<CommentDto>>(bookingService.findCommentsOfPhotographer(photographerId, pageable) ,HttpStatus.OK);
     }
 
     @PostMapping
@@ -255,76 +242,55 @@ public class BookingController {
         return new ResponseEntity<Booking>(bookingService.book(booking), HttpStatus.OK);
     }
 
-    @PutMapping("/cancel")
-    public ResponseEntity<Booking> cancel(@RequestBody Booking booking) {
-        // if status not hop ly
-        // check co dung nguoi ko
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
+    @PutMapping("/cancel/customer")
+    public ResponseEntity<Booking> cancelForCustomer(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.cancelForCustomer(booking), HttpStatus.OK);
+    }
 
-        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
-        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
-        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+    @PutMapping("/cancel/photographer")
+    public ResponseEntity<Booking> cancelForPhotographer(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.cancelForPhotographer(booking), HttpStatus.OK);
     }
 
     @PutMapping("/reject")
     public ResponseEntity<Booking> reject(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 1");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.REJECTED);
-        savedBooking.setRejectedReason(booking.getRejectedReason());
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.reject(booking), HttpStatus.OK);
     }
 
     @PutMapping("/accept")
     public ResponseEntity<Booking> accept(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 1");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.ONGOING);
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.accept(booking), HttpStatus.OK);
     }
 
     @PutMapping("/done")
     public ResponseEntity<Booking> done(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.DONE);
-        savedBooking.setComment(booking.getComment());
-        savedBooking.setRating(booking.getRating());
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.done(booking), HttpStatus.OK);
     }
 
     @PutMapping("/editing")
     public ResponseEntity<Booking> editing(@RequestBody Booking booking) {
-        // if status not hop ly
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
-
-        savedBooking.setBookingStatus(EBookingStatus.EDITING);
-        return new ResponseEntity<Booking>(bookingService.save(savedBooking), HttpStatus.OK);
+        return new ResponseEntity<Booking>(bookingService.editing(booking), HttpStatus.OK);
     }
 
     private Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
         return user.getId();
+    }
+
+    @GetMapping("/{bookingId}/comments")
+    public ResponseEntity<?> findCommentsOfBooking(@PathVariable("bookingId") long bookingId) {
+        return new ResponseEntity<>(bookingService.findCommentsOfBooking(bookingId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{bookingId}/comments/json")
+    public ResponseEntity<?> findCommentsOfBookingTest(@PathVariable("bookingId") long bookingId) {
+        return new ResponseEntity<>(bookingService.getCommentJson(bookingId), HttpStatus.OK);
+    }
+
+    @PostMapping("/{bookingId}/comments")
+    public ResponseEntity<?> findCommentsOfBooking(@PathVariable("bookingId") long bookingId, @RequestBody BookingComment comment) {
+        return new ResponseEntity<>(bookingService.comment(comment), HttpStatus.OK);
     }
 
     private Boolean isBookingOfUser(Long bookingUserId) {

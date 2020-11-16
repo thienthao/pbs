@@ -1,15 +1,19 @@
-import 'package:customer_app_java_support/models/topic_model.dart';
+
+import 'package:customer_app_java_support/blocs/thread_bloc/thread_bloc.dart';
+import 'package:customer_app_java_support/models/thread_model.dart';
+import 'package:customer_app_java_support/respositories/thread_repository.dart';
 import 'package:customer_app_java_support/screens/forum_screen/new_thread.dart';
 import 'package:customer_app_java_support/widgets/forum_screen/list_topic.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TopicAdd extends StatefulWidget {
-  @override
-  _TopicAddState createState() => _TopicAddState();
-}
+class TopicAdd extends StatelessWidget {
+  final List<Topic> topics;
+  final ThreadRepository repository;
 
-class _TopicAddState extends State<TopicAdd> {
+  TopicAdd({@required this.topics, @required this.repository});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,24 +25,27 @@ class _TopicAddState extends State<TopicAdd> {
       ),
       body: Container(
         child: ListView.builder(
-          physics: BouncingScrollPhysics(),
-          itemCount: topics.length,
-          itemBuilder: (context, index) {
-            Topic topic = topics[index];
-            return InkWell(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NewThread(
-                    topic: topic,
+            physics: BouncingScrollPhysics(),
+            itemCount: topics.length,
+            itemBuilder: (context, index) {
+              Topic topic = topics[index];
+              return InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (context) => ThreadBloc(repository: repository),
+                      child: NewThread(
+                      topic: topic,
+                      ),
+                    )
                   ),
                 ),
-              ),
-              child: listTopic(topics[index]),
-            );
-          },
+                child: listTopic(topic),
+              );
+            },
+          ),
         ),
-      ),
     );
   }
 }
