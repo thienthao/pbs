@@ -85,7 +85,7 @@ class BookingRepository {
             phone: tempCustomer['phone'],
             avatar: tempCustomer['avatar']);
 
-        final tempTimeAndLocations = data['timeLocationDetails'] as List;
+        final tempTimeAndLocations = booking['timeLocationDetails'] as List;
 
         final List<TimeAndLocationBlocModel> listTimeAndLocations =
             tempTimeAndLocations.map((item) {
