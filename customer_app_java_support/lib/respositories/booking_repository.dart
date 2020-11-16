@@ -31,7 +31,7 @@ class BookingRepository {
         final tempPhotographer = booking['photographer'] as Map;
         final tempTimeAndLocations = booking['timeLocationDetails'] as List;
         bool isMultiDay = false;
-        if(tempTimeAndLocations.length >1) {
+        if (tempTimeAndLocations.length > 1) {
           isMultiDay = true;
         }
         Photographer photographer = Photographer(
@@ -40,16 +40,16 @@ class BookingRepository {
             ratingCount: tempPhotographer['ratingCount'],
             avatar: tempPhotographer['avatar']);
 
-       final List<TimeAndLocationBlocModel> listTimeAndLocations =
-          tempTimeAndLocations.map((item) {
-        return TimeAndLocationBlocModel(
-            id: item['id'],
-            start: item['start'],
-            end: item['end'],
-            formattedAddress: item['formattedAddress'],
-            latitude: item['lat'],
-            longitude: item['lon']);
-      }).toList();
+        final List<TimeAndLocationBlocModel> listTimeAndLocations =
+            tempTimeAndLocations.map((item) {
+          return TimeAndLocationBlocModel(
+              id: item['id'],
+              start: item['start'],
+              end: item['end'],
+              formattedAddress: item['formattedAddress'],
+              latitude: item['lat'],
+              longitude: item['lon']);
+        }).toList();
 
         return BookingBlocModel(
           id: booking['id'],
@@ -76,6 +76,7 @@ class BookingRepository {
       }).toList();
       return bookings;
     } else {
+      throw Exception();
     }
   }
 

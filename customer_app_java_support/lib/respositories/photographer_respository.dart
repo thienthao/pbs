@@ -19,17 +19,17 @@ class PhotographerRepository {
   }) : assert(httpClient != null);
 
   Future<List<Photographer>> getListPhotographerByRating(
-      int categoryId, LatLng latLng) async {
+      int categoryId, LatLng latLng, String city) async {
     final response = await this.httpClient.get(
         baseUrl +
-            'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}',
+            'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}&city=$city',
         headers: {
           HttpHeaders.authorizationHeader: 'Bearer ' +
               'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
         });
 
-        print( baseUrl +
-            'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}');
+    print(baseUrl +
+        'byrating?page=0&size=100&categoryId=$categoryId&lat=${latLng.latitude}&lon=${latLng.longitude}');
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;

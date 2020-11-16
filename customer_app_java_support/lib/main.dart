@@ -39,3 +39,75 @@ class _MyAppState extends State<MyApp> {
         home: LoginScreen());
   }
 }
+
+
+// import 'package:expand_widget/expand_widget.dart';
+// import 'package:flutter/material.dart';
+
+// void main() => runApp(MyApp());
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Expand Widget',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: HomePage(),
+//     );
+//   }
+// }
+
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Expand Widget'),
+//       ),
+//       body: ListView(
+//         padding: EdgeInsets.all(8),
+//         children: <Widget>[
+//           SizedBox(height: 4),
+//           Container(
+//             child: Padding(
+//               padding: EdgeInsets.all(8),
+//               child: Column(
+//                 children: <Widget>[
+//                   Text(
+//                     'Expand Child',
+//                     style: Theme.of(context).textTheme.headline6,
+//                   ),
+//                   SizedBox(height: 8),
+//                   OutlineButton(
+//                     child: Text('Button0'),
+//                     onPressed: () => print('Pressed button0'),
+//                   ),
+//                   ExpandChild(
+//                     child: Column(
+//                       children: <Widget>[
+//                         OutlineButton(
+//                           child: Text('Button1'),
+//                           onPressed: () => print('Pressed button1'),
+//                         ),
+//                         OutlineButton(
+//                           child: Text('Button2'),
+//                           onPressed: () => print('Pressed button2'),
+//                         ),
+//                         OutlineButton(
+//                           child: Text('Button3'),
+//                           onPressed: () => print('Pressed button3'),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

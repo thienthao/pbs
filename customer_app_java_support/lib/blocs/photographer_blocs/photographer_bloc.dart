@@ -24,7 +24,7 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
             (state as PhotographerStateInifiniteFetchedSuccess).hasReachedEnd);
     if (photographerEvent is PhotographerEventFetch) {
       yield* _mapPhotographersLoadedToState(
-          photographerEvent.categoryId, photographerEvent.latLng);
+          photographerEvent.categoryId, photographerEvent.latLng, photographerEvent.city);
     } else if (photographerEvent is PhotographerEventFetchByFactorAlg) {
       yield* _mapPhotographersFetchByFactorAlgToState();
     } else if (photographerEvent is PhotographerEventFetchInfinite &&
@@ -44,12 +44,12 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
   }
 
   Stream<PhotographerState> _mapPhotographersLoadedToState(
-      int categoryId, LatLng latLng) async* {
+      int categoryId, LatLng latLng, String city) async* {
     yield PhotographerStateLoading();
     try {
       final photographers = await this
           .photographerRepository
-          .getListPhotographerByRating(categoryId, latLng);
+          .getListPhotographerByRating(categoryId, latLng, city);
       yield PhotographerStateSuccess(photographers: photographers);
     } catch (_) {
       yield PhotographerStateFailure();
