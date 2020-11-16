@@ -46,7 +46,7 @@ public class TestController {
 
     @PostMapping("/notify")
     public String sendNotification(@RequestBody NotiRequest notiRequest) {
-        return fcmService.pushNotification(notiRequest, Long.parseLong("1"));
+        return fcmService.pushNotification(notiRequest, Long.parseLong("1"), "topic");
     }
 
     @GetMapping("/packages")

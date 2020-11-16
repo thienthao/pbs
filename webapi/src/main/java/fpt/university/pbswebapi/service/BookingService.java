@@ -5,10 +5,12 @@ import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
+import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CommentRepository;
+import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,22 +26,25 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
     private final FCMService fcmService;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, FCMService fcmService) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.userRepository = userRepository;
         this.fcmService = fcmService;
     }
 
     public Booking book(Booking booking) {
         Booking result = bookingRepository.save(booking);
+        User user = userRepository.findById(booking.getCustomer().getId()).get();
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Yêu cầu đặt hẹn mới");
-        notiRequest.setBody("Bạn nhận được yêu cầu đặt hẹn từ " + result.getCustomer().getFullname());
+        notiRequest.setBody("Bạn nhận được yêu cầu đặt hẹn từ " + user.getFullname());
         notiRequest.setToken(result.getPhotographer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
+        fcmService.pushNotification(notiRequest, booking.getId(), "photographer-topic");
         return result;
     }
 
@@ -51,12 +56,13 @@ public class BookingService {
 //        }
         savedBooking.setBookingStatus(EBookingStatus.ONGOING);
         Booking result = bookingRepository.save(savedBooking);
+        User user = userRepository.findById(booking.getPhotographer().getId()).get();
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Đặt hẹn thành công");
-        notiRequest.setBody(result.getPhotographer().getFullname() + " đã chấp nhận yêu cầu từ bạn.");
+        notiRequest.setBody(user.getFullname() + " đã chấp nhận yêu cầu từ bạn.");
         notiRequest.setToken(result.getPhotographer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
+        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
         return result;
     }
 
@@ -71,11 +77,13 @@ public class BookingService {
         savedBooking.setRejectedReason(booking.getRejectedReason());
         Booking result = bookingRepository.save(savedBooking);
 
+        User user = userRepository.findById(booking.getPhotographer().getId()).get();
+
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Rất tiếc, đặt hẹn thất bại");
-        notiRequest.setBody(result.getPhotographer().getFullname() + " đã không thể chấp nhận yêu cầu từ bạn.");
+        notiRequest.setBody(user.getFullname() + " đã không thể chấp nhận yêu cầu từ bạn.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
+        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
         return result;
     }
 
@@ -91,12 +99,13 @@ public class BookingService {
         savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
+        User user = userRepository.findById(booking.getCustomer().getId()).get();
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
-        notiRequest.setBody(result.getCustomer().getFullname() + " đã hủy cuộc hẹn.");
+        notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
         notiRequest.setToken(result.getPhotographer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
+        fcmService.pushNotification(notiRequest, booking.getId(), "photographer-topic");
         return result;
     }
 
@@ -112,12 +121,13 @@ public class BookingService {
         savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
+        User user = userRepository.findById(booking.getPhotographer().getId()).get();
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
-        notiRequest.setBody(result.getPhotographer().getFullname() + " đã hủy cuộc hẹn.");
+        notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
+        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
         return result;
     }
 
@@ -149,7 +159,7 @@ public class BookingService {
         notiRequest.setTitle("Đơn chụp hình thành công");
         notiRequest.setBody("Đơn chụp hình với " + savedBooking.getPhotographer().getFullname() + " đã hoàn tất.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
+        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
 
         return result;
     }

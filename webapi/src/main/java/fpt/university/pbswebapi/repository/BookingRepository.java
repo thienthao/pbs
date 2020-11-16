@@ -78,8 +78,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("select count(b) " +
             "from Booking b " +
             "inner join b.timeLocationDetails tld " +
-            "where tld.start>=:from and tld.start<=:to")
-    Long countOngoingOnDate(Date from, Date to);
+            "where tld.start>=:from and tld.start<=:to and b.bookingStatus='ONGOING' " +
+            "or b.editDeadline>=:from and b.editDeadline<=:to and b.bookingStatus='EDITING'")
+    Long countOngoingNEditOnDate(Date from, Date to);
 
     @Query("select count(b) " +
             "from Booking b " +

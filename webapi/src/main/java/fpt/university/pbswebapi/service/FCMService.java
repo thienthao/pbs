@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 public class FCMService {
 
     //                .setToken(notiRequest.getToken())
-    public String pushNotification(NotiRequest notiRequest, Long bookingId) {
+    public String pushNotification(NotiRequest notiRequest, Long bookingId, String topic) {
         Message message = Message.builder()
-                .setTopic("topic")
+                .setTopic(topic)
                 .setNotification(Notification.builder().setTitle(notiRequest.getTitle())
                     .setBody(notiRequest.getBody()).build())
                 .putData("view", "booking_history")
