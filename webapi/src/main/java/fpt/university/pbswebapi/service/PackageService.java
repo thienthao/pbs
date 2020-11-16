@@ -1,9 +1,11 @@
 package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.entity.ServicePackage;
+import fpt.university.pbswebapi.payload.own.response.MessageResponse;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +27,12 @@ public class PackageService {
         return packageRepository.save(servicePackage);
     }
 
-    public Object removePackage(Long packageId) {
+    public ResponseEntity<?> removePackage(Long packageId) {
         if(bookingRepository.countPackageBeingUsed(packageId) > 0) {
-            return ResponseEntity.badRequest().body("Bạn không thể xóa gói dịch vụ này đang được sử dụng bởi khách hàng!");
+            return ResponseEntity.badRequest().body(new MessageResponse("Bạn không thể xóa gói dịch vụ này đang được sử dụng bởi khách hàng!"));
         }
         ServicePackage servicePackage = packageRepository.findById(packageId).get();
         servicePackage.setIsAvailable(Boolean.FALSE);
-        return packageRepository.save(servicePackage);
+        return new ResponseEntity<>(packageRepository.save(servicePackage), HttpStatus.OK);
     }
 }
