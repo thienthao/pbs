@@ -63,7 +63,7 @@ class _ListVacationState extends State<ListVacation> {
         ),
         elevation: 0.0,
       ),
-      body: Column(
+      body: ListView(
         children: [
           SizedBox(height: 5.0),
           Row(
@@ -289,7 +289,7 @@ class _ListVacationState extends State<ListVacation> {
             builder: (context, state) {
               if (state is WorkingDayStateFetchSuccess) {
                 _listWorkingDays = state.listWorkingDays;
-                return Text('Done Loading Working Day');
+
               }
               return SizedBox();
             },

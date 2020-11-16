@@ -2,6 +2,8 @@ import 'package:customer_app_java_support/blocs/authen_blocs/user_dao.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_login_model.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_model.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/api_connection.dart';
+import 'package:customer_app_java_support/blocs/register_blocs/api_connection.dart';
+import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
 import 'package:flutter/cupertino.dart';
 
 class UserRepository {
@@ -19,6 +21,12 @@ class UserRepository {
       accessToken: token.token,
     );
     return user;
+  }
+
+  Future<bool> register({@required String username, @required String password, @required String email}) async {
+    UserRegister userRegister = UserRegister(username: username, password: password, email: email);
+    bool success = await registerApi(userRegister);
+    return success;
   }
 
   Future<void> persistToken({@required User user}) async {

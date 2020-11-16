@@ -17,6 +17,27 @@ class UserDao {
     return result;
   }
 
+  Future<int> getUserId() async {
+    final db = await sqProvider.database;
+    List<Map> users = await db.query(userTable);
+    var result = users[0]["id"];
+    return result;
+  }
+
+  Future<String> getUsername() async {
+    final db = await sqProvider.database;
+    List<Map> users = await db.query(userTable);
+    var result = users[0]["username"];
+    return result;
+  }
+
+  Future<String> getUserToken() async {
+    final db = await sqProvider.database;
+    List<Map> users = await db.query(userTable);
+    var result = users[0]["accessToken"];
+    return result;
+  }
+
   Future<bool> checkUser(int id) async {
     final db = await sqProvider.database;
     try {

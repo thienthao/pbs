@@ -27,7 +27,9 @@ class PushNotificationService {
 //      );
 //    });
 
-    _fcm.subscribeToTopic("topic");
+    _fcm.unsubscribeFromTopic("topic");
+    _fcm.subscribeToTopic("photographer-topic");
+
 
     print("configure");
     _fcm.configure(

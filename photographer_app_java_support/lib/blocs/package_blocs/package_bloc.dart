@@ -64,12 +64,11 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
 
   Stream<PackageState> _mapPackageDeletedtoState(
       PackageBlocModel package) async* {
-    yield PackageStateLoading();
     try {
       final isSuccess = await this.packageRepository.deletePackage(package);
       yield PackageStateDeletedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield PackageStateFailure();
+    } catch (error) {
+      yield PackageStateFailure(error: error.toString());
     }
   }
 }

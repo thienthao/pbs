@@ -58,4 +58,14 @@ class PackageStateDeletedSuccess extends PackageState {
       'PackageStateDeletedSuccess { Package Delete: $isSuccess }';
 }
 
-class PackageStateFailure extends PackageState {}
+class PackageStateFailure extends PackageState {
+  final String error;
+
+  const PackageStateFailure({this.error});
+
+  @override
+  List<Object> get props => [error];
+
+  @override
+  String toString() => 'Login failure {error: $error}';
+}

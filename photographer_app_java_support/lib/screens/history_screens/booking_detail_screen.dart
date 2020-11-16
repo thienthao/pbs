@@ -1366,31 +1366,43 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   }
                 }
                 if (bookingState is BookingStateCanceledSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if(widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
                 if (bookingState is BookingStateAcceptedSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if(widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateRejectedSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if(widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateCanceledSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if(widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateMovedToEditSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if(widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateMovedToDoneSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if(widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 

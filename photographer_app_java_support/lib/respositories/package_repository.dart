@@ -172,7 +172,10 @@ class PackageRepository {
       print('create package success: $result');
       result = true;
     } else {
-      throw Exception('Error Delete a Package');
+      print(json.decode(response.body).toString());
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      print(data['message']);
+      throw Exception(data['message']);
     }
 
     return result;

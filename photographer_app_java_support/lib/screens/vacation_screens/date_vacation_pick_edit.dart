@@ -262,6 +262,7 @@ class _VacationPickerEditState extends State<VacationPickerEdit> {
               )
             ],
           ),
+          SizedBox(height: 30,)
         ],
       ),
     );
