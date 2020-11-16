@@ -10,8 +10,9 @@ import 'package:http/http.dart' as http;
 class BookingWidget extends StatefulWidget {
   final List<BookingBlocModel> blocBookings;
   final Function onGoBack;
+  final Function(bool) isEdited;
 
-  const BookingWidget({this.blocBookings, this.onGoBack});
+  const BookingWidget({this.blocBookings, this.onGoBack, this.isEdited});
 
   @override
   _BookingWidgetState createState() => _BookingWidgetState();
@@ -183,6 +184,7 @@ class _BookingWidgetState extends State<BookingWidget> {
                       ),
                       SizedBox(height: 5.0),
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
                             padding: EdgeInsets.only(right: 10.0),
@@ -205,20 +207,23 @@ class _BookingWidgetState extends State<BookingWidget> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: booking.isMultiday
-                                ? Text('Nhiều mốc thời gian khác nhau')
-                                : Text(
-                                    booking.startDate == null
-                                        ? ''
-                                        : DateFormat('dd/MM/yyyy hh:mm a')
-                                            .format(DateTime.parse(
-                                                booking.listTimeAndLocations[0].start)),
-                                    style: TextStyle(
-                                      color: Colors.grey,
+                          Flexible(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: booking.isMultiday
+                                  ? Text('Nhiều ngày khác nhau')
+                                  : Text(
+                                      booking.startDate == null
+                                          ? ''
+                                          : DateFormat('dd/MM/yyyy hh:mm a')
+                                              .format(DateTime.parse(booking
+                                                  .listTimeAndLocations[0]
+                                                  .start)),
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
                                     ),
-                                  ),
+                            ),
                           ),
                         ],
                       ),
@@ -255,9 +260,12 @@ class _BookingWidgetState extends State<BookingWidget> {
                               child: booking.isMultiday
                                   ? Text('Nhiều địa điểm khác nhau')
                                   : Text(
-                                      booking.listTimeAndLocations[0].formattedAddress == null
+                                      booking.listTimeAndLocations[0]
+                                                  .formattedAddress ==
+                                              null
                                           ? ''
-                                          : booking.listTimeAndLocations[0].formattedAddress,
+                                          : booking.listTimeAndLocations[0]
+                                              .formattedAddress,
                                       style: TextStyle(
                                         color: Colors.grey,
                                       ),
@@ -267,33 +275,34 @@ class _BookingWidgetState extends State<BookingWidget> {
                         ],
                       ),
                       SizedBox(height: 5),
-                      booking.isMultiday ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(right: 10.0),
-                            child: Icon(
-                              Icons.assistant_photo_outlined,
-                              size: 17,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              right: 10.0,
-                            ),
-                            child: Text(
-                              'Chụp nhiều ngày',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        
-                        ],
-                      ):SizedBox(),
+                      booking.isMultiday
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(right: 10.0),
+                                  child: Icon(
+                                    Icons.assistant_photo_outlined,
+                                    size: 17,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    right: 10.0,
+                                  ),
+                                  child: Text(
+                                    'Chụp nhiều ngày',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.blueAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : SizedBox(),
                     ],
                   ),
                 ),

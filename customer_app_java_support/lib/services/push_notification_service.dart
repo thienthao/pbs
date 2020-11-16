@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:bot_toast/bot_toast.dart';
-import 'package:customer_app_java_support/screens/history_screens/history_screen.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/routing_constants.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class PushNotificationService {
@@ -24,6 +20,9 @@ class PushNotificationService {
 //        body: token,
 //      );
 //    });
+
+    _fcm.unsubscribeFromTopic("photographer-topic");
+    _fcm.subscribeToTopic("topic");
 
     _fcm.configure(
       onMessage: (Map<String, dynamic> msg) async {

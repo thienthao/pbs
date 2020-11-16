@@ -12,9 +12,15 @@ class BookHistory extends StatefulWidget {
 }
 
 class _BookHistoryState extends State<BookHistory> {
+  static const String AUTO_FIRST_STATUS = 'ALL';
+  final ScrollController _scrollController = ScrollController();
+  final _scrollThreshold = 0.0;
+  String statusForFilter = 'ALL';
+  bool isBookingEdited = false;
   @override
   void dispose() {
     super.dispose();
+    _scrollController.dispose();
   }
 
   Completer<void> _completer;
@@ -23,11 +29,25 @@ class _BookHistoryState extends State<BookHistory> {
   void initState() {
     super.initState();
     _completer = Completer<void>();
+
+    // BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
+    // _loadBookingsByPaging(AUTO_FIRST_STATUS);
+
+    _scrollController.addListener(() {
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.position.pixels;
+      if (maxScrollExtent - currentScroll <= _scrollThreshold) {
+        print('scroll on $statusForFilter');
+        // _loadBookingsByPaging(statusForFilter);
+      }
+    });
   }
 
   FutureOr onGoBack(dynamic value) {
-    _loadBookings();
-    setState(() {});
+    if (isBookingEdited) {
+      _loadBookings();
+      setState(() {});
+    }
   }
 
   _loadBookings() async {

@@ -21,8 +21,9 @@ import 'package:status_alert/status_alert.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final int bookingId;
+  final Function(bool) isEdited;
 
-  const BookingDetailScreen({this.bookingId});
+  const BookingDetailScreen({this.bookingId, this.isEdited});
 
   @override
   _BookingDetailScreenState createState() => _BookingDetailScreenState();
@@ -422,26 +423,51 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             SizedBox(
               height: 20,
             ),
-            Center(
-              child: Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: ButtonTheme(
-                    minWidth: 300.0,
-                    child: RaisedButton(
-                      color: Color(0xFFF77474),
-                      onPressed: () {
-                        _showMyDialog();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          'Hủy',
-                          style: TextStyle(fontSize: 25.0, color: Colors.white),
-                        ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FlatButton(
+                  minWidth: 150.0,
+                  height: 60.0,
+                  color: Colors.white,
+                  onPressed: () {
+                    _showMyDialog();
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Hủy',
+                      style: TextStyle(fontSize: 21.0, color: Colors.black87),
+                    ),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                ),
+                ButtonTheme(
+                  buttonColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  minWidth: 180.0,
+                  height: 60.0,
+                  child: RaisedButton(
+                    onPressed: () {
+                      // _acceptBooking(bookingObj);
+                      // Navigator.pop(context);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Sửa',
+                        style: TextStyle(fontSize: 21.0, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
-                  )),
-            )
+                  ),
+                ),
+              ],
+            ),
+          
           ],
         ),
       );
@@ -1050,7 +1076,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               fontWeight: FontWeight.bold)),
                       TextSpan(
                           text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel.startDate)),
+                              DateTime.parse(bookingBlocModel
+                                  .listTimeAndLocations[0].start)),
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
