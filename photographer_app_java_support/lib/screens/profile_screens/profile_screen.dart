@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_event.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/login_bloc.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/user_repository.dart';
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/album_respository.dart';
@@ -18,6 +22,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final userRepository = UserRepository();
   Photographer _photographer;
   AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   PhotographerRepository _photographerRepository =
@@ -72,10 +77,22 @@ class _ProfileState extends State<Profile> {
                         );
                       },
                     ),
-                    ProfileMenuItem(
-                      iconSrc: "assets/icons/logout.svg",
-                      title: "Đăng xuất",
-                      press: () {},
+                    BlocProvider(
+                      create: (context) {
+                        return LoginBloc(
+                          authenticationBloc:
+                              BlocProvider.of<AuthenticationBloc>(context),
+                          userRepository: userRepository,
+                        );
+                      },
+                      child: ProfileMenuItem(
+                        iconSrc: "assets/icons/logout.svg",
+                        title: "Đăng xuất",
+                        press: () {
+                          BlocProvider.of<AuthenticationBloc>(context)
+                              .add(LoggedOut());
+                        },
+                      ),
                     ),
                   ],
                 ),

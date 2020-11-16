@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:customer_app_java_support/screens/history_screens/history_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -28,13 +29,13 @@ class PushNotificationService {
       onMessage: (Map<String, dynamic> msg) async {
         print("onMessage ne");
         print('onMessage: $msg');
-        Fluttertoast.showToast(
-            msg: msg["notification"]["body"],
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.TOP,
-            backgroundColor: Color(0xFFF88F8F),
-            textColor: Colors.white,
-            fontSize: 16.0,
+        BotToast.showSimpleNotification(
+          title: msg["notification"]["body"],
+          backgroundColor: Colors.red[200],
+          titleStyle: TextStyle(
+              color: Colors.white, fontFamily: "Quicksand", fontSize: 16.0),
+          duration: Duration(seconds: 2),
+          hideCloseButton: true,
         );
       },
       onLaunch: (Map<String, dynamic> msg) async {
@@ -53,15 +54,14 @@ class PushNotificationService {
     var view = notificationData['view'];
     var bookingId = notificationData['bookingId'];
 
-    if(view != null) {
-      if(view == 'booking_detail') {
+    if (view != null) {
+      if (view == 'booking_detail') {
         print("co zo serialize");
         _navigationService.navigateTo(BookingDetail, arguments: bookingId);
       }
-      if(view == 'booking_history') {
+      if (view == 'booking_history') {
         _navigationService.navigateTo(BookingHistory);
       }
     }
   }
-
 }

@@ -1,7 +1,7 @@
 import 'package:customer_app_java_support/blocs/authen_blocs/login_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_event.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_state.dart';
-import 'package:customer_app_java_support/nav_screen.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,10 +29,28 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is LoginFailure) {
-          Scaffold.of(context).showSnackBar(SnackBar(
-            content: Text('${state.error}'),
-            backgroundColor: Colors.red,
-          ));
+          Flushbar(
+            flushbarPosition: FlushbarPosition.TOP,
+            flushbarStyle: FlushbarStyle.FLOATING,
+            backgroundColor: Colors.red[200],
+            reverseAnimationCurve: Curves.decelerate,
+            forwardAnimationCurve: Curves.elasticOut,
+            isDismissible: false,
+            duration: Duration(seconds: 2),
+            titleText: Text(
+              "Đăng nhập thất bại",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
+                  color: Colors.white,
+                  fontFamily: "Quicksand"),
+            ),
+            messageText: Text(
+              "${state.error.replaceAll("Exception: ", "")}",
+              style: TextStyle(
+                  fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
+            ),
+          ).show(context);
         }
       },
       child: BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
