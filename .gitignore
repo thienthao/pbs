@@ -848,3 +848,6 @@ MigrationBackup/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/java-web,java,maven,gradle,android,androidstudio,flutter,intellij,visualstudiocode,visualstudio,eclipse,netbeans
+
+webapi/src/main/resources/application.yaml
+webapi/src/main/resources/pbs-webapi-firebase-adminsdk-rijgb-156ed6588e.json
