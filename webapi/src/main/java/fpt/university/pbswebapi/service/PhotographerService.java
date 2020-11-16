@@ -522,10 +522,8 @@ public class PhotographerService {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                     LocalDateTime localFrom = LocalDateTime.parse(fromString, formatter);
                     LocalDateTime localTo = LocalDateTime.parse(toString, formatter);
-                    if(bookingRepository.countOngoingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
-                        if(bookingRepository.countEditBookingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
-                            busyDays.add(DateHelper.convertToDateViaInstant(date));
-                        }
+                    if(bookingRepository.countOngoingNEditOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                        busyDays.add(DateHelper.convertToDateViaInstant(date));
                     }
                 }
             }
@@ -566,7 +564,7 @@ public class PhotographerService {
             dows.add(DateHelper.getNotWorkingDay(dow));
         }
 
-        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 7, 1), LocalDate.of(2021, 3, 31));
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 10, 1), LocalDate.of(2021, 1, 31));
         for(LocalDate date : datesBetween) {
             for(java.time.DayOfWeek dow : dows) {
                 if(DateHelper.isDateDayOfWeek(date, dow)) {
@@ -575,10 +573,8 @@ public class PhotographerService {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                     LocalDateTime localFrom = LocalDateTime.parse(fromString, formatter);
                     LocalDateTime localTo = LocalDateTime.parse(toString, formatter);
-                    if(bookingRepository.countOngoingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
-                        if(bookingRepository.countEditBookingOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
-                            busyDays.add(DateHelper.convertToDateViaInstant(date));
-                        }
+                    if(bookingRepository.countOngoingNEditOnDate(DateHelper.convertToDateViaInstant(localFrom), DateHelper.convertToDateViaInstant(localTo)) == 0) {
+                        busyDays.add(DateHelper.convertToDateViaInstant(date));
                     }
                 }
             }
@@ -590,6 +586,7 @@ public class PhotographerService {
         return result;
     }
 
+    @Cacheable("calendar")
     public DayEvent getPhotographerEventOnDay(long ptgId, String date) {
         DayEvent dayEvent = new DayEvent();
         Date from;
@@ -635,6 +632,7 @@ public class PhotographerService {
         return dayEvent;
     }
 
+    @Cacheable("calendar")
     public DayEvent getPhotographerEventOnDayForCustomer(long ptgId, String date) {
         DayEvent dayEvent = new DayEvent();
         Date from;

@@ -26,7 +26,7 @@ class BlocDatePicker extends StatefulWidget {
 class _BlocDatePickerState extends State<BlocDatePicker> {
   CalendarController controller;
   TimeOfDay _time = TimeOfDay.now();
-  DateTime _selectedDateTime = DateTime.now();
+  DateTime _selectedDateTime = DateTime.now().toLocal().add(Duration(days: 1));
   CalendarModel photographerDays;
   // List _selectedEvents;
 
@@ -66,7 +66,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
 
   bool _predicate(DateTime day) {
     DateFormat dateFormat = DateFormat('yyyy/MM/dd');
-    if ((day.isBefore(DateTime.now()))) {
+    if ((day.isBefore(DateTime.now().toLocal()))) {
       return false;
     }
     for (var item in photographerDays.busyDays) {
@@ -174,7 +174,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                                   leading: Icon(Icons.event_busy_outlined,
                                       color: Theme.of(context).primaryColor),
                                   title: Text(
-                                    'Slot ${mapEntry.key + 1}:   ${DateFormat('HH:mm a').format(DateTime.parse(listBookings[mapEntry.key].startDate))} - ${DateFormat('HH:mm a').format(DateTime.parse(listBookings[mapEntry.key].startDate).add(Duration(hours: 6)))} ',
+                                    'Slot ${mapEntry.key + 1}:   ${DateFormat('HH:mm a').format(DateTime.parse(listBookings[mapEntry.key].startDate).toLocal())} - ${DateFormat('HH:mm a').format(DateTime.parse(listBookings[mapEntry.key].startDate).add(Duration(hours: 6)).toLocal())} ',
                                     style:
                                         TextStyle(fontWeight: FontWeight.w600),
                                   ),
@@ -336,6 +336,9 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                               fontSize: 18, fontWeight: FontWeight.w600),
                         ),
                       ),
+                      SizedBox(
+                        height: 30,
+                      )
                     ],
                   ),
                 );

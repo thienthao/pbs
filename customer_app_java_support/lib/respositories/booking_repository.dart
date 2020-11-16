@@ -238,7 +238,7 @@ class BookingRepository {
 
     String str = json.encode(resBody);
 
-    final response = await httpClient.put(baseUrl + 'bookings/cancel',
+    final response = await httpClient.put(baseUrl + 'bookings/cancel/customer',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -265,14 +265,18 @@ class BookingRepository {
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final bookingInfos = data['bookingInfos'] as List;
-      print(bookingInfos.length);
-      List<BookingBlocModel> listBookings = bookingInfos.map((booking) {
-        return BookingBlocModel(
-            id: booking['id'],
-            latitude: booking['lat'],
-            startDate: booking['start'],
-            endDate: booking['end']);
-      }).toList();
+      List<BookingBlocModel> listBookings;
+      if (bookingInfos != null) {
+        listBookings = bookingInfos.map((booking) {
+          return BookingBlocModel(
+              id: booking['id'],
+              latitude: booking['lat'],
+              startDate: booking['start'],
+              endDate: booking['end']);
+        }).toList();
+      } else {
+        listBookings = [];
+      }
 
       return listBookings;
     } else {

@@ -102,7 +102,7 @@ public class ServicePackageController {
     public ResponseEntity<?> removePackage(@PathVariable("ptgId") Long ptgId,
                                            @PathVariable("packageId") Long packageId) {
         try {
-            return new ResponseEntity<Object>(packageService.removePackage(packageId), HttpStatus.OK);
+            return packageService.removePackage(packageId);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
