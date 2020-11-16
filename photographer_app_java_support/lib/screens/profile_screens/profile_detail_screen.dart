@@ -41,8 +41,7 @@ class _DetailState extends State<Detail> {
         description: descriptionController.text);
 
     print(_photographer.fullname);
-    context
-        .bloc<PhotographerBloc>()
+    BlocProvider.of<PhotographerBloc>(context)
         .add(PhotographerEventUpdateProfile(photographer: _photographer));
   }
 

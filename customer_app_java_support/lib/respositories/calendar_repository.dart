@@ -17,7 +17,7 @@ class CalendarRepository {
   Future<CalendarModel> getBusyDaysOfPhotographer(int id) async {
     final response = await this
         .httpClient
-        .get(baseUrl + 'photographers/$id/calendar', headers: {
+        .get(baseUrl + 'photographers/$id/calendar/for-customer', headers: {
       HttpHeaders.authorizationHeader: 'Bearer ' +
           'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
     });

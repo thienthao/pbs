@@ -21,7 +21,7 @@ class NavScreen extends StatefulWidget {
 }
 
 class _NavScreenState extends State<NavScreen> {
-  int _selectedTab = 3;
+  int _selectedTab = 0;
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
   PackageRepository _packageRepository =

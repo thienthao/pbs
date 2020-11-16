@@ -44,14 +44,12 @@ class _InfoState extends State<Info> {
   }
 
   _updateAvatar() async {
-    context
-        .bloc<PhotographerBloc>()
+    BlocProvider.of<PhotographerBloc>(context)
         .add(PhotographerEventOnChangeAvatar(image: _avatar));
   }
 
   _updateCover() async {
-    context
-        .bloc<PhotographerBloc>()
+    BlocProvider.of<PhotographerBloc>(context)
         .add(PhotographerEventOnChangeCover(image: _cover));
   }
 

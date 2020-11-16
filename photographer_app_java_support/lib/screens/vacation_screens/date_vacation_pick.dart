@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
+import 'package:photographer_app_java_support/models/busy_day_bloc_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class VacationPicker extends StatefulWidget {
@@ -8,10 +12,27 @@ class VacationPicker extends StatefulWidget {
 
 class _VacationPickerState extends State<VacationPicker> {
   CalendarController controller;
+  TextEditingController titleTxtController = TextEditingController();
+  TextEditingController descriptionTxtController = TextEditingController();
+  DateTime daySelected = DateTime.now();
+
+  void _onDaySelected(DateTime day, List events, List holidays) {
+    daySelected = day;
+  }
+
+  _createBusyDay() async {
+    BlocProvider.of<BusyDayBloc>(context).add(BusyDayEventCreate(
+        ptgId: 168,
+        busyDayBlocModel: BusyDayBlocModel(
+          title: titleTxtController.text,
+          description: descriptionTxtController.text,
+          startDate:
+              DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(daySelected),
+        )));
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     controller = CalendarController();
   }
@@ -49,7 +70,7 @@ class _VacationPickerState extends State<VacationPicker> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ngày nghỉ:',
+                      'Tiêu đề:',
                       style: TextStyle(
                         fontSize: 15.0,
                         color: Colors.black87,
@@ -57,6 +78,7 @@ class _VacationPickerState extends State<VacationPicker> {
                       ),
                     ),
                     TextField(
+                      controller: titleTxtController,
                       keyboardType: TextInputType.text,
                       style: TextStyle(
                         color: Colors.black87,
@@ -72,11 +94,38 @@ class _VacationPickerState extends State<VacationPicker> {
                         ),
                       ),
                     ),
+                    Text(
+                      'Mô tả:',
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextField(
+                      controller: descriptionTxtController,
+                      keyboardType: TextInputType.multiline,
+                      minLines: 1,
+                      maxLines: 5,
+                      style: TextStyle(
+                        color: Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(8.0),
+                        hintText: 'Mô tả...',
+                        hintStyle: TextStyle(
+                          fontSize: 20.0,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
               Container(
-                height: 350,
+                height: 380,
                 margin: EdgeInsets.all(15.0),
                 padding: EdgeInsets.all(7.0),
                 decoration: BoxDecoration(
@@ -93,6 +142,7 @@ class _VacationPickerState extends State<VacationPicker> {
                   child: TableCalendar(
                     locale: 'vi_VN',
                     calendarController: controller,
+                    onDaySelected: _onDaySelected,
                     startingDayOfWeek: StartingDayOfWeek.monday,
                     initialCalendarFormat: CalendarFormat.month,
                     formatAnimation: FormatAnimation.slide,
@@ -133,7 +183,7 @@ class _VacationPickerState extends State<VacationPicker> {
               SizedBox(height: 5.0),
               RaisedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  _createBusyDay();
                 },
                 textColor: Colors.white,
                 color: Theme.of(context).primaryColor,
@@ -147,6 +197,14 @@ class _VacationPickerState extends State<VacationPicker> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),
+              BlocBuilder<BusyDayBloc, BusyDayState>(
+                builder: (context, state) {
+                  if (state is BusyDayStateCreatedSuccess) {
+                    return Text('Created Success!!');
+                  }
+                  return Container();
+                },
+              )
             ],
           ),
         ],

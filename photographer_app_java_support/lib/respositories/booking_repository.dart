@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
 import 'package:photographer_app_java_support/models/package_bloc_model.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:photographer_app_java_support/models/time_and_location_bloc_model.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/';
 
@@ -84,6 +84,20 @@ class BookingRepository {
             fullname: tempCustomer['fullname'],
             phone: tempCustomer['phone'],
             avatar: tempCustomer['avatar']);
+
+        final tempTimeAndLocations = booking['timeLocationDetails'] as List;
+
+        final List<TimeAndLocationBlocModel> listTimeAndLocations =
+            tempTimeAndLocations.map((item) {
+          return TimeAndLocationBlocModel(
+              id: item['id'],
+              start: item['start'],
+              end: item['end'],
+              formattedAddress: item['formattedAddress'],
+              latitude: item['lat'],
+              longitude: item['lon']);
+        }).toList();
+
         return BookingBlocModel(
           id: booking['id'],
           status: booking['bookingStatus'],
@@ -99,6 +113,7 @@ class BookingRepository {
           rating: booking['rating'] ?? 0.0,
           location: booking['location'] ?? '',
           customer: customer,
+          listTimeAndLocations: listTimeAndLocations,
         );
       }).toList();
       return bookings;
@@ -110,38 +125,40 @@ class BookingRepository {
   Future<List<BookingBlocModel>> getListBookingByDate(String date) async {
     final response = await this
         .httpClient
-        .get(baseUrl + 'bookings/photographer/168/date?date=$date', headers: {
+        .get(baseUrl + 'photographers/168/on-day?date=$date', headers: {
       HttpHeaders.authorizationHeader: 'Bearer ' +
           'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
     });
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-      final list = data['bookings'] as List;
 
-      final List<BookingBlocModel> bookings = list.map((booking) {
-        final tempCustomer = booking['customer'] as Map;
-        CustomerBlocModel customer = CustomerBlocModel(
-            id: tempCustomer['id'],
-            fullname: tempCustomer['fullname'],
-            phone: tempCustomer['phone'],
-            avatar: tempCustomer['avatar']);
-        return BookingBlocModel(
-          id: booking['id'],
-          status: booking['bookingStatus'],
-          startDate: booking['startDate'] == null
-              ? DateTime.now().toString()
-              : booking['startDate'],
-          endDate: booking['endDate'] ?? DateTime.now().toString(),
-          serviceName: booking['serviceName'] ?? 'Không có dịch vụ nào',
-          price: booking['price'] ?? 0,
-          customerCanceledReason: booking['customerCanceledReason'] ?? '',
-          photographerCanceledReason: booking['photographerCanceledReason'],
-          rejectedReason: booking['rejectedReason'],
-          rating: booking['rating'] ?? 0.0,
-          location: booking['location'] ?? '',
-          customer: customer,
-        );
-      }).toList();
+      final list = data['bookingInfos'] as List;
+      List<BookingBlocModel> bookings;
+      if (list != null) {
+        bookings = list.map((booking) {
+          CustomerBlocModel customer = CustomerBlocModel(
+            id: booking['customerId'],
+            fullname: booking['customerName'],
+          );
+          return BookingBlocModel(
+            id: booking['id'],
+            status: booking['status'],
+            startDate: booking['start'] == null
+                ? DateTime.now().toString()
+                : booking['start'],
+            endDate: booking['end'] ?? DateTime.now().toString(),
+            serviceName: booking['packageName'] ?? 'Không có dịch vụ nào',
+            location: booking['address'],
+            latitude: booking['lat'],
+            longitude: booking['long'],
+            price: booking['packagePrice'] ?? 0,
+            customer: customer,
+          );
+        }).toList();
+      } else {
+        bookings = [];
+      }
+
       return bookings;
     } else {
       throw Exception('Error getting list of bookings');

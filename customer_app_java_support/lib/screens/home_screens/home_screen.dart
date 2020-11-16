@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
   String ptgServiceResult = '';
+  String city ='';
   LatLng selectedLatlng = LatLng(0.0, 0.0);
   int selectedCategory = 1;
   @override
@@ -41,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _completer = Completer<void>();
 
     _loadAlbums(1);
-    _loadPhotographers(1, selectedLatlng);
+    _loadPhotographers(1, selectedLatlng, city);
 
     Timer(Duration(seconds: 5), () {
       BlocProvider.of<PhotographerAlgBloc>(context)
@@ -54,16 +55,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         .add(AlbumEventFetch(categoryId: _categoryId));
   }
 
-  _loadPhotographers(int _categoryId, LatLng _latLng) async {
+  _loadPhotographers(int _categoryId, LatLng _latLng, String _city) async {
     BlocProvider.of<PhotographerBloc>(context)
-        .add(PhotographerEventFetch(categoryId: _categoryId, latLng: _latLng));
+        .add(PhotographerEventFetch(categoryId: _categoryId, latLng: _latLng, city: _city));
   }
 
-  _filteredByCategoryId(_categoryId, _latLng) async {
+  _filteredByCategoryId(_categoryId, _latLng, _city) async {
     _loadAlbums(
       _categoryId,
     );
-    _loadPhotographers(_categoryId, _latLng);
+    _loadPhotographers(_categoryId, _latLng,_city);
   }
 
   @override
@@ -104,8 +105,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onChangeLocation: (Map result) {
                   double _lat = result['lat'];
                   double _long = result['long'];
+                   city = result['name'];
                   selectedLatlng = LatLng(_lat, _long);
-                  _filteredByCategoryId(selectedCategory, selectedLatlng);
+                  _filteredByCategoryId(selectedCategory, selectedLatlng, city);
                 },
               ),
             ),
@@ -135,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 setState(() {
                                   selectedCategory = _selectedCategory;
                                   _filteredByCategoryId(
-                                      selectedCategory, selectedLatlng);
+                                      selectedCategory, selectedLatlng, city);
                                 });
                               },
                             ),

@@ -3,12 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
+import 'package:photographer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:photographer_app_java_support/blocs/working_day_blocs/working_days.dart';
+import 'package:photographer_app_java_support/respositories/calendar_repository.dart';
 import 'package:photographer_app_java_support/widgets/home/build_pen_task.dart';
 import 'package:photographer_app_java_support/widgets/home/build_task.dart';
 import 'package:photographer_app_java_support/widgets/home/show_calendar.dart';
 import 'package:photographer_app_java_support/widgets/shared/loading_line.dart';
 
 import 'vacation_screens/list_vacation_screen.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,15 +21,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  CalendarRepository _calendarRepository =
+      CalendarRepository(httpClient: http.Client());
+
   String filterType = 'Đang chờ';
   Completer<void> _completer;
   String _selectedDate;
-
   @override
   void initState() {
     super.initState();
     _completer = Completer<void>();
     _loadPendingBookings();
+    _loadCalendar();
+  }
+
+  _loadCalendar() async {
+    BlocProvider.of<CalendarBloc>(context)
+        .add(CalendarEventPhotographerDaysFetch(ptgId: 168));
   }
 
   _loadPendingBookings() async {
@@ -59,7 +72,23 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ListVacation()),
+                  MaterialPageRoute(builder: (context) {
+                    return MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => WorkingDayBloc(
+                              calendarRepository: _calendarRepository)
+                            ..add(WorkingDayEventFetch(ptgId: 168)),
+                        ),
+                        BlocProvider(
+                          create: (context) => BusyDayBloc(
+                              calendarRepository: _calendarRepository)
+                            ,
+                        ),
+                      ],
+                      child: ListVacation(),
+                    );
+                  }),
                 );
               },
             ),
@@ -133,11 +162,40 @@ class _HomeScreenState extends State<HomeScreen> {
               ? Expanded(
                   child: Column(
                     children: [
-                      CalendarShow(
-                        onSelectedDate: (String date) {
-                          _selectedDate = date;
-                          print('$date is selected');
-                          _loadBookingsByDate(_selectedDate);
+                      BlocBuilder<CalendarBloc, CalendarState>(
+                        builder: (context, state) {
+                          if (state is CalendarStateLoading) {
+                            return Padding(
+                              padding: const EdgeInsets.all(50.0),
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (state is CalendarStateFailure) {
+                            return Center(
+                              child: InkWell(
+                                onTap: () {},
+                                child: Text(
+                                  'Đã xảy ra lỗi trong lúc tải dữ liệu \n Ấn để thử lại',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.red[300], fontSize: 16),
+                                ),
+                              ),
+                            );
+                          }
+
+                          if (state is CalendarStatePhotographerDaysSuccess) {
+                            return CalendarShow(
+                              photographerDays: state.photographerDays,
+                              onSelectedDate: (String date) {
+                                _selectedDate = date;
+                                print('$date is selected');
+                                _loadBookingsByDate(_selectedDate);
+                              },
+                            );
+                          }
+                          return Text('');
                         },
                       ),
                       Expanded(

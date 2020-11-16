@@ -405,7 +405,11 @@ class _CustomerPhotographerDetailState
                   if (state is CalendarStateFailure) {
                     return Center(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          BlocProvider.of<CalendarBloc>(context).add(
+                              CalendarEventPhotographerDaysFetch(
+                                  ptgId: widget.id));
+                        },
                         child: Text(
                           'Đã xảy ra lỗi trong lúc tải dữ liệu \n Ấn để thử lại',
                           textAlign: TextAlign.center,

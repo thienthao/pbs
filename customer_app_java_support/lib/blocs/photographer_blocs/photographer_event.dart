@@ -13,8 +13,9 @@ abstract class PhotographerEvent extends Equatable {
 class PhotographerEventFetch extends PhotographerEvent {
   final int categoryId;
   final LatLng latLng;
+  final String city;
 
-  PhotographerEventFetch({this.categoryId, this.latLng});
+  PhotographerEventFetch({this.categoryId, this.latLng, this.city});
 }
 
 class PhotographerRestartEvent extends PhotographerEvent {}

@@ -244,12 +244,26 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                       onTap: () async {
                         final pageResult =
                             await Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => BlocDatePicker(
+                                builder: (context) {
+                                  return MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => CalendarBloc(
+                                            calendarRepository: _calendarRepository),
+                                      ),
+                                      BlocProvider(
+                                        create: (context) => BookingBloc(
+                                            bookingRepository: _bookingRepository),
+                                      )
+                                    ],
+                                    child: BlocDatePicker(
                                       ptgId: widget.photographerName.id,
                                       onSelecParam: (DateTime result) {
                                         startDate = result.toString();
                                       },
-                                    )));
+                                    ),
+                                  );
+                                }));
                         setState(() {
                           if (pageResult != null) {
                             timeResult = pageResult;

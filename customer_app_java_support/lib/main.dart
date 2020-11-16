@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_state.dart';
@@ -20,6 +21,7 @@ import 'blocs/bloc_observer.dart';
 import 'package:customer_app_java_support/globals.dart' as globals;
 import 'package:http/http.dart' as http;
 import 'router.dart' as router;
+import 'package:firebase_core/firebase_core.dart';
 
 void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
@@ -61,6 +63,10 @@ class _AppState extends State<App> {
     _pushNotificationService.init();
     super.initState();
     globals.selectedTabGlobal = 0;
+    Firebase.initializeApp().whenComplete(() { 
+      print("completed");
+      setState(() {});
+    });
   }
 
   @override
@@ -70,6 +76,9 @@ class _AppState extends State<App> {
             AuthenticationBloc(userRepository: widget.userRepository)
               ..add(AppStarted()),
         child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          builder: BotToastInit(),
+          navigatorObservers: [BotToastNavigatorObserver()],
           navigatorKey: locator<NavigationService>().navigatorKey,
           onGenerateRoute: router.generateRoute,
           theme: ThemeData(
@@ -77,6 +86,9 @@ class _AppState extends State<App> {
             primaryColor: Color(0xFFF88F8F),
             accentColor: Color(0xFFFFBDAC),
             scaffoldBackgroundColor: Color(0xFFF3F5F7),
+            primaryColorDark: Color(0xff262833),
+            primaryColorLight: Color(0xffFCF9F5),
+            visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
           home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
             builder: (context, state) {
@@ -137,3 +149,74 @@ class _MyAppState extends State<MyApp> {
         home: LoginScreen());
   }
 }
+
+// import 'package:expand_widget/expand_widget.dart';
+// import 'package:flutter/material.dart';
+
+// void main() => runApp(MyApp());
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Expand Widget',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: HomePage(),
+//     );
+//   }
+// }
+
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Expand Widget'),
+//       ),
+//       body: ListView(
+//         padding: EdgeInsets.all(8),
+//         children: <Widget>[
+//           SizedBox(height: 4),
+//           Container(
+//             child: Padding(
+//               padding: EdgeInsets.all(8),
+//               child: Column(
+//                 children: <Widget>[
+//                   Text(
+//                     'Expand Child',
+//                     style: Theme.of(context).textTheme.headline6,
+//                   ),
+//                   SizedBox(height: 8),
+//                   OutlineButton(
+//                     child: Text('Button0'),
+//                     onPressed: () => print('Pressed button0'),
+//                   ),
+//                   ExpandChild(
+//                     child: Column(
+//                       children: <Widget>[
+//                         OutlineButton(
+//                           child: Text('Button1'),
+//                           onPressed: () => print('Pressed button1'),
+//                         ),
+//                         OutlineButton(
+//                           child: Text('Button2'),
+//                           onPressed: () => print('Pressed button2'),
+//                         ),
+//                         OutlineButton(
+//                           child: Text('Button3'),
+//                           onPressed: () => print('Pressed button3'),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

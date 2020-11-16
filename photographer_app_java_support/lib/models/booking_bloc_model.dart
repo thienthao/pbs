@@ -1,9 +1,9 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
 
 import 'package:photographer_app_java_support/models/package_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:photographer_app_java_support/models/time_and_location_bloc_model.dart';
 
 class BookingBlocModel extends Equatable {
   final int id;
@@ -25,33 +25,40 @@ class BookingBlocModel extends Equatable {
   final String commentDate;
   final String packageDescription;
   final Photographer photographer;
+  final int returningType;
+  final bool isMultiday;
   final CustomerBlocModel customer;
   final PackageBlocModel package;
+  final List<TimeAndLocationBlocModel> listTimeAndLocations;
   final List<String> services;
 
-  BookingBlocModel(
-      {this.id,
-      this.status,
-      this.startDate,
-      this.endDate,
-      this.serviceName,
-      this.price,
-      this.createdAt,
-      this.updatedAt,
-      this.customerCanceledReason,
-      this.photographerCanceledReason,
-      this.rejectedReason,
-      this.rating,
-      this.comment,
-      this.location,
-      this.latitude,
-      this.longitude,
-      this.commentDate,
-      this.packageDescription,
-      this.photographer,
-      this.customer,
-      this.package,
-      this.services});
+  BookingBlocModel({
+    this.id,
+    this.status,
+    this.startDate,
+    this.endDate,
+    this.serviceName,
+    this.price,
+    this.createdAt,
+    this.updatedAt,
+    this.customerCanceledReason,
+    this.photographerCanceledReason,
+    this.rejectedReason,
+    this.rating,
+    this.comment,
+    this.location,
+    this.latitude,
+    this.longitude,
+    this.commentDate,
+    this.packageDescription,
+    this.photographer,
+    this.customer,
+    this.package,
+    this.services,
+    this.returningType,
+    this.isMultiday,
+    this.listTimeAndLocations,
+  });
 
   @override
   List<Object> get props {
@@ -80,5 +87,4 @@ class BookingBlocModel extends Equatable {
       services
     ];
   }
-  
 }
