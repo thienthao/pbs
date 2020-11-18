@@ -134,7 +134,7 @@ class _PlaneIndicatorState extends State<PlaneIndicator>
   @override
   void dispose() {
     _planeController.dispose();
-    _disposeCloudsControllers();
+    // _disposeCloudsControllers();
     super.dispose();
   }
 

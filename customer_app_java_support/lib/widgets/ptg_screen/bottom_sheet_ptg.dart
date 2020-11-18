@@ -242,28 +242,27 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                         ),
                       ),
                       onTap: () async {
-                        final pageResult =
-                            await Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) {
-                                  return MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (context) => CalendarBloc(
-                                            calendarRepository: _calendarRepository),
-                                      ),
-                                      BlocProvider(
-                                        create: (context) => BookingBloc(
-                                            bookingRepository: _bookingRepository),
-                                      )
-                                    ],
-                                    child: BlocDatePicker(
-                                      ptgId: widget.photographerName.id,
-                                      onSelecParam: (DateTime result) {
-                                        startDate = result.toString();
-                                      },
-                                    ),
-                                  );
-                                }));
+                        final pageResult = await Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (context) {
+                          return MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => CalendarBloc(
+                                    calendarRepository: _calendarRepository),
+                              ),
+                              BlocProvider(
+                                create: (context) => BookingBloc(
+                                    bookingRepository: _bookingRepository),
+                              )
+                            ],
+                            child: BlocDatePicker(
+                              ptgId: widget.photographerName.id,
+                              onSelecParam: (DateTime result) {
+                                startDate = result.toString();
+                              },
+                            ),
+                          );
+                        }));
                         setState(() {
                           if (pageResult != null) {
                             timeResult = pageResult;
@@ -340,7 +339,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                             child: BlocDatePicker(
                               ptgId: widget.photographerName.id,
                               onSelecParam: (DateTime result) {
-                                startDate = result.toString();
+                                endDate = result.toString();
                               },
                             ),
                           );
@@ -513,7 +512,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               SizedBox(height: 30.0),
               RaisedButton(
                 onPressed: () {
-                  print('Hi $selectedLatLng');
+                  print(startDate);
                   var startDateTemp = DateFormat("yyyy-MM-dd")
                       .format(DateTime.parse(startDate));
                   var endDateTemp =
@@ -542,8 +541,8 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                       formattedAddress: locationResult,
                       start: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
                           .format(DateTime.parse(startDate)),
-                      end: DateFormat("yyyy-MM-dd'T'23:59:59.999'Z'")
-                          .format(DateTime.parse(startDate)),
+                      end: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(
+                          DateTime.parse(startDate).add(Duration(hours: 6))),
                     );
                     timeAndLocations.add(timeAndLocationBlocModel);
 
@@ -583,10 +582,9 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
 
   void popNotice() {
     globals.selectedTabGlobal = 2;
-    sleep(Duration(seconds: 5));
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-        (Route<dynamic> route) => false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    });
 
     StatusAlert.show(
       context,

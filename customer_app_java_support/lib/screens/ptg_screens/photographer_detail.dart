@@ -543,32 +543,36 @@ class _CustomerPhotographerDetailState
         isScrollControlled: true,
         context: context,
         builder: (context) {
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.95,
-            color: Colors.black45,
-            child: Container(
-              child: MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create: (context) =>
-                        BookingBloc(bookingRepository: _bookingRepository),
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.95,
+                color: Colors.black45,
+                child: Container(
+                  child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) =>
+                            BookingBloc(bookingRepository: _bookingRepository),
+                      ),
+                    ],
+                    child: BottomSheetShow(
+                      photographerName:
+                          Photographer(id: widget.id, fullname: widget.name),
+                      blocPackages: blocPackages,
+                      selectedPackage: selectedPackage,
+                    ),
                   ),
-                ],
-                child: BottomSheetShow(
-                  photographerName:
-                      Photographer(id: widget.id, fullname: widget.name),
-                  blocPackages: blocPackages,
-                  selectedPackage: selectedPackage,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).canvasColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25.0),
+                      topRight: Radius.circular(25.0),
+                    ),
+                  ),
                 ),
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).canvasColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25.0),
-                  topRight: Radius.circular(25.0),
-                ),
-              ),
-            ),
+              );
+            },
           );
         },
       );

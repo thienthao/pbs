@@ -101,10 +101,11 @@ class _SliverItemsState extends State<SliverItems> {
                                 .toString()
                                 .compareTo(city.name) ==
                             0) {
+                              print(city.image);
                           return image = city.image;
                         } else {
                           image =
-                              'https://pix10.agoda.net/hotelImages/4410136/-1/0048c77b8b106c212bb7a6690c14d7b9.jpg?s=1024x768';
+                              'https://i.pinimg.com/564x/52/d2/94/52d294e56bd9dbf4ebb46099753e69ba.jpg';
                         }
                       }
                     });
