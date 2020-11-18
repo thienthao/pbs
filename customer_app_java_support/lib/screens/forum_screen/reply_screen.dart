@@ -1,14 +1,23 @@
 import 'dart:io';
+import 'package:customer_app_java_support/blocs/thread_bloc/thread_bloc.dart';
+import 'package:customer_app_java_support/blocs/thread_bloc/thread_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
+import 'package:customer_app_java_support/models/thread_model.dart';
 
 class Reply extends StatefulWidget {
+  Thread thread;
+
+  Reply({this.thread});
+
   @override
   _ReplyState createState() => _ReplyState();
 }
 
 class _ReplyState extends State<Reply> {
   List<File> _images = [];
+  TextEditingController replyController = TextEditingController();
 
   Future getImage() async {
     var image = await ImagePickerGC.pickImage(
@@ -18,6 +27,20 @@ class _ReplyState extends State<Reply> {
     setState(() {
       _images.add(image);
     });
+  }
+
+  void _postComment() {
+    String reply = replyController.text;
+    String createdAt = "2020-11-18";
+    Owner owner = Owner(id: 2);
+
+    ThreadComment comment = ThreadComment(
+        comment: reply,
+        createdAt: createdAt,
+        owner: owner,
+        thread: widget.thread);
+    BlocProvider.of<ThreadBloc>(context)
+        .add(PostComment(threadComment: comment));
   }
 
   @override
@@ -39,7 +62,10 @@ class _ReplyState extends State<Reply> {
               Icons.done,
               color: Colors.blue,
             ),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              _postComment();
+              Navigator.pop(context);
+            },
           ),
         ],
         title: Text('Trả lời'),
@@ -52,6 +78,7 @@ class _ReplyState extends State<Reply> {
           Padding(
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: TextField(
+              controller: replyController,
               keyboardType: TextInputType.text,
               style: TextStyle(
                 color: Colors.black87,
