@@ -168,6 +168,10 @@ public class BookingService {
         return bookingRepository.byStatus(status, paging, userId);
     }
 
+    public Page<Booking> findByStatusForCustomer(EBookingStatus status, Pageable paging, Long customerId) {
+        return bookingRepository.byStatusForCustomer(status, paging, customerId);
+    }
+
     public Page<Booking> findAll(Pageable paging, Long cusId) {
         return bookingRepository.all(paging, cusId);
     }

@@ -1,5 +1,8 @@
 package fpt.university.pbswebapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +17,10 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class ThreadComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +39,9 @@ public class ThreadComment {
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private User owner;
+
+    @ManyToOne
+    @JoinColumn(name = "thread_id", referencedColumnName = "id")
+    @JsonBackReference
+    private Thread thread;
 }

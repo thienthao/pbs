@@ -1,6 +1,8 @@
 package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.entity.Thread;
+import fpt.university.pbswebapi.entity.ThreadComment;
+import fpt.university.pbswebapi.repository.ThreadCommentRepository;
 import fpt.university.pbswebapi.service.ThreadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class ThreadController {
 
     private final ThreadService threadService;
+    private final ThreadCommentRepository threadCommentRepository;
 
     @Autowired
-    public ThreadController(ThreadService threadService) {
+    public ThreadController(ThreadService threadService, ThreadCommentRepository threadCommentRepository) {
         this.threadService = threadService;
+        this.threadCommentRepository = threadCommentRepository;
     }
 
     @GetMapping("/threads")
@@ -32,4 +36,15 @@ public class ThreadController {
     public ResponseEntity<?> createThread(@RequestBody Thread thread) {
         return new ResponseEntity<>(threadService.save(thread), HttpStatus.OK);
     }
+
+    @GetMapping("/threads/comments/json")
+    public ResponseEntity<?> getThreadCommentJson() {
+        return new ResponseEntity<>(threadCommentRepository.findAll(), HttpStatus.OK);
+    }
+
+    @PostMapping("/threads/comments")
+    public ResponseEntity<?> postComment(@RequestBody ThreadComment comment) {
+        return new ResponseEntity<>(threadService.postComment(comment), HttpStatus.OK);
+    }
+
 }
