@@ -1,5 +1,3 @@
-
-
 import 'package:customer_app_java_support/models/thread_model.dart';
 import 'package:customer_app_java_support/respositories/thread_api_client.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,8 +13,11 @@ class ThreadRepository {
   }
 
   Future<bool> postThread(Thread thread) async {
-    print("vo post repository");
     // return await threadApiClient.postThread(thread);
     return Future.value(await threadApiClient.postThread(thread));
+  }
+
+  Future<bool> postComment(ThreadComment comment) async {
+    return Future.value(await threadApiClient.postComment(comment));
   }
 }

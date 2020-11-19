@@ -19,8 +19,7 @@ class Thread extends Equatable {
       this.updatedAt,
       this.owner,
       this.topic,
-      this.comments}
-  );
+      this.comments});
 
   @override
   
@@ -60,7 +59,6 @@ class Thread extends Equatable {
     }
     return data;
   }
-
 }
 
 class Owner {
@@ -154,9 +152,15 @@ class ThreadComment {
   String createdAt;
   String updatedAt;
   Owner owner;
+  Thread thread;
 
   ThreadComment(
-      {this.id, this.comment, this.createdAt, this.updatedAt, this.owner});
+      {this.id,
+      this.comment,
+      this.createdAt,
+      this.updatedAt,
+      this.owner,
+      this.thread});
 
   ThreadComment.fromJson(json) {
     id = json['id'];
@@ -164,6 +168,8 @@ class ThreadComment {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     owner = json['owner'] != null ? new Owner.fromJson(json['owner']) : null;
+    thread =
+        json['thread'] != null ? new Thread.fromJson(json['thread']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -174,6 +180,9 @@ class ThreadComment {
     data['updatedAt'] = this.updatedAt;
     if (this.owner != null) {
       data['owner'] = this.owner.toJson();
+    }
+    if (this.thread != null) {
+      data['thread'] = this.thread.toJson();
     }
     return data;
   }

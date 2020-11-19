@@ -1,41 +1,42 @@
-import 'package:customer_app_java_support/blocs/authen_blocs/login_bloc.dart';
-import 'package:customer_app_java_support/blocs/authen_blocs/login_event.dart';
-import 'package:customer_app_java_support/blocs/authen_blocs/login_state.dart';
-import 'package:customer_app_java_support/blocs/authen_blocs/user_repository.dart';
 import 'package:customer_app_java_support/blocs/register_blocs/register_bloc.dart';
-import 'package:customer_app_java_support/screens/sign_up_screen.dart';
+import 'package:customer_app_java_support/blocs/register_blocs/register_event.dart';
+import 'package:customer_app_java_support/blocs/register_blocs/register_state.dart';
+import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class LoginScreen extends StatefulWidget {
-  final UserRepository userRepository;
-
-  LoginScreen({@required this.userRepository});
-
+class SignUpScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+class _SignUpScreenState extends State<SignUpScreen> {
   bool remember = false;
+  TextEditingController username = TextEditingController();
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+  TextEditingController repassword = TextEditingController();
+
+  void signup() {
+    String username = this.username.text;
+    String email = this.email.text;
+    String password = this.password.text;
+    String repassword = this.repassword.text;
+    print("zo on click");
+    UserRegister userRegister =
+        UserRegister(username: username, email: email, password: password);
+    BlocProvider.of<RegisterBloc>(context)
+        .add(SignUp(userRegister: userRegister));
+  }
 
   @override
   Widget build(BuildContext context) {
-    _onLoginButtonPressed() {
-      BlocProvider.of<LoginBloc>(context).add(LoginButtonPressed(
-        username: _usernameController.text,
-        password: _passwordController.text,
-      ));
-    }
-
-    return BlocListener<LoginBloc, LoginState>(
+    return BlocListener<RegisterBloc, RegisterState>(
       listener: (context, state) {
-        if (state is LoginFailure) {
+        if (state is RegisterFailure) {
           Flushbar(
             flushbarPosition: FlushbarPosition.TOP,
             flushbarStyle: FlushbarStyle.FLOATING,
@@ -53,14 +54,40 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontFamily: "Quicksand"),
             ),
             messageText: Text(
-              "${state.error.replaceAll("Exception: ", "")}",
+              "dang nhap that bai",
+              style: TextStyle(
+                  fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
+            ),
+          ).show(context);
+        }
+
+        if (state is RegisterSuccess) {
+          Flushbar(
+            flushbarPosition: FlushbarPosition.TOP,
+            flushbarStyle: FlushbarStyle.FLOATING,
+            backgroundColor: Colors.red[200],
+            reverseAnimationCurve: Curves.decelerate,
+            forwardAnimationCurve: Curves.elasticOut,
+            isDismissible: false,
+            duration: Duration(seconds: 2),
+            titleText: Text(
+              "Đăng nhập thanh cong",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
+                  color: Colors.white,
+                  fontFamily: "Quicksand"),
+            ),
+            messageText: Text(
+              "Đăng nhập thanh cong",
               style: TextStyle(
                   fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
             ),
           ).show(context);
         }
       },
-      child: BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {
+      child:
+          BlocBuilder<RegisterBloc, RegisterState>(builder: (context, state) {
         return Scaffold(
           body: AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle.light,
@@ -76,24 +103,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Color(0xFFF9D1B7),
                           Color(0xFFF894A4),
+                          Color(0xFFF9D1B7),
                         ],
-                        stops: [0.1, 0.8],
+                        stops: [0.1, 0.9],
                       ),
                     ),
                   ),
                   Container(
                     height: double.infinity,
                     child: SingleChildScrollView(
-                      physics: BouncingScrollPhysics(),
+                      physics: AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.symmetric(
                           horizontal: 40.0, vertical: 70.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Đăng nhập',
+                            'Đăng kí',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 30.0,
@@ -105,12 +132,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                'Tên đăng nhập',
+                                'Tên tài khoản',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600),
                               ),
-                              SizedBox(height: 10.0),
+                              SizedBox(height: 15.0),
                               Container(
                                 alignment: Alignment.centerLeft,
                                 height: 60.0,
@@ -119,33 +146,78 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(10.0),
                                     boxShadow: [
                                       BoxShadow(
-                                          color: Colors.black26,
+                                          color: Colors.grey[400],
                                           offset: Offset(0.0, 2.0),
                                           blurRadius: 6.0)
                                     ]),
                                 child: TextField(
-                                  controller: _usernameController,
+                                  controller: username,
                                   keyboardType: TextInputType.text,
                                   style: TextStyle(
-                                    color: Color(0xFFF67062),
+                                    color: Colors.black87,
                                   ),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.only(top: 14.0),
                                     prefixIcon: Icon(
-                                      Icons.supervised_user_circle,
-                                      color: Color(0xFFF67062),
+                                      Icons.person,
+                                      color: Theme.of(context).primaryColor,
                                     ),
-                                    hintText: 'Tên đăng nhập của bạn',
+                                    hintText: 'Nhập tên tài khoản',
                                     hintStyle: TextStyle(
-                                      color: Color(0xFFF67062),
+                                      color: Colors.black87,
                                     ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 30.0),
+                          SizedBox(height: 20.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Email',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(height: 15.0),
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                height: 60.0,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.grey[400],
+                                          offset: Offset(0.0, 2.0),
+                                          blurRadius: 6.0)
+                                    ]),
+                                child: TextField(
+                                  controller: email,
+                                  keyboardType: TextInputType.text,
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.only(top: 14.0),
+                                    prefixIcon: Icon(
+                                      Icons.email,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    hintText: 'Nhập email',
+                                    hintStyle: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20.0),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
@@ -155,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600),
                               ),
-                              SizedBox(height: 10.0),
+                              SizedBox(height: 15.0),
                               Container(
                                 alignment: Alignment.centerLeft,
                                 height: 60.0,
@@ -164,89 +236,95 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(10.0),
                                     boxShadow: [
                                       BoxShadow(
-                                          color: Colors.black26,
+                                          color: Colors.grey[400],
                                           offset: Offset(0.0, 2.0),
                                           blurRadius: 6.0)
                                     ]),
                                 child: TextField(
-                                  controller: _passwordController,
+                                  controller: password,
                                   obscureText: true,
                                   style: TextStyle(
-                                    color: Color(0xFFF67062),
+                                    color: Colors.black87,
                                   ),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.only(top: 14.0),
                                     prefixIcon: Icon(
                                       Icons.lock,
-                                      color: Color(0xFFF67062),
+                                      color: Theme.of(context).primaryColor,
                                     ),
-                                    hintText: 'Mật khẩu của bạn',
+                                    hintText: 'Nhập mật khẩu của bạn',
                                     hintStyle: TextStyle(
-                                      color: Color(0xFFF67062),
+                                      color: Colors.black87,
                                     ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            child: FlatButton(
-                              onPressed: () {},
-                              padding: EdgeInsets.only(right: 0.0),
-                              child: Text(
-                                'Quên mật khẩu?',
+                          SizedBox(height: 20.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'Nhập lại mật khẩu',
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(height: 15.0),
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                height: 60.0,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.grey[400],
+                                          offset: Offset(0.0, 2.0),
+                                          blurRadius: 6.0)
+                                    ]),
+                                child: TextField(
+                                  controller: repassword,
+                                  obscureText: true,
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.only(top: 14.0),
+                                    prefixIcon: Icon(
+                                      Icons.lock,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    hintText: 'Nhập lại mật khẩu của bạn',
+                                    hintStyle: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                          Container(
-                            height: 20.0,
-                            child: Row(
-                              children: <Widget>[
-                                Theme(
-                                  data: ThemeData(
-                                      unselectedWidgetColor: Colors.white),
-                                  child: Checkbox(
-                                    value: remember,
-                                    checkColor: Colors.green,
-                                    activeColor: Colors.white,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        remember = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                Text(
-                                  'Nhớ mật khẩu',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
+                          SizedBox(height: 35.0),
                           Container(
                             padding: EdgeInsets.symmetric(vertical: 25.0),
                             width: double.infinity,
                             child: RaisedButton(
                               elevation: 5.0,
-                              onPressed: _onLoginButtonPressed,
+                              onPressed: () {
+                                signup();
+                              },
                               padding: EdgeInsets.all(15.0),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30.0),
                               ),
                               color: Colors.white,
                               child: Text(
-                                'ĐĂNG NHẬP',
+                                'ĐĂNG KÍ',
                                 style: TextStyle(
-                                  color: Color(0xFFF67062),
+                                  color: Theme.of(context).primaryColor,
                                   letterSpacing: 1.5,
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold,
@@ -259,15 +337,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               Text(
                                 '- HOẶC -',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black87,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
                               SizedBox(height: 20.0),
                               Text(
-                                'Đăng nhập với',
+                                'Đăng kí với',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black87,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -323,42 +401,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               ],
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BlocProvider(
-                                      create: (context) => RegisterBloc(
-                                          userRepository:
-                                              widget.userRepository),
-                                      child: SignUpScreen(),
-                                    ),
-                                  ));
-                            },
-                            child: RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Không có tài khoản? ',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: 'Đăng kí',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
                         ],

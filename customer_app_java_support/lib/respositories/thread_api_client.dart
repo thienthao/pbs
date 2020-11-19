@@ -8,24 +8,29 @@ class ThreadApiClient {
   final _baseUrl = 'https://pbs-webapi.herokuapp.com';
   final http.Client httpClient;
 
-  ThreadApiClient({@required this.httpClient,}) : assert(httpClient != null);
+  ThreadApiClient({
+    @required this.httpClient,
+  }) : assert(httpClient != null);
 
   Future<List<Thread>> all() async {
     final url = '$_baseUrl/api/threads';
     final response = await this.httpClient.get(url);
 
-    if(response.statusCode != 200) {
-      throw new Exception("Error fetching threads");
-    }
-    final json = jsonDecode(utf8.decode(response.bodyBytes));
-
     List<Thread> threads = List<Thread>();
 
-    if(json != null) {
-      json.forEach((element) {
-        final thread = Thread.fromJson(element);
-        threads.add(thread);
-      });
+    try {
+      if (response.statusCode != 200) {
+        throw new Exception("Error fetching threads");
+      }
+      final json = jsonDecode(utf8.decode(response.bodyBytes));
+      if (json != null) {
+        json.forEach((element) {
+          final thread = Thread.fromJson(element);
+          threads.add(thread);
+        });
+      }
+    } catch (e) {
+      print(e.toString());
     }
 
     return Future.value(threads);
@@ -35,38 +40,48 @@ class ThreadApiClient {
     final url = '$_baseUrl/api/thread-topics';
     final response = await this.httpClient.get(url);
 
-    if(response.statusCode != 200) {
-      print("error fetching");
+    if (response.statusCode != 200) {
       throw new Exception("Error fetching topics");
     }
     final json = jsonDecode(utf8.decode(response.bodyBytes));
 
     List<Topic> topics = List<Topic>();
 
-    if(json != null) {
+    if (json != null) {
       json.forEach((element) {
         final topic = Topic.fromJson(element);
         topics.add(topic);
       });
     }
 
-    print("alltopic xong");
     return Future.value(topics);
-
   }
 
   Future<bool> postThread(Thread thread) async {
     final url = '$_baseUrl/api/threads';
     final response = await this.httpClient.post(
-      url,
-      headers: {
+          url,
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(thread.toJson()),
+        );
+    if (response.statusCode != 200) {
+      return Future.value(false);
+    }
+    return Future.value(true);
+  }
+
+  Future<bool> postComment(ThreadComment comment) async {
+    final url = '$_baseUrl/api/threads/comments';
+    print(jsonEncode(comment.toJson()));
+    final response = await this.httpClient.post(url,
+        headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         },
-      body: jsonEncode(thread.toJson()),
-    );
-    print(response.statusCode);
-    print(response.body);
-    if(response.statusCode != 200) {
+        body: jsonEncode(comment.toJson()));
+    if (response.statusCode != 200) {
+      print(response.body);
       return Future.value(false);
     }
     return Future.value(true);

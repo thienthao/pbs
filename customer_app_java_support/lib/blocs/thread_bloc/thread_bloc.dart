@@ -1,5 +1,3 @@
-
-
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_event.dart';
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_state.dart';
 import 'package:customer_app_java_support/models/thread_model.dart';
@@ -19,23 +17,36 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       try {
         final List<Thread> threads = await repository.all();
         yield ThreadLoaded(threads: threads);
-      } catch(_) {
+      } catch (_) {
         yield ThreadError();
       }
     }
-    print("vo bloc");
 
     if (event is PostThread) {
       yield ThreadLoading();
       try {
-        print("vo post thread");
         bool success = await repository.postThread(event.thread);
-        if(success) {
+        if (success) {
           yield ThreadSuccess();
         } else {
           yield ThreadError();
         }
-      } catch(e) {
+      } catch (e) {
+        print(e.toString());
+        yield ThreadError();
+      }
+    }
+
+    if (event is PostComment) {
+      yield ThreadLoading();
+      try {
+        bool success = await repository.postComment(event.threadComment);
+        if (success) {
+          yield CommentSuccess();
+        } else {
+          yield CommentFailure();
+        }
+      } catch (e) {
         print(e.toString());
         yield ThreadError();
       }
