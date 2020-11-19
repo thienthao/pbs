@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/constant/chat_name.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
+import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:customer_app_java_support/screens/chat_screens/chat_screen.dart';
 import 'package:customer_app_java_support/screens/history_screens/location_guide.dart';
 import 'package:customer_app_java_support/screens/rating_screen/rating_screen.dart';
@@ -15,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:status_alert/status_alert.dart';
 
@@ -71,6 +73,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   BookingBlocModel bookingObj;
   bool isAbleToCanceled = true;
   bool isCanceled = false;
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
   final TextEditingController _reasonTextController = TextEditingController();
 
   TextSpan statusFormat(String status) {
@@ -147,7 +151,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           pageBuilder: (BuildContext context,
                               Animation<double> animation,
                               Animation<double> secAnimation) {
-                            return RatingScreen();
+                            return BlocProvider(
+                              create: (context) => CommentBloc(
+                                  commentRepository: _commentRepository),
+                              child: RatingScreen(
+                                bookingId: bookingObj.id,
+                              ),
+                            );
                           }));
                 },
                 child: Text(
@@ -460,14 +470,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       padding: EdgeInsets.all(8.0),
                       child: Text(
                         'Sửa',
-                        style: TextStyle(fontSize: 21.0, color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 21.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-          
           ],
         ),
       );
@@ -665,6 +677,24 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ),
         );
       }
+    } else if (status.toUpperCase().trim() == 'REJECTED') {
+      if (bookingObj.rejectedReason != null) {
+        return RichText(
+          text: TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+            children: <TextSpan>[
+              TextSpan(
+                  text: 'Lý do của photographer:   ',
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: bookingObj.photographerCanceledReason,
+                  style: TextStyle(fontWeight: FontWeight.normal)),
+            ],
+          ),
+        );
+      }
     }
     return SizedBox(
       height: 0,
@@ -700,6 +730,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
           ),
           actions: <Widget>[
+            FlatButton(
+              child: Text('Hủy bỏ'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
             FlatButton(
               child: Text('Xác nhận'),
               onPressed: () {
@@ -757,11 +793,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   getCurrentLocation() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      cuLat = position.latitude;
-      cuLong = position.longitude;
-      print('cuLat + cuLat');
-    });
+    cuLat = position.latitude;
+    cuLong = position.longitude;
+    print('cuLat + cuLat');
   }
 
   @override
@@ -1074,11 +1108,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
-                      TextSpan(
-                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel
-                                  .listTimeAndLocations[0].start)),
-                          style: TextStyle(fontWeight: FontWeight.normal)),
+                      bookingBlocModel.listTimeAndLocations.isNotEmpty
+                          ? TextSpan(
+                              text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                  DateTime.parse(bookingBlocModel
+                                      .listTimeAndLocations[0].start)),
+                              style: TextStyle(fontWeight: FontWeight.normal))
+                          : bookingBlocModel.startDate == null
+                              ? TextSpan(text: '')
+                              : TextSpan(
+                                  text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(
+                                          bookingBlocModel.startDate)),
+                                ),
                     ],
                   ),
                 ),
@@ -1116,10 +1158,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
-                      TextSpan(
-                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel.editDeadLine)),
-                          style: TextStyle(fontWeight: FontWeight.normal)),
+                      bookingBlocModel.listTimeAndLocations.isNotEmpty
+                          ? TextSpan(
+                              text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                  DateTime.parse(
+                                      bookingBlocModel.editDeadLine)),
+                              style: TextStyle(fontWeight: FontWeight.normal))
+                          : bookingBlocModel.endDate == null
+                              ? TextSpan(text: '')
+                              : TextSpan(
+                                  text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(bookingBlocModel.endDate)),
+                                ),
                     ],
                   ),
                 ),
@@ -1142,11 +1192,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold)),
-                            TextSpan(
-                                text: bookingBlocModel
-                                    .listTimeAndLocations[0].formattedAddress,
-                                style:
-                                    TextStyle(fontWeight: FontWeight.normal)),
+                            bookingBlocModel.listTimeAndLocations.isNotEmpty
+                                ? TextSpan(
+                                    text: bookingBlocModel
+                                        .listTimeAndLocations[0]
+                                        .formattedAddress,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.normal))
+                                : bookingBlocModel.address == null
+                                    ? TextSpan(text: '')
+                                    : TextSpan(text: bookingBlocModel.address),
                           ],
                         ),
                       ),
@@ -1383,7 +1438,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                             IconButton(
                                                 icon: Icon(Icons
                                                     .phone_android_outlined),
-                                                onPressed: null),
+                                                onPressed: () {
+                                                  launch(
+                                                      'tel://${bookingState.booking.photographer.phone}');
+                                                }),
                                             IconButton(
                                               icon:
                                                   Icon(Icons.comment_outlined),
@@ -1592,9 +1650,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                       ]),
                                 ),
                               )),
-                          formatBottomComponentBasedOnStatus(bookingObj.status),
                           SizedBox(
                             height: 20,
+                          ),
+                          formatBottomComponentBasedOnStatus(bookingObj.status),
+                          SizedBox(
+                            height: 30,
                           ),
                         ],
                       ),

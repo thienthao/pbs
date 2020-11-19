@@ -71,4 +71,24 @@ class BookingStateGetBookingByDateSuccess extends BookingState {
       'BookingStateGetBookingByDateSuccess { listBookingByDate: $listBookings }';
 }
 
+class BookingStateInfiniteFetchedSuccess extends BookingState {
+  final bool hasReachedEnd;
+  final List<BookingBlocModel> bookings;
+  const BookingStateInfiniteFetchedSuccess({this.bookings, this.hasReachedEnd})
+      : assert(bookings != null, hasReachedEnd != null);
+  @override
+  List<Object> get props => [bookings, hasReachedEnd];
+
+  @override
+  String toString() =>
+      'BookingStatePagingFetchedSuccess { Booking: $bookings , hasReachedEnd: $hasReachedEnd}';
+
+  BookingStateInfiniteFetchedSuccess cloneWith(
+      {bool hasReachedEnd, List<BookingBlocModel> bookings}) {
+    return BookingStateInfiniteFetchedSuccess(
+        bookings: bookings ?? this.bookings,
+        hasReachedEnd: hasReachedEnd ?? this.hasReachedEnd);
+  }
+}
+
 class BookingStateFailure extends BookingState {}

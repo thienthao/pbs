@@ -75,8 +75,7 @@ class _NavScreenState extends State<NavScreen> {
         providers: [
           BlocProvider(
             create: (context) =>
-                BookingBloc(bookingRepository: _bookingRepository)
-                  ..add(BookingEventFetch()),
+                BookingBloc(bookingRepository: _bookingRepository),
           ),
         ],
         child: BookHistory(),

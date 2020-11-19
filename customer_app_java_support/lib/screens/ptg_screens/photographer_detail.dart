@@ -365,17 +365,7 @@ class _CustomerPhotographerDetailState
                         style: TextStyle(color: Colors.red[300], fontSize: 16),
                       );
                     }
-                    final commentsTemp =
-                        (commentState as CommentStateSuccess).comments;
-                    return RefreshIndicator(
-                        child: CommentShow(
-                          blocComments: commentsTemp,
-                        ),
-                        onRefresh: () {
-                          BlocProvider.of<CommentBloc>(context).add(
-                              CommentEventRefresh(comment: commentsTemp[0]));
-                          return _completer.future;
-                        });
+                    return Text('');
                   },
                 ),
               ),

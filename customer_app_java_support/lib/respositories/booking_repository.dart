@@ -80,6 +80,74 @@ class BookingRepository {
     }
   }
 
+  Future<List<BookingBlocModel>> getListInfiniteBookingByPhotographerId(
+      int cusId, int page, int size, String status) async {
+    String extendUrl;
+
+    if (status == 'ALL') {
+      extendUrl = 'bookings/customer/$cusId/id?page=$page&size=$size';
+    } else {
+      extendUrl =
+          'bookings/customer/$cusId/status?status=$status&page=$page&size=$size';
+    }
+    final response = await this.httpClient.get(baseUrl + extendUrl, headers: {
+      HttpHeaders.authorizationHeader: 'Bearer ' +
+          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
+    });
+    print(baseUrl + extendUrl);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      final list = data['bookings'] as List;
+
+      final List<BookingBlocModel> bookings = list.map((booking) {
+        final tempPhotographer = booking['photographer'] as Map;
+        final tempTimeAndLocations = booking['timeLocationDetails'] as List;
+        bool isMultiDay = false;
+        if (tempTimeAndLocations.length > 1) {
+          isMultiDay = true;
+        }
+        Photographer photographer = Photographer(
+            id: tempPhotographer['id'],
+            fullname: tempPhotographer['fullname'],
+            ratingCount: tempPhotographer['ratingCount'],
+            avatar: tempPhotographer['avatar']);
+
+        final List<TimeAndLocationBlocModel> listTimeAndLocations =
+            tempTimeAndLocations.map((item) {
+          return TimeAndLocationBlocModel(
+              id: item['id'],
+              start: item['start'],
+              end: item['end'],
+              formattedAddress: item['formattedAddress'],
+              latitude: item['lat'],
+              longitude: item['lon']);
+        }).toList();
+
+        return BookingBlocModel(
+          id: booking['id'],
+          status: booking['bookingStatus'],
+          startDate: booking['startDate'] == null
+              ? DateTime.now().toString()
+              : booking['startDate'],
+          endDate: booking['endDate'] ?? DateTime.now().toString(),
+          serviceName: booking['serviceName'] ?? 'Không có dịch vụ nào',
+          price: booking['price'] ?? 0,
+          customerCanceledReason: booking['customerCanceledReason'] ?? '',
+          photographerCanceledReason: booking['photographerCanceledReason'],
+          rejectedReason: booking['rejectedReason'],
+          rating: booking['rating'] ?? 0.0,
+          address: booking['location'] ?? '',
+          isMultiday: isMultiDay,
+          photographer: photographer,
+          listTimeAndLocations: listTimeAndLocations,
+        );
+      }).toList();
+      return bookings;
+    } else {
+      throw Exception('Error getting list of bookings');
+    }
+  }
+
   Future<BookingBlocModel> getBookingDetailById(int id) async {
     final response = await this
         .httpClient
@@ -93,6 +161,7 @@ class BookingRepository {
       final tempPhotographer = data['photographer'] as Map;
       Photographer photographer = Photographer(
           id: tempPhotographer['id'],
+          phone: tempPhotographer['phone'],
           fullname: tempPhotographer['fullname'],
           ratingCount: tempPhotographer['ratingCount'],
           avatar: tempPhotographer['avatar']);

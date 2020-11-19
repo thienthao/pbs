@@ -1,3 +1,4 @@
+import 'package:customer_app_java_support/models/comment_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,9 +17,9 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     if (commentEvent is CommentEventFetch) {
     } else if (commentEvent is CommentByPhotographerIdEventFetch) {
       yield* _mapCommentsByPhotographerIdLoadedToState(commentEvent.id);
-    } else if (commentEvent is CommentEventLoadSuccess) {
-    } else if (commentEvent is CommentEventRequested) {
-    } else if (commentEvent is CommentEventRefresh) {}
+    } else if (commentEvent is CommentEventPost) {
+      yield* _mapPostCommentToState(commentEvent.comment);
+    }
   }
 
   Stream<CommentState> _mapCommentsByPhotographerIdLoadedToState(
@@ -27,6 +28,15 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       final comments =
           await this.commentRepository.getCommentByPhotographerId(id);
       yield CommentStateSuccess(comments: comments);
+    } catch (_) {
+      yield CommentStateFailure();
+    }
+  }
+
+  Stream<CommentState> _mapPostCommentToState(CommentBlocModel comment) async* {
+    try {
+      final isPostedSuccess = await this.commentRepository.postComment(comment);
+      yield CommentStatePostedSuccess(isPostedSuccess: isPostedSuccess);
     } catch (_) {
       yield CommentStateFailure();
     }

@@ -11,10 +11,18 @@ abstract class BookingEvent extends Equatable {
 
 class BookingEventFetch extends BookingEvent {}
 
+class BookingRestartEvent extends BookingEvent {}
+
 class BookingEventDetailFetch extends BookingEvent {
   final int id;
 
   BookingEventDetailFetch({this.id});
+}
+
+class BookingEventFetchInfinite extends BookingEvent {
+  final int cusId;
+  final String status;
+  BookingEventFetchInfinite({this.cusId, this.status});
 }
 
 class BookingEventCreate extends BookingEvent {
@@ -31,7 +39,7 @@ class BookingEventGetBookingOnDate extends BookingEvent {
   final int ptgId;
   final String date;
 
-  BookingEventGetBookingOnDate({this.ptgId,this.date});
+  BookingEventGetBookingOnDate({this.ptgId, this.date});
 }
 
 class BookingEventLoadSuccess extends BookingEvent {

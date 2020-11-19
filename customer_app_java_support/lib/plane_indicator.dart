@@ -127,9 +127,9 @@ class _PlaneIndicatorState extends State<PlaneIndicator>
     for (final cloud in _clouds) cloud.controller.repeat();
   }
 
-  void _disposeCloudsControllers() {
-    for (final cloud in _clouds) cloud.controller.dispose();
-  }
+  // void _disposeCloudsControllers() {
+  //   for (final cloud in _clouds) cloud.controller.dispose();
+  // }
 
   @override
   void dispose() {

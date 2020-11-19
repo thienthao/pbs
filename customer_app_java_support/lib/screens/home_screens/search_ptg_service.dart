@@ -1,9 +1,20 @@
+import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/respositories/album_respository.dart';
+import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/comment_repository.dart';
+import 'package:customer_app_java_support/respositories/package_repository.dart';
+import 'package:customer_app_java_support/respositories/photographer_respository.dart';
+import 'package:customer_app_java_support/screens/ptg_screens/photographer_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:http/http.dart' as http;
 
 class SearchPtgService extends StatefulWidget {
   @override
@@ -12,6 +23,15 @@ class SearchPtgService extends StatefulWidget {
 
 class _SearchPtgServiceState extends State<SearchPtgService>
     with SingleTickerProviderStateMixin {
+      PhotographerRepository _photographerRepository =
+      PhotographerRepository(httpClient: http.Client());
+  AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
+  PackageRepository _packageRepository =
+      PackageRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
+  CalendarRepository _calendarRepository =
+      CalendarRepository(httpClient: http.Client());
   bool isInit = true;
   List<Tab> _tabList = [
     Tab(
@@ -82,56 +102,6 @@ class _SearchPtgServiceState extends State<SearchPtgService>
         });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: searchBar.build(context),
-      body: BlocBuilder<PhotographerBloc, PhotographerState>(
-        builder: (context, state) {
-          if (state is PhotographerStateLoading) {
-            if (isInit) {
-              isInit = false;
-              return Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Center(
-                    child: Text(
-                  'Bạn hãy nhập photographer hoặc gói dịch vụ bạn muốn tìm',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20.0),
-                )),
-              );
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }
-
-          if (state is PhotographerStateSearchSuccess) {
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                Container(
-                  child: listPtg(state.searchModel.photographers),
-                ),
-                Container(
-                  child: listService(state.searchModel.packages),
-                ),
-              ],
-            );
-          }
-
-          if (state is PhotographerStateFailure) {
-            return Center(child: Text('Đã xảy ra lỗi'));
-          }
-
-          return Text('');
-        },
-      ),
-    );
-  }
-}
-
 Widget listPtg(List<Photographer> listPhotographers) {
   if (listPhotographers.isEmpty) {
     return Center(
@@ -146,34 +116,79 @@ Widget listPtg(List<Photographer> listPhotographers) {
       itemCount: listPhotographers.length,
       itemBuilder: (BuildContext context, int index) {
         Photographer photographer = listPhotographers[index];
-        return Card(
-          elevation: 0.0,
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  width: 65.0,
-                  height: 65.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(photographer.avatar),
+        return GestureDetector(
+          onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => PhotographerBloc(
+                                photographerRepository: _photographerRepository)
+                              ..add(PhotographerbyIdEventFetch(
+                                  id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) =>
+                                AlbumBloc(albumRepository: _albumRepository)
+                                  ..add(AlbumByPhotographerIdEventFetch(
+                                      id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => PackageBloc(
+                                packageRepository: _packageRepository)
+                              ..add(PackageByPhotographerIdEventFetch(
+                                  id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => CommentBloc(
+                                commentRepository: _commentRepository)
+                              ..add(CommentByPhotographerIdEventFetch(
+                                  id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => CalendarBloc(
+                                calendarRepository: _calendarRepository)
+                              ..add(CalendarEventPhotographerDaysFetch(
+                                  ptgId: photographer.id)),
+                          ),
+                        ],
+                        child: CustomerPhotographerDetail(
+                          id: photographer.id,
+                          name: photographer.fullname,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 20.0),
-                Text(
-                  photographer.fullname,
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
+          child: Card(
+            elevation: 0.0,
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 65.0,
+                    height: 65.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(photographer.avatar),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(width: 20.0),
+                  Text(
+                    photographer.fullname,
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -239,6 +254,56 @@ Widget listService(List<PackageBlocModel> listPackages) {
           ),
         );
       },
+    );
+  }
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: searchBar.build(context),
+      body: BlocBuilder<PhotographerBloc, PhotographerState>(
+        builder: (context, state) {
+          if (state is PhotographerStateLoading) {
+            if (isInit) {
+              isInit = false;
+              return Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Center(
+                    child: Text(
+                  'Bạn hãy nhập photographer hoặc gói dịch vụ bạn muốn tìm',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20.0),
+                )),
+              );
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          }
+
+          if (state is PhotographerStateSearchSuccess) {
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                Container(
+                  child: listPtg(state.searchModel.photographers),
+                ),
+                Container(
+                  child: listService(state.searchModel.packages),
+                ),
+              ],
+            );
+          }
+
+          if (state is PhotographerStateFailure) {
+            return Center(child: Text('Đã xảy ra lỗi'));
+          }
+
+          return Text('');
+        },
+      ),
     );
   }
 }
