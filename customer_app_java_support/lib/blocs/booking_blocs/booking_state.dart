@@ -34,6 +34,18 @@ class BookingStateCreatedSuccess extends BookingState {
       'BookingStateCreatedSuccess { Booking Created: $isSuccess }';
 }
 
+class BookingStateEditedSuccess extends BookingState {
+  final bool isSuccess;
+  BookingStateEditedSuccess({@required this.isSuccess});
+
+  @override
+  List<Object> get props => [isSuccess];
+
+  @override
+  String toString() =>
+      'BookingStateCreatedSuccess { Booking Created: $isSuccess }';
+}
+
 class BookingStateCancelInProgress extends BookingState {}
 
 class BookingStateCanceledSuccess extends BookingState {

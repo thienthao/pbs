@@ -1,13 +1,19 @@
 import 'dart:async';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/blocs/package_blocs/package_bloc.dart';
+import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/constant/chat_name.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
+import 'package:customer_app_java_support/respositories/package_repository.dart';
 import 'package:customer_app_java_support/screens/chat_screens/chat_screen.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen_loading.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_many_day_edit_screen.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_one_day_edit_screen.dart';
 import 'package:customer_app_java_support/screens/history_screens/location_guide.dart';
 import 'package:customer_app_java_support/screens/rating_screen/rating_screen.dart';
 import 'package:customer_app_java_support/services/chat_service.dart';
@@ -32,6 +38,35 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  double cuLat = 0;
+  double cuLong = 0;
+  double destinationLat = 11.939346;
+  double destinationLong = 108.445173;
+
+  Completer<void> _completer;
+
+  BookingRepository _bookingRepository =
+      BookingRepository(httpClient: http.Client());
+  BookingBloc _bookingBloc;
+  BookingBlocModel bookingObj;
+  bool isAbleToCanceled = true;
+  bool isCanceled = false;
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
+  PackageRepository _packageRepository =
+      PackageRepository(httpClient: http.Client());
+  final TextEditingController _reasonTextController = TextEditingController();
+
+  bool isBookingEdited = false;
+
+  FutureOr onGoBack(dynamic value) {
+    if (isBookingEdited) {
+      _loadBookingDetail();
+      widget.isEdited(true);
+      setState(() {});
+    }
+  }
+
   getChatRoomId(String a, String b) {
     if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
       return "$b\_$a";
@@ -59,23 +94,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   chatRoomId: chatRoomId,
                 )));
   }
-
-  double cuLat = 0;
-  double cuLong = 0;
-  double destinationLat = 11.939346;
-  double destinationLong = 108.445173;
-
-  Completer<void> _completer;
-
-  BookingRepository _bookingRepository =
-      BookingRepository(httpClient: http.Client());
-  BookingBloc _bookingBloc;
-  BookingBlocModel bookingObj;
-  bool isAbleToCanceled = true;
-  bool isCanceled = false;
-  CommentRepository _commentRepository =
-      CommentRepository(httpClient: http.Client());
-  final TextEditingController _reasonTextController = TextEditingController();
 
   TextSpan statusFormat(String status) {
     String text = status;
@@ -463,6 +481,84 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   height: 60.0,
                   child: RaisedButton(
                     onPressed: () {
+                      Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                              transitionDuration: Duration(milliseconds: 1000),
+                              transitionsBuilder: (BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secAnimation,
+                                  Widget child) {
+                                animation = CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.fastLinearToSlowEaseIn);
+                                return SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(1, 0),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: child,
+                                );
+                              },
+                              pageBuilder: (BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secAnimation) {
+                                return !bookingObj.isMultiday
+                                    ? MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => BookingBloc(
+                                                bookingRepository:
+                                                    _bookingRepository),
+                                          ),
+                                          BlocProvider(
+                                              create: (BuildContext context) =>
+                                                  PackageBloc(
+                                                      packageRepository:
+                                                          _packageRepository)
+                                                    ..add(
+                                                        PackageByPhotographerIdEventFetch(
+                                                            id: bookingObj
+                                                                .photographer
+                                                                .id)))
+                                        ],
+                                        child: BookingOneDayEditScreen(
+                                          isEdited: (bool isEdited) {
+                                            isBookingEdited = isEdited;
+                                          },
+                                          bookingBlocModel: bookingObj,
+                                          selectedPackage: bookingObj.package,
+                                          photographer: bookingObj.photographer,
+                                        ),
+                                      )
+                                    : MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => BookingBloc(
+                                                bookingRepository:
+                                                    _bookingRepository),
+                                          ),
+                                          BlocProvider(
+                                            create: (context) => PackageBloc(
+                                                packageRepository:
+                                                    _packageRepository)
+                                              ..add(
+                                                  PackageByPhotographerIdEventFetch(
+                                                      id: bookingObj
+                                                          .photographer.id)),
+                                          ),
+                                        ],
+                                        child: BookingManyDayEdit(
+                                          bookingBlocModel: bookingObj,
+                                          selectedPackage: bookingObj.package,
+                                          photographer: bookingObj.photographer,
+                                          isEdited: (bool isEdited) {
+                                            isBookingEdited = isEdited;
+                                          },
+                                        ),
+                                      );
+                              })).then(onGoBack);
+
                       // _acceptBooking(bookingObj);
                       // Navigator.pop(context);
                     },
@@ -1395,7 +1491,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                           .spaceBetween,
                                                   children: <Widget>[
                                                     Text(
-                                                      '4.5',
+                                                      '${bookingState.booking.photographer.ratingCount ?? 0.0}',
                                                       textAlign:
                                                           TextAlign.right,
                                                       style: TextStyle(
@@ -1664,20 +1760,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 }
 
                 if (bookingState is BookingStateCancelInProgress) {
-                  // testDialog('Cancel Inprogess');
-                  return Padding(
-                    padding: const EdgeInsets.all(50.0),
-                    child: Loading(),
-                  );
+                  return BookingDetailLoading();
                 }
                 if (bookingState is BookingStateCanceledSuccess) {
                   _loadBookingDetail();
                 }
                 if (bookingState is BookingStateLoading) {
-                  return Padding(
-                    padding: const EdgeInsets.all(50.0),
-                    child: Loading(),
-                  );
+                  return BookingDetailLoading();
                 }
 
                 if (bookingState is BookingStateFailure) {

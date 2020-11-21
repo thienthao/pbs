@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class SplashPage extends StatelessWidget {
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text('Splash Screen'),
-      ),
+          child: Image(
+        image: AssetImage("assets/images/portrait_2.jpg"),
+        
+      )),
     );
   }
 }

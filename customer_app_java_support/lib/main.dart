@@ -11,6 +11,7 @@ import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/nav_screen.dart';
 import 'package:customer_app_java_support/respositories/thread_api_client.dart';
 import 'package:customer_app_java_support/routing_constants.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen_loading.dart';
 import 'package:customer_app_java_support/screens/login_screen.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
 import 'package:customer_app_java_support/services/push_notification_service.dart';
@@ -63,7 +64,7 @@ class _AppState extends State<App> {
     _pushNotificationService.init();
     super.initState();
     globals.selectedTabGlobal = 0;
-    Firebase.initializeApp().whenComplete(() { 
+    Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});
     });

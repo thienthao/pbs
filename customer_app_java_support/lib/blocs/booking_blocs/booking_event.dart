@@ -30,6 +30,11 @@ class BookingEventCreate extends BookingEvent {
   BookingEventCreate({this.booking});
 }
 
+class BookingEventEdit extends BookingEvent {
+  final BookingBlocModel booking;
+  BookingEventEdit({this.booking});
+}
+
 class BookingEventCancel extends BookingEvent {
   final BookingBlocModel booking;
   BookingEventCancel({this.booking});

@@ -19,7 +19,7 @@ class PackageStateSuccess extends PackageState {
   List<Object> get props => [packages];
 
   @override
-  String toString() => 'PackagesLoadSuccess { Package: $packages }';
+  String toString() => 'PackageStateSuccess { Package: $packages }';
 }
 
 class PackageStateFailure extends PackageState {}

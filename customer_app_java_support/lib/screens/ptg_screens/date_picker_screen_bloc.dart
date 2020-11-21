@@ -234,7 +234,6 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                         height: 3.0,
                       ),
                       Container(
-                        height: 390,
                         margin: EdgeInsets.all(15.0),
                         padding: EdgeInsets.all(7.0),
                         decoration: BoxDecoration(

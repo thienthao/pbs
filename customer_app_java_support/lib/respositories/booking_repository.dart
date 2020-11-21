@@ -170,6 +170,8 @@ class BookingRepository {
       PackageBlocModel package = PackageBlocModel(
         id: tempPackage['id'],
         name: tempPackage['name'],
+        price: tempPackage['price'],
+        supportMultiDays: tempPackage['supportMultiDays'],
       );
 
       final tempServices = data['servicePackage']['services'] as List;
@@ -270,6 +272,70 @@ class BookingRepository {
     }
     resBody["timeLocationDetails"] = timeLocationDetailsResbody;
     String str = json.encode(resBody);
+    final response = await httpClient.post(baseUrl + 'bookings',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: str);
+
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else {
+      throw Exception('Error Create a Booking');
+    }
+
+    return result;
+  }
+
+  Future<bool> editBooking(BookingBlocModel booking) async {
+    var resBody = {};
+    var ptgResBody = {};
+    var cusResBody = {};
+    var packageResBody = {};
+    var bookingDetailResBody = [];
+    var returningTypeResBody = {};
+    var timeLocationDetailsResbody = [];
+    var timeLocationDetailObject = {};
+
+    resBody["id"] = booking.id;
+    print(booking.id);
+    resBody["serviceName"] = booking.serviceName;
+
+    resBody["price"] = booking.price;
+
+    resBody["editDeadline"] = booking.editDeadLine;
+
+    cusResBody["id"] = "2";
+    resBody["customer"] = cusResBody;
+
+    ptgResBody["id"] = booking.photographer.id;
+    resBody["photographer"] = ptgResBody;
+
+    packageResBody["id"] = booking.package.id;
+    resBody["servicePackage"] = packageResBody;
+
+    returningTypeResBody["id"] = booking.returningType;
+    resBody["returningType"] = returningTypeResBody;
+
+    // for (var service in booking.package.serviceDtos) {
+    //   serviceResBody["serviceName"] = service.name;
+    //   bookingDetailResBody.add(serviceResBody);
+    // }
+    resBody["bookingDetails"] = bookingDetailResBody;
+
+    for (var item in booking.listTimeAndLocations) {
+      timeLocationDetailObject["lat"] = item.latitude;
+      timeLocationDetailObject["lon"] = item.longitude;
+      timeLocationDetailObject["formattedAddress"] = item.formattedAddress;
+      timeLocationDetailObject["start"] = item.start;
+      timeLocationDetailObject["end"] = item.end;
+      timeLocationDetailsResbody.add(timeLocationDetailObject);
+    }
+    resBody["timeLocationDetails"] = timeLocationDetailsResbody;
+    String str = json.encode(resBody);
+
+    print(str);
     final response = await httpClient.post(baseUrl + 'bookings',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',

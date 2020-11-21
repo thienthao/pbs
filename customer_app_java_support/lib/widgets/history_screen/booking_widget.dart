@@ -59,6 +59,7 @@ class _BookingWidgetState extends State<BookingWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      physics: AlwaysScrollableScrollPhysics(),
       controller: widget.scrollController,
       padding: EdgeInsets.only(top: 10.0, bottom: 15.0),
       scrollDirection: Axis.vertical,

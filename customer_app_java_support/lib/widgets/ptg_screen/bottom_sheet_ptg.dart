@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/globals.dart' as globals;
@@ -9,17 +7,16 @@ import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
-import 'package:customer_app_java_support/screens/home_screens/home_screen.dart';
-import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/map_picker_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:status_alert/status_alert.dart';
-import 'package:http/http.dart' as http;
+
 import 'drop_menu_book.dart';
 
 class ReturnTypeModel {

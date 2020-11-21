@@ -27,6 +27,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       yield* _mapBookingDetailLoadedToState(bookingEvent.id);
     } else if (bookingEvent is BookingEventCreate) {
       yield* _mapBookingCreatedtoState(bookingEvent.booking);
+    } else if (bookingEvent is BookingEventEdit) {
+      yield* _mapBookingEditedtoState(bookingEvent.booking);
     } else if (bookingEvent is BookingEventCancel) {
       yield* _mapBookingCanceledtoState(bookingEvent.booking);
     } else if (bookingEvent is BookingEventGetBookingOnDate) {
@@ -68,6 +70,17 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.createBooking(booking);
       yield BookingStateCreatedSuccess(isSuccess: isSuccess);
+    } catch (_) {
+      yield BookingStateFailure();
+    }
+  }
+
+  Stream<BookingState> _mapBookingEditedtoState(
+      BookingBlocModel booking) async* {
+    yield BookingStateLoading();
+    try {
+      final isSuccess = await this.bookingRepository.editBooking(booking);
+      yield BookingStateEditedSuccess(isSuccess: isSuccess);
     } catch (_) {
       yield BookingStateFailure();
     }
