@@ -8,7 +8,9 @@ import 'package:customer_app_java_support/respositories/booking_repository.dart'
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
+import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
@@ -51,6 +53,7 @@ class _BookingManyState extends State<BookingMany> {
   String endDate = '';
   String editDeadLine = '';
   String startDate = '';
+  DateTime lastDate = DateTime.now();
   List<PackageBlocModel> listPackages = List<PackageBlocModel>();
 
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
@@ -123,6 +126,70 @@ class _BookingManyState extends State<BookingMany> {
     selectedPackage = widget.selectedPackage;
   }
 
+  void popUp(String title, String content) {
+    Flushbar(
+      flushbarPosition: FlushbarPosition.TOP,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      backgroundColor: Colors.black87,
+      reverseAnimationCurve: Curves.decelerate,
+      forwardAnimationCurve: Curves.elasticOut,
+      isDismissible: false,
+      duration: Duration(seconds: 5),
+      titleText: Text(
+        title,
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18.0,
+            color: Colors.white,
+            fontFamily: "Quicksand"),
+      ),
+      messageText: Text(
+        content,
+        style: TextStyle(
+            fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
+      ),
+    ).show(context);
+  }
+
+  bool _validateBooking() {
+    if (listTimeAndLocation == null) {
+      popUp('Địa điểm và thời gian chụp',
+          'Xin hãy chọn thời gian chụp và địa điểm');
+      return false;
+    } else if (listTimeAndLocation.isEmpty) {
+      popUp('Địa điểm và thời gian chụp',
+          'Xin hãy chọn thời gian chụp và địa điểm');
+      return false;
+    } else if (timeReturnResult == 'Hãy chọn thời gian nhận') {
+      popUp('Nhập thời gian nhận', 'Xin hãy chọn thời gian nhận');
+      return false;
+    } else if (!lastDate.isBefore(DateTime.parse(editDeadLine))) {
+      popUp('Thời gian nhận',
+          'Thời gian nhận ảnh phải sau ngày chụp cuối ít nhất 1 ngày');
+      return false;
+    }
+    return true;
+  }
+
+  _createBooking() async {
+    if (_validateBooking()) {
+      List<TimeAndLocationBlocModel> timeAndLocations = listTimeAndLocation;
+
+      BookingBlocModel booking = BookingBlocModel(
+          serviceName: selectedPackage.name,
+          price: selectedPackage.price,
+          editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+              .format(DateTime.parse(editDeadLine)),
+          photographer: Photographer(id: widget.photographer.id),
+          package: selectedPackage,
+          returningType: selectedType.id,
+          listTimeAndLocations: timeAndLocations);
+
+      BlocProvider.of<BookingBloc>(context)
+          .add(BookingEventCreate(booking: booking));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,25 +202,9 @@ class _BookingManyState extends State<BookingMany> {
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
+        backgroundColor: Colors.grey[50],
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            List<TimeAndLocationBlocModel> timeAndLocations =
-                listTimeAndLocation;
-
-            BookingBlocModel booking = BookingBlocModel(
-                serviceName: selectedPackage.name,
-                price: selectedPackage.price,
-                editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                    .format(DateTime.parse(editDeadLine)),
-                photographer: Photographer(id: widget.photographer.id),
-                package: selectedPackage,
-                returningType: selectedType.id,
-                listTimeAndLocations: timeAndLocations);
-
-            BlocProvider.of<BookingBloc>(context)
-                .add(BookingEventCreate(booking: booking));
-            // selectItem('Done');
-          },
+          onPressed: _createBooking,
           child: Icon(
             Icons.check,
             color: Colors.white,
@@ -163,10 +214,62 @@ class _BookingManyState extends State<BookingMany> {
         body: BlocListener<BookingBloc, BookingState>(
           listener: (context, state) {
             if (state is BookingStateCreatedSuccess) {
+              removeNotice();
+              Flushbar(
+                flushbarPosition: FlushbarPosition.TOP,
+                flushbarStyle: FlushbarStyle.FLOATING,
+                backgroundColor: Colors.black87,
+                reverseAnimationCurve: Curves.decelerate,
+                forwardAnimationCurve: Curves.elasticOut,
+                isDismissible: false,
+                duration: Duration(seconds: 5),
+                titleText: Text(
+                  "Đặt lịch",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+                messageText: Text(
+                  "Gửi yêu cầu thành công!!",
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+              ).show(context);
+            }
+
+            if (state is BookingStateLoading) {
               popNotice();
             }
             if (state is BookingStateFailure) {
-              popFail();
+              removeNotice();
+              Flushbar(
+                flushbarPosition: FlushbarPosition.TOP,
+                flushbarStyle: FlushbarStyle.FLOATING,
+                backgroundColor: Colors.black87,
+                reverseAnimationCurve: Curves.decelerate,
+                forwardAnimationCurve: Curves.elasticOut,
+                isDismissible: false,
+                duration: Duration(seconds: 5),
+                titleText: Text(
+                  "Cập nhật cuộc hẹn",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+                messageText: Text(
+                  "Cập nhật thất bại!!",
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+              ).show(context);
             }
           },
           child: ListView(
@@ -269,128 +372,6 @@ class _BookingManyState extends State<BookingMany> {
               //////////gói dịch vụ
               ///
               ///
-              ///Thời gian nhận ảnh
-              Padding(
-                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
-                child: Text(
-                  'Thời gian nhận ảnh',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    wordSpacing: -1,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                child: InkWell(
-                  onTap: () async {
-                    final pageResult = await Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (context) => CalendarBloc(
-                                calendarRepository: _calendarRepository),
-                          ),
-                          BlocProvider(
-                            create: (context) => BookingBloc(
-                                bookingRepository: _bookingRepository),
-                          )
-                        ],
-                        child: BlocDatePicker(
-                          ptgId: widget.photographer.id,
-                          onSelecParam: (DateTime result) {
-                            editDeadLine = result.toString();
-                          },
-                        ),
-                      );
-                    }));
-                    setState(() {
-                      if (pageResult != null) {
-                        timeReturnResult = pageResult;
-                      }
-                    });
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          timeReturnResult,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15.0,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 30,
-                          color: Theme.of(context).accentColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              ///Thời gian nhận ảnh
-
-              Padding(
-                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
-                child: Text(
-                  'Phương thức nhận ảnh',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    wordSpacing: -1,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                padding: EdgeInsets.all(10),
-                child: DropdownButtonHideUnderline(
-                  child: ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButton(
-                      value: selectedType,
-                      items: dropDownMenuItems,
-                      onChanged: onChangeDropdownItem,
-                      icon: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.pink,
-                        size: 20.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Padding(
                 padding: EdgeInsets.only(left: 10, top: 20, bottom: 10.0),
                 child: Row(
@@ -415,6 +396,14 @@ class _BookingManyState extends State<BookingMany> {
                                     onUpdateList:
                                         (TimeAndLocationBlocModel model) {
                                       listTimeAndLocation.add(model);
+                                      if (DateTime.parse(model.start)
+                                              .add(Duration(days: 1))
+                                              .isAfter(lastDate) ||
+                                          DateTime.parse(model.start)
+                                              .add(Duration(days: 1))
+                                              .isAtSameMomentAs(lastDate)) {
+                                        lastDate = DateTime.parse(model.start);
+                                      }
                                       setState(() {});
                                     },
                                   )),
@@ -575,6 +564,129 @@ class _BookingManyState extends State<BookingMany> {
                   );
                 }).toList(),
               ),
+
+              ///Thời gian nhận ảnh
+              Padding(
+                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
+                child: Text(
+                  'Thời gian nhận ảnh',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    wordSpacing: -1,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey[300],
+                        offset: Offset(-1.0, 2.0),
+                        blurRadius: 6.0)
+                  ],
+                ),
+                child: InkWell(
+                  onTap: () async {
+                    final pageResult = await Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => CalendarBloc(
+                                calendarRepository: _calendarRepository),
+                          ),
+                          BlocProvider(
+                            create: (context) => BookingBloc(
+                                bookingRepository: _bookingRepository),
+                          )
+                        ],
+                        child: DatePicker(
+                          lastDay: lastDate,
+                          onSelecParam: (DateTime result) {
+                            editDeadLine = result.toString();
+                          },
+                        ),
+                      );
+                    }));
+                    setState(() {
+                      if (pageResult != null) {
+                        timeReturnResult = pageResult;
+                      }
+                    });
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          timeReturnResult,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 30,
+                          color: Theme.of(context).accentColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              ///Thời gian nhận ảnh
+
+              Padding(
+                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
+                child: Text(
+                  'Phương thức nhận ảnh',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    wordSpacing: -1,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey[300],
+                        offset: Offset(-1.0, 2.0),
+                        blurRadius: 6.0)
+                  ],
+                ),
+                padding: EdgeInsets.all(10),
+                child: DropdownButtonHideUnderline(
+                  child: ButtonTheme(
+                    alignedDropdown: true,
+                    child: DropdownButton(
+                      value: selectedType,
+                      items: dropDownMenuItems,
+                      onChanged: onChangeDropdownItem,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.pink,
+                        size: 20.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 70,
               ),
@@ -693,29 +805,24 @@ class _BookingManyState extends State<BookingMany> {
     );
   }
 
-  void popNotice() {
+  void goBackToHomePage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.of(context).popUntil((route) => route.isFirst);
     });
+  }
 
+  void popNotice() {
     StatusAlert.show(
       context,
-      duration: Duration(seconds: 2),
-      title: 'Gửi yêu cầu thành công ',
+      duration: Duration(seconds: 60),
+      title: 'Đang gửi yêu cầu',
       configuration: IconConfiguration(
-        icon: Icons.done,
+        icon: Icons.send_to_mobile,
       ),
     );
   }
 
-  void popFail() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 2),
-      title: 'Gửi yêu cầu thất bại ',
-      configuration: IconConfiguration(
-        icon: Icons.highlight_remove,
-      ),
-    );
+  void removeNotice() {
+    StatusAlert.hide();
   }
 }

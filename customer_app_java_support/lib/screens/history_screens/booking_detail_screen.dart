@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/package_bloc.dart';
@@ -17,15 +18,14 @@ import 'package:customer_app_java_support/screens/history_screens/booking_one_da
 import 'package:customer_app_java_support/screens/history_screens/location_guide.dart';
 import 'package:customer_app_java_support/screens/rating_screen/rating_screen.dart';
 import 'package:customer_app_java_support/services/chat_service.dart';
-import 'package:customer_app_java_support/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
 import 'package:status_alert/status_alert.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final int bookingId;
@@ -44,6 +44,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   double destinationLong = 108.445173;
 
   Completer<void> _completer;
+  final _formKey = GlobalKey<FormState>();
 
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
@@ -808,18 +809,27 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(5.0),
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
-                  child: TextFormField(
-                    controller: _reasonTextController,
-                    cursorColor: Color(0xFFF77474),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 6,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Lý do hủy của bạn là gì...'),
+                Form(
+                  key: _formKey,
+                  child: Container(
+                    padding: EdgeInsets.all(5.0),
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Xin hãy nhập lý do';
+                        }
+                        return null;
+                      },
+                      controller: _reasonTextController,
+                      cursorColor: Color(0xFFF77474),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Lý do hủy của bạn là gì...'),
+                    ),
                   ),
                 ),
               ],
@@ -829,20 +839,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             FlatButton(
               child: Text('Hủy bỏ'),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.of(context, rootNavigator: true).pop('dialog');
               },
             ),
             FlatButton(
               child: Text('Xác nhận'),
               onPressed: () {
-                BookingBlocModel booking = BookingBlocModel(
-                    id: bookingObj.id,
-                    customerCanceledReason: _reasonTextController.text,
-                    photographer: Photographer(id: bookingObj.photographer.id),
-                    package: bookingObj.package);
-                _bookingBloc.add(BookingEventCancel(booking: booking));
-                Navigator.pop(context);
-                // selectItem('Done');
+                if (_formKey.currentState.validate()) {
+                  BookingBlocModel booking = BookingBlocModel(
+                      id: bookingObj.id,
+                      customerCanceledReason: _reasonTextController.text,
+                      photographer:
+                          Photographer(id: bookingObj.photographer.id),
+                      package: bookingObj.package);
+                  _bookingBloc.add(BookingEventCancel(booking: booking));
+                }
               },
             ),
           ],

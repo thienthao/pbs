@@ -10,6 +10,7 @@ class Photographer extends Equatable {
   final String cover;
   final String phone;
   final double ratingCount;
+  final int booked;
   final bool isBlocked;
   final bool isDeleted;
   final DateTime createdAt;
@@ -26,6 +27,7 @@ class Photographer extends Equatable {
       this.cover,
       this.phone,
       this.ratingCount,
+      this.booked,
       this.isBlocked,
       this.isDeleted,
       this.createdAt,
@@ -34,7 +36,6 @@ class Photographer extends Equatable {
       this.albums});
 
   @override
-  
   List<Object> get props => [
         id,
         username,

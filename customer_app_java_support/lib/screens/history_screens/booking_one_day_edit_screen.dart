@@ -675,7 +675,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 70),
+                        padding: const EdgeInsets.only(right: 37),
                         child: Text(
                           'Giao trả:',
                           style: TextStyle(
@@ -768,7 +768,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                       borderRadius: BorderRadius.circular(20.0),
                     ),
                     child: Text(
-                      'Đặt dịch vụ',
+                      'Cập nhật cuộc hẹn',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                     ),

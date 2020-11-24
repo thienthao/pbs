@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-// ignore: must_be_immutable
 class DatePicker extends StatefulWidget {
-  Function(DateTime) onSelecParam;
-  DatePicker({
-    this.onSelecParam,
-  });
+  final DateTime lastDay;
+  final Function(DateTime) onSelecParam;
+  DatePicker({this.onSelecParam, this.lastDay});
   @override
   _DatePickerState createState() => _DatePickerState();
 }
@@ -19,13 +17,7 @@ class _DatePickerState extends State<DatePicker> {
   TimeOfDay _time = TimeOfDay.now();
   DateTime _selectedDateTime = DateTime.now();
 
-  final Map<DateTime, List> _holidays = {
-    DateTime(2020, 10, 1): ['New Year\'s Day'],
-    DateTime(2020, 10, 6): ['Epiphany'],
-    DateTime(2020, 10, 15): ['Valentine\'s Day'],
-    DateTime(2020, 10, 21): ['Easter Sunday'],
-    DateTime(2020, 10, 22): ['Easter Monday'],
-  };
+  final Map<DateTime, List> _holidays = {};
 
   void onTimeChanged(TimeOfDay newTime) {
     setState(() {
@@ -34,7 +26,6 @@ class _DatePickerState extends State<DatePicker> {
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {
-    print('CALLBACK: _onDaySelected');
     setState(() {
       _selectedDateTime = day;
     });
@@ -44,21 +35,13 @@ class _DatePickerState extends State<DatePicker> {
   void initState() {
     super.initState();
     controller = CalendarController();
+    _selectedDateTime = widget.lastDay;
   }
 
   bool _predicate(DateTime day) {
     DateFormat dateFormat = DateFormat('yyyy/MM/dd');
-    print(dateFormat
-        .format(day)
-        .compareTo(dateFormat.format(DateTime.parse('2020-11-20 20:18:04Z'))));
-    if ((day.isAfter(DateTime.now()))) {
-      if (dateFormat.format(day).compareTo(
-              dateFormat.format(DateTime.parse('2020-11-20 20:18:04Z'))) ==
-          0) {
-        return false;
-      } else {
-        return true;
-      }
+    if ((day.isAfter(widget.lastDay))) {
+      return true;
     }
     return false;
   }

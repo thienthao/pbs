@@ -16,6 +16,7 @@ import 'package:customer_app_java_support/screens/login_screen.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
 import 'package:customer_app_java_support/services/push_notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'blocs/bloc_observer.dart';
@@ -28,7 +29,7 @@ void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
     Bloc.observer = PBSBlocObserver();
     final userRepository = UserRepository();
-
+    
     //thao
     setupLocator();
     ThreadApiClient threadApiClient =

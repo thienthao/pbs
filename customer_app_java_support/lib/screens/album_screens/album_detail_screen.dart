@@ -1,8 +1,10 @@
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
+import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/photographer_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
@@ -31,6 +33,8 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
       PackageRepository(httpClient: http.Client());
   CommentRepository _commentRepository =
       CommentRepository(httpClient: http.Client());
+  CalendarRepository _calendarRepository =
+      CalendarRepository(httpClient: http.Client());
   CardController controller;
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   int indexOfAlbum = 0;
@@ -93,6 +97,12 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                                 commentRepository: _commentRepository)
                               ..add(CommentByPhotographerIdEventFetch(
                                   id: widget.album.photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => CalendarBloc(
+                                calendarRepository: _calendarRepository)
+                              ..add(CalendarEventPhotographerDaysFetch(
+                                  ptgId: widget.album.photographer.id)),
                           ),
                         ],
                         child: CustomerPhotographerDetail(

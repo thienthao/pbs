@@ -23,7 +23,7 @@ class SearchPtgService extends StatefulWidget {
 
 class _SearchPtgServiceState extends State<SearchPtgService>
     with SingleTickerProviderStateMixin {
-      PhotographerRepository _photographerRepository =
+  PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
   AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   PackageRepository _packageRepository =
@@ -102,161 +102,206 @@ class _SearchPtgServiceState extends State<SearchPtgService>
         });
   }
 
-Widget listPtg(List<Photographer> listPhotographers) {
-  if (listPhotographers.isEmpty) {
-    return Center(
-        child: Text(
-      'Không có kết quả nào phù hợp',
-      textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 20.0),
-    ));
-  } else {
-    return ListView.builder(
-      physics: BouncingScrollPhysics(),
-      itemCount: listPhotographers.length,
-      itemBuilder: (BuildContext context, int index) {
-        Photographer photographer = listPhotographers[index];
-        return GestureDetector(
-          onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (context) => PhotographerBloc(
-                                photographerRepository: _photographerRepository)
-                              ..add(PhotographerbyIdEventFetch(
-                                  id: photographer.id)),
-                          ),
-                          BlocProvider(
-                            create: (context) =>
-                                AlbumBloc(albumRepository: _albumRepository)
-                                  ..add(AlbumByPhotographerIdEventFetch(
-                                      id: photographer.id)),
-                          ),
-                          BlocProvider(
-                            create: (context) => PackageBloc(
-                                packageRepository: _packageRepository)
-                              ..add(PackageByPhotographerIdEventFetch(
-                                  id: photographer.id)),
-                          ),
-                          BlocProvider(
-                            create: (context) => CommentBloc(
-                                commentRepository: _commentRepository)
-                              ..add(CommentByPhotographerIdEventFetch(
-                                  id: photographer.id)),
-                          ),
-                          BlocProvider(
-                            create: (context) => CalendarBloc(
-                                calendarRepository: _calendarRepository)
-                              ..add(CalendarEventPhotographerDaysFetch(
-                                  ptgId: photographer.id)),
-                          ),
-                        ],
-                        child: CustomerPhotographerDetail(
-                          id: photographer.id,
-                          name: photographer.fullname,
-                        ),
-                      ),
+  Widget listPtg(List<Photographer> listPhotographers) {
+    if (listPhotographers.isEmpty) {
+      return Center(
+          child: Text(
+        'Không có kết quả nào phù hợp',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 20.0),
+      ));
+    } else {
+      return ListView.builder(
+        physics: BouncingScrollPhysics(),
+        itemCount: listPhotographers.length,
+        itemBuilder: (BuildContext context, int index) {
+          Photographer photographer = listPhotographers[index];
+          return GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (context) => PhotographerBloc(
+                          photographerRepository: _photographerRepository)
+                        ..add(PhotographerbyIdEventFetch(id: photographer.id)),
                     ),
-                  ),
-          child: Card(
-            elevation: 0.0,
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 65.0,
-                    height: 65.0,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(photographer.avatar),
-                      ),
+                    BlocProvider(
+                      create: (context) =>
+                          AlbumBloc(albumRepository: _albumRepository)
+                            ..add(AlbumByPhotographerIdEventFetch(
+                                id: photographer.id)),
                     ),
-                  ),
-                  SizedBox(width: 20.0),
-                  Text(
-                    photographer.fullname,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
+                    BlocProvider(
+                      create: (context) =>
+                          PackageBloc(packageRepository: _packageRepository)
+                            ..add(PackageByPhotographerIdEventFetch(
+                                id: photographer.id)),
                     ),
+                    BlocProvider(
+                      create: (context) =>
+                          CommentBloc(commentRepository: _commentRepository)
+                            ..add(CommentByPhotographerIdEventFetch(
+                                id: photographer.id)),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          CalendarBloc(calendarRepository: _calendarRepository)
+                            ..add(CalendarEventPhotographerDaysFetch(
+                                ptgId: photographer.id)),
+                    ),
+                  ],
+                  child: CustomerPhotographerDetail(
+                    id: photographer.id,
+                    name: photographer.fullname,
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-Widget listService(List<PackageBlocModel> listPackages) {
-  if (listPackages.isEmpty) {
-    return Center(
-        child: Text(
-      'Không có kết quả nào phù hợp',
-      textAlign: TextAlign.center,
-      style: TextStyle(fontSize: 20.0),
-    ));
-  } else {
-    return ListView.builder(
-      itemCount: listPackages.length,
-      physics: BouncingScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        PackageBlocModel package = listPackages[index];
-        return Card(
-          elevation: 0.0,
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.grey[200],
-                  ),
-                  height: 50,
-                  width: 50,
-                  child: Icon(Icons.category),
-                ),
-                SizedBox(width: 20.0),
-                Container(
-                  child: Flexible(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          package.name,
-                          style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
+            child: Card(
+              elevation: 0.0,
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 65.0,
+                      height: 65.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(photographer.avatar),
                         ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        Text(
-                          ' tạo bởi ${package.photographer.fullname}',
-                          style: TextStyle(fontSize: 11.0, color: Colors.grey),
-                        ),
-                      ],
+                      ),
                     ),
+                    SizedBox(width: 20.0),
+                    Text(
+                      photographer.fullname,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Widget listService(List<PackageBlocModel> listPackages) {
+    if (listPackages.isEmpty) {
+      return Center(
+          child: Text(
+        'Không có kết quả nào phù hợp',
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 20.0),
+      ));
+    } else {
+      return ListView.builder(
+        itemCount: listPackages.length,
+        physics: BouncingScrollPhysics(),
+        itemBuilder: (BuildContext context, int index) {
+          PackageBlocModel package = listPackages[index];
+          return GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (context) => PhotographerBloc(
+                          photographerRepository: _photographerRepository)
+                        ..add(PhotographerbyIdEventFetch(
+                            id: package.photographer.id)),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          AlbumBloc(albumRepository: _albumRepository)
+                            ..add(AlbumByPhotographerIdEventFetch(
+                                id: package.photographer.id)),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          PackageBloc(packageRepository: _packageRepository)
+                            ..add(PackageByPhotographerIdEventFetch(
+                                id: package.photographer.id)),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          CommentBloc(commentRepository: _commentRepository)
+                            ..add(CommentByPhotographerIdEventFetch(
+                                id: package.photographer.id)),
+                    ),
+                    BlocProvider(
+                      create: (context) =>
+                          CalendarBloc(calendarRepository: _calendarRepository)
+                            ..add(CalendarEventPhotographerDaysFetch(
+                                ptgId: package.photographer.id)),
+                    ),
+                  ],
+                  child: CustomerPhotographerDetail(
+                    id: package.photographer.id,
+                    name: package.photographer.fullname,
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+            child: Card(
+              elevation: 0.0,
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.grey[200],
+                      ),
+                      height: 50,
+                      width: 50,
+                      child: Icon(Icons.category),
+                    ),
+                    SizedBox(width: 20.0),
+                    Container(
+                      child: Flexible(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              package.name,
+                              style: TextStyle(
+                                  fontSize: 18.0, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(
+                              height: 5.0,
+                            ),
+                            Text(
+                              ' tạo bởi ${package.photographer.fullname}',
+                              style:
+                                  TextStyle(fontSize: 11.0, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

@@ -168,6 +168,30 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
         body: BlocListener<BookingBloc, BookingState>(
           listener: (context, state) {
             if (state is BookingStateEditedSuccess) {
+              Flushbar(
+                flushbarPosition: FlushbarPosition.TOP,
+                flushbarStyle: FlushbarStyle.FLOATING,
+                backgroundColor: Colors.black87,
+                reverseAnimationCurve: Curves.decelerate,
+                forwardAnimationCurve: Curves.elasticOut,
+                isDismissible: false,
+                duration: Duration(seconds: 5),
+                titleText: Text(
+                  "Cập nhật cuộc hẹn",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+                messageText: Text(
+                  "Cập nhật thành công!!",
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+              ).show(context);
               widget.isEdited(true);
               removeNotice();
               Flushbar(
@@ -323,128 +347,7 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
               //////////gói dịch vụ
               ///
               ///
-              ///Thời gian nhận ảnh
-              Padding(
-                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
-                child: Text(
-                  'Thời gian nhận ảnh',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    wordSpacing: -1,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                child: InkWell(
-                  onTap: () async {
-                    final pageResult = await Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (context) => CalendarBloc(
-                                calendarRepository: _calendarRepository),
-                          ),
-                          BlocProvider(
-                            create: (context) => BookingBloc(
-                                bookingRepository: _bookingRepository),
-                          )
-                        ],
-                        child: BlocDatePicker(
-                          ptgId: widget.photographer.id,
-                          onSelecParam: (DateTime result) {
-                            editDeadLine = result.toString();
-                          },
-                        ),
-                      );
-                    }));
-                    setState(() {
-                      if (pageResult != null) {
-                        timeReturnResult = pageResult;
-                      }
-                    });
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          timeReturnResult,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15.0,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 30,
-                          color: Theme.of(context).accentColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
 
-              ///Thời gian nhận ảnh
-
-              Padding(
-                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
-                child: Text(
-                  'Phương thức nhận ảnh',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    wordSpacing: -1,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                padding: EdgeInsets.all(10),
-                child: DropdownButtonHideUnderline(
-                  child: ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButton(
-                      value: selectedType,
-                      items: dropDownMenuItems,
-                      onChanged: onChangeDropdownItem,
-                      icon: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.pink,
-                        size: 20.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Padding(
                 padding: EdgeInsets.only(left: 10, top: 20, bottom: 10.0),
                 child: Row(
@@ -628,6 +531,129 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                     ),
                   );
                 }).toList(),
+              ),
+
+              ///Thời gian nhận ảnh
+              Padding(
+                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
+                child: Text(
+                  'Thời gian nhận ảnh',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    wordSpacing: -1,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey[300],
+                        offset: Offset(-1.0, 2.0),
+                        blurRadius: 6.0)
+                  ],
+                ),
+                child: InkWell(
+                  onTap: () async {
+                    final pageResult = await Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => CalendarBloc(
+                                calendarRepository: _calendarRepository),
+                          ),
+                          BlocProvider(
+                            create: (context) => BookingBloc(
+                                bookingRepository: _bookingRepository),
+                          )
+                        ],
+                        child: BlocDatePicker(
+                          ptgId: widget.photographer.id,
+                          onSelecParam: (DateTime result) {
+                            editDeadLine = result.toString();
+                          },
+                        ),
+                      );
+                    }));
+                    setState(() {
+                      if (pageResult != null) {
+                        timeReturnResult = pageResult;
+                      }
+                    });
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 10.0, top: 5.0, bottom: 5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          timeReturnResult,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 30,
+                          color: Theme.of(context).accentColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              ///Thời gian nhận ảnh
+
+              Padding(
+                padding: EdgeInsets.only(left: 10, top: 20, bottom: 5.0),
+                child: Text(
+                  'Phương thức nhận ảnh',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    wordSpacing: -1,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey[300],
+                        offset: Offset(-1.0, 2.0),
+                        blurRadius: 6.0)
+                  ],
+                ),
+                padding: EdgeInsets.all(10),
+                child: DropdownButtonHideUnderline(
+                  child: ButtonTheme(
+                    alignedDropdown: true,
+                    child: DropdownButton(
+                      value: selectedType,
+                      items: dropDownMenuItems,
+                      onChanged: onChangeDropdownItem,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.pink,
+                        size: 20.0,
+                      ),
+                    ),
+                  ),
+                ),
               ),
               SizedBox(
                 height: 70,
