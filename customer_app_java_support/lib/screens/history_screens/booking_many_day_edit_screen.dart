@@ -1,5 +1,6 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
@@ -8,7 +9,6 @@ import 'package:customer_app_java_support/respositories/booking_repository.dart'
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
-import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -31,19 +31,23 @@ class ReturnTypeModel {
   }
 }
 
-class BookingMany extends StatefulWidget {
+class BookingManyDayEdit extends StatefulWidget {
   final PackageBlocModel selectedPackage;
+  final BookingBlocModel bookingBlocModel;
   final Photographer photographer;
-  final List<PackageBlocModel> blocPackages;
+  final Function(bool) isEdited;
 
-  const BookingMany(
-      {this.selectedPackage, this.photographer, this.blocPackages});
+  const BookingManyDayEdit(
+      {this.selectedPackage,
+      this.photographer,
+      this.bookingBlocModel,
+      this.isEdited});
 
   @override
-  _BookingManyState createState() => _BookingManyState();
+  _BookingManyDayEditState createState() => _BookingManyDayEditState();
 }
 
-class _BookingManyState extends State<BookingMany> {
+class _BookingManyDayEditState extends State<BookingManyDayEdit> {
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
@@ -53,7 +57,6 @@ class _BookingManyState extends State<BookingMany> {
   String endDate = '';
   String editDeadLine = '';
   String startDate = '';
-  DateTime lastDate = DateTime.now();
   List<PackageBlocModel> listPackages = List<PackageBlocModel>();
 
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
@@ -110,72 +113,12 @@ class _BookingManyState extends State<BookingMany> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    dropDownMenuItems = buildDropdownMenuItems(returnedTypes);
-    selectedType = dropDownMenuItems[0].value;
-
-    for (PackageBlocModel package in widget.blocPackages) {
-      if (package.supportMultiDays) {
-        listPackages.add(package);
-      }
-    }
-
-    packageDropDownMenuItems = buildPackageDropdownMenuItems(listPackages);
-    selectedPackage = widget.selectedPackage;
-  }
-
-  void popUp(String title, String content) {
-    Flushbar(
-      flushbarPosition: FlushbarPosition.TOP,
-      flushbarStyle: FlushbarStyle.FLOATING,
-      backgroundColor: Colors.black87,
-      reverseAnimationCurve: Curves.decelerate,
-      forwardAnimationCurve: Curves.elasticOut,
-      isDismissible: false,
-      duration: Duration(seconds: 5),
-      titleText: Text(
-        title,
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18.0,
-            color: Colors.white,
-            fontFamily: "Quicksand"),
-      ),
-      messageText: Text(
-        content,
-        style: TextStyle(
-            fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-      ),
-    ).show(context);
-  }
-
-  bool _validateBooking() {
-    if (listTimeAndLocation == null) {
-      popUp('Địa điểm và thời gian chụp',
-          'Xin hãy chọn thời gian chụp và địa điểm');
-      return false;
-    } else if (listTimeAndLocation.isEmpty) {
-      popUp('Địa điểm và thời gian chụp',
-          'Xin hãy chọn thời gian chụp và địa điểm');
-      return false;
-    } else if (timeReturnResult == 'Hãy chọn thời gian nhận') {
-      popUp('Nhập thời gian nhận', 'Xin hãy chọn thời gian nhận');
-      return false;
-    } else if (!lastDate.isBefore(DateTime.parse(editDeadLine))) {
-      popUp('Thời gian nhận',
-          'Thời gian nhận ảnh phải sau ngày chụp cuối ít nhất 1 ngày');
-      return false;
-    }
-    return true;
-  }
-
-  _createBooking() async {
-    if (_validateBooking()) {
+  _editBooking() async {
+    if (selectedPackage != null) {
       List<TimeAndLocationBlocModel> timeAndLocations = listTimeAndLocation;
 
       BookingBlocModel booking = BookingBlocModel(
+          id: widget.bookingBlocModel.id,
           serviceName: selectedPackage.name,
           price: selectedPackage.price,
           editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
@@ -186,8 +129,19 @@ class _BookingManyState extends State<BookingMany> {
           listTimeAndLocations: timeAndLocations);
 
       BlocProvider.of<BookingBloc>(context)
-          .add(BookingEventCreate(booking: booking));
+          .add(BookingEventEdit(booking: booking));
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    dropDownMenuItems = buildDropdownMenuItems(returnedTypes);
+    selectedType = dropDownMenuItems[0].value;
+    listTimeAndLocation = widget.bookingBlocModel.listTimeAndLocations;
+    timeReturnResult = DateFormat('dd/MM/yyy HH:mm a')
+        .format(DateTime.parse(widget.bookingBlocModel.editDeadLine));
+    editDeadLine = widget.bookingBlocModel.editDeadLine;
   }
 
   @override
@@ -204,7 +158,7 @@ class _BookingManyState extends State<BookingMany> {
         ),
         backgroundColor: Colors.grey[50],
         floatingActionButton: FloatingActionButton(
-          onPressed: _createBooking,
+          onPressed: _editBooking,
           child: Icon(
             Icons.check,
             color: Colors.white,
@@ -213,7 +167,32 @@ class _BookingManyState extends State<BookingMany> {
         ),
         body: BlocListener<BookingBloc, BookingState>(
           listener: (context, state) {
-            if (state is BookingStateCreatedSuccess) {
+            if (state is BookingStateEditedSuccess) {
+              Flushbar(
+                flushbarPosition: FlushbarPosition.TOP,
+                flushbarStyle: FlushbarStyle.FLOATING,
+                backgroundColor: Colors.black87,
+                reverseAnimationCurve: Curves.decelerate,
+                forwardAnimationCurve: Curves.elasticOut,
+                isDismissible: false,
+                duration: Duration(seconds: 5),
+                titleText: Text(
+                  "Cập nhật cuộc hẹn",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+                messageText: Text(
+                  "Cập nhật thành công!!",
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                      fontFamily: "Quicksand"),
+                ),
+              ).show(context);
+              widget.isEdited(true);
               removeNotice();
               Flushbar(
                 flushbarPosition: FlushbarPosition.TOP,
@@ -224,7 +203,7 @@ class _BookingManyState extends State<BookingMany> {
                 isDismissible: false,
                 duration: Duration(seconds: 5),
                 titleText: Text(
-                  "Đặt lịch",
+                  "Cập nhật cuộc hẹn",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18.0,
@@ -232,7 +211,7 @@ class _BookingManyState extends State<BookingMany> {
                       fontFamily: "Quicksand"),
                 ),
                 messageText: Text(
-                  "Gửi yêu cầu thành công!!",
+                  "Cập nhật thành công!!",
                   style: TextStyle(
                       fontSize: 16.0,
                       color: Colors.white,
@@ -338,40 +317,37 @@ class _BookingManyState extends State<BookingMany> {
                   ),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                padding: EdgeInsets.all(10),
-                child: DropdownButtonHideUnderline(
-                  child: ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButton(
-                      value: selectedPackage,
-                      items: packageDropDownMenuItems,
-                      onChanged: onChangePackageDropdownItem,
-                      icon: Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Colors.pink,
-                        size: 20.0,
-                      ),
-                    ),
-                  ),
-                ),
+              BlocListener<PackageBloc, PackageState>(
+                listener: (context, state) {
+                  if (state is PackageStateSuccess) {
+                    for (PackageBlocModel package in state.packages) {
+                      if (package.supportMultiDays) {
+                        listPackages.add(package);
+                      }
+                    }
+
+                    for (var item in state.packages) {
+                      if (item.id == widget.selectedPackage.id) {
+                        selectedPackage = item;
+                      }
+                    }
+                    packageDropDownMenuItems =
+                        buildPackageDropdownMenuItems(listPackages);
+
+                    setState(() {});
+                  }
+                  if (state is PackageStateLoading) {
+                    return CircularProgressIndicator();
+                  }
+                },
+                child: Text(''),
               ),
               //////////gói dịch vụ
               _buildPackage(),
               //////////gói dịch vụ
               ///
               ///
+
               Padding(
                 padding: EdgeInsets.only(left: 10, top: 20, bottom: 10.0),
                 child: Row(
@@ -396,14 +372,6 @@ class _BookingManyState extends State<BookingMany> {
                                     onUpdateList:
                                         (TimeAndLocationBlocModel model) {
                                       listTimeAndLocation.add(model);
-                                      if (DateTime.parse(model.start)
-                                              .add(Duration(days: 1))
-                                              .isAfter(lastDate) ||
-                                          DateTime.parse(model.start)
-                                              .add(Duration(days: 1))
-                                              .isAtSameMomentAs(lastDate)) {
-                                        lastDate = DateTime.parse(model.start);
-                                      }
                                       setState(() {});
                                     },
                                   )),
@@ -606,8 +574,8 @@ class _BookingManyState extends State<BookingMany> {
                                 bookingRepository: _bookingRepository),
                           )
                         ],
-                        child: DatePicker(
-                          lastDay: lastDate,
+                        child: BlocDatePicker(
+                          ptgId: widget.photographer.id,
                           onSelecParam: (DateTime result) {
                             editDeadLine = result.toString();
                           },
@@ -696,119 +664,152 @@ class _BookingManyState extends State<BookingMany> {
   }
 
   Widget _buildPackage() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey[300],
-              offset: Offset(-1.0, 2.0),
-              blurRadius: 6.0)
-        ],
-      ),
-      padding: EdgeInsets.all(10),
-      child: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              RichText(
-                text: TextSpan(
-                  text: '',
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Quicksand',
-                      fontSize: 14.0),
-                  children: <TextSpan>[
-                    TextSpan(
-                        text: 'Tên gói:  ',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold)),
-                    TextSpan(
-                        text: selectedPackage.name,
-                        style: TextStyle(fontWeight: FontWeight.normal)),
+    return selectedPackage != null
+        ? Column(
+            children: [
+              Container(
+                margin: EdgeInsets.all(10),
+                width: MediaQuery.of(context).size.width * 0.99,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey[300],
+                        offset: Offset(-1.0, 2.0),
+                        blurRadius: 6.0)
                   ],
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                'Bao gồm các dịch vụ:',
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-              ),
-              SizedBox(
-                height: 5.0,
-              ),
-              Column(
-                children: selectedPackage.serviceDtos
-                    .asMap()
-                    .entries
-                    .map((MapEntry mapEntry) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 5.0,
+                padding: EdgeInsets.all(10),
+                child: DropdownButtonHideUnderline(
+                  child: ButtonTheme(
+                    alignedDropdown: true,
+                    child: DropdownButton(
+                      value: selectedPackage,
+                      items: packageDropDownMenuItems,
+                      onChanged: onChangePackageDropdownItem,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.pink,
+                        size: 20.0,
+                      ),
                     ),
-                    child: Row(
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey[300],
+                        offset: Offset(-1.0, 2.0),
+                        blurRadius: 6.0)
+                  ],
+                ),
+                padding: EdgeInsets.all(10),
+                child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.done,
-                          color: Color(0xFFF77474),
-                          size: 20,
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Flexible(
-                          child: Text(
-                            selectedPackage.serviceDtos[mapEntry.key].name,
-                            style: TextStyle(fontSize: 14),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 5,
+                      children: <Widget>[
+                        RichText(
+                          text: TextSpan(
+                            text: '',
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Quicksand',
+                                fontSize: 14.0),
+                            children: <TextSpan>[
+                              TextSpan(
+                                  text: 'Tên gói:  ',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold)),
+                              TextSpan(
+                                  text: selectedPackage.name,
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.normal)),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          'Bao gồm các dịch vụ:',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.black),
+                        ),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Column(
+                          children: selectedPackage.serviceDtos
+                              .asMap()
+                              .entries
+                              .map((MapEntry mapEntry) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 5.0,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.done,
+                                    color: Color(0xFFF77474),
+                                    size: 20,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      selectedPackage
+                                          .serviceDtos[mapEntry.key].name,
+                                      style: TextStyle(fontSize: 14),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        Divider(
+                          height: 40.0,
+                          indent: 20.0,
+                          endIndent: 20.0,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Tổng cộng:',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            Text(
+                              '${oCcy.format(selectedPackage.price)} đồng',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ]),
+                ),
               ),
-              Divider(
-                height: 40.0,
-                indent: 20.0,
-                endIndent: 20.0,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Tổng cộng:',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  Text(
-                    '${oCcy.format(selectedPackage.price)} đồng',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ]),
-      ),
-    );
-  }
-
-  void goBackToHomePage() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    });
+            ],
+          )
+        : SizedBox();
   }
 
   void popNotice() {

@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/widgets/history_screen/booking_widget.dart';
-import 'package:customer_app_java_support/widgets/history_screen/top_part_history.dart';
+import 'package:customer_app_java_support/widgets/history_screen/customshapeclipper.dart';
+import 'package:customer_app_java_support/widgets/history_screen/drop_menu_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
@@ -31,16 +33,21 @@ class _BookHistoryState extends State<BookHistory> {
     _completer = Completer<void>();
 
     // BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
-    // _loadBookingsByPaging(AUTO_FIRST_STATUS);
+    _loadBookingsByPaging(AUTO_FIRST_STATUS);
 
     _scrollController.addListener(() {
       final maxScrollExtent = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
       if (maxScrollExtent - currentScroll <= _scrollThreshold) {
         print('scroll on $statusForFilter');
-        // _loadBookingsByPaging(statusForFilter);
+        _loadBookingsByPaging(statusForFilter);
       }
     });
+  }
+
+  _loadBookingsByPaging(String _status) async {
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventFetchInfinite(cusId: 2, status: _status));
   }
 
   FutureOr onGoBack(dynamic value) {
@@ -54,12 +61,16 @@ class _BookHistoryState extends State<BookHistory> {
     BlocProvider.of<BookingBloc>(context).add(BookingEventFetch());
   }
 
+  _restartEvent() async {
+    BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
+  }
+
   Widget refreshData() {
     return Expanded(
       child: Center(
         child: BlocBuilder<BookingBloc, BookingState>(
           builder: (context, bookingState) {
-            if (bookingState is BookingStateSuccess) {
+            if (bookingState is BookingStateInfiniteFetchedSuccess) {
               if (bookingState.bookings.isEmpty) {
                 return Text(
                   'Đà Lạt',
@@ -72,11 +83,13 @@ class _BookHistoryState extends State<BookHistory> {
               } else {
                 return RefreshIndicator(
                   onRefresh: () {
-                    _loadBookings();
+                    _loadBookingsByPaging(statusForFilter);
                     return _completer.future;
                   },
                   child: Container(
                     child: BookingWidget(
+                      scrollController: _scrollController,
+                      hasReachedEnd: bookingState.hasReachedEnd,
                       blocBookings: bookingState.bookings,
                       onGoBack: onGoBack,
                     ),
@@ -217,7 +230,50 @@ class _BookHistoryState extends State<BookHistory> {
       body: Column(
         children: [
           //////////////////////////////////////////////////////// Filter
-          TopPart(),
+          Stack(
+            children: <Widget>[
+              ClipPath(
+                clipper: CustomShapeClipper(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      Color(0xFFF88F8F),
+                      Color(0xFFF88Fa9),
+                    ]),
+                  ),
+                  height: 120.0,
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
+                height: 54.0,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      offset: Offset(0, 4),
+                      blurRadius: 5,
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                  ],
+                ),
+                child: DropMenu(
+                  onSelectParam: (String selectedStatus) {
+                    print(selectedStatus.compareTo(statusForFilter));
+                    if (selectedStatus == statusForFilter) {
+                      statusForFilter = selectedStatus;
+                      _loadBookingsByPaging(statusForFilter);
+                    } else {
+                      statusForFilter = selectedStatus;
+                      _restartEvent();
+                      _loadBookingsByPaging(statusForFilter);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
           ///////////////////////////////////////////////////////////////
           SizedBox(
             height: 20.0,

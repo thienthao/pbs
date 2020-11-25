@@ -20,20 +20,7 @@ class CommentEventLoadSuccess extends CommentEvent {
   CommentEventLoadSuccess(List<CommentBlocModel> list);
 }
 
-class CommentEventRequested extends CommentEvent {
+class CommentEventPost extends CommentEvent {
   final CommentBlocModel comment;
-  CommentEventRequested({
-    @required this.comment,
-  }) : assert(comment != null);
-  @override
-  List<Object> get props => [comment];
-}
-
-class CommentEventRefresh extends CommentEvent {
-  final CommentBlocModel comment;
-  CommentEventRefresh({
-    @required this.comment,
-  }) : assert(comment != null);
-  @override
-  List<Object> get props => [comment];
+  CommentEventPost({this. comment});
 }

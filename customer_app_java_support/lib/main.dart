@@ -11,10 +11,12 @@ import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/nav_screen.dart';
 import 'package:customer_app_java_support/respositories/thread_api_client.dart';
 import 'package:customer_app_java_support/routing_constants.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen_loading.dart';
 import 'package:customer_app_java_support/screens/login_screen.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
 import 'package:customer_app_java_support/services/push_notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'blocs/bloc_observer.dart';
@@ -27,7 +29,7 @@ void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
     Bloc.observer = PBSBlocObserver();
     final userRepository = UserRepository();
-
+    
     //thao
     setupLocator();
     ThreadApiClient threadApiClient =
@@ -63,7 +65,7 @@ class _AppState extends State<App> {
     _pushNotificationService.init();
     super.initState();
     globals.selectedTabGlobal = 0;
-    Firebase.initializeApp().whenComplete(() { 
+    Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});
     });

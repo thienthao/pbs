@@ -1,23 +1,31 @@
 import 'dart:async';
+
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/blocs/package_blocs/package_bloc.dart';
+import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/constant/chat_name.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
+import 'package:customer_app_java_support/respositories/comment_repository.dart';
+import 'package:customer_app_java_support/respositories/package_repository.dart';
 import 'package:customer_app_java_support/screens/chat_screens/chat_screen.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen_loading.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_many_day_edit_screen.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_one_day_edit_screen.dart';
 import 'package:customer_app_java_support/screens/history_screens/location_guide.dart';
 import 'package:customer_app_java_support/screens/rating_screen/rating_screen.dart';
 import 'package:customer_app_java_support/services/chat_service.dart';
-import 'package:customer_app_java_support/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
-
-import 'package:http/http.dart' as http;
 import 'package:status_alert/status_alert.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final int bookingId;
@@ -30,6 +38,36 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  double cuLat = 0;
+  double cuLong = 0;
+  double destinationLat = 11.939346;
+  double destinationLong = 108.445173;
+
+  Completer<void> _completer;
+  final _formKey = GlobalKey<FormState>();
+
+  BookingRepository _bookingRepository =
+      BookingRepository(httpClient: http.Client());
+  BookingBloc _bookingBloc;
+  BookingBlocModel bookingObj;
+  bool isAbleToCanceled = true;
+  bool isCanceled = false;
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
+  PackageRepository _packageRepository =
+      PackageRepository(httpClient: http.Client());
+  final TextEditingController _reasonTextController = TextEditingController();
+
+  bool isBookingEdited = false;
+
+  FutureOr onGoBack(dynamic value) {
+    if (isBookingEdited) {
+      _loadBookingDetail();
+      widget.isEdited(true);
+      setState(() {});
+    }
+  }
+
   getChatRoomId(String a, String b) {
     if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
       return "$b\_$a";
@@ -57,21 +95,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   chatRoomId: chatRoomId,
                 )));
   }
-
-  double cuLat = 0;
-  double cuLong = 0;
-  double destinationLat = 11.939346;
-  double destinationLong = 108.445173;
-
-  Completer<void> _completer;
-
-  BookingRepository _bookingRepository =
-      BookingRepository(httpClient: http.Client());
-  BookingBloc _bookingBloc;
-  BookingBlocModel bookingObj;
-  bool isAbleToCanceled = true;
-  bool isCanceled = false;
-  final TextEditingController _reasonTextController = TextEditingController();
 
   TextSpan statusFormat(String status) {
     String text = status;
@@ -147,7 +170,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           pageBuilder: (BuildContext context,
                               Animation<double> animation,
                               Animation<double> secAnimation) {
-                            return RatingScreen();
+                            return BlocProvider(
+                              create: (context) => CommentBloc(
+                                  commentRepository: _commentRepository),
+                              child: RatingScreen(
+                                bookingId: bookingObj.id,
+                              ),
+                            );
                           }));
                 },
                 child: Text(
@@ -453,6 +482,84 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   height: 60.0,
                   child: RaisedButton(
                     onPressed: () {
+                      Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                              transitionDuration: Duration(milliseconds: 1000),
+                              transitionsBuilder: (BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secAnimation,
+                                  Widget child) {
+                                animation = CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.fastLinearToSlowEaseIn);
+                                return SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(1, 0),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: child,
+                                );
+                              },
+                              pageBuilder: (BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secAnimation) {
+                                return !bookingObj.isMultiday
+                                    ? MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => BookingBloc(
+                                                bookingRepository:
+                                                    _bookingRepository),
+                                          ),
+                                          BlocProvider(
+                                              create: (BuildContext context) =>
+                                                  PackageBloc(
+                                                      packageRepository:
+                                                          _packageRepository)
+                                                    ..add(
+                                                        PackageByPhotographerIdEventFetch(
+                                                            id: bookingObj
+                                                                .photographer
+                                                                .id)))
+                                        ],
+                                        child: BookingOneDayEditScreen(
+                                          isEdited: (bool isEdited) {
+                                            isBookingEdited = isEdited;
+                                          },
+                                          bookingBlocModel: bookingObj,
+                                          selectedPackage: bookingObj.package,
+                                          photographer: bookingObj.photographer,
+                                        ),
+                                      )
+                                    : MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => BookingBloc(
+                                                bookingRepository:
+                                                    _bookingRepository),
+                                          ),
+                                          BlocProvider(
+                                            create: (context) => PackageBloc(
+                                                packageRepository:
+                                                    _packageRepository)
+                                              ..add(
+                                                  PackageByPhotographerIdEventFetch(
+                                                      id: bookingObj
+                                                          .photographer.id)),
+                                          ),
+                                        ],
+                                        child: BookingManyDayEdit(
+                                          bookingBlocModel: bookingObj,
+                                          selectedPackage: bookingObj.package,
+                                          photographer: bookingObj.photographer,
+                                          isEdited: (bool isEdited) {
+                                            isBookingEdited = isEdited;
+                                          },
+                                        ),
+                                      );
+                              })).then(onGoBack);
+
                       // _acceptBooking(bookingObj);
                       // Navigator.pop(context);
                     },
@@ -460,14 +567,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       padding: EdgeInsets.all(8.0),
                       child: Text(
                         'Sửa',
-                        style: TextStyle(fontSize: 21.0, color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 21.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-          
           ],
         ),
       );
@@ -665,6 +774,24 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ),
         );
       }
+    } else if (status.toUpperCase().trim() == 'REJECTED') {
+      if (bookingObj.rejectedReason != null) {
+        return RichText(
+          text: TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+            children: <TextSpan>[
+              TextSpan(
+                  text: 'Lý do của photographer:   ',
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: bookingObj.photographerCanceledReason,
+                  style: TextStyle(fontWeight: FontWeight.normal)),
+            ],
+          ),
+        );
+      }
     }
     return SizedBox(
       height: 0,
@@ -682,18 +809,27 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(5.0),
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
-                  child: TextFormField(
-                    controller: _reasonTextController,
-                    cursorColor: Color(0xFFF77474),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 6,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Lý do hủy của bạn là gì...'),
+                Form(
+                  key: _formKey,
+                  child: Container(
+                    padding: EdgeInsets.all(5.0),
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Xin hãy nhập lý do';
+                        }
+                        return null;
+                      },
+                      controller: _reasonTextController,
+                      cursorColor: Color(0xFFF77474),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Lý do hủy của bạn là gì...'),
+                    ),
                   ),
                 ),
               ],
@@ -701,16 +837,23 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ),
           actions: <Widget>[
             FlatButton(
+              child: Text('Hủy bỏ'),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop('dialog');
+              },
+            ),
+            FlatButton(
               child: Text('Xác nhận'),
               onPressed: () {
-                BookingBlocModel booking = BookingBlocModel(
-                    id: bookingObj.id,
-                    customerCanceledReason: _reasonTextController.text,
-                    photographer: Photographer(id: bookingObj.photographer.id),
-                    package: bookingObj.package);
-                _bookingBloc.add(BookingEventCancel(booking: booking));
-                Navigator.pop(context);
-                // selectItem('Done');
+                if (_formKey.currentState.validate()) {
+                  BookingBlocModel booking = BookingBlocModel(
+                      id: bookingObj.id,
+                      customerCanceledReason: _reasonTextController.text,
+                      photographer:
+                          Photographer(id: bookingObj.photographer.id),
+                      package: bookingObj.package);
+                  _bookingBloc.add(BookingEventCancel(booking: booking));
+                }
               },
             ),
           ],
@@ -757,11 +900,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   getCurrentLocation() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      cuLat = position.latitude;
-      cuLong = position.longitude;
-      print('cuLat + cuLat');
-    });
+    cuLat = position.latitude;
+    cuLong = position.longitude;
+    print('cuLat + cuLat');
   }
 
   @override
@@ -1074,11 +1215,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
-                      TextSpan(
-                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel
-                                  .listTimeAndLocations[0].start)),
-                          style: TextStyle(fontWeight: FontWeight.normal)),
+                      bookingBlocModel.listTimeAndLocations.isNotEmpty
+                          ? TextSpan(
+                              text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                  DateTime.parse(bookingBlocModel
+                                      .listTimeAndLocations[0].start)),
+                              style: TextStyle(fontWeight: FontWeight.normal))
+                          : bookingBlocModel.startDate == null
+                              ? TextSpan(text: '')
+                              : TextSpan(
+                                  text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(
+                                          bookingBlocModel.startDate)),
+                                ),
                     ],
                   ),
                 ),
@@ -1116,10 +1265,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
-                      TextSpan(
-                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel.editDeadLine)),
-                          style: TextStyle(fontWeight: FontWeight.normal)),
+                      bookingBlocModel.listTimeAndLocations.isNotEmpty
+                          ? TextSpan(
+                              text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                  DateTime.parse(
+                                      bookingBlocModel.editDeadLine)),
+                              style: TextStyle(fontWeight: FontWeight.normal))
+                          : bookingBlocModel.endDate == null
+                              ? TextSpan(text: '')
+                              : TextSpan(
+                                  text: DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(bookingBlocModel.endDate)),
+                                ),
                     ],
                   ),
                 ),
@@ -1142,11 +1299,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                 style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.bold)),
-                            TextSpan(
-                                text: bookingBlocModel
-                                    .listTimeAndLocations[0].formattedAddress,
-                                style:
-                                    TextStyle(fontWeight: FontWeight.normal)),
+                            bookingBlocModel.listTimeAndLocations.isNotEmpty
+                                ? TextSpan(
+                                    text: bookingBlocModel
+                                        .listTimeAndLocations[0]
+                                        .formattedAddress,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.normal))
+                                : bookingBlocModel.address == null
+                                    ? TextSpan(text: '')
+                                    : TextSpan(text: bookingBlocModel.address),
                           ],
                         ),
                       ),
@@ -1340,7 +1502,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                           .spaceBetween,
                                                   children: <Widget>[
                                                     Text(
-                                                      '4.5',
+                                                      '${bookingState.booking.photographer.ratingCount ?? 0.0}',
                                                       textAlign:
                                                           TextAlign.right,
                                                       style: TextStyle(
@@ -1383,7 +1545,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                             IconButton(
                                                 icon: Icon(Icons
                                                     .phone_android_outlined),
-                                                onPressed: null),
+                                                onPressed: () {
+                                                  launch(
+                                                      'tel://${bookingState.booking.photographer.phone}');
+                                                }),
                                             IconButton(
                                               icon:
                                                   Icon(Icons.comment_outlined),
@@ -1592,9 +1757,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                       ]),
                                 ),
                               )),
-                          formatBottomComponentBasedOnStatus(bookingObj.status),
                           SizedBox(
                             height: 20,
+                          ),
+                          formatBottomComponentBasedOnStatus(bookingObj.status),
+                          SizedBox(
+                            height: 30,
                           ),
                         ],
                       ),
@@ -1603,20 +1771,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 }
 
                 if (bookingState is BookingStateCancelInProgress) {
-                  // testDialog('Cancel Inprogess');
-                  return Padding(
-                    padding: const EdgeInsets.all(50.0),
-                    child: Loading(),
-                  );
+                  return BookingDetailLoading();
                 }
                 if (bookingState is BookingStateCanceledSuccess) {
                   _loadBookingDetail();
                 }
                 if (bookingState is BookingStateLoading) {
-                  return Padding(
-                    padding: const EdgeInsets.all(50.0),
-                    child: Loading(),
-                  );
+                  return BookingDetailLoading();
                 }
 
                 if (bookingState is BookingStateFailure) {

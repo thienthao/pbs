@@ -41,4 +41,40 @@ class CommentRepository {
       throw Exception('Error getting list of comments');
     }
   }
+
+  Future<bool> postComment(CommentBlocModel comment) async {
+    var resBody = {};
+    var bookingResBody = {};
+    var userResBody = {};
+
+    resBody["comment"] = comment.comment;
+
+    resBody["rating"] = comment.rating;
+
+    userResBody["id"] = comment.cusId;
+    resBody["user"] = userResBody;
+
+    bookingResBody["id"] = comment.bookingId;
+    resBody["booking"] = bookingResBody;
+
+    resBody["commentedAt"] = comment.createdAt;
+
+    String str = json.encode(resBody);
+    print(str);
+    final response = await httpClient.post(
+        baseUrl + 'bookings/${comment.bookingId}/comments/',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: str);
+
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else {
+      throw Exception('Error at cancel a booking');
+    }
+
+    return result;
+  }
 }

@@ -144,14 +144,16 @@ class _CustomerPhotographerDetailState
                                       ),
                                       children: <TextSpan>[
                                         TextSpan(
-                                            text:
-                                                // '${photographerState.photographer.ratingCount}',
-                                                '30',
+                                            text: photographerState
+                                                        .photographer.booked !=
+                                                    null
+                                                ? '${photographerState.photographer.booked}'
+                                                : '0',
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontWeight: FontWeight.bold)),
                                         TextSpan(
-                                            text: ' đánh giá ',
+                                            text: ' đã đặt ',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.normal)),
                                         TextSpan(
@@ -166,9 +168,11 @@ class _CustomerPhotographerDetailState
                                           ),
                                         ),
                                         TextSpan(
-                                            text:
-                                                // '${photographerState.photographer.ratingCount}',
-                                                '4.5',
+                                            text: photographerState.photographer
+                                                        .ratingCount !=
+                                                    null
+                                                ? '${photographerState.photographer.ratingCount}'
+                                                : '0',
                                             style: TextStyle(
                                                 color: Colors.amber,
                                                 fontWeight: FontWeight.bold)),
@@ -365,17 +369,7 @@ class _CustomerPhotographerDetailState
                         style: TextStyle(color: Colors.red[300], fontSize: 16),
                       );
                     }
-                    final commentsTemp =
-                        (commentState as CommentStateSuccess).comments;
-                    return RefreshIndicator(
-                        child: CommentShow(
-                          blocComments: commentsTemp,
-                        ),
-                        onRefresh: () {
-                          BlocProvider.of<CommentBloc>(context).add(
-                              CommentEventRefresh(comment: commentsTemp[0]));
-                          return _completer.future;
-                        });
+                    return Text('');
                   },
                 ),
               ),

@@ -3,20 +3,27 @@ import 'package:flutter/material.dart';
 class Status {
   int id;
   String name;
+  String key;
 
-  Status(this.id, this.name);
+  Status(this.id, this.name, this.key);
 
   static List<Status> getStatus() {
     return <Status>[
-      Status(1, 'Tất cả'),
-      Status(1, 'Sắp diễn ra'),
-      Status(1, 'Đã diễn ra'),
-      Status(2, 'Đã hủy'),
+      Status(1, 'Tất cả', 'ALL'),
+      Status(2, 'Chờ xác nhận', 'pending'),
+      Status(3, 'Sắp diễn ra', 'ongoing'),
+      Status(4, 'Đang hậu kì', 'editing'),
+      Status(5, 'Hoàn thành', 'done'),
+      Status(6, 'Đã hủy', 'canceled'),
+      Status(7, 'Bị từ chối', 'rejected'),
     ];
   }
 }
 
 class DropMenu extends StatefulWidget {
+  final Function(String) onSelectParam;
+
+  const DropMenu({this.onSelectParam});
   @override
   _DropMenuState createState() => _DropMenuState();
 }
@@ -51,6 +58,7 @@ class _DropMenuState extends State<DropMenu> {
   onChangeDropdownItem(Status newSelectedStatus) {
     setState(() {
       selectedStatus = newSelectedStatus;
+       widget.onSelectParam(selectedStatus.key);
     });
   }
 

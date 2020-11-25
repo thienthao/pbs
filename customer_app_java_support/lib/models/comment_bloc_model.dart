@@ -8,6 +8,8 @@ class CommentBlocModel extends Equatable {
   final String avatar;
   final String createdAt;
   final String location;
+  final int bookingId;
+  final int cusId;
 
   CommentBlocModel({
     this.username,
@@ -17,6 +19,8 @@ class CommentBlocModel extends Equatable {
     this.rating,
     this.createdAt,
     this.location,
+    this.bookingId,
+    this.cusId,
   });
 
   @override

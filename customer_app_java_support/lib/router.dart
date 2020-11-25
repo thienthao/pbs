@@ -1,13 +1,11 @@
-import 'package:customer_app_java_support/screens/history_screens/history_screen.dart';
-import 'package:customer_app_java_support/screens/login_screen.dart';
-import 'package:customer_app_java_support/widgets/history_screen/booking_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/booking_bloc.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/booking_event.dart';
 import 'package:customer_app_java_support/main.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/routing_constants.dart';
+import 'package:customer_app_java_support/screens/history_screens/history_screen.dart';
+import 'package:customer_app_java_support/screens/login_screen.dart';
+import 'package:customer_app_java_support/widgets/history_screen/booking_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;

@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
   String ptgServiceResult = '';
-  String city ='';
+  String city = '';
   LatLng selectedLatlng = LatLng(0.0, 0.0);
   int selectedCategory = 1;
   @override
@@ -56,15 +56,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   _loadPhotographers(int _categoryId, LatLng _latLng, String _city) async {
-    BlocProvider.of<PhotographerBloc>(context)
-        .add(PhotographerEventFetch(categoryId: _categoryId, latLng: _latLng, city: _city));
+    BlocProvider.of<PhotographerBloc>(context).add(PhotographerEventFetch(
+        categoryId: _categoryId, latLng: _latLng, city: _city));
   }
 
   _filteredByCategoryId(_categoryId, _latLng, _city) async {
     _loadAlbums(
       _categoryId,
     );
-    _loadPhotographers(_categoryId, _latLng,_city);
+    _loadPhotographers(_categoryId, _latLng, _city);
   }
 
   @override
@@ -74,10 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         physics: BouncingScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
-            // pinned: true,
-            // snap: false,
-            // floating: false,
-            expandedHeight: 200,
+            expandedHeight: 220,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             actions: <Widget>[
               IconButton(
@@ -99,13 +96,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 },
               ),
             ],
-
             flexibleSpace: FlexibleSpaceBar(
               background: SliverItems(
                 onChangeLocation: (Map result) {
                   double _lat = result['lat'];
                   double _long = result['long'];
-                   city = result['name'];
+                  city = result['name'];
                   selectedLatlng = LatLng(_lat, _long);
                   _filteredByCategoryId(selectedCategory, selectedLatlng, city);
                 },

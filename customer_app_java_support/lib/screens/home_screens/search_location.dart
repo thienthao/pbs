@@ -44,7 +44,12 @@ class _SearchLocationState extends State<SearchLocation> {
           await Geocoder.local.findAddressesFromCoordinates(coordinates);
       var first = addresses.first;
       print('${first.coordinates} ${first.coordinates}');
-      returnLocation = {'name': first.adminArea, 'latlng': first.coordinates};
+      returnLocation = {
+        'name': first.adminArea,
+        'latlng': first.coordinates,
+        'lat': coordinates.latitude,
+        'long': coordinates.longitude,
+      };
     } catch (e) {}
   } // thêm để check null
 

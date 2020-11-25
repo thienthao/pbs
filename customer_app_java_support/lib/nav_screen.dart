@@ -5,6 +5,7 @@ import 'package:customer_app_java_support/respositories/booking_repository.dart'
 import 'package:customer_app_java_support/screens/forum_screen/forum_screen.dart';
 import 'package:customer_app_java_support/screens/profile_screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +41,7 @@ class _NavScreenState extends State<NavScreen> {
   void initState() {
     super.initState();
     globals.selectedTabGlobal = 0;
+    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   @override
@@ -75,8 +77,7 @@ class _NavScreenState extends State<NavScreen> {
         providers: [
           BlocProvider(
             create: (context) =>
-                BookingBloc(bookingRepository: _bookingRepository)
-                  ..add(BookingEventFetch()),
+                BookingBloc(bookingRepository: _bookingRepository),
           ),
         ],
         child: BookHistory(),

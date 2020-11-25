@@ -22,7 +22,7 @@ class Thread extends Equatable {
       this.comments});
 
   @override
-  // TODO: implement props
+  
   List<Object> get props => throw UnimplementedError();
 
   Thread.fromJson(json) {
