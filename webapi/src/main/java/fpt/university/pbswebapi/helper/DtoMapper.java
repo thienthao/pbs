@@ -73,7 +73,8 @@ public class DtoMapper {
                 servicePackage.getPrice(),
                 servicePackage.getDescription(),
                 servicePackage.getSupportMultiDays(),
-                serviceDtos
+                serviceDtos,
+                servicePackage.getCategory()
         );
     }
 

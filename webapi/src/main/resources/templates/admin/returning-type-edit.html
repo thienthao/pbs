@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body>
+<h1 th:text="${add} ? 'Create:' : 'Edit:'" />
+<a th:href="@{/admin/returningTypes}">Back to List</a>
+<br/><br/>
+<span th:text="${returningType.type}">Category</span>
+<div th:if="${returningType}">
+    <form th:action="${add} ? @{/admin/returningTypes/{returningTypeId}/edit(returningTypeId=${returningType.id})} : @{/admin/returningTypes/{returningTypeId}/edit(returningTypeId=${returningType.id})}" th:object="${returningType}" method="POST">
+        <table border="0">
+            <tr th:if="${returningType.id}">
+                <td>ID</td>
+                <td>:</td>
+                <td th:utext="${returningType.id}">...</td>
+            </tr>
+            <tr>
+                <td>Full Name</td>
+                <td>:</td>
+                <td><input type="text" th:field="*{type}" /></td>
+            </tr>
+
+        </table>
+        <br/><br/>
+        <!--    <div th:if="not ${allowDelete}">-->
+        <!--        <a th:href="@{/contacts/{contactId}/edit(contactId=${contact.id})}">Edit</a> |-->
+        <!--        <a th:href="@{/contacts/{contactId}/delete(contactId=${contact.id})}">Delete</a>-->
+        <!--    </div>-->
+    </form>
+
+    <div th:if="${errorMessage}" th:utext="${errorMessage}" class="error" />
+</div>
+<!--    <table border="0">-->
+<!--        <tr>-->
+<!--            <td>Phone</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{phone}" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Email</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{email}" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Address</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{address1}" size="50" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td></td>-->
+<!--            <td></td>-->
+<!--            <td><input type="text" th:field="*{address2}" size="50" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td></td>-->
+<!--            <td></td>-->
+<!--            <td><input type="text" th:field="*{address3}" size="50" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Postal Code</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{postalCode}" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Notes</td>-->
+<!--            <td>:</td>-->
+<!--            <td><textarea th:field="*{note}" rows="4" cols="50" /></td>-->
+<!--        </tr>-->
+<!--    </table>-->
+<!--    <input type="submit" th:value="${add} ? 'Create' : 'Update'" />-->
+<!--</form>-->
+
+<!--<br/>-->
+<!--&lt;!&ndash; Check if errorMessage is not null and not empty &ndash;&gt;-->
+<!--<div th:if="${errorMessage}" th:utext="${errorMessage}" class="error" />-->
+</body>
+</html>

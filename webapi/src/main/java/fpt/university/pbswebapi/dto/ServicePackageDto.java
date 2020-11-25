@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.dto;
 
+import fpt.university.pbswebapi.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,6 @@ public class ServicePackageDto {
     private Boolean supportMultiDays;
 
     private List<ServiceDto> serviceDtos;
+
+    private Category category;
 }

@@ -4,8 +4,10 @@ import fpt.university.pbswebapi.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,4 +54,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("FROM User photographer where photographer.role.id =:roleId and photographer.fullname like %:search% order by photographer.ratingCount desc")
     Page<User> searchPhotographerNameContaining(String search, Pageable paging, long roleId);
+
+    @Transactional
+    @Modifying
+    @Query("update User user set user.isBlocked=true where user.id=:userId")
+    void blockUser(long userId);
+
+    @Transactional
+    @Modifying
+    @Query("update User user set user.isBlocked=false where user.id=:userId")
+    void unblockUser(long userId);
 }

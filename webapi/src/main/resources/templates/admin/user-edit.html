@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body>
+<h1 th:text="${add} ? 'Create a User:' : 'Edit a User:'" />
+<a th:href="@{/admin/users}">Back to User List</a>
+<br/><br/>
+<div th:if="${user}">
+    <form th:action="${add} ? @{/admin/users/{userId}/edit(userId=${user.id})} : @{/admin/users/{userId}/edit(userId=${user.id})}" th:object="${user}" method="POST">
+        <table border="0">
+            <tr>
+                <img th:src="${user.avatar}" alt="Avatar" width="200" height="200"/>
+            </tr>
+            <tr th:if="${user.id}">
+                <td>ID</td>
+                <td>:</td>
+                <td th:utext="${user.id}">...</td>
+            </tr>
+            <tr>
+                <td>Full Name</td>
+                <td>:</td>
+                <td><input type="text" th:field="*{fullname}" /></td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td>:</td>
+                <td><input type="text" th:field="*{email}" /></td>
+            </tr>
+            <tr>
+                <td>Phone</td>
+                <td>:</td>
+                <td><input type="text" th:field="*{phone}" /></td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td>:</td>
+                <td><input type="text" th:field="*{description}" /></td>
+            </tr>
+            <tr>
+                <td>Role</td>
+                <td>:</td>
+                <td><input type="text" th:field="*{role.role}" /></td>
+            </tr>
+        </table>
+        <br/><br/>
+        <!--    <div th:if="not ${allowDelete}">-->
+        <!--        <a th:href="@{/contacts/{contactId}/edit(contactId=${contact.id})}">Edit</a> |-->
+        <!--        <a th:href="@{/contacts/{contactId}/delete(contactId=${contact.id})}">Delete</a>-->
+        <!--    </div>-->
+    </form>
+
+    <form th:if="not ${user.isBlocked}" th:action="@{/admin/users/{userId}/block(userId=${user.id})}" method="POST">
+        Block this User? <input type="submit" th:value="Yes" />
+    </form>
+
+    <form th:if="${user.isBlocked}" th:action="@{/admin/users/{userId}/unblock(userId=${user.id})}" method="POST">
+        Unblock this User? <input type="submit" th:value="Yes" />
+    </form>
+
+    <div th:if="${errorMessage}" th:utext="${errorMessage}" class="error" />
+</div>
+<!--    <table border="0">-->
+<!--        <tr>-->
+<!--            <td>Phone</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{phone}" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Email</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{email}" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Address</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{address1}" size="50" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td></td>-->
+<!--            <td></td>-->
+<!--            <td><input type="text" th:field="*{address2}" size="50" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td></td>-->
+<!--            <td></td>-->
+<!--            <td><input type="text" th:field="*{address3}" size="50" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Postal Code</td>-->
+<!--            <td>:</td>-->
+<!--            <td><input type="text" th:field="*{postalCode}" /></td>-->
+<!--        </tr>-->
+<!--        <tr>-->
+<!--            <td>Notes</td>-->
+<!--            <td>:</td>-->
+<!--            <td><textarea th:field="*{note}" rows="4" cols="50" /></td>-->
+<!--        </tr>-->
+<!--    </table>-->
+<!--    <input type="submit" th:value="${add} ? 'Create' : 'Update'" />-->
+<!--</form>-->
+
+<!--<br/>-->
+<!--&lt;!&ndash; Check if errorMessage is not null and not empty &ndash;&gt;-->
+<!--<div th:if="${errorMessage}" th:utext="${errorMessage}" class="error" />-->
+</body>
+</html>
