@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="admin-rework/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+</style>
+<div class="wrapper">
+    <!-- header-fragment -->
+    <div th:replace="admin-rework/header::header-nav"></div>
+    <!-- sidebar-fragment -->
+    <div th:replace="admin-rework/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <!-- Inner main -->
+        <div class="inner-main">
+            <!-- Inner main header -->
+            <div class="inner-main-header">
+                <a class="nav-link nav-icon rounded-circle nav-link-faded mr-3 d-md-none" href="#" data-toggle="inner-sidebar"><i class="material-icons">arrow_forward_ios</i></a>
+                <select class="custom-select custom-select-sm w-auto mr-1">
+                    <option selected="">Latest</option>
+                    <option value="1">Popular</option>
+                    <option value="3">Solved</option>
+                    <option value="3">Unsolved</option>
+                    <option value="3">No Replies Yet</option>
+                </select>
+                <span class="input-icon input-icon-sm ml-auto w-auto">
+                    <input type="text" class="form-control form-control-sm bg-gray-200 border-gray-200 shadow-none mb-4 mt-4" placeholder="Search forum" />
+                </span>
+            </div>
+            <!-- /Inner main header -->
+
+            <!-- Inner main body -->
+
+            <!-- Forum List -->
+            <div class="inner-main-body p-2 p-sm-3 collapse forum-content show">
+                <th:block th:each="thread :${threads}">
+                    <div class="card mb-2">
+                        <div class="card-body p-2 p-sm-3">
+                            <div class="media forum-item">
+                                <a href="#" data-toggle="collapse" data-target=".forum-content"><img th:src="${thread.owner.avatar}" class="mr-3 rounded-circle" width="50" alt="User" /></a>
+                                <div class="media-body">
+                                    <h6><a th:href="@{/admin/threads/{id}(id=${thread.id})}" class="text-body"><span th:text="${thread.title}">Title</span></a></h6>
+                                    <p class="text-secondary">
+                                        <span th:text="${thread.topic.topic}">Topic</span>
+                                    </p>
+                                    <p class="text-muted"><span th:text="${thread.createdAt}">Created At</span></p>
+                                </div>
+                                <div class="text-muted small text-center align-self-center">
+                                    <span class="d-none d-sm-inline-block"><i class="far fa-eye"></i> 19</span>
+                                    <span><i class="far fa-comment ml-2"></i> 3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+                <ul class="pagination pagination-sm pagination-circle justify-content-center mb-0">
+                    <li class="page-item disabled">
+                        <span class="page-link has-icon"><i class="material-icons">Back</i></span>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="javascript:void(0)">1</a></li>
+                    <li class="page-item active"><span class="page-link">2</span></li>
+                    <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link has-icon" href="javascript:void(0)"><i class="material-icons">Next</i></a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /Forum List -->
+            <!-- /Inner main body -->
+        </div>
+        <!-- /Inner main -->
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- footer-fragment -->
+    <div th:replace="admin-rework/footer::footer-fragment"></div>
+</div>
+<!-- jQuery -->
+<script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/admin/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/admin/dist/js/adminlte.min.js}"></script>
+<!-- jqgrid -->
+<script th:src="@{/admin/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/admin/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/admin/dist/js/public.js}"></script>
+<script th:src="@{/admin/dist/js/thread.js}"></script>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

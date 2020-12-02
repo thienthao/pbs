@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="admin-rework/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+</style>
+<div class="wrapper">
+    <!-- header-fragment -->
+    <div th:replace="admin-rework/header::header-nav"></div>
+    <!-- sidebar-fragment -->
+    <div th:replace="admin-rework/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <!-- Inner main -->
+        <div class="inner-main">
+            <!-- Inner main body -->
+            <!-- Forum Detail -->
+            <div class="inner-main-body p-2 p-sm-3 forum-content">
+                <a th:href="@{/admin/threads}" class="btn btn-light btn-sm mb-3 has-icon"><i class="fa fa-arrow-left mr-2"></i>Back</a>
+
+<!--                <form th:if="not ${user.isBlocked}" th:action="@{/admin/users/{userId}/block(userId=${user.id})}" method="POST">-->
+<!--                    <input type="submit" th:value="Yes" />-->
+<!--                </form>-->
+
+<!--                <form th:if="${user.isBlocked}" th:action="@{/admin/users/{userId}/unblock(userId=${user.id})}" method="POST">-->
+<!--                    <input type="submit" th:value="Yes" />-->
+<!--                </form>-->
+                <a th:if="not ${thread.isBan}" th:href="@{/admin/threads/{threadId}/ban(threadId=${thread.id})}" class="btn btn-danger float-right has-icon"><i class="fa fa-warning mr-2"></i>Ban this thread</a>
+                <a th:if="${thread.isBan}" th:href="@{/admin/threads/{threadId}/unban(threadId=${thread.id})}" class="btn btn-primary float-right has-icon">Unban this thread</a>
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <div class="media forum-item">
+                            <a href="javascript:void(0)" class="card-link">
+                                <img th:src=${thread.owner.avatar} class="rounded-circle" width="50" height="50" alt="User" />
+                                <small class="d-block text-center text-muted"></small>
+                            </a>
+                            <div class="media-body ml-3">
+                                <a href="javascript:void(0)" class="text-secondary"><span th:text="${thread.owner.fullname}"></span></a>
+                                <small class="text-muted ml-2">1 hour ago</small>
+                                <h5 class="mt-1" th:text="${thread.title}"></h5>
+                                <div class="mt-3 font-size-sm">
+                                    <p th:text="${thread.content}"></p>
+                                </div>
+                            </div>
+                            <div class="text-muted small text-center">
+                                <span class="d-none d-sm-inline-block"><i class="far fa-eye"></i> 19</span>
+                                <span><i class="far fa-comment ml-2"></i> 3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <th:block th:each="comment :${thread.comments}">
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <div class="media forum-item">
+                                <a href="javascript:void(0)" class="card-link">
+                                    <img th:src="${comment.owner.avatar}" class="rounded-circle" width="50" height="50" alt="User" />
+                                    <small class="d-block text-center text-muted"></small>
+                                </a>
+                                <div class="media-body ml-3">
+                                    <a href="javascript:void(0)" class="text-secondary"><span th:text="${comment.owner.fullname}"></span></a>
+                                    <small class="text-muted ml-2">1 hour ago</small>
+                                    <div class="mt-3 font-size-sm">
+                                        <p th:text="${comment.comment}"></p>
+                                    </div>
+                                    <button class="btn btn-xs text-muted has-icon"><i class="fa fa-heart" aria-hidden="true"></i>1</button>
+                                    <a href="javascript:void(0)" class="text-muted small">Reply</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+            <!-- /Forum Detail -->
+            <!-- /Inner main body -->
+        </div>
+        <!-- /Inner main -->
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- footer-fragment -->
+    <div th:replace="admin-rework/footer::footer-fragment"></div>
+</div>
+<!-- jQuery -->
+<script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/admin/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/admin/dist/js/adminlte.min.js}"></script>
+<!-- jqgrid -->
+<script th:src="@{/admin/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/admin/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/admin/dist/js/public.js}"></script>
+<script th:src="@{/admin/dist/js/thread.js}"></script>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</body>
+</html>

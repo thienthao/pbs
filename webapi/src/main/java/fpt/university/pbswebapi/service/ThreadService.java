@@ -32,11 +32,23 @@ public class ThreadService {
         return topicRepository.findAll();
     }
 
+    public Thread findById(long id) {
+        return threadRepository.findById(id).get();
+    }
+
     public Thread save(Thread thread) {
         return threadRepository.save(thread);
     }
 
     public ThreadComment postComment(ThreadComment comment) {
         return threadCommentRepository.save(comment);
+    }
+
+    public void banThread(long threadId) {
+        threadRepository.banThread(threadId);
+    }
+
+    public void unbanThread(long threadId) {
+        threadRepository.unbanThread(threadId);
     }
 }

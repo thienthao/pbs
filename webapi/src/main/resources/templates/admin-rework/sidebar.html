@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<aside th:fragment="sidebar-fragment(path)" class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a th:href="@{/admin/index}" class="brand-link">
+        <img th:src="@{/admin/dist/img/logo.png}" alt="ssm-cluster Logo" class="brand-image img-circle elevation-3"
+             style="opacity: .8">
+        <span class="brand-text font-weight-light">Admin</span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img th:src="@{/admin/dist/img/avatar5.png}" class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block" th:text="${session.loginUser}"></a>
+            </div>
+        </div>
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                data-accordion="false">
+                <!-- Add icons to the links using the .nav-icon class
+                     with font-awesome or any other icon font library -->
+                <li class="nav-header">Overview</li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/dashboard}" th:class="${path}=='index'?'nav-link active':'nav-link'">
+                        <i class="nav-icon fa fa-dashboard"></i>
+                        <p>
+                            Dashboard
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-header">Management</li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/users}" th:class="${path}=='blogs'?'nav-link active':'nav-link'">
+                        <i class="fa fa-list-alt nav-icon" aria-hidden="true"></i>
+                        <p>
+                            Users Management
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/threads/topics}" th:class="${path}=='links'?'nav-link active':'nav-link'">
+                        <i class="fa fa-comments nav-icon" aria-hidden="true"></i>
+                        <p>
+                            Thread Topics
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/threads}" th:class="${path}=='comments'?'nav-link active':'nav-link'">
+                        <i class="fa fa-comments nav-icon" aria-hidden="true"></i>
+                        <p>
+                            Threads
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/categories}" th:class="${path}=='categories'?'nav-link active':'nav-link'">
+                        <i class="fa fa-bookmark nav-icon" aria-hidden="true"></i>
+                        <p>
+                            Category
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/returningTypes}" th:class="${path}=='tags'?'nav-link active':'nav-link'">
+<!--                        <i class="fa fa-tags nav-icon" aria-hidden="true"></i>-->
+                        <i class="fa fa-truck nav-icon" aria-hidden="true"></i>
+                        <p>
+                            Delivery Method
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-header">System Management</li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/threads/1}"
+                       th:class="${path}=='configurations'?'nav-link active':'nav-link'">
+                        <i class="fa fa-wrench nav-icon"></i>
+                        <p>System configuration</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/profile}"
+                       th:class="${path}=='profile'?'nav-link active':'nav-link'">
+                        <i class="fas fa-user nav-icon"></i>
+                        <p>Profile</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/admin/logout}" class="nav-link">
+                        <i class="fas fa-sign-out-alt nav-icon"></i>
+                        <p>Logout</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>
+</html>

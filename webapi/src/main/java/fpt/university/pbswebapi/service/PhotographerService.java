@@ -513,7 +513,7 @@ public class PhotographerService {
             dows.add(DateHelper.getNotWorkingDay(dow));
         }
 
-        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 7, 1), LocalDate.of(2021, 3, 31));
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 10, 1), LocalDate.of(2021, 1, 31));
         for(LocalDate date : datesBetween) {
             for(java.time.DayOfWeek dow : dows) {
                 if(DateHelper.isDateDayOfWeek(date, dow)) {
