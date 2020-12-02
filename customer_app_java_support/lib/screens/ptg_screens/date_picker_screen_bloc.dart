@@ -3,8 +3,8 @@ import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/calendar_model.dart';
 import 'package:customer_app_java_support/plane_indicator.dart';
+import 'package:customer_app_java_support/shared/datepicker_loading.dart';
 import 'package:customer_app_java_support/shared/loading.dart';
-import 'package:customer_app_java_support/shared/loading_line.dart';
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -318,7 +318,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                       SizedBox(height: 30.0),
                       RaisedButton(
                         onPressed: () {
-                          widget.onSelecParam(_selectedDateTime);
+                          widget.onSelecParam(_selectedDateTime.toUtc());
                           Navigator.pop(context,
                               '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
                         },
@@ -344,7 +344,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
               }
 
               if (state is CalendarStateLoading) {
-                return Container(child: Center(child: LoadingLine()));
+                return DatePickerLoadingWidget();
               }
               return Text('Nothing');
             },

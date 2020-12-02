@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/working_day_blocs/working_days.dart';
 import 'package:photographer_app_java_support/models/working_date_bloc_model.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 
 class BottomSheetDaily extends StatefulWidget {
   final List<WorkingDayBlocModel> listWorkingDays;
@@ -275,19 +276,23 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
             ),
           ),
         ),
-        BlocBuilder<WorkingDayBloc, WorkingDayState>(
-          builder: (context, state) {
+        BlocListener<WorkingDayBloc, WorkingDayState>(
+          listener: (context, state) {
             if (state is WorkingDayStateUpdateSuccess) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text('Update Success!!')),
-              );
+              removeNotice();
+              popUp(context, 'Cập nhật các ngày làm việc hằng tuần',
+                  'Đã cập nhật thành công các ngày làm việc hằng tuần');
+            }
+            if (state is WorkingDayStateLoading) {
+              popNotice(context);
             }
             if (state is WorkingDayStateFailure) {
-              return Center(child: Text('Update Fail'));
+              removeNotice();
+              popUp(context, 'Cập nhật các ngày làm việc hằng tuần',
+                  'Cập nhật thất bại');
             }
-            return SizedBox();
           },
+          child: SizedBox(),
         )
       ],
     );

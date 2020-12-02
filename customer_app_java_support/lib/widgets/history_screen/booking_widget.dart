@@ -111,6 +111,9 @@ class _BookingWidgetState extends State<BookingWidget> {
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,
+                                isEdited: (bool _isEdited) {
+                                  widget.isEdited(_isEdited);
+                                },
                               ),
                             );
                           })).then(widget.onGoBack);

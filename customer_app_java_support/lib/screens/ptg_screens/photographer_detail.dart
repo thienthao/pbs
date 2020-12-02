@@ -11,13 +11,17 @@ import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/plane_indicator.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_screen.dart';
+import 'package:customer_app_java_support/shared/block_loading.dart';
 import 'package:customer_app_java_support/shared/loading.dart';
+import 'package:customer_app_java_support/shared/photographer_album_loading.dart';
+import 'package:customer_app_java_support/shared/photographer_info_loading.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/album_of_ptg_carousel.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/bottom_sheet_ptg.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/calendar_show_ptg.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/comment_show_ptg.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/service_show_ptg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
@@ -46,6 +50,7 @@ class _CustomerPhotographerDetailState
   void initState() {
     super.initState();
     _completer = Completer<void>();
+    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   @override
@@ -221,10 +226,7 @@ class _CustomerPhotographerDetailState
                     }
 
                     if (photographerState is PhotographerStateLoading) {
-                      return Padding(
-                        padding: const EdgeInsets.all(50.0),
-                        child: Loading(),
-                      );
+                      return PhotographerInfoLoadingWidget();
                     }
 
                     if (photographerState is PhotographerStateFailure) {
@@ -284,10 +286,7 @@ class _CustomerPhotographerDetailState
                     }
 
                     if (albumState is AlbumStateLoading) {
-                      return Padding(
-                        padding: const EdgeInsets.all(50.0),
-                        child: Loading(),
-                      );
+                      return AlbumOfPhotographerLoadingWidget();
                     }
 
                     if (albumState is AlbumStateFailure) {
@@ -350,8 +349,12 @@ class _CustomerPhotographerDetailState
                           ),
                         );
                       } else {
-                        CommentShow(
-                          blocComments: commentState.comments,
+                        Column(
+                          children: [
+                            CommentShow(
+                              blocComments: commentState.comments,
+                            ),
+                          ],
                         );
                       }
                     }
@@ -391,8 +394,8 @@ class _CustomerPhotographerDetailState
                 builder: (context, state) {
                   if (state is CalendarStateLoading) {
                     return Padding(
-                      padding: const EdgeInsets.all(50.0),
-                      child: Loading(),
+                      padding: const EdgeInsets.all(8.0),
+                      child: BlockLoadingWidget(),
                     );
                   }
 
@@ -492,7 +495,11 @@ class _CustomerPhotographerDetailState
               Padding(
                 padding: EdgeInsets.all(30.0),
                 child: RaisedButton(
-                  onPressed: () => onPressedButton(),
+                  onPressed: () {
+                    if (_photographer != null) {
+                      onPressedButton();
+                    }
+                  },
                   textColor: Colors.white,
                   color: Theme.of(context).primaryColor,
                   padding:

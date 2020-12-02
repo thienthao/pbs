@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:photographer_app_java_support/blocs/category_blocs/category_bloc.dart';
 import 'package:photographer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:photographer_app_java_support/models/package_bloc_model.dart';
+import 'package:photographer_app_java_support/respositories/category_respository.dart';
 import 'package:photographer_app_java_support/respositories/package_repository.dart';
 import 'package:photographer_app_java_support/screens/services_screens/service_new_screen.dart';
 import 'package:shimmer/shimmer.dart';
@@ -20,6 +22,8 @@ class ListService extends StatefulWidget {
 class _ListServiceState extends State<ListService> {
   PackageRepository _packageRepository =
       PackageRepository(httpClient: http.Client());
+  CategoryRepository _categoryRepository =
+      CategoryRepository(httpClient: http.Client());
 
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
 
@@ -108,10 +112,19 @@ class _ListServiceState extends State<ListService> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                    create: (context) =>
-                        PackageBloc(packageRepository: _packageRepository),
-                    child: NewService())),
+                builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => PackageBloc(
+                              packageRepository: _packageRepository),
+                        ),
+                        BlocProvider(
+                          create: (context) => CategoryBloc(
+                              categoryRepository: _categoryRepository),
+                        ),
+                      ],
+                      child: NewService(),
+                    )),
           );
         },
         child: Icon(
@@ -126,9 +139,9 @@ class _ListServiceState extends State<ListService> {
             if (packageState is PackageStateSuccess) {
               if (packageState.packages.isEmpty) {
                 return Text(
-                  'Đà Lạt',
+                  'Hiện tại bạn chưa có gói dịch vụ nào',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: 17.0,
                     fontWeight: FontWeight.w400,
                   ),
@@ -292,16 +305,26 @@ class _ListServiceState extends State<ListService> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => BlocProvider(
-                                                create: (context) =>
-                                                    PackageBloc(
-                                                        packageRepository:
-                                                            _packageRepository),
-                                                child: EditService(
-                                                  package: package,
-                                                ),
-                                              ),
-                                            ),
+                                                builder: (_) =>
+                                                    MultiBlocProvider(
+                                                      providers: [
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                              PackageBloc(
+                                                                  packageRepository:
+                                                                      _packageRepository),
+                                                        ),
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                              CategoryBloc(
+                                                                  categoryRepository:
+                                                                      _categoryRepository),
+                                                        ),
+                                                      ],
+                                                      child: EditService(
+                                                        package: package,
+                                                      ),
+                                                    )),
                                           );
                                         },
                                         child: Text(

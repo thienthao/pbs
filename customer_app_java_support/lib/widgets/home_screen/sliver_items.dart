@@ -95,6 +95,14 @@ class _SliverItemsState extends State<SliverItems> {
                                 )));
                     setState(() {
                       locationResult = pageResult;
+                      if (locationResult == null) {
+                        locationResult = {
+                          'name': '',
+                          'latlng': LatLng(cuLat, cuLong),
+                          'lat': cuLat,
+                          'long': cuLong,
+                        };
+                      }
                       widget.onChangeLocation(locationResult);
                       for (var city in listCityLocations) {
                         print(locationResult['name'].toString());

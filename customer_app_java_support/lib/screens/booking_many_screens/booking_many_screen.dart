@@ -8,8 +8,8 @@ import 'package:customer_app_java_support/respositories/booking_repository.dart'
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
+import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
-import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -239,6 +239,7 @@ class _BookingManyState extends State<BookingMany> {
                       fontFamily: "Quicksand"),
                 ),
               ).show(context);
+              _moveToBookingDetailDialog('chi tiết cuộc hẹn', state.bookingId);
             }
 
             if (state is BookingStateLoading) {
@@ -824,5 +825,82 @@ class _BookingManyState extends State<BookingMany> {
 
   void removeNotice() {
     StatusAlert.hide();
+  }
+
+  Future<void> _moveToBookingDetailDialog(String title, int bookingId) async {
+    return showDialog<void>(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext aContext) {
+        return AlertDialog(
+          title: Text('Chuyển đến $title',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
+                  child: Text('Bạn có muôn chuyển đến $title',
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Hủy bỏ'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // selectItem('Done');
+              },
+            ),
+            FlatButton(
+              child: Text('Xác nhận'),
+              onPressed: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        transitionDuration: Duration(milliseconds: 500),
+                        transitionsBuilder: (BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secAnimation,
+                            Widget child) {
+                          animation = CurvedAnimation(
+                              parent: animation, curve: Curves.elasticInOut);
+                          return ScaleTransition(
+                              scale: animation,
+                              child: child,
+                              alignment: Alignment.center);
+                        },
+                        pageBuilder: (BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secAnimation) {
+                          return MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                  create: (context) => BookingBloc(
+                                      bookingRepository: _bookingRepository)),
+                            ],
+                            child: BookingDetailScreen(
+                              bookingId: bookingId,
+                              isEdited: (bool _isEdited) {
+                                // widget.isEdited(_isEdited);
+                              },
+                            ),
+                          );
+                        }));
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

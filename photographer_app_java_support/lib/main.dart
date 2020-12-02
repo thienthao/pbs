@@ -1,21 +1,24 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:photographer_app_java_support/locator.dart';
 import 'package:photographer_app_java_support/nav_screen.dart';
 import 'package:photographer_app_java_support/screens/login_screen.dart';
 import 'package:photographer_app_java_support/services/push_notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'router.dart' as router;
-import './services/navigation_service.dart';
+import 'services/navigation_service.dart';
 import 'blocs/bloc_observer.dart';
-import './blocs/authen_blocs/authen_export.dart';
+import 'blocs/authen_blocs/authen_export.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
     final userRepository = UserRepository();
     Bloc.observer = PBSBlocObserver();
+    SystemChrome.setEnabledSystemUIOverlays([]);
     setupLocator();
     runApp(App(
       userRepository: userRepository,
@@ -42,6 +45,7 @@ class _AppState extends State<App> {
   void initState() {
     _pushNotificationService.init();
     super.initState();
+
     Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});
@@ -50,6 +54,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     return BlocProvider(
         create: (context) =>
             AuthenticationBloc(userRepository: widget.userRepository)

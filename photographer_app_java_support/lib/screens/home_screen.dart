@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
@@ -10,6 +11,7 @@ import 'package:photographer_app_java_support/respositories/calendar_repository.
 import 'package:photographer_app_java_support/widgets/home/build_pen_task.dart';
 import 'package:photographer_app_java_support/widgets/home/build_task.dart';
 import 'package:photographer_app_java_support/widgets/home/show_calendar.dart';
+import 'package:photographer_app_java_support/widgets/shared/list_booking_loading.dart';
 import 'package:photographer_app_java_support/widgets/shared/loading_line.dart';
 
 import 'vacation_screens/list_vacation_screen.dart';
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIOverlays([]);
     _completer = Completer<void>();
     _loadPendingBookings();
     _loadCalendar();
@@ -82,8 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         BlocProvider(
                           create: (context) => BusyDayBloc(
-                              calendarRepository: _calendarRepository)
-                            ,
+                              calendarRepository: _calendarRepository),
                         ),
                       ],
                       child: ListVacation(),
@@ -266,12 +268,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (context, bookingState) {
                         if (bookingState is BookingStateSuccess) {
                           if (bookingState.bookings.isEmpty) {
-                            return Text(
-                              'Đà Lạt',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 17.0,
-                                fontWeight: FontWeight.w400,
+                            return Center(
+                              child: Text(
+                                'Hiện tại bạn chưa có lịch hẹn nào',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 17.0,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
                             );
                           } else {
@@ -283,6 +287,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Container(
                                 child: UpComSlidable(
                                   blocPendingBookings: bookingState.bookings,
+                                  isEdited: (bool isEdited) {
+                                    if (isEdited) {
+                                      _loadPendingBookings();
+                                    }
+                                  },
                                 ),
                               ),
                             );
@@ -290,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
 
                         if (bookingState is BookingStateLoading) {
-                          return LoadingLine();
+                          return ListBookingLoadingWidget();
                         }
 
                         if (bookingState is BookingStateFailure) {

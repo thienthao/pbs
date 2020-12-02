@@ -144,7 +144,7 @@ class _BookingWidgetState extends State<BookingWidget> {
                             Container(
                               width: 120.0,
                               child: Text(
-                                'Chụp ảnh với ${booking.customer.fullname} ${booking.id}',
+                                'Chụp ảnh với ${booking.customer.fullname}',
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.w600,
@@ -167,44 +167,6 @@ class _BookingWidgetState extends State<BookingWidget> {
                           ],
                         ),
                         SizedBox(height: 10.0),
-                        Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 10.0),
-                              child: Icon(
-                                Icons.timer,
-                                size: 15,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: 10.0,
-                              ),
-                              child: Text(
-                                'Thời gian:',
-                                style: TextStyle(
-                                  fontSize: 15.0,
-                                  color: Colors.black54,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Text(
-                                booking.startDate == null
-                                    ? ''
-                                    : DateFormat('dd/MM/yyyy hh:mm a').format(
-                                        DateTime.parse(booking.startDate)),
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5.0),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -246,6 +208,51 @@ class _BookingWidgetState extends State<BookingWidget> {
                         ),
                         SizedBox(height: 5.0),
                         Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 10.0),
+                              child: Icon(
+                                Icons.timer,
+                                size: 15,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: 10.0,
+                              ),
+                              child: Text(
+                                'Thời gian:',
+                                style: TextStyle(
+                                  fontSize: 15.0,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: Text(
+                                booking.listTimeAndLocations.isEmpty
+                                    ? ''
+                                    : booking.listTimeAndLocations.length > 1
+                                        ? 'Nhiều mốc thời gian'
+                                        : booking.listTimeAndLocations[0] ==
+                                                null
+                                            ? ''
+                                            : DateFormat('dd/MM/yyyy HH:mm a')
+                                                .format(DateTime.parse(booking
+                                                    .listTimeAndLocations[0]
+                                                    .start)),
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5.0),
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
@@ -273,9 +280,15 @@ class _BookingWidgetState extends State<BookingWidget> {
                               child: Padding(
                                 padding: EdgeInsets.only(right: 10),
                                 child: Text(
-                                  booking.location == null
+                                  booking.listTimeAndLocations.isEmpty
                                       ? ''
-                                      : booking.location,
+                                      : booking.listTimeAndLocations.length > 1
+                                          ? 'Nhiều địa điểm'
+                                          : booking.listTimeAndLocations[0] ==
+                                                  null
+                                              ? ''
+                                              : booking.listTimeAndLocations[0]
+                                                  .formattedAddress,
                                   style: TextStyle(
                                     color: Colors.grey,
                                   ),

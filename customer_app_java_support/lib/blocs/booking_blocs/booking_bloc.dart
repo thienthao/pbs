@@ -68,8 +68,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       BookingBlocModel booking) async* {
     yield BookingStateLoading();
     try {
-      final isSuccess = await this.bookingRepository.createBooking(booking);
-      yield BookingStateCreatedSuccess(isSuccess: isSuccess);
+      final bookingId = await this.bookingRepository.createBooking(booking);
+      yield BookingStateCreatedSuccess(bookingId: bookingId);
     } catch (_) {
       yield BookingStateFailure();
     }
@@ -88,7 +88,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
   Stream<BookingState> _mapBookingCanceledtoState(
       BookingBlocModel booking) async* {
-    yield BookingStateCancelInProgress();
+    yield BookingStateLoading();
     try {
       final isSuccess = await this.bookingRepository.cancelBooking(booking);
       yield BookingStateCanceledSuccess(isSuccess: isSuccess);

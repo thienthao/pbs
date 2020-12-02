@@ -226,7 +226,7 @@ class BookingRepository {
     }
   }
 
-  Future<bool> createBooking(BookingBlocModel booking) async {
+  Future<int> createBooking(BookingBlocModel booking) async {
     print(booking.listTimeAndLocations[0].formattedAddress);
     var resBody = {};
     var ptgResBody = {};
@@ -278,9 +278,10 @@ class BookingRepository {
         },
         body: str);
 
-    bool result = false;
+    int result = 0;
     if (response.statusCode == 200) {
-      result = true;
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      result = data['id'];
     } else {
       throw Exception('Error Create a Booking');
     }
