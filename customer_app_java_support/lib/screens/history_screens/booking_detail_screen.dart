@@ -12,7 +12,7 @@ import 'package:customer_app_java_support/respositories/booking_repository.dart'
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:customer_app_java_support/respositories/package_repository.dart';
 import 'package:customer_app_java_support/screens/chat_screens/chat_screen.dart';
-import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen_loading.dart';
+import 'package:customer_app_java_support/shared/booking_detail_screen_loading.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_many_day_edit_screen.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_one_day_edit_screen.dart';
 import 'package:customer_app_java_support/screens/history_screens/location_guide.dart';
@@ -48,7 +48,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
-  BookingBloc _bookingBloc;
   BookingBlocModel bookingObj;
   bool isAbleToCanceled = true;
   bool isCanceled = false;
@@ -801,6 +800,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   Future<void> _showMyDialog() async {
     return showDialog<void>(
       context: context,
+      useRootNavigator: false,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext aContext) {
         return AlertDialog(
@@ -839,20 +839,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             FlatButton(
               child: Text('Hủy bỏ'),
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.pop(context);
               },
             ),
             FlatButton(
               child: Text('Xác nhận'),
               onPressed: () {
                 if (_formKey.currentState.validate()) {
+                  Navigator.pop(context);
                   BookingBlocModel booking = BookingBlocModel(
                       id: bookingObj.id,
                       customerCanceledReason: _reasonTextController.text,
                       photographer:
                           Photographer(id: bookingObj.photographer.id),
                       package: bookingObj.package);
-                  _bookingBloc.add(BookingEventCancel(booking: booking));
+                  BlocProvider.of<BookingBloc>(context)
+                      .add(BookingEventCancel(booking: booking));
                 }
               },
             ),
@@ -878,6 +880,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   void testDialog(String name) async {
     return showDialog<void>(
       context: context,
+      useRootNavigator: false,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext aContext) {
         return AlertDialog(
@@ -909,7 +912,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   void initState() {
     super.initState();
     _completer = Completer<void>();
-    _bookingBloc = BookingBloc(bookingRepository: _bookingRepository);
     _loadBookingDetail();
     getCurrentLocation();
   }
@@ -1378,6 +1380,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             child: BlocBuilder<BookingBloc, BookingState>(
               builder: (context, bookingState) {
                 if (bookingState is BookingDetailStateSuccess) {
+                  widget.isEdited(true);
                   bookingObj = bookingState.booking;
                   if (bookingState.booking == null) {
                     return Text(

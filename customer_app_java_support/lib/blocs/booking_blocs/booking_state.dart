@@ -23,15 +23,15 @@ class BookingDetailStateSuccess extends BookingState {
 }
 
 class BookingStateCreatedSuccess extends BookingState {
-  final bool isSuccess;
-  BookingStateCreatedSuccess({@required this.isSuccess});
+  final int bookingId;
+  BookingStateCreatedSuccess({@required this.bookingId});
 
   @override
-  List<Object> get props => [isSuccess];
+  List<Object> get props => [bookingId];
 
   @override
   String toString() =>
-      'BookingStateCreatedSuccess { Booking Created: $isSuccess }';
+      'BookingStateCreatedSuccess { Booking Created: $bookingId }';
 }
 
 class BookingStateEditedSuccess extends BookingState {

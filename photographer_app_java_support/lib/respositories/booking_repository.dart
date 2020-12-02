@@ -73,7 +73,7 @@ class BookingRepository {
       HttpHeaders.authorizationHeader: 'Bearer ' +
           'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
     });
-    print(baseUrl+extendUrl);
+    print(baseUrl + extendUrl);
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['bookings'] as List;
@@ -184,6 +184,20 @@ class BookingRepository {
             fullname: tempCustomer['fullname'],
             phone: tempCustomer['phone'],
             avatar: tempCustomer['avatar']);
+
+        final tempTimeAndLocations = booking['timeLocationDetails'] as List;
+
+        final List<TimeAndLocationBlocModel> listTimeAndLocations =
+            tempTimeAndLocations.map((item) {
+          return TimeAndLocationBlocModel(
+              id: item['id'],
+              start: item['start'],
+              end: item['end'],
+              formattedAddress: item['formattedAddress'],
+              latitude: item['lat'],
+              longitude: item['lon']);
+        }).toList();
+
         return BookingBlocModel(
           id: booking['id'],
           status: booking['bookingStatus'],
@@ -195,6 +209,7 @@ class BookingRepository {
           price: booking['price'] ?? 0,
           location: booking['location'] ?? '',
           customer: customer,
+          listTimeAndLocations: listTimeAndLocations,
         );
       }).toList();
       print('Tất cả các bookings $bookings');
@@ -235,6 +250,19 @@ class BookingRepository {
       for (final service in tempServices) {
         services.add(service['name']);
       }
+
+      final tempTimeAndLocations = data['timeLocationDetails'] as List;
+
+      final List<TimeAndLocationBlocModel> listTimeAndLocations =
+          tempTimeAndLocations.map((item) {
+        return TimeAndLocationBlocModel(
+            id: item['id'],
+            start: item['start'],
+            end: item['end'],
+            formattedAddress: item['formattedAddress'],
+            latitude: item['lat'],
+            longitude: item['lon']);
+      }).toList();
       final booking = BookingBlocModel(
         id: data['id'],
         status: data['bookingStatus'],
@@ -252,6 +280,10 @@ class BookingRepository {
         location: data['location'] ?? '',
         commentDate: data['commentDate'],
         customer: customer,
+        isMultiday: data['servicePackage']['supportMultiDays'],
+        editDeadLine: data['editDeadline'],
+        returningType: data['returningType']['id'],
+        listTimeAndLocations: listTimeAndLocations,
         services: services ?? [],
         packageDescription: data['servicePackage']['description'] ?? '',
         package: package ?? [],

@@ -10,8 +10,8 @@ import 'package:photographer_app_java_support/screens/history_screens/booking_de
 
 class UpComSlidable extends StatefulWidget {
   final List<BookingBlocModel> blocPendingBookings;
-
-  const UpComSlidable({this.blocPendingBookings});
+  final Function(bool) isEdited;
+  const UpComSlidable({this.blocPendingBookings, this.isEdited});
   @override
   _UpComSlidableState createState() => _UpComSlidableState();
 }
@@ -44,10 +44,6 @@ class _UpComSlidableState extends State<UpComSlidable> {
       text,
       style: TextStyle(color: color, fontWeight: FontWeight.bold),
     );
-  }
-
-  _loadBookings() async {
-    BlocProvider.of<BookingBloc>(context).add(BookingEventFetchByStatusPending());
   }
 
   @override
@@ -85,6 +81,9 @@ class _UpComSlidableState extends State<UpComSlidable> {
                           create: (context) => BookingBloc(
                               bookingRepository: _bookingRepository),
                           child: BookingDetailScreen(
+                            onCheckIfEdited: (bool isEdited) {
+                              widget.isEdited(isEdited);
+                            },
                             bookingId: pendingBooking.id,
                           ),
                         );
@@ -120,7 +119,7 @@ class _UpComSlidableState extends State<UpComSlidable> {
                         Container(
                           width: 120.0,
                           child: Text(
-                            'Chụp ảnh',
+                            'Yêu cầu từ ${pendingBooking.customer.fullname}',
                             style: TextStyle(
                               fontSize: 18.0,
                               fontWeight: FontWeight.w600,
@@ -143,41 +142,6 @@ class _UpComSlidableState extends State<UpComSlidable> {
                       ],
                     ),
                     SizedBox(height: 10.0),
-                    Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 10.0),
-                          child: Icon(
-                            Icons.person,
-                            size: 15,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            right: 10.0,
-                          ),
-                          child: Text(
-                            'Khách hàng:',
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: Text(
-                            pendingBooking.customer.fullname,
-                            style: TextStyle(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5.0),
                     Row(
                       children: [
                         Padding(
@@ -239,10 +203,18 @@ class _UpComSlidableState extends State<UpComSlidable> {
                         Padding(
                           padding: EdgeInsets.only(right: 10),
                           child: Text(
-                            pendingBooking.startDate == null
+                            pendingBooking.listTimeAndLocations.isEmpty
                                 ? ''
-                                : DateFormat('dd/MM/yyyy hh:mm a').format(
-                                    DateTime.parse(pendingBooking.startDate)),
+                                : pendingBooking.listTimeAndLocations.length > 1
+                                    ? 'Nhiều mốc thời gian'
+                                    : pendingBooking.listTimeAndLocations[0] ==
+                                            null
+                                        ? ''
+                                        : DateFormat('dd/MM/yyyy HH:mm a')
+                                            .format(DateTime.parse(
+                                                pendingBooking
+                                                    .listTimeAndLocations[0]
+                                                    .start)),
                             style: TextStyle(
                               color: Colors.grey,
                             ),
@@ -279,7 +251,18 @@ class _UpComSlidableState extends State<UpComSlidable> {
                           child: Padding(
                             padding: EdgeInsets.only(right: 10),
                             child: Text(
-                              pendingBooking.location,
+                              pendingBooking.listTimeAndLocations.isEmpty
+                                  ? ''
+                                  : pendingBooking.listTimeAndLocations.length >
+                                          1
+                                      ? 'Nhiều địa điểm'
+                                      : pendingBooking
+                                                  .listTimeAndLocations[0] ==
+                                              null
+                                          ? ''
+                                          : pendingBooking
+                                              .listTimeAndLocations[0]
+                                              .formattedAddress,
                               style: TextStyle(
                                 color: Colors.grey,
                               ),

@@ -34,12 +34,13 @@ class _DatePickerState extends State<DatePicker> {
   @override
   void initState() {
     super.initState();
-    controller = CalendarController();
     _selectedDateTime = widget.lastDay;
+
+    print(widget.lastDay);
+    controller = CalendarController();
   }
 
   bool _predicate(DateTime day) {
-    DateFormat dateFormat = DateFormat('yyyy/MM/dd');
     if ((day.isAfter(widget.lastDay))) {
       return true;
     }
@@ -49,7 +50,8 @@ class _DatePickerState extends State<DatePicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      
+      body: ListView(
         children: [
           Align(
             alignment: Alignment.centerLeft,
@@ -91,6 +93,7 @@ class _DatePickerState extends State<DatePicker> {
               borderRadius: BorderRadius.circular(15.0),
               child: TableCalendar(
                 onDaySelected: _onDaySelected,
+                initialSelectedDay: _selectedDateTime,
                 holidays: _holidays,
                 locale: 'vi_VN',
                 calendarController: controller,
@@ -183,25 +186,30 @@ class _DatePickerState extends State<DatePicker> {
             ],
           ),
           SizedBox(height: 30.0),
-          RaisedButton(
-            onPressed: () {
-              widget.onSelecParam(_selectedDateTime);
-              Navigator.pop(context,
-                  '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
-            },
-            textColor: Colors.white,
-            color: Theme.of(context).primaryColor,
-            padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 100.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Text(
-              'Xác nhận',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: RaisedButton(
+              onPressed: () {
+                widget.onSelecParam(_selectedDateTime);
+                Navigator.pop(context,
+                    '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
+              },
+              textColor: Colors.white,
+              color: Theme.of(context).primaryColor,
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 100.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Text(
+                'Xác nhận',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
+          SizedBox(height: 30.0),
         ],
       ),
     );
   }
+
 }

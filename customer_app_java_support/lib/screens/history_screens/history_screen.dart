@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/shared/list_booking_loading.dart';
 import 'package:customer_app_java_support/widgets/history_screen/booking_widget.dart';
 import 'package:customer_app_java_support/widgets/history_screen/customshapeclipper.dart';
 import 'package:customer_app_java_support/widgets/history_screen/drop_menu_history.dart';
@@ -52,13 +53,9 @@ class _BookHistoryState extends State<BookHistory> {
 
   FutureOr onGoBack(dynamic value) {
     if (isBookingEdited) {
-      _loadBookings();
+      _loadBookingsByPaging(statusForFilter);
       setState(() {});
     }
-  }
-
-  _loadBookings() async {
-    BlocProvider.of<BookingBloc>(context).add(BookingEventFetch());
   }
 
   _restartEvent() async {
@@ -83,6 +80,8 @@ class _BookHistoryState extends State<BookHistory> {
               } else {
                 return RefreshIndicator(
                   onRefresh: () {
+                    BlocProvider.of<BookingBloc>(context)
+                        .add(BookingRestartEvent());
                     _loadBookingsByPaging(statusForFilter);
                     return _completer.future;
                   },
@@ -92,6 +91,9 @@ class _BookHistoryState extends State<BookHistory> {
                       hasReachedEnd: bookingState.hasReachedEnd,
                       blocBookings: bookingState.bookings,
                       onGoBack: onGoBack,
+                      isEdited: (bool isEdit) {
+                        isBookingEdited = isEdit;
+                      },
                     ),
                   ),
                 );
@@ -99,99 +101,7 @@ class _BookHistoryState extends State<BookHistory> {
             }
 
             if (bookingState is BookingStateLoading) {
-              return Shimmer.fromColors(
-                period: Duration(milliseconds: 1100),
-                baseColor: Colors.grey[300],
-                highlightColor: Colors.grey[500],
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-                  width: double.infinity,
-                  child: ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: 3,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.all(10.0),
-                        width: double.infinity,
-                        height: 160.0,
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black26,
-                                        offset: Offset(0.0, 2.0),
-                                        blurRadius: 6.0)
-                                  ]),
-                              child: Stack(
-                                children: <Widget>[
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            Colors.grey[400],
-                                            Colors.grey[300],
-                                          ], // whitish to gray
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(1.0),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 15.0,
-                                    bottom: 15.0,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[400],
-                                            borderRadius:
-                                                BorderRadius.circular(1.0),
-                                          ),
-                                          width: 100,
-                                          height: 24,
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[400],
-                                                borderRadius:
-                                                    BorderRadius.circular(1.0),
-                                              ),
-                                              width: 35,
-                                              height: 15,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
+              return ListBookingLoadingWidget();
             }
 
             if (bookingState is BookingStateFailure) {

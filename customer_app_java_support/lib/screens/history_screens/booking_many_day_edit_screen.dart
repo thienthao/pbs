@@ -57,6 +57,8 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
   String endDate = '';
   String editDeadLine = '';
   String startDate = '';
+
+  
   List<PackageBlocModel> listPackages = List<PackageBlocModel>();
 
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
@@ -340,7 +342,7 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                     return CircularProgressIndicator();
                   }
                 },
-                child: Text(''),
+                child: SizedBox(),
               ),
               //////////gói dịch vụ
               _buildPackage(),

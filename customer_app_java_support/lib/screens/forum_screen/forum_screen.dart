@@ -29,9 +29,6 @@ class _ForumPageState extends State<ForumPage>
       child: Text('Xu hướng thảo luận'),
     ),
     Tab(
-      child: Text('Gần đây nhất'),
-    ),
-    Tab(
       child: Text('Danh mục'),
     ),
     Tab(
@@ -174,26 +171,6 @@ class ForumBody extends StatelessWidget {
                             builder: (_) => ForumDetail(
                                 thread: thread,
                                 threadRepository: threadRepository),
-                          ),
-                        ),
-                        child: listThread(state.threads[index]),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  child: ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemCount: state.threads.length,
-                    itemBuilder: (context, index) {
-                      Thread thread = state.threads[index];
-                      return InkWell(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ForumDetail(
-                              thread: thread,
-                            ),
                           ),
                         ),
                         child: listThread(state.threads[index]),
