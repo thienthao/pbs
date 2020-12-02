@@ -5,7 +5,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-
 </head>
 <body>
 
@@ -40,26 +39,25 @@
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
-                            <table id="example4" class="table table-bordered table-hover">
+                            <table id="example2" class="table table-bordered table-hover">
                                 <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Type</th>
+                                    <th>Topic</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <th:block th:each="returningType :${returningTypes}">
+                                <th:block th:each="topic :${topics}">
                                     <tr>
-                                        <td><span th:text="${returningType.id}">No</span></td>
-                                        <td><span th:text="${returningType.type}">Category</span></td>
-                                        <td><span><a th:href="@{/admin/returningTypes/{returningTypeId}/edit(returningTypeId=${returningType.id})}">Edit</a></span></td>
+                                        <td><span th:text="${topic.id}">No</span></td>
+                                        <td><span th:text="${topic.topic}">Title</span></td>
                                     </tr>
                                 </th:block>
                                 </tbody>
                                 <tfoot>
                                 <tr>
                                     <th>No</th>
-                                    <th>Type</th>
+                                    <th>Topic</th>
                                 </tr>
                                 </tfoot>
                             </table>
@@ -75,6 +73,29 @@
         <!-- /.container-fluid -->
     </section>
     <!-- /.content -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="icon-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Drop icon image here</h4>
+                    <button id="close" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form class="category-icon-form">
+                    <div class="modal-body">
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="input-file-now" class="file-upload" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button id="file-modal-save" type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 </div>
 </body>

@@ -17,3 +17,7 @@
 - update lai photographer album link (kem` ca? security)
 https://pbs-webapi.herokuapp.com/api/categories/1/download
 https://pbs-webapi.herokuapp.com/api/photographers/{id}/download
+
+
+-------------------------
+- booking by status dùng startDate -> sai

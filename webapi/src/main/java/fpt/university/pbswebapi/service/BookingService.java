@@ -2,15 +2,13 @@ package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.dto.NotiRequest;
-import fpt.university.pbswebapi.entity.Booking;
-import fpt.university.pbswebapi.entity.BookingComment;
-import fpt.university.pbswebapi.entity.EBookingStatus;
-import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CommentRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +33,27 @@ public class BookingService {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.fcmService = fcmService;
+    }
+
+    public Booking checkDistance(Booking booking) {
+        //query booking trong vong 1 ngay truoc va 1 ngay sau
+        // vidu ngay` 25
+        try {
+            // lay bien thoi gian dau vo
+            // TH1: booking 1 ngay
+            if(booking.getServicePackage().getSupportMultiDays()) {
+                TimeLocationDetail timeLocationDetail = booking.getTimeLocationDetails().get(0);
+                String fromStr = timeLocationDetail.toString();
+                String toStr = timeLocationDetail.toString();
+            } else {
+
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        // t = S / v
+        // neu t < thoi gian tu bay gio cho toi thoi diem dat hen
+        return null;
     }
 
     public Booking book(Booking booking) {
