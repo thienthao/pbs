@@ -37,10 +37,16 @@ class _CalendarShowState extends State<CalendarShow> {
     controller = CalendarController();
 
     for (String day in widget.photographerDays.bookedDays) {
-      _events[DateTime.parse(day)] = [day];
+      if(day != 'null') {
+        _events[DateTime.parse(day)] = [day];
+      }
+
     }
     for (String day in widget.photographerDays.busyDays) {
-      _holidays[DateTime.parse(day)] = [day];
+      if (day != 'null') {
+        _holidays[DateTime.parse(day)] = [day];
+      }
+
     }
   }
 
