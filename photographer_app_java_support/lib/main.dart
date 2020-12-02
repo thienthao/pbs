@@ -43,7 +43,6 @@ class _AppState extends State<App> {
     _pushNotificationService.init();
     super.initState();
     Firebase.initializeApp().whenComplete(() {
-      print("completed");
       setState(() {});
     });
   }

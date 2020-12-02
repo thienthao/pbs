@@ -4,9 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photographer_app_java_support/blocs/register_blocs/register_bloc.dart';
+import 'package:photographer_app_java_support/screens/sign_up_screen.dart';
 import '../blocs/authen_blocs/authen_export.dart';
 
 class LoginScreen extends StatefulWidget {
+  final UserRepository userRepository;
+
+  LoginScreen({@required this.userRepository});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -349,7 +355,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BlocProvider(
+                                        create: (context) => RegisterBloc(
+                                            userRepository:
+                                                widget.userRepository),
+                                        child: SignUpScreen(),
+                                      ),
+                                    ));
+                              },
                               child: RichText(
                                 text: TextSpan(
                                   children: [
