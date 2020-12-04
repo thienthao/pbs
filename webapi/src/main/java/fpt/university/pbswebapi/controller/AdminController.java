@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 @RequestMapping("/admin")
@@ -40,7 +41,7 @@ public class AdminController {
 
     @RequestMapping({"/dashboard", "/"})
     public String dashboard(Model model) {
-        return "admin/dashboard";
+        return "admin-rework/index";
     }
 
     @RequestMapping("/users/add")
@@ -51,7 +52,7 @@ public class AdminController {
     @RequestMapping("/users")
     public String userList(Model model) {
         model.addAttribute("users", userRepository.findAll());
-        return "admin/user-list";
+        return "admin-rework/user-list";
     }
 
     @GetMapping(value = {"/users/{userId}/edit"})
@@ -64,7 +65,7 @@ public class AdminController {
         }
         model.addAttribute("add", false);
         model.addAttribute("user", user);
-        return "admin/user-edit";
+        return "admin-rework/user-detail";
     }
 
     @PostMapping(value = {"/users/{userId}/block"})
@@ -102,7 +103,7 @@ public class AdminController {
     @RequestMapping("/returningTypes")
     public String returningTypeList(Model model) {
         model.addAttribute("returningTypes", returningTypeRepository.findAll());
-        return "admin/returning-type";
+        return "admin-rework/returning-list";
     }
 
     @GetMapping(value = {"/returningTypes/{returningTypeId}/edit"})
@@ -121,7 +122,7 @@ public class AdminController {
     @RequestMapping("/categories")
     public String categoriesList(Model model) {
         model.addAttribute("categories", categoryRepository.findAll());
-        return "admin/category-list";
+        return "admin-rework/category-list";
     }
 
     @RequestMapping("/categories/add")
@@ -130,15 +131,66 @@ public class AdminController {
         return "admin/category-add";
     }
 
+//    @GetMapping("/threads")
+//    public String showThreadsPage(Model model) {
+//        model.addAttribute("threads", threadService.all());
+//        return "admin-rework/thread-list";
+//    }
+
     @GetMapping("/threads")
-    public String showThreadsPage(Model model) {
+    public String showThreadsPage1(Model model) {
         model.addAttribute("threads", threadService.all());
-        return "admin/thread-list";
+        return "admin-rework/thread-list-1";
+    }
+
+    @GetMapping("/threads/{id}")
+    public String showThreadDetail(Model model, @PathVariable long id) {
+        model.addAttribute("thread", threadService.findById(id));
+        return "admin-rework/thread-detail";
+    }
+
+    @GetMapping("/threads/add")
+    public String showAddThreadPage(Model model) {
+        model.addAttribute("threads", threadService.all());
+        model.addAttribute("topic", threadService.allTopics());
+        return "admin-rework/thread-add";
     }
 
     @GetMapping("/threads/topics")
     public String showThreadTopicsPage(Model model) {
         model.addAttribute("topics", threadService.allTopics());
-        return "admin/topic-list";
+        return "admin-rework/topic-list";
+    }
+
+    @GetMapping(value = {"/threads/{threadId}/ban"})
+    public RedirectView banThread(
+            Model model, @PathVariable long threadId) {
+        try {
+            threadService.banThread(threadId);
+            String uri = "/admin/threads/" + threadId;
+            model.addAttribute("errorMessage", "Blocked");
+            return new RedirectView(uri);
+        } catch (Exception ex) {
+            String errorMessage = ex.getMessage();
+            logger.error(errorMessage);
+            model.addAttribute("errorMessage", errorMessage);
+            return new RedirectView("/admin/threads");
+        }
+    }
+
+    @GetMapping(value = {"/threads/{threadId}/unban"})
+    public RedirectView  unbanThread(
+            Model model, @PathVariable long threadId) {
+        try {
+            threadService.unbanThread(threadId);
+            String uri = "/admin/threads/" + threadId;
+            model.addAttribute("errorMessage", "Blocked");
+            return new RedirectView(uri);
+        } catch (Exception ex) {
+            String errorMessage = ex.getMessage();
+            logger.error(errorMessage);
+            model.addAttribute("errorMessage", errorMessage);
+            return new RedirectView("/admin/threads");
+        }
     }
 }
