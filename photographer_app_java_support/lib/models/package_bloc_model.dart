@@ -1,3 +1,4 @@
+import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/models/service_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 
@@ -8,11 +9,17 @@ class PackageBlocModel extends Equatable {
   final String description;
   final bool supportMultiDays;
   final List<ServiceBlocModel> serviceDtos;
+  final CategoryBlocModel category;
 
   const PackageBlocModel(
-      {this.id, this.name, this.description, this.price, this.supportMultiDays, this.serviceDtos});
+      {this.id,
+      this.name,
+      this.description,
+      this.price,
+      this.supportMultiDays,
+      this.serviceDtos,
+      this.category});
 
   @override
   List<Object> get props => [id, name, description, price, serviceDtos];
-
 }

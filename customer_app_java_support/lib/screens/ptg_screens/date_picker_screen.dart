@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-// ignore: must_be_immutable
 class DatePicker extends StatefulWidget {
-  Function(DateTime) onSelecParam;
-  DatePicker({
-    this.onSelecParam,
-  });
+  final DateTime lastDay;
+  final Function(DateTime) onSelecParam;
+  DatePicker({this.onSelecParam, this.lastDay});
   @override
   _DatePickerState createState() => _DatePickerState();
 }
@@ -17,15 +15,9 @@ class DatePicker extends StatefulWidget {
 class _DatePickerState extends State<DatePicker> {
   CalendarController controller;
   TimeOfDay _time = TimeOfDay.now();
-  DateTime _selectedDateTime = DateTime.now();
+  DateTime _selectedDateTime = DateTime.now().toLocal();
 
-  final Map<DateTime, List> _holidays = {
-    DateTime(2020, 10, 1): ['New Year\'s Day'],
-    DateTime(2020, 10, 6): ['Epiphany'],
-    DateTime(2020, 10, 15): ['Valentine\'s Day'],
-    DateTime(2020, 10, 21): ['Easter Sunday'],
-    DateTime(2020, 10, 22): ['Easter Monday'],
-  };
+  final Map<DateTime, List> _holidays = {};
 
   void onTimeChanged(TimeOfDay newTime) {
     setState(() {
@@ -34,7 +26,6 @@ class _DatePickerState extends State<DatePicker> {
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {
-    print('CALLBACK: _onDaySelected');
     setState(() {
       _selectedDateTime = day;
     });
@@ -43,22 +34,15 @@ class _DatePickerState extends State<DatePicker> {
   @override
   void initState() {
     super.initState();
+    _selectedDateTime = widget.lastDay;
+
+    print(widget.lastDay);
     controller = CalendarController();
   }
 
   bool _predicate(DateTime day) {
-    DateFormat dateFormat = DateFormat('yyyy/MM/dd');
-    print(dateFormat
-        .format(day)
-        .compareTo(dateFormat.format(DateTime.parse('2020-11-20 20:18:04Z'))));
-    if ((day.isAfter(DateTime.now()))) {
-      if (dateFormat.format(day).compareTo(
-              dateFormat.format(DateTime.parse('2020-11-20 20:18:04Z'))) ==
-          0) {
-        return false;
-      } else {
-        return true;
-      }
+    if ((!day.isBefore(widget.lastDay))) {
+      return true;
     }
     return false;
   }
@@ -66,7 +50,8 @@ class _DatePickerState extends State<DatePicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      
+      body: ListView(
         children: [
           Align(
             alignment: Alignment.centerLeft,
@@ -108,6 +93,7 @@ class _DatePickerState extends State<DatePicker> {
               borderRadius: BorderRadius.circular(15.0),
               child: TableCalendar(
                 onDaySelected: _onDaySelected,
+                initialSelectedDay: _selectedDateTime,
                 holidays: _holidays,
                 locale: 'vi_VN',
                 calendarController: controller,
@@ -200,25 +186,30 @@ class _DatePickerState extends State<DatePicker> {
             ],
           ),
           SizedBox(height: 30.0),
-          RaisedButton(
-            onPressed: () {
-              widget.onSelecParam(_selectedDateTime);
-              Navigator.pop(context,
-                  '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
-            },
-            textColor: Colors.white,
-            color: Theme.of(context).primaryColor,
-            padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 100.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Text(
-              'Xác nhận',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: RaisedButton(
+              onPressed: () {
+                widget.onSelecParam(_selectedDateTime);
+                Navigator.pop(context,
+                    '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
+              },
+              textColor: Colors.white,
+              color: Theme.of(context).primaryColor,
+              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 100.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Text(
+                'Xác nhận',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
+          SizedBox(height: 30.0),
         ],
       ),
     );
   }
+
 }

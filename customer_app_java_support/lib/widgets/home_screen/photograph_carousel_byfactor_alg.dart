@@ -1,9 +1,11 @@
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/album_respository.dart';
+import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:customer_app_java_support/respositories/package_repository.dart';
 import 'package:customer_app_java_support/respositories/photographer_respository.dart';
@@ -32,6 +34,8 @@ class _PhotographCarouselByFactorAlgState
       PackageRepository(httpClient: http.Client());
   CommentRepository _commentRepository =
       CommentRepository(httpClient: http.Client());
+  CalendarRepository _calendarRepository =
+      CalendarRepository(httpClient: http.Client());
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -141,6 +145,12 @@ class _PhotographCarouselByFactorAlgState
                                 commentRepository: _commentRepository)
                               ..add(CommentByPhotographerIdEventFetch(
                                   id: photographer.id)),
+                          ),
+                          BlocProvider(
+                            create: (context) => CalendarBloc(
+                                calendarRepository: _calendarRepository)
+                              ..add(CalendarEventPhotographerDaysFetch(
+                                  ptgId: photographer.id)),
                           ),
                         ],
                         child: CustomerPhotographerDetail(

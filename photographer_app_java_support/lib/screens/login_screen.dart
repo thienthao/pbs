@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       contentPadding:
                                           EdgeInsets.only(top: 14.0),
                                       prefixIcon: Icon(
-                                        Icons.supervised_user_circle,
+                                        Icons.person,
                                         color: Color(0xFFF67062),
                                       ),
                                       hintText: 'Tên đăng nhập của bạn',

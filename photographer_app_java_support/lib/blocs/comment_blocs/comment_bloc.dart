@@ -6,6 +6,7 @@ import 'comment_state.dart';
 
 class CommentBloc extends Bloc<CommentEvent, CommentState> {
   final CommentRepository commentRepository;
+
   CommentBloc({
     @required this.commentRepository,
   })  : assert(commentRepository != null),
@@ -16,6 +17,8 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     if (commentEvent is CommentEventFetch) {
     } else if (commentEvent is CommentByPhotographerIdEventFetch) {
       yield* _mapCommentsByPhotographerIdLoadedToState(commentEvent.id);
+    } else if (commentEvent is CommentByBookingIdEventFetch) {
+      yield* _mapCommentsByBookingIdLoadedToState(commentEvent.id);
     } else if (commentEvent is CommentEventLoadSuccess) {
     } else if (commentEvent is CommentEventRequested) {
     } else if (commentEvent is CommentEventRefresh) {}
@@ -26,6 +29,15 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     try {
       final comments =
           await this.commentRepository.getCommentByPhotographerId(id);
+      yield CommentStateSuccess(comments: comments);
+    } catch (_) {
+      yield CommentStateFailure();
+    }
+  }
+
+  Stream<CommentState> _mapCommentsByBookingIdLoadedToState(int id) async* {
+    try {
+      final comments = await this.commentRepository.getCommentByBookingId(id);
       yield CommentStateSuccess(comments: comments);
     } catch (_) {
       yield CommentStateFailure();

@@ -27,38 +27,39 @@ class BookingBlocModel extends Equatable {
   final Photographer photographer;
   final int returningType;
   final bool isMultiday;
+  final String editDeadLine;
   final CustomerBlocModel customer;
   final PackageBlocModel package;
   final List<TimeAndLocationBlocModel> listTimeAndLocations;
   final List<String> services;
 
-  BookingBlocModel({
-    this.id,
-    this.status,
-    this.startDate,
-    this.endDate,
-    this.serviceName,
-    this.price,
-    this.createdAt,
-    this.updatedAt,
-    this.customerCanceledReason,
-    this.photographerCanceledReason,
-    this.rejectedReason,
-    this.rating,
-    this.comment,
-    this.location,
-    this.latitude,
-    this.longitude,
-    this.commentDate,
-    this.packageDescription,
-    this.photographer,
-    this.customer,
-    this.package,
-    this.services,
-    this.returningType,
-    this.isMultiday,
-    this.listTimeAndLocations,
-  });
+  BookingBlocModel(
+      {this.id,
+      this.status,
+      this.startDate,
+      this.endDate,
+      this.serviceName,
+      this.price,
+      this.createdAt,
+      this.updatedAt,
+      this.customerCanceledReason,
+      this.photographerCanceledReason,
+      this.rejectedReason,
+      this.rating,
+      this.comment,
+      this.location,
+      this.latitude,
+      this.longitude,
+      this.commentDate,
+      this.packageDescription,
+      this.photographer,
+      this.customer,
+      this.package,
+      this.services,
+      this.returningType,
+      this.isMultiday,
+      this.listTimeAndLocations,
+      this.editDeadLine});
 
   @override
   List<Object> get props {

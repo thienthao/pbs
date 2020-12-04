@@ -16,24 +16,18 @@ class CommentByPhotographerIdEventFetch extends CommentEvent {
   CommentByPhotographerIdEventFetch({@required this.id});
 }
 
+class CommentByBookingIdEventFetch extends CommentEvent {
+  final int id;
+  CommentByBookingIdEventFetch({@required this.id});
+}
+
 class CommentEventLoadSuccess extends CommentEvent {
   CommentEventLoadSuccess(List<CommentBlocModel> list);
 }
 
-class CommentEventRequested extends CommentEvent {
+class CommentEventPost extends CommentEvent {
   final CommentBlocModel comment;
-  CommentEventRequested({
-    @required this.comment,
-  }) : assert(comment != null);
-  @override
-  List<Object> get props => [comment];
+  CommentEventPost({this. comment});
 }
 
-class CommentEventRefresh extends CommentEvent {
-  final CommentBlocModel comment;
-  CommentEventRefresh({
-    @required this.comment,
-  }) : assert(comment != null);
-  @override
-  List<Object> get props => [comment];
-}
+

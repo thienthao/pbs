@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/comment_blocs/comment_bloc.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/booking_repository.dart';
+import 'package:photographer_app_java_support/respositories/comment_repository.dart';
 import 'package:photographer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 
 class BookingWidget extends StatefulWidget {
@@ -28,6 +30,7 @@ class BookingWidget extends StatefulWidget {
 class _BookingWidgetState extends State<BookingWidget> {
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  CommentRepository _commentRepository = CommentRepository(httpClient: http.Client());
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -107,6 +110,9 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 BlocProvider(
                                     create: (context) => BookingBloc(
                                         bookingRepository: _bookingRepository)),
+                                BlocProvider(
+                                    create: (context) => CommentBloc(
+                                        commentRepository: _commentRepository)),
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,
@@ -144,7 +150,7 @@ class _BookingWidgetState extends State<BookingWidget> {
                             Container(
                               width: 120.0,
                               child: Text(
-                                'Chụp ảnh với ${booking.customer.fullname} ${booking.id}',
+                                'Chụp ảnh với ${booking.customer.fullname}',
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.w600,
@@ -167,44 +173,6 @@ class _BookingWidgetState extends State<BookingWidget> {
                           ],
                         ),
                         SizedBox(height: 10.0),
-                        Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 10.0),
-                              child: Icon(
-                                Icons.timer,
-                                size: 15,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                right: 10.0,
-                              ),
-                              child: Text(
-                                'Thời gian:',
-                                style: TextStyle(
-                                  fontSize: 15.0,
-                                  color: Colors.black54,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: Text(
-                                booking.startDate == null
-                                    ? ''
-                                    : DateFormat('dd/MM/yyyy hh:mm a').format(
-                                        DateTime.parse(booking.startDate)),
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5.0),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -246,6 +214,51 @@ class _BookingWidgetState extends State<BookingWidget> {
                         ),
                         SizedBox(height: 5.0),
                         Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: 10.0),
+                              child: Icon(
+                                Icons.timer,
+                                size: 15,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                right: 10.0,
+                              ),
+                              child: Text(
+                                'Thời gian:',
+                                style: TextStyle(
+                                  fontSize: 15.0,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: Text(
+                                booking.listTimeAndLocations.isEmpty
+                                    ? ''
+                                    : booking.listTimeAndLocations.length > 1
+                                        ? 'Nhiều mốc thời gian'
+                                        : booking.listTimeAndLocations[0] ==
+                                                null
+                                            ? ''
+                                            : DateFormat('dd/MM/yyyy HH:mm a')
+                                                .format(DateTime.parse(booking
+                                                    .listTimeAndLocations[0]
+                                                    .start)),
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5.0),
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
@@ -273,9 +286,15 @@ class _BookingWidgetState extends State<BookingWidget> {
                               child: Padding(
                                 padding: EdgeInsets.only(right: 10),
                                 child: Text(
-                                  booking.location == null
+                                  booking.listTimeAndLocations.isEmpty
                                       ? ''
-                                      : booking.location,
+                                      : booking.listTimeAndLocations.length > 1
+                                          ? 'Nhiều địa điểm'
+                                          : booking.listTimeAndLocations[0] ==
+                                                  null
+                                              ? ''
+                                              : booking.listTimeAndLocations[0]
+                                                  .formattedAddress,
                                   style: TextStyle(
                                     color: Colors.grey,
                                   ),

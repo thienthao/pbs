@@ -1,28 +1,103 @@
+import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/models/comment_bloc_model.dart';
 import 'package:customer_app_java_support/screens/rating_screen/backgroundColorTween.dart';
 import 'package:customer_app_java_support/screens/rating_screen/flare_controller.dart';
 import 'package:customer_app_java_support/screens/rating_screen/slider_painter.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flare_flutter/flare_actor.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 enum SlideState { Worst, Bad, OK, Good, Excellent }
 
 class RatingScreen extends StatefulWidget {
+  final int bookingId;
+  final Function(bool) onRatingSuccess;
+  const RatingScreen({this.bookingId, this.onRatingSuccess});
+
   @override
   _RatingScreenState createState() => _RatingScreenState();
 }
 
 class _RatingScreenState extends State<RatingScreen>
     with SingleTickerProviderStateMixin {
+  TextEditingController _commentTextController = TextEditingController();
   FlareRateController _flareRateController;
   AnimationController _controller;
   double sliderWidth = 340;
   double sliderHeight = 50;
   double _dragPercent = 0.0;
+  double rating = 0.0;
+
+  _postComment() async {
+    CommentBlocModel _comment = CommentBlocModel(
+        bookingId: widget.bookingId,
+        cusId: 2,
+        rating: rating,
+        comment: _commentTextController.text,
+        createdAt:
+            DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(DateTime.now()));
+    print('${_comment.bookingId} ${_comment.cusId} '
+        ' ${_comment.rating} '
+        ' ${_comment.comment} '
+        ' ${_comment.createdAt}');
+    BlocProvider.of<CommentBloc>(context)
+        .add(CommentEventPost(comment: _comment));
+  }
 
   SlideState slideState = SlideState.Worst;
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext aContext) {
+        return AlertDialog(
+          title: Text('Ý kiến của bạn',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
+                  child: TextFormField(
+                    controller: _commentTextController,
+                    cursorColor: Color(0xFFF77474),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: 6,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Nhập ý kiến của bạn...'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Hủy bỏ'),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Xác nhận'),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void updateDragPosition(Offset offset) {
     setState(() {
@@ -31,16 +106,21 @@ class _RatingScreenState extends State<RatingScreen>
 
       if (_dragPercent >= 0 && _dragPercent < .2) {
         slideState = SlideState.Worst;
+        rating = 1.0;
         _controller.forward(from: 0.0);
       } else if (_dragPercent >= .2 && _dragPercent < .4) {
         slideState = SlideState.Bad;
+        rating = 2.0;
         _controller.stop();
       } else if (_dragPercent >= .4 && _dragPercent < .6) {
         slideState = SlideState.OK;
+        rating = 3.0;
       } else if (_dragPercent >= .6 && _dragPercent < .8) {
         slideState = SlideState.Good;
+        rating = 4.0;
       } else if (_dragPercent >= .8) {
         slideState = SlideState.Excellent;
+        rating = 5.0;
       }
       print(slideState);
     });
@@ -140,33 +220,54 @@ class _RatingScreenState extends State<RatingScreen>
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    return AnimatedContainer(
-      duration: Duration(seconds: 1),
-      color: backgroundTween.evaluate(AlwaysStoppedAnimation(_dragPercent)),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            _buildAppBar(),
-            _buildHeaderText(),
-            SizedBox(
-              height: 50.h,
-            ),
-            _buildTitle(),
-            SizedBox(
-              height: 50.h,
-            ),
-            _buildFlareActor(),
-            SizedBox(
-              height: 50.h,
-            ),
-            _buildSlider(),
-            SizedBox(
-              height: 5.h,
-            ),
-            _buildBottom(),
-          ],
+    return BlocListener<CommentBloc, CommentState>(
+      listener: (context, state) {
+        if (state is CommentStateLoading) {
+          popNotice(context);
+        }
+
+        if (state is CommentStateFailure) {
+          removeNotice(context);
+          popUp(context, 'Bình luận',
+              'Bình luận thất bại, bình luận của bạn sẽ không được hiển thị');
+        }
+        if (state is CommentStatePostedSuccess) {
+          widget.onRatingSuccess(true);
+          removeNotice(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pop(context);
+          });
+          popUp(context, 'Bình luận', 'Bình luận thành công!!');
+        }
+      },
+      child: AnimatedContainer(
+        duration: Duration(seconds: 1),
+        color: backgroundTween.evaluate(AlwaysStoppedAnimation(_dragPercent)),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          resizeToAvoidBottomInset: false,
+          body: Column(
+            children: [
+              _buildAppBar(),
+              _buildHeaderText(),
+              SizedBox(
+                height: 50.h,
+              ),
+              _buildTitle(),
+              SizedBox(
+                height: 50.h,
+              ),
+              _buildFlareActor(),
+              SizedBox(
+                height: 50.h,
+              ),
+              _buildSlider(),
+              SizedBox(
+                height: 5.h,
+              ),
+              _buildBottom(),
+            ],
+          ),
         ),
       ),
     );
@@ -238,24 +339,32 @@ class _RatingScreenState extends State<RatingScreen>
 
   _buildBottom() => Column(
         children: [
-          Padding(
-            padding: EdgeInsets.only(left: 25.0, top: 10.0, bottom: 10.0),
-            child: TextField(
-              keyboardType: TextInputType.text,
-              style: TextStyle(
-                color: Colors.black87,
-              ),
-              decoration: InputDecoration(
-                icon: Icon(
-                  Icons.mode_comment_outlined,
-                  color: Colors.black,
+          GestureDetector(
+            onTap: () {
+              _showMyDialog();
+            },
+            child: Padding(
+              padding: EdgeInsets.only(left: 25.0, top: 10.0, bottom: 10.0),
+              child: TextField(
+                maxLines: 2,
+                enabled: false,
+                controller: _commentTextController,
+                keyboardType: TextInputType.text,
+                style: TextStyle(
+                  color: Colors.black87,
                 ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.all(10.0),
-                hintText: 'Viết bình luận của bạn...',
-                hintStyle: TextStyle(
-                  fontSize: 16.0,
-                  color: Colors.black,
+                decoration: InputDecoration(
+                  icon: Icon(
+                    Icons.mode_comment_outlined,
+                    color: Colors.black,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(10.0),
+                  hintText: 'Viết bình luận của bạn...',
+                  hintStyle: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
@@ -277,7 +386,7 @@ class _RatingScreenState extends State<RatingScreen>
                 ),
               ),
               onPressed: () {
-                setState(() {});
+                _postComment();
               },
             ),
           ),

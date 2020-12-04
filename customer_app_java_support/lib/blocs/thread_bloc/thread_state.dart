@@ -1,4 +1,3 @@
-
 import 'package:customer_app_java_support/models/thread_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,3 +31,7 @@ class ThreadPost extends ThreadState {
 class ThreadSuccess extends ThreadState {}
 
 class ThreadError extends ThreadState {}
+
+class CommentSuccess extends ThreadState {}
+
+class CommentFailure extends ThreadState {}

@@ -15,6 +15,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.customer.id = :userId and b.bookingStatus = :bookingStatus or b.photographer.id= :userId and b.bookingStatus = :bookingStatus order by b.startDate desc")
     Page<Booking> byStatus(EBookingStatus bookingStatus, Pageable paging, Long userId);
 
+    @Query("FROM Booking b where b.customer.id = :userId and b.bookingStatus = :bookingStatus or b.customer.id= :customerId and b.bookingStatus = :bookingStatus order by b.startDate desc")
+    Page<Booking> byStatusForCustomer(EBookingStatus bookingStatus, Pageable paging, Long customerId);
+
     @Query("FROM Booking b where b.bookingStatus = :bookingStatus")
     Page<Booking> byStatusWithoutUserId(EBookingStatus bookingStatus, Pageable paging);
 

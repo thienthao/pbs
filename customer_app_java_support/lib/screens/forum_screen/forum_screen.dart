@@ -29,9 +29,6 @@ class _ForumPageState extends State<ForumPage>
       child: Text('Xu hướng thảo luận'),
     ),
     Tab(
-      child: Text('Gần đây nhất'),
-    ),
-    Tab(
       child: Text('Danh mục'),
     ),
     Tab(
@@ -41,15 +38,13 @@ class _ForumPageState extends State<ForumPage>
 
   // thao's
   final ThreadRepository threadRepository = ThreadRepository(
-    threadApiClient: ThreadApiClient(
-      httpClient: http.Client()
-      ),
+    threadApiClient: ThreadApiClient(httpClient: http.Client()),
   );
 
   final TopicRepository topicRepository = TopicRepository(
     threadApiClient: ThreadApiClient(
       httpClient: http.Client(),
-      ),
+    ),
   );
   // end thao's
 
@@ -57,14 +52,12 @@ class _ForumPageState extends State<ForumPage>
 
   @override
   void initState() {
-    
     super.initState();
     _tabController = TabController(length: _tabList.length, vsync: this);
   }
 
   @override
   void dispose() {
-    
     _tabController.dispose();
     super.dispose();
   }
@@ -72,37 +65,36 @@ class _ForumPageState extends State<ForumPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 120.0,
-        backgroundColor: Color(0xFFFAFAFA),
-        centerTitle: true,
-        title: Text(
-          'Forum',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(30.0),
-          child: TabBar(
-            indicatorColor: Theme.of(context).primaryColor,
-            isScrollable: true,
-            controller: _tabController,
-            tabs: _tabList,
-            labelColor: Colors.black,
+        appBar: AppBar(
+          toolbarHeight: 120.0,
+          backgroundColor: Color(0xFFFAFAFA),
+          centerTitle: true,
+          title: Text(
+            'Forum',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          ),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(30.0),
+            child: TabBar(
+              indicatorColor: Theme.of(context).primaryColor,
+              isScrollable: true,
+              controller: _tabController,
+              tabs: _tabList,
+              labelColor: Colors.black,
+            ),
           ),
         ),
-      ),
-      body: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => ThreadBloc(repository: threadRepository),
-          ),
-          BlocProvider(
-            create: (context) => TopicBloc(repository: topicRepository),
-          ),
-        ],
-        child: ForumBody(_tabController, topicRepository, threadRepository),
-    )
-    );
+        body: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => ThreadBloc(repository: threadRepository),
+            ),
+            BlocProvider(
+              create: (context) => TopicBloc(repository: topicRepository),
+            ),
+          ],
+          child: ForumBody(_tabController, topicRepository, threadRepository),
+        ));
   }
 }
 
@@ -121,22 +113,27 @@ class ForumBody extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-                return FutureBuilder<List<Topic>>(
+              return FutureBuilder<List<Topic>>(
                   future: topicRepository.all(),
-                  builder: (BuildContext context, AsyncSnapshot<List<Topic>> snapshot) {
-                    if(snapshot.connectionState == ConnectionState.waiting) {
-                      return Scaffold(body:Center(child: CircularProgressIndicator(),));
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<Topic>> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Scaffold(
+                          body: Center(
+                        child: CircularProgressIndicator(),
+                      ));
                     } else {
-                      if(snapshot.hasError) {
+                      if (snapshot.hasError) {
                         return Text("Error loading topics");
                       } else {
-                        return TopicAdd(topics: snapshot.data, repository: threadRepository,);
+                        return TopicAdd(
+                          topics: snapshot.data,
+                          repository: threadRepository,
+                        );
                       }
                     }
-                  }
-                );
-              } 
-            ),
+                  });
+            }),
           );
         },
         child: Icon(
@@ -147,16 +144,18 @@ class ForumBody extends StatelessWidget {
       ),
       body: BlocBuilder<ThreadBloc, ThreadState>(
         builder: (context, state) {
-          if(state is ThreadEmpty) {
+          if (state is ThreadEmpty) {
             BlocProvider.of<ThreadBloc>(context).add(FetchThreads());
           }
 
-          if(state is ThreadError) {
-            return Center(child: Text("Đã có lỗi xảy ra"),);
+          if (state is ThreadError) {
+            return Center(
+              child: Text("Đã có lỗi xảy ra"),
+            );
           }
 
-          if(state is ThreadLoaded) {
-              return TabBarView(
+          if (state is ThreadLoaded) {
+            return TabBarView(
               controller: _tabController,
               children: [
                 Container(
@@ -170,28 +169,8 @@ class ForumBody extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => ForumDetail(
-                              thread: thread,
-                            ),
-                          ),
-                        ),
-                        child: listThread(state.threads[index]),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  child: ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    itemCount: state.threads.length,
-                    itemBuilder: (context, index) {
-                      Thread thread = state.threads[index];
-                      return InkWell(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ForumDetail(
-                              thread: thread,
-                            ),
+                                thread: thread,
+                                threadRepository: threadRepository),
                           ),
                         ),
                         child: listThread(state.threads[index]),
@@ -202,15 +181,15 @@ class ForumBody extends StatelessWidget {
                 Container(
                   child: BlocBuilder<TopicBloc, TopicState>(
                     builder: (context, topicState) {
-                      if(topicState is TopicEmpty) {
+                      if (topicState is TopicEmpty) {
                         BlocProvider.of<TopicBloc>(context).add(FetchTopics());
                       }
 
-                      if(topicState is TopicError) {
+                      if (topicState is TopicError) {
                         return Text("Đã xảy ra lỗi khi tải dữ liệu");
                       }
 
-                      if(topicState is TopicLoaded) {
+                      if (topicState is TopicLoaded) {
                         return ListView.builder(
                           physics: BouncingScrollPhysics(),
                           itemCount: topicState.topics.length,
@@ -222,7 +201,9 @@ class ForumBody extends StatelessWidget {
                         );
                       }
 
-                      return Center(child: CircularProgressIndicator(),);
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
                     },
                   ),
                 ),
@@ -233,10 +214,11 @@ class ForumBody extends StatelessWidget {
               ],
             );
           }
-          return Center(child: CircularProgressIndicator(),);
+          return Center(
+            child: CircularProgressIndicator(),
+          );
         },
       ),
     );
   }
 }
-

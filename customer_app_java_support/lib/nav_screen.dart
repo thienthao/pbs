@@ -1,10 +1,13 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:customer_app_java_support/globals.dart' as globals;
 import 'package:customer_app_java_support/plane_indicator.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
+import 'package:customer_app_java_support/respositories/customer_repository.dart';
 import 'package:customer_app_java_support/screens/forum_screen/forum_screen.dart';
 import 'package:customer_app_java_support/screens/profile_screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
@@ -34,12 +37,15 @@ class _NavScreenState extends State<NavScreen> {
 
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  CustomerRepository _customerRepository =
+      CustomerRepository(httpClient: http.Client());
   List _pageOptions = [];
 
   @override
   void initState() {
     super.initState();
     globals.selectedTabGlobal = 0;
+    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   @override
@@ -75,13 +81,20 @@ class _NavScreenState extends State<NavScreen> {
         providers: [
           BlocProvider(
             create: (context) =>
-                BookingBloc(bookingRepository: _bookingRepository)
-                  ..add(BookingEventFetch()),
+                BookingBloc(bookingRepository: _bookingRepository),
           ),
         ],
         child: BookHistory(),
       ),
-      Profile(),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                CustomerBloc(customerRepository: _customerRepository),
+          ),
+        ],
+        child: Profile(),
+      )
     ];
     return MaterialApp(
       title: 'Flutter User UI',

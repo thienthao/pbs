@@ -52,6 +52,7 @@
                                     <tr>
                                         <td><span th:text="${returningType.id}">No</span></td>
                                         <td><span th:text="${returningType.type}">Category</span></td>
+                                        <td><span><a th:href="@{/admin/returningTypes/{returningTypeId}/edit(returningTypeId=${returningType.id})}">Edit</a></span></td>
                                     </tr>
                                 </th:block>
                                 </tbody>

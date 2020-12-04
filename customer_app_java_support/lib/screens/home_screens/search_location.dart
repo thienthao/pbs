@@ -8,7 +8,6 @@ class SearchLocation extends StatefulWidget {
   final double currentLongitude;
 
   const SearchLocation({this.currentLatitude, this.currentLongitude});
-
   // bắn qua để init location
   @override
   _SearchLocationState createState() => _SearchLocationState();
@@ -44,7 +43,12 @@ class _SearchLocationState extends State<SearchLocation> {
           await Geocoder.local.findAddressesFromCoordinates(coordinates);
       var first = addresses.first;
       print('${first.coordinates} ${first.coordinates}');
-      returnLocation = {'name': first.adminArea, 'latlng': first.coordinates};
+      returnLocation = {
+        'name': first.adminArea,
+        'latlng': first.coordinates,
+        'lat': coordinates.latitude,
+        'long': coordinates.longitude,
+      };
     } catch (e) {}
   } // thêm để check null
 
@@ -115,7 +119,7 @@ class _SearchLocationState extends State<SearchLocation> {
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 380, left: 20, right: 20),
+                  padding: EdgeInsets.only(top: 450, left: 20, right: 20),
                   child: RaisedButton(
                     onPressed: () {
                       Navigator.pop(context, returnLocation);

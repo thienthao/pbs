@@ -39,12 +39,12 @@ class PackageRepository {
         }).toList();
 
         return PackageBlocModel(
-          id: package['id'],
-          name: package['name'].toString(),
-          price: package['price'],
-          description: package['description'].toString(),
-          serviceDtos: services,
-        );
+            id: package['id'],
+            name: package['name'].toString(),
+            price: package['price'],
+            description: package['description'].toString(),
+            serviceDtos: services,
+            supportMultiDays: package['supportMultiDays']);
       }).toList();
 
       return packages;
@@ -59,6 +59,8 @@ class PackageRepository {
 
     var servicesResBody = [];
     var serviceResBody = {};
+
+    var categoryResBody = {};
 
     resBody["name"] = package.name;
     resBody["price"] = package.price;
@@ -76,6 +78,9 @@ class PackageRepository {
     }
 
     resBody["services"] = servicesResBody;
+
+    categoryResBody["id"] = package.category.id;
+    resBody["category"] = categoryResBody;
 
     String str = json.encode(resBody);
     print(str);
@@ -104,10 +109,16 @@ class PackageRepository {
     var servicesResBody = [];
     var serviceResBody = {};
 
+    var categoryResBody = {};
+
+    categoryResBody["id"] = package.category.id;
+    resBody["category"] = categoryResBody;
+
     resBody["id"] = package.id;
     resBody["name"] = package.name;
     resBody["price"] = package.price;
     resBody["description"] = package.description;
+    resBody["supportMultiDays"] = package.supportMultiDays;
 
     ptgResBody["id"] = 168;
     resBody["photographer"] = ptgResBody;
@@ -118,13 +129,6 @@ class PackageRepository {
       serviceResBody["name"] = service.name;
       servicesResBody.add(serviceResBody);
     }
-
-    // servicesResBody = package.serviceDtos.map((service) {
-    //   serviceResBody = {};
-    //   serviceResBody["id"] = service.id;
-    //   serviceResBody["name"] = service.name;
-    //   return serviceResBody;
-    // }).toList();
 
     resBody["services"] = servicesResBody;
 

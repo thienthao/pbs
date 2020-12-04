@@ -1,8 +1,8 @@
-import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
-import 'package:photographer_app_java_support/respositories/booking_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
+import 'package:photographer_app_java_support/respositories/booking_repository.dart';
+
 import 'booking_event.dart';
 import 'booking_state.dart';
 

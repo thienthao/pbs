@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/working_day_blocs/working_days.dart';
 import 'package:photographer_app_java_support/models/working_date_bloc_model.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 
 class BottomSheetDaily extends StatefulWidget {
   final List<WorkingDayBlocModel> listWorkingDays;
@@ -18,13 +19,13 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
   List<WorkingDayBlocModel> _newListWorkingDays = List<WorkingDayBlocModel>();
   updateWorkingDays(Map<String, bool> _days) async {
     List<bool> listIsWorkingDays = [
+      _days[sun],
       _days[mon],
       _days[tue],
       _days[wed],
       _days[thur],
       _days[fri],
       _days[sat],
-      _days[sun]
     ];
     _newListWorkingDays.clear();
     for (var i = 0; i < 7; i++) {
@@ -71,19 +72,19 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
   void initState() {
     super.initState();
     for (var item in widget.listWorkingDays) {
-      if (item.day == 1) {
+      if (item.day == 2) {
         days[mon] = item.workingDay;
-      } else if (item.day == 2) {
-        days[tue] = item.workingDay;
       } else if (item.day == 3) {
-        days[wed] = item.workingDay;
+        days[tue] = item.workingDay;
       } else if (item.day == 4) {
-        days[thur] = item.workingDay;
+        days[wed] = item.workingDay;
       } else if (item.day == 5) {
-        days[fri] = item.workingDay;
+        days[thur] = item.workingDay;
       } else if (item.day == 6) {
-        days[sat] = item.workingDay;
+        days[fri] = item.workingDay;
       } else if (item.day == 7) {
+        days[sat] = item.workingDay;
+      } else if (item.day == 1) {
         days[sun] = item.workingDay;
       }
     }
@@ -275,19 +276,23 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
             ),
           ),
         ),
-        BlocBuilder<WorkingDayBloc, WorkingDayState>(
-          builder: (context, state) {
+        BlocListener<WorkingDayBloc, WorkingDayState>(
+          listener: (context, state) {
             if (state is WorkingDayStateUpdateSuccess) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text('Update Success!!')),
-              );
+              removeNotice();
+              popUp(context, 'Cập nhật các ngày làm việc hằng tuần',
+                  'Đã cập nhật thành công các ngày làm việc hằng tuần');
+            }
+            if (state is WorkingDayStateLoading) {
+              popNotice(context);
             }
             if (state is WorkingDayStateFailure) {
-              return Center(child: Text('Update Fail'));
+              removeNotice();
+              popUp(context, 'Cập nhật các ngày làm việc hằng tuần',
+                  'Cập nhật thất bại');
             }
-            return SizedBox();
           },
+          child: SizedBox(),
         )
       ],
     );

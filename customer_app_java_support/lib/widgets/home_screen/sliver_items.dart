@@ -2,6 +2,7 @@ import 'package:customer_app_java_support/constant/city_location.dart';
 import 'package:customer_app_java_support/screens/home_screens/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SliverItems extends StatefulWidget {
   final Function(Map) onChangeLocation;
@@ -64,7 +65,7 @@ class _SliverItemsState extends State<SliverItems> {
           padding: EdgeInsets.only(
             left: 10.0,
             right: 20.0,
-            top: 30.0,
+            top: 20.0,
           ),
           child: Text(
             'Bạn muốn chụp ảnh ở đâu?',
@@ -94,6 +95,14 @@ class _SliverItemsState extends State<SliverItems> {
                                 )));
                     setState(() {
                       locationResult = pageResult;
+                      if (locationResult == null) {
+                        locationResult = {
+                          'name': '',
+                          'latlng': LatLng(cuLat, cuLong),
+                          'lat': cuLat,
+                          'long': cuLong,
+                        };
+                      }
                       widget.onChangeLocation(locationResult);
                       for (var city in listCityLocations) {
                         print(locationResult['name'].toString());
@@ -101,7 +110,7 @@ class _SliverItemsState extends State<SliverItems> {
                                 .toString()
                                 .compareTo(city.name) ==
                             0) {
-                              print(city.image);
+                          print(city.image);
                           return image = city.image;
                         } else {
                           image =
@@ -118,7 +127,7 @@ class _SliverItemsState extends State<SliverItems> {
                     color: Colors.white,
                   ),
                   label: Text(
-                    locationResult.isEmpty
+                    locationResult.isEmpty || locationResult['name'] == ''
                         ? 'Địa điểm'
                         : locationResult['name'],
                     textAlign: TextAlign.center,
@@ -129,6 +138,41 @@ class _SliverItemsState extends State<SliverItems> {
                     ),
                   ),
                 ),
+                locationResult.isEmpty || locationResult['name'] == ''
+                    ? SizedBox()
+                    : FlatButton.icon(
+                        color: Colors.black26,
+                        onPressed: () async {
+                          getCurrentLocation();
+                          setState(() {
+                            locationResult = {
+                              'name': '',
+                              'latlng': LatLng(cuLat, cuLong),
+                              'lat': cuLat,
+                              'long': cuLong,
+                            };
+                            image =
+                                'https://i.pinimg.com/564x/52/d2/94/52d294e56bd9dbf4ebb46099753e69ba.jpg';
+                            widget.onChangeLocation(locationResult);
+                          });
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        icon: Icon(
+                          Icons.refresh,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          '',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
               ],
             ),
           ),

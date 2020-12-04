@@ -69,3 +69,18 @@ class PackageStateFailure extends PackageState {
   @override
   String toString() => 'Login failure {error: $error}';
 }
+
+class PackageStateDeletedInProgress extends PackageState {
+
+}
+
+class PackageStateDeletedFailure extends PackageState {
+  final String error;
+  const PackageStateDeletedFailure({this.error});
+
+  @override
+  List<Object> get props => [error];
+
+  @override
+  String toString() => 'Login failure {error: $error}';
+}

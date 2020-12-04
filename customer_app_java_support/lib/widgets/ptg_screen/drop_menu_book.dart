@@ -95,7 +95,7 @@ class _DropMenuState extends State<DropMenu> {
             Padding(
               padding: EdgeInsets.only(right: 10),
               child: Text(
-                '${oCcy.format(selectedPackage.price)} đồng',
+                '${oCcy.format(selectedPackage.price ?? 0)} đồng',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 17.0,

@@ -23,15 +23,27 @@ class BookingDetailStateSuccess extends BookingState {
 }
 
 class BookingStateCreatedSuccess extends BookingState {
+  final int bookingId;
+  BookingStateCreatedSuccess({@required this.bookingId});
+
+  @override
+  List<Object> get props => [bookingId];
+
+  @override
+  String toString() =>
+      'BookingStateCreatedSuccess { Booking Created: $bookingId }';
+}
+
+class BookingStateEditedSuccess extends BookingState {
   final bool isSuccess;
-  BookingStateCreatedSuccess({@required this.isSuccess});
+  BookingStateEditedSuccess({@required this.isSuccess});
 
   @override
   List<Object> get props => [isSuccess];
 
   @override
   String toString() =>
-      'BookingStateCreatedSuccess { Booking Created: $isSuccess }';
+      'BookingStateEditedSuccess { Booking Updated: $isSuccess }';
 }
 
 class BookingStateCancelInProgress extends BookingState {}
@@ -69,6 +81,26 @@ class BookingStateGetBookingByDateSuccess extends BookingState {
   @override
   String toString() =>
       'BookingStateGetBookingByDateSuccess { listBookingByDate: $listBookings }';
+}
+
+class BookingStateInfiniteFetchedSuccess extends BookingState {
+  final bool hasReachedEnd;
+  final List<BookingBlocModel> bookings;
+  const BookingStateInfiniteFetchedSuccess({this.bookings, this.hasReachedEnd})
+      : assert(bookings != null, hasReachedEnd != null);
+  @override
+  List<Object> get props => [bookings, hasReachedEnd];
+
+  @override
+  String toString() =>
+      'BookingStatePagingFetchedSuccess { Booking: $bookings , hasReachedEnd: $hasReachedEnd}';
+
+  BookingStateInfiniteFetchedSuccess cloneWith(
+      {bool hasReachedEnd, List<BookingBlocModel> bookings}) {
+    return BookingStateInfiniteFetchedSuccess(
+        bookings: bookings ?? this.bookings,
+        hasReachedEnd: hasReachedEnd ?? this.hasReachedEnd);
+  }
 }
 
 class BookingStateFailure extends BookingState {}

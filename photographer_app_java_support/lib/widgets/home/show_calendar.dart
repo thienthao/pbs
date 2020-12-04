@@ -37,21 +37,18 @@ class _CalendarShowState extends State<CalendarShow> {
     controller = CalendarController();
 
     for (String day in widget.photographerDays.bookedDays) {
-      if(day != 'null') {
+      if (day != 'null') {
         _events[DateTime.parse(day)] = [day];
       }
-
     }
     for (String day in widget.photographerDays.busyDays) {
       if (day != 'null') {
         _holidays[DateTime.parse(day)] = [day];
       }
-
     }
   }
 
   void onTimeChanged(TimeOfDay newTime) {
-
     setState(() {
       _time = newTime;
     });
@@ -100,7 +97,7 @@ class _CalendarShowState extends State<CalendarShow> {
       calendarStyle: CalendarStyle(
         selectedColor: Theme.of(context).accentColor,
         todayStyle: TextStyle().copyWith(color: Colors.black),
-        todayColor: Colors.white,
+        todayColor: Theme.of(context).scaffoldBackgroundColor,
         markersColor: Colors.pinkAccent,
         weekendStyle: TextStyle().copyWith(color: Colors.black),
         outsideDaysVisible: false,

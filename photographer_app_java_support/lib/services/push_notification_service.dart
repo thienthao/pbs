@@ -1,16 +1,12 @@
-import 'dart:convert';
-
 import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:photographer_app_java_support/screens/history_screens/history_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/locator.dart';
 import 'package:photographer_app_java_support/routing_constants.dart';
 import 'package:photographer_app_java_support/services/navigation_service.dart';
-import 'package:http/http.dart' as http;
-import 'package:overlay_support/overlay_support.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
@@ -26,23 +22,31 @@ class PushNotificationService {
 //        body: token,
 //      );
 //    });
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     _fcm.unsubscribeFromTopic("topic");
     _fcm.subscribeToTopic("photographer-topic");
-
+    int unreadNoti = 0;
+    if (prefs.getInt('unreadNoti') != null) {
+      unreadNoti = prefs.getInt('unreadNoti');
+    }
 
     print("configure");
     _fcm.configure(
       onMessage: (Map<String, dynamic> msg) async {
         print("onMessage ne");
         print('onMessage: $msg');
+        prefs.setInt('unreadNoti', unreadNoti + 1);
+        print(prefs.getInt('unreadNoti'));
         BotToast.showSimpleNotification(
+          enableSlideOff: true,
+          onTap: () => _seralizeAndNavigate(msg),
           title: msg["notification"]["body"],
           backgroundColor: Colors.red[200],
           titleStyle: TextStyle(
               color: Colors.white, fontFamily: "Quicksand", fontSize: 16.0),
-          duration: Duration(seconds: 2),
-          hideCloseButton: true,
+          duration: Duration(seconds: 10),
+          hideCloseButton: false,
+          
         );
         // BotToast.showCustomNotification(toastBuilder: (widget) {
         //   return Container(
@@ -63,10 +67,14 @@ class PushNotificationService {
       },
       onLaunch: (Map<String, dynamic> msg) async {
         print('onLaunch: $msg');
+        prefs.setInt('unreadNoti', unreadNoti + 1);
+        print(prefs.getInt('unreadNoti'));
         _seralizeAndNavigate(msg);
       },
       onResume: (Map<String, dynamic> msg) async {
         print('onResume: $msg');
+        prefs.setInt('unreadNoti', unreadNoti + 1);
+        print(prefs.getInt('unreadNoti'));
         _seralizeAndNavigate(msg);
       },
     );

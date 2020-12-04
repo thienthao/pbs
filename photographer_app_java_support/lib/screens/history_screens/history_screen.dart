@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:photographer_app_java_support/widgets/customshapeclipper.dart';
 import 'package:photographer_app_java_support/widgets/history/booking_widget.dart';
 import 'package:photographer_app_java_support/widgets/history/drop_menu_history.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:photographer_app_java_support/widgets/shared/list_booking_loading.dart';
 
 class BookHistory extends StatefulWidget {
   @override
@@ -30,6 +31,7 @@ class _BookHistoryState extends State<BookHistory> {
   @override
   void initState() {
     super.initState();
+
     _completer = Completer<void>();
     BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
     _loadBookingsByPaging(AUTO_FIRST_STATUS);
@@ -52,7 +54,8 @@ class _BookHistoryState extends State<BookHistory> {
   }
 
   _loadBookingsByPaging(String _status) async {
-    BlocProvider.of<BookingBloc>(context).add(BookingEventFetchInfinite(status: _status));
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventFetchInfinite(status: _status));
   }
 
   _restartEvent() async {
@@ -73,18 +76,21 @@ class _BookHistoryState extends State<BookHistory> {
             }
             if (bookingState is BookingStateInfiniteFetchedSuccess) {
               if (bookingState.bookings.isEmpty) {
-                return Text(
-                  'Đà Lạt',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17.0,
-                    fontWeight: FontWeight.w400,
+                return Center(
+                  child: Text(
+                    'Hiện tại bạn chưa có lịch hẹn nào',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 );
               } else {
                 return RefreshIndicator(
                   onRefresh: () {
-                    BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
+                    BlocProvider.of<BookingBloc>(context)
+                        .add(BookingRestartEvent());
                     _loadBookingsByPaging(statusForFilter);
                     return _completer.future;
                   },
@@ -104,99 +110,7 @@ class _BookHistoryState extends State<BookHistory> {
             }
 
             if (bookingState is BookingStateLoading) {
-              return Shimmer.fromColors(
-                period: Duration(milliseconds: 1100),
-                baseColor: Colors.grey[300],
-                highlightColor: Colors.grey[500],
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-                  width: double.infinity,
-                  child: ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: 3,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.all(10.0),
-                        width: double.infinity,
-                        height: 160.0,
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black26,
-                                        offset: Offset(0.0, 2.0),
-                                        blurRadius: 6.0)
-                                  ]),
-                              child: Stack(
-                                children: <Widget>[
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            Colors.grey[400],
-                                            Colors.grey[300],
-                                          ], // whitish to gray
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(1.0),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 15.0,
-                                    bottom: 15.0,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[400],
-                                            borderRadius:
-                                                BorderRadius.circular(1.0),
-                                          ),
-                                          width: 100,
-                                          height: 24,
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[400],
-                                                borderRadius:
-                                                    BorderRadius.circular(1.0),
-                                              ),
-                                              width: 35,
-                                              height: 15,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
+              return ListBookingLoadingWidget();
             }
 
             if (bookingState is BookingStateFailure) {

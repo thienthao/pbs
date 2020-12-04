@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/album_respository.dart';
+import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:customer_app_java_support/respositories/package_repository.dart';
 import 'package:customer_app_java_support/respositories/photographer_respository.dart';
@@ -29,6 +31,8 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
       PackageRepository(httpClient: http.Client());
   CommentRepository _commentRepository =
       CommentRepository(httpClient: http.Client());
+  CalendarRepository _calendarRepository =
+      CalendarRepository(httpClient: http.Client());
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   final ScrollController _scrollController = ScrollController();
   final _scrollThreshold = 0.0;
@@ -107,6 +111,12 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                           commentRepository: _commentRepository)
                         ..add(CommentByPhotographerIdEventFetch(id: ptg.id)),
                     ),
+                    BlocProvider(
+                      create: (context) =>
+                          CalendarBloc(calendarRepository: _calendarRepository)
+                            ..add(CalendarEventPhotographerDaysFetch(
+                                ptgId: ptg.id)),
+                    ),
                   ],
                   child: CustomerPhotographerDetail(
                     id: ptg.id,
@@ -169,14 +179,14 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                             Text('|'),
                             SizedBox(width: 10.0),
                             Text(
-                              '30',
+                              ptg.booked == null ? '0' : ptg.booked.toString(),
                               style: TextStyle(
                                 color: Colors.grey,
                               ),
                             ),
                             SizedBox(width: 3.0),
                             Text(
-                              'nhận xét',
+                              'đã đặt',
                               style: TextStyle(
                                 color: Colors.grey,
                               ),
@@ -188,14 +198,18 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
-                              Icons.location_on,
-                              size: 20,
+                              Icons.work_outline_rounded,
+                              size: 18,
                               color: Colors.grey[600],
                             ),
                             SizedBox(width: 5.0),
                             Flexible(
                               child: Text(
-                                'Địa điểm của photographer',
+                                ptg.description == null || ptg.description == ''
+                                    ? 'Chưa có mô tả'
+                                    : ptg.description,
+                                maxLines: 4,
+                                overflow: TextOverflow.fade,
                                 style: TextStyle(
                                   color: Colors.grey,
                                 ),
@@ -204,25 +218,6 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                           ],
                         ),
                         SizedBox(height: 10.0),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.attach_money_rounded,
-                              size: 20,
-                              color: Colors.grey[600],
-                            ),
-                            SizedBox(width: 5.0),
-                            Flexible(
-                              child: Text(
-                                '~ Trung bình số tiền các package (chẳn hạn)',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -317,7 +312,7 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                   _hasReachedEnd = photographerState.hasReachedEnd;
                   return RefreshIndicator(
                     onRefresh: () {
-                     BlocProvider.of<PhotographerBloc>(context)
+                      BlocProvider.of<PhotographerBloc>(context)
                           .add(PhotographerRestartEvent());
                       _loadPhotographerInfinite();
                       return _completer.future;

@@ -3,8 +3,8 @@ import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/calendar_model.dart';
 import 'package:customer_app_java_support/plane_indicator.dart';
+import 'package:customer_app_java_support/shared/datepicker_loading.dart';
 import 'package:customer_app_java_support/shared/loading.dart';
-import 'package:customer_app_java_support/shared/loading_line.dart';
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +26,7 @@ class BlocDatePicker extends StatefulWidget {
 class _BlocDatePickerState extends State<BlocDatePicker> {
   CalendarController controller;
   TimeOfDay _time = TimeOfDay.now();
-  DateTime _selectedDateTime = DateTime.now().toLocal().add(Duration(days: 1));
+  DateTime _selectedDateTime = DateTime.now().toLocal();
   CalendarModel photographerDays;
   // List _selectedEvents;
 
@@ -66,7 +66,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
 
   bool _predicate(DateTime day) {
     DateFormat dateFormat = DateFormat('yyyy/MM/dd');
-    if ((day.isBefore(DateTime.now().toLocal()))) {
+    if ((day.isBefore(DateTime.now()))) {
       return false;
     }
     for (var item in photographerDays.busyDays) {
@@ -120,10 +120,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
           outsideDaysVisible: false,
           weekendStyle: TextStyle().copyWith(color: Colors.black87),
           todayColor: Colors.white,
-          holidayStyle: TextStyle().copyWith(
-            color: Colors.black87,
-            decoration: TextDecoration.lineThrough,
-          ),
+          holidayStyle: TextStyle().copyWith(color: Colors.black87),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
           weekendStyle: TextStyle().copyWith(color: Colors.black87),
@@ -234,7 +231,6 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                         height: 3.0,
                       ),
                       Container(
-                        height: 390,
                         margin: EdgeInsets.all(15.0),
                         padding: EdgeInsets.all(7.0),
                         decoration: BoxDecoration(
@@ -261,7 +257,13 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                             return Text('fail!!');
                           }
                           if (state is BookingStateGetBookingByDateSuccess) {
-                            return _buildEventList(state.listBookings);
+                            final tempListBooking = List<BookingBlocModel>();
+                            for (var booking in state.listBookings) {
+                              if (booking.status.toUpperCase() == 'ONGOING') {
+                                tempListBooking.add(booking);
+                              }
+                            }
+                            return _buildEventList(tempListBooking);
                           }
                           return Text('');
                         },
@@ -345,7 +347,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
               }
 
               if (state is CalendarStateLoading) {
-                return Container(child: Center(child: LoadingLine()));
+                return DatePickerLoadingWidget();
               }
               return Text('Nothing');
             },

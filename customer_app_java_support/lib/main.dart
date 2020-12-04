@@ -7,6 +7,7 @@ import 'package:customer_app_java_support/blocs/authen_blocs/loading_indicator.d
 import 'package:customer_app_java_support/blocs/authen_blocs/login_page.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/splash.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_repository.dart';
+import 'package:customer_app_java_support/globals.dart' as globals;
 import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/nav_screen.dart';
 import 'package:customer_app_java_support/respositories/thread_api_client.dart';
@@ -14,20 +15,20 @@ import 'package:customer_app_java_support/routing_constants.dart';
 import 'package:customer_app_java_support/screens/login_screen.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
 import 'package:customer_app_java_support/services/push_notification_service.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'blocs/bloc_observer.dart';
-import 'package:customer_app_java_support/globals.dart' as globals;
-import 'package:http/http.dart' as http;
-import 'router.dart' as router;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/date_symbol_data_local.dart';
+
+import 'blocs/bloc_observer.dart';
+import 'router.dart' as router;
 
 void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
     Bloc.observer = PBSBlocObserver();
     final userRepository = UserRepository();
-
     //thao
     setupLocator();
     ThreadApiClient threadApiClient =
@@ -63,7 +64,7 @@ class _AppState extends State<App> {
     _pushNotificationService.init();
     super.initState();
     globals.selectedTabGlobal = 0;
-    Firebase.initializeApp().whenComplete(() { 
+    Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});
     });
@@ -71,6 +72,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     return BlocProvider(
         create: (context) =>
             AuthenticationBloc(userRepository: widget.userRepository)

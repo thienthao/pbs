@@ -1,6 +1,9 @@
 import 'package:customer_app_java_support/blocs/authen_blocs/login_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_event.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_state.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/user_repository.dart';
+import 'package:customer_app_java_support/blocs/register_blocs/register_bloc.dart';
+import 'package:customer_app_java_support/screens/sign_up_screen.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
+  final UserRepository userRepository;
+
+  LoginScreen({@required this.userRepository});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -319,7 +326,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BlocProvider(
+                                      create: (context) => RegisterBloc(
+                                          userRepository:
+                                              widget.userRepository),
+                                      child: SignUpScreen(),
+                                    ),
+                                  ));
+                            },
                             child: RichText(
                               text: TextSpan(
                                 children: [

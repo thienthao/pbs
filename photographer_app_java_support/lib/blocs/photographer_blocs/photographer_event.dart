@@ -20,7 +20,6 @@ class PhotographerbyIdEventFetch extends PhotographerEvent {
 
 class PhotographerEventOnChangeAvatar extends PhotographerEvent {
   final File image;
-
   PhotographerEventOnChangeAvatar({this.image});
 }
 

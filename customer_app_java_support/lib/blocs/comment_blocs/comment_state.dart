@@ -22,4 +22,9 @@ class CommentStateSuccess extends CommentState {
   String toString() => 'CommentsLoadSuccess { Comment: $comments }';
 }
 
+class CommentStatePostedSuccess extends CommentState {
+  final bool isPostedSuccess;
+  CommentStatePostedSuccess({this.isPostedSuccess});
+}
+
 class CommentStateFailure extends CommentState {}

@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 
 abstract class RegisterState extends Equatable {
@@ -6,7 +5,9 @@ abstract class RegisterState extends Equatable {
   List<Object> get props => [];
 }
 
-class RegisterUnInit extends RegisterState {}
+class RegisterUninit extends RegisterState {}
+
+class RegisterWaiting extends RegisterState {}
 
 class RegisterSuccess extends RegisterState {}
 

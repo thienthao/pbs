@@ -32,13 +32,13 @@ class _NewThreadState extends State<NewThread> {
     String content = threadContent.text.toString();
     int topicId = widget.topic.id;
     Topic topic = Topic(id: topicId);
-    Owner owner = Owner(id: 168);
+    Owner owner = Owner(id: 2);
     Thread thread = Thread(
         title: title,
         content: content,
         topic: topic,
         owner: owner,
-        createdAt: "2020-11-08 12:12:12");
+        createdAt: "2020-11-18 12:12:12");
     BlocProvider.of<ThreadBloc>(context).add(PostThread(thread: thread));
   }
 

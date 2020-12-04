@@ -68,7 +68,7 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
       final isSuccess = await this.packageRepository.deletePackage(package);
       yield PackageStateDeletedSuccess(isSuccess: isSuccess);
     } catch (error) {
-      yield PackageStateFailure(error: error.toString());
+      yield PackageStateDeletedFailure(error: error.toString());
     }
   }
 }

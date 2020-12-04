@@ -1,8 +1,8 @@
 import 'package:customer_app_java_support/blocs/authen_blocs/user_dao.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_login_model.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_model.dart';
-import 'package:customer_app_java_support/blocs/authen_blocs/api_connection.dart';
-import 'package:customer_app_java_support/blocs/register_blocs/api_connection.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/api_connection.dart'
+    as api;
 import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -14,7 +14,7 @@ class UserRepository {
     @required String password,
   }) async {
     UserLogin userLogin = UserLogin(username: username, password: password);
-    Token token = await getToken(userLogin);
+    Token token = await api.getToken(userLogin);
     User user = User(
       id: 0,
       username: username,
@@ -23,10 +23,8 @@ class UserRepository {
     return user;
   }
 
-  Future<bool> register({@required String username, @required String password, @required String email}) async {
-    UserRegister userRegister = UserRegister(username: username, password: password, email: email);
-    bool success = await registerApi(userRegister);
-    return success;
+  Future<bool> register({@required UserRegister userRegister}) async {
+    return Future.value(await api.register(userRegister));
   }
 
   Future<void> persistToken({@required User user}) async {
