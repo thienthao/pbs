@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographer_event.dart';
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographer_state.dart';
+import 'package:photographer_app_java_support/models/location_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       yield* _mapPhotographerByIdLoadedToState(photographerEvent.id);
     } else if (photographerEvent is PhotographerEventUpdateProfile) {
       yield* _mapPhotographerUpdatedProfileToState(
-          photographerEvent.photographer);
+          photographerEvent.photographer, photographerEvent.locations);
     } else if (photographerEvent is PhotographerEventRequested) {
       yield* _mapPhotographersLoadedToState();
     } else if (photographerEvent is PhotographerEventRefresh) {
@@ -32,6 +33,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       yield* _mapPhotographerOnChangeAvatarToState(photographerEvent.image);
     } else if (photographerEvent is PhotographerEventOnChangeCover) {
       yield* _mapPhotographerOnChangeCoverToState(photographerEvent.image);
+    } else if (photographerEvent is PhotographerEventGetLocations) {
+      yield* _mapGetPhotographerLocationsToState(photographerEvent.ptgId);
     }
   }
 
@@ -67,12 +70,12 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
   }
 
   Stream<PhotographerState> _mapPhotographerUpdatedProfileToState(
-      Photographer photographer) async* {
+      Photographer photographer, List<LocationBlocModel> locations) async* {
     yield PhotographerStateLoading();
     try {
       final updateProfileSuccess =
-          await this.photographerRepository.updateProfile(photographer);
-      yield PhotograherStateUpdatedProfileSuccess(
+          await this.photographerRepository.updateProfile(photographer,locations);
+      yield PhotographerStateUpdatedProfileSuccess(
           isSuccess: updateProfileSuccess);
     } catch (_) {
       yield PhotographerStateFailure();
@@ -85,6 +88,17 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           await this.photographerRepository.getPhotographerbyId(id);
       print('it goes here!');
       yield PhotographerIDStateSuccess(photographer: photographer);
+    } catch (_) {
+      yield PhotographerStateFailure();
+    }
+  }
+
+  Stream<PhotographerState> _mapGetPhotographerLocationsToState(int id) async* {
+    try {
+      final locations =
+          await this.photographerRepository.getPhotographerLocations(id);
+      print('it goes here!');
+      yield PhotographerStateGetLocationsSuccess(locations: locations);
     } catch (_) {
       yield PhotographerStateFailure();
     }

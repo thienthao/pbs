@@ -18,7 +18,6 @@ class _MiniListEditState extends State<MiniListEdit> {
   List<ServiceBlocModel> tempServices = [];
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     tempServices = widget.servicesOfPackage.map((service) {
       return ServiceBlocModel(id: service.id, name: service.name);

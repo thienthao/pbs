@@ -18,7 +18,6 @@ void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
     final userRepository = UserRepository();
     Bloc.observer = PBSBlocObserver();
-    SystemChrome.setEnabledSystemUIOverlays([]);
     setupLocator();
     runApp(App(
       userRepository: userRepository,

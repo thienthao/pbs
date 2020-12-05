@@ -45,16 +45,24 @@ class _BodyState extends State<Body> {
                       press: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                    create: (BuildContext context) =>
-                                        PhotographerBloc(
-                                            photographerRepository:
-                                                _photographerRepository),
-                                    child: Detail(
-                                      photographer: _photographer,
-                                    ),
-                                  )),
+                          MaterialPageRoute(builder: (context) {
+                            return MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (BuildContext context) =>
+                                      PhotographerBloc(
+                                          photographerRepository:
+                                              _photographerRepository)
+                                        ..add(PhotographerEventGetLocations(
+                                            ptgId: photographerState
+                                                .photographer.id)),
+                                ),
+                              ],
+                              child: Detail(
+                                photographer: _photographer,
+                              ),
+                            );
+                          }),
                         );
                       },
                     ),
