@@ -4,6 +4,7 @@ import fpt.university.pbswebapi.entity.DayOfWeek;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -23,6 +24,22 @@ public class DateHelper {
         return java.util.Date
                 .from(dateToConvert.atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
                         .toInstant());
+    }
+
+    public static LocalDateTime convertToLocalDateTimeViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    public static LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
+    public static LocalTime plusHour(LocalTime localTime, long hour) {
+        return localTime.plusHours(hour);
     }
 
     public static List<LocalDate> getDatesBetween(

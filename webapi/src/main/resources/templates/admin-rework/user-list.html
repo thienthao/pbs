@@ -3,6 +3,10 @@
 <header th:replace="admin-rework/header::header-fragment"></header>
 <body class="hold-transition sidebar-mini">
 <style>
+    .ui-jqgrid {
+        font-family: Roboto;
+    }
+
     .ui-jqgrid tr.jqgrow td {
         white-space: normal !important;
         height: auto;
@@ -31,15 +35,9 @@
                     </div> <!-- /.card-body -->
                     <div class="card-body">
                         <div class="grid-btn">
-                            <button class="btn btn-success" onclick="addBlog()"><i
-                                    class="fa fa-plus"></i>&nbsp;Add
-                            </button>
-                            <button class="btn btn-info" onclick="editBlog()"><i
+                            <button class="btn btn-info" onclick="editUser()"><i
                                     class="fa fa-edit"></i>&nbsp;Edit
                             </button>
-                            <button class="btn btn-danger" onclick="deleteBlog()"><i
-                                    class="fa fa-trash-o"></i>&nbsp;Delete
-                            </button>&nbsp;&nbsp;
                             <input type="text" placeholder="Search..." id="keyword" class="form-control col-2">&nbsp;
                             <button class="btn btn-info" onclick="search()"><i
                                     class="fa fa-search"></i>&nbsp;Search

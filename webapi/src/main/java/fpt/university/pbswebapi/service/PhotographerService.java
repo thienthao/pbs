@@ -713,12 +713,23 @@ public class PhotographerService {
         return "Delete success";
     }
 
-    public List<Location> getPhotographerLocations() {
-        return locationRepository.findAll();
+    public List<Location> getPhotographerLocations(long userId) {
+        return locationRepository.findAllByUserId(userId);
     }
 
-    public Location addLocation(long ptgId, Location location) {
+    public Location addLocation(Location location) {
         Location result = locationRepository.save(location);
         return result;
+    }
+
+    public User updateProfile(User user) {
+        User save = phtrRepo.findById(user.getId()).get();
+        save.setFullname(user.getFullname());
+        save.setLocations(user.getLocations());
+        save.setEmail(user.getEmail());
+        save.setPhone(user.getPhone());
+        save.setDescription(user.getDescription());
+        save.setUsername(user.getUsername());
+        return phtrRepo.save(save);
     }
 }

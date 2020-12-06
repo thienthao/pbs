@@ -29,6 +29,9 @@ public class ServicePackage {
     @Column(name = "package_price")
     private Integer price;
 
+    @Column(name = "time_anticipate")
+    private Integer timeAnticipate;
+
     private String description;
 
     @Column(name = "is_available")

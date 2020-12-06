@@ -234,6 +234,18 @@ public class BookingController {
         return new ResponseEntity<List<CommentDto>>(bookingService.findCommentsOfPhotographer(photographerId, pageable) ,HttpStatus.OK);
     }
 
+    @GetMapping("/testtimewarning")
+    public ResponseEntity<?> testTimeWarning() {
+        Booking booking = bookingRepository.findById(Long.parseLong("257")).get();
+        return new ResponseEntity<>(bookingService.warnBookingTime(booking), HttpStatus.OK);
+    }
+
+    @GetMapping("/testdistancewarning")
+    public ResponseEntity<?> testDistanceWarning() {
+        Booking booking = bookingRepository.findById(Long.parseLong("257")).get();
+        return new ResponseEntity<>(bookingService.warnDistance(booking), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Booking> book(@RequestBody Booking booking) {
         // require status

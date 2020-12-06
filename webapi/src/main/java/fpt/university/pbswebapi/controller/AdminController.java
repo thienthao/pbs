@@ -39,6 +39,11 @@ public class AdminController {
         this.threadService = threadService;
     }
 
+    @GetMapping("/login")
+    public String login(Model model, String error, String logout) {
+        return "admin-rework/login";
+    }
+
     @RequestMapping({"/dashboard", "/"})
     public String dashboard(Model model) {
         return "admin-rework/index";

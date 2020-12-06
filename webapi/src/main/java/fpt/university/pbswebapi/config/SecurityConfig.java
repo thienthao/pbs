@@ -108,7 +108,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.js"
                 ).permitAll()
                 .anyRequest().authenticated()
-                .and().formLogin();
+                    .and()
+                .formLogin()
+                    .loginPage("/admin/login")
+                    .permitAll()
+                    .and()
+                .logout()
+                    .permitAll();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 

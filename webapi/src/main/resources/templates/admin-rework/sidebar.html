@@ -12,10 +12,10 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img th:src="@{/admin/dist/img/avatar5.png}" class="img-circle elevation-2" alt="User Image">
+                <img src="https://pbs-webapi.herokuapp.com/api/photographers/174/download" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block" th:text="${session.loginUser}"></a>
+                <a href="#" class="d-block" th:text="${session.loginUser}">Xuan Bach</a>
             </div>
         </div>
         <!-- Sidebar Menu -->
@@ -44,9 +44,9 @@
                 </li>
                 <li class="nav-item">
                     <a th:href="@{/admin/threads/topics}" th:class="${path}=='links'?'nav-link active':'nav-link'">
-                        <i class="fa fa-comments nav-icon" aria-hidden="true"></i>
+                        <i class="far fa-comment-alt nav-icon" aria-hidden="true"></i>
                         <p>
-                            Thread Topics
+                            Topics
                         </p>
                     </a>
                 </li>

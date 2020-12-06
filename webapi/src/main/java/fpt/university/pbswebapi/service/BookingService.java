@@ -5,6 +5,7 @@ import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.helper.DtoMapper;
+import fpt.university.pbswebapi.helper.MapHelper;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CommentRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -274,5 +276,70 @@ public class BookingService {
             result.add(DtoMapper.toCommentDto(comment));
         }
         return result;
+    }
+
+    public List<String> warnBookingTime(Booking booking) {
+        // booking nay` la pending booking
+        List<String> warnings = new ArrayList<>();
+        Integer duration = booking.getTimeAnticipate();
+        for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
+            //get cai booking do len da~
+            Date startDate = tld.getStart(); //bien nay se de query cac booking trong 1 ngay hom do
+            LocalDateTime localDateTime = DateHelper.convertToLocalDateTimeViaInstant(startDate);
+            LocalDate startLocalDate = DateHelper.convertToLocalDateViaInstant(startDate);
+            LocalDateTime atStart = startLocalDate.atStartOfDay();
+            LocalDateTime atEnd = startLocalDate.atTime(23, 59);
+            Date dateAtStart = DateHelper.convertToDateViaInstant(atStart);
+            Date dateAtEnd = DateHelper.convertToDateViaInstant(atEnd);
+            List<Booking> bookings = bookingRepository.findOngoingBookingOnDate(dateAtStart, dateAtEnd, booking.getPhotographer().getId());
+
+            //start time + duration
+            LocalTime pendingStartTime = localDateTime.toLocalTime();
+
+            for(Booking onGoingBooking : bookings) {
+                for (TimeLocationDetail timeLocationDetail : onGoingBooking.getTimeLocationDetails()) {
+                    LocalDateTime ongoingStartDateTime = DateHelper.convertToLocalDateTimeViaInstant(timeLocationDetail.getStart());
+                    LocalTime ongoingStartTime = ongoingStartDateTime.toLocalTime();
+                    LocalTime ongoingEndTime = DateHelper.plusHour(ongoingStartTime, 3);
+                    LocalTime onGoingEndTimePlus2 = DateHelper.plusHour(ongoingEndTime, 2);
+                    if(pendingStartTime.compareTo(ongoingEndTime) > 0 && onGoingEndTimePlus2.compareTo(pendingStartTime) > 0) {
+                        warnings.add("Bạn có lịch hẹn kết thúc vào lúc " + ongoingEndTime + " với " + onGoingBooking.getCustomer().getFullname() + "! Bạn có chắc muốn nhận cuộc hẹn này? ");
+                    }
+                }
+            }
+        }
+        return warnings;
+    }
+
+    public List<String> warnDistance(Booking booking) {
+        // booking nay` la pending booking
+        List<String> warnings = new ArrayList<>();
+        for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
+            Date startDate = tld.getStart(); //bien nay se de query cac booking trong 1 ngay hom do
+            LocalDateTime localDateTime = DateHelper.convertToLocalDateTimeViaInstant(startDate);
+            LocalDate startLocalDate = DateHelper.convertToLocalDateViaInstant(startDate);
+            LocalDateTime atStart = startLocalDate.atStartOfDay();
+            atStart = atStart.minusDays(1);
+            LocalDateTime atEnd = startLocalDate.atTime(23, 59);
+            atEnd = atEnd.plusDays(1);
+            Date dateAtStart = DateHelper.convertToDateViaInstant(atStart);
+            Date dateAtEnd = DateHelper.convertToDateViaInstant(atEnd);
+            List<Booking> bookings = bookingRepository.findOngoingBookingOnDate(dateAtStart, dateAtEnd, booking.getPhotographer().getId());
+
+            Double pendingLat = tld.getLat();
+            Double pendingLon = tld.getLon();
+
+            for(Booking onGoingBooking : bookings) {
+                for(TimeLocationDetail timeLocationDetail : onGoingBooking.getTimeLocationDetails()) {
+                    Double onGoingLat = timeLocationDetail.getLat();
+                    Double onGoingLon = timeLocationDetail.getLon();
+                    Double distance = MapHelper.distance(pendingLat, onGoingLat, pendingLon, onGoingLon);
+                    if(distance > 50) {
+                        warnings.add("Khoảng cách giữa cuộc hẹn với " + onGoingBooking.getCustomer().getFullname() + " và cuộc hẹn này là " + distance +"! Bạn có chắc muốn nhận cuộc hẹn này? ");
+                    }
+                }
+            }
+        }
+        return warnings;
     }
 }

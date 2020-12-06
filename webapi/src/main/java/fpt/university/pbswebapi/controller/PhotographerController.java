@@ -42,6 +42,11 @@ public class PhotographerController {
         return new ResponseEntity<List<User>>(phtrService.findAllPhotographers(), HttpStatus.OK);
     }
 
+    @PostMapping
+    public ResponseEntity<?> updateProfile(@RequestBody User user) {
+        return new ResponseEntity<>(phtrService.updateProfile(user), HttpStatus.OK);
+    }
+
     @GetMapping("/byrating")
     public ResponseEntity<Map<String, Object>> findPhotographersByRatingCount(
             @RequestParam(defaultValue = "0") int page,
@@ -299,12 +304,12 @@ public class PhotographerController {
     }
 
     @GetMapping("/{ptgId}/locations")
-    public ResponseEntity<?> getPhotographerLocations() {
-        return new ResponseEntity<>(phtrService.getPhotographerLocations(), HttpStatus.OK);
+    public ResponseEntity<?> getPhotographerLocations(@PathVariable long ptgId) {
+        return new ResponseEntity<>(phtrService.getPhotographerLocations(ptgId), HttpStatus.OK);
     }
 
-    @PostMapping("/{ptgId}/locations")
-    public ResponseEntity<?> addLocation(@PathVariable("ptgId") long ptgId, @RequestBody Location location) {
-        return new ResponseEntity<>(phtrService.addLocation(ptgId, location), HttpStatus.OK);
+    @PostMapping("/locations")
+    public ResponseEntity<?> addLocation(@RequestBody Location location) {
+        return new ResponseEntity<>(phtrService.addLocation(location), HttpStatus.OK);
     }
 }

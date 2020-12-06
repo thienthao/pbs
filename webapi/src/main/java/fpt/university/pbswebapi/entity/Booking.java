@@ -32,6 +32,9 @@ public class Booking {
 
     private Integer price;
 
+    @Column(name = "time_anticipate")
+    private Integer timeAnticipate;
+
     @Column(name = "created_at")
     private Date createdAt;
 
