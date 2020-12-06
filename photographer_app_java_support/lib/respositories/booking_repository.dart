@@ -515,7 +515,7 @@ class BookingRepository {
     String str = json.encode(resBody);
     print(str);
 
-    final response = await httpClient.put(baseUrl + 'bookings/cancel',
+    final response = await httpClient.put(baseUrl + 'bookings/cancel/photographer',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
         },

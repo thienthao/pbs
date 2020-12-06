@@ -1,12 +1,10 @@
 import 'dart:async';
-
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:customer_app_java_support/shared/loading_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-
 import 'album_detail_screen.dart';
 
 class MoreAlbumScreen extends StatefulWidget {

@@ -12,6 +12,10 @@ import 'package:photographer_app_java_support/widgets/service/mini_service_list.
 import 'package:status_alert/status_alert.dart';
 
 class NewService extends StatefulWidget {
+  final Function(bool) isAdded;
+
+  const NewService({this.isAdded});
+
   @override
   _NewServiceState createState() => _NewServiceState();
 }
@@ -175,11 +179,13 @@ class _NewServiceState extends State<NewService> {
   }
 
   bool _validateBooking() {
-    if (int.parse(onAirTimeTextController.text.trim()) > 0 &&
-        int.parse(onAirTimeTextController.text.trim()) < 24) {
-      popUp('Thời gian tác nghiệp',
-          'Thời gian tác nghiệp ít hơn 1 giờ và quá 24 giờ!');
-      return false;
+    if (!isMultiDay) {
+      if (!(int.parse(onAirTimeTextController.text.trim()) > 0 &&
+          int.parse(onAirTimeTextController.text.trim()) < 24)) {
+        popUp('Thời gian tác nghiệp',
+            'Thời gian tác nghiệp ít hơn 1 giờ và quá 24 giờ!');
+        return false;
+      }
     } else if (servicesOfPackageResult.isEmpty) {
       popUp('Chi tiết dịch vụ', 'Xin hãy tạo dịch vụ bên trong gói dịch vụ!');
       return false;
@@ -259,7 +265,12 @@ class _NewServiceState extends State<NewService> {
           listener: (context, state) {
             if (state is PackageStateCreatedSuccess) {
               removeNotice();
+              widget.isAdded(true);
               popUp('Tạo gói dịch vụ', 'Tạo gói dịch vụ thành công!!');
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              });
             }
 
             if (state is PackageStateLoading) {

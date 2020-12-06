@@ -9,19 +9,19 @@ import 'package:customer_app_java_support/respositories/booking_repository.dart'
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/map_picker_screen.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:status_alert/status_alert.dart';
 
 class ReturnTypeModel {
   int id;
   String name;
-
   ReturnTypeModel(this.id, this.name);
 
   static List<ReturnTypeModel> getReturnTypes() {
@@ -134,17 +134,17 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
       var endDateTemp =
           DateFormat("yyyy-MM-dd").format(DateTime.parse(endDate));
       if (timeResult == 'Hãy chọn thời gian chụp') {
-        validateNotice('Mời bạn chọn thời gian chụp');
+        popUp(context,'Thời gian chụp','Mời bạn chọn thời gian chụp');
       } else if (timeReturnResult == 'Hãy chọn thời gian nhận') {
-        validateNotice('Mời bạn chọn thời gian nhận ảnh');
+        popUp(context,'Thời gian nhận ảnh','Mời bạn chọn thời gian nhận ảnh');
       } else if (locationResult == 'Hãy chọn nơi bạn muốn chụp ảnh') {
-        validateNotice('Mời bạn chọn nơi chụp ảnh');
+        popUp(context,'Địa điểm chụp','Mời bạn chọn nơi chụp ảnh');
       } else if (DateTime.parse(startDateTemp)
                   .compareTo(DateTime.parse(endDateTemp)) +
               1 >
           1) {
-        validateNotice(
-            'Thời gian nhận ảnh phải sau thời gian chụp ít nhất 1 ngày');
+        popUp(
+            context,'Thời gian nhận ảnh','Thời gian nhận ảnh phải sau thời gian chụp ít nhất 1 ngày');
       } else {
         List<TimeAndLocationBlocModel> timeAndLocations =
             List<TimeAndLocationBlocModel>();
@@ -779,63 +779,19 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
               listener: (context, bookingState) {
                 if (bookingState is BookingStateEditedSuccess) {
                   widget.isEdited(true);
-                  removeNotice();
-                  Flushbar(
-                    flushbarPosition: FlushbarPosition.TOP,
-                    flushbarStyle: FlushbarStyle.FLOATING,
-                    backgroundColor: Colors.black87,
-                    reverseAnimationCurve: Curves.decelerate,
-                    forwardAnimationCurve: Curves.elasticOut,
-                    isDismissible: false,
-                    duration: Duration(seconds: 5),
-                    titleText: Text(
-                      "Cập nhật cuộc hẹn",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                          color: Colors.white,
-                          fontFamily: "Quicksand"),
-                    ),
-                    messageText: Text(
-                      "Cập nhật thành công!!",
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.white,
-                          fontFamily: "Quicksand"),
-                    ),
-                  ).show(context);
+                  Navigator.pop(context);
+                  _showBookingSuccessAlert();
+                  popUp(context, 'Cập nhật cuộc hẹn', 'Cập nhật thành công!');
                 }
 
                 if (bookingState is BookingStateLoading) {
-                  popNotice();
+                  _showLoadingAlert();
                 }
 
                 if (bookingState is BookingStateFailure) {
-                  removeNotice();
-                  Flushbar(
-                    flushbarPosition: FlushbarPosition.TOP,
-                    flushbarStyle: FlushbarStyle.FLOATING,
-                    backgroundColor: Colors.black87,
-                    reverseAnimationCurve: Curves.decelerate,
-                    forwardAnimationCurve: Curves.elasticOut,
-                    isDismissible: false,
-                    duration: Duration(seconds: 5),
-                    titleText: Text(
-                      "Cập nhật cuộc hẹn",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                          color: Colors.white,
-                          fontFamily: "Quicksand"),
-                    ),
-                    messageText: Text(
-                      "Cập nhật thất bại!!",
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.white,
-                          fontFamily: "Quicksand"),
-                    ),
-                  ).show(context);
+                  Navigator.pop(context);
+                  _showBookingFailDialog();
+                  popUp(context, 'Cập nhật cuộc hẹn', 'Cập nhật thất bại!');
                 }
               },
             ),
@@ -845,31 +801,100 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
     );
   }
 
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 60),
-      title: 'Đang gửi yêu cầu',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
+  Future<void> _showBookingSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) =>
+            AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thành Công',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã cập nhật thành công yêu cầu của bạn.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme
+                  .of(context)
+                  .primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 
-  void removeNotice() {
-    StatusAlert.hide();
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
   }
 
-  void validateNotice(String name) async {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 2),
-      title: name,
-      titleOptions:
-          StatusAlertTextConfiguration(style: TextStyle(fontSize: 18)),
-      configuration: IconConfiguration(
-        icon: Icons.error_outline_outlined,
-      ),
-    );
+  Future<void> _showBookingFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) =>
+            AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme
+                  .of(context)
+                  .primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

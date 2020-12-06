@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/comment_blocs/comment_bloc.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/booking_repository.dart';
+import 'package:photographer_app_java_support/respositories/comment_repository.dart';
 import 'package:photographer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 
 class BookingWidget extends StatefulWidget {
@@ -28,6 +30,7 @@ class BookingWidget extends StatefulWidget {
 class _BookingWidgetState extends State<BookingWidget> {
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  CommentRepository _commentRepository = CommentRepository(httpClient: http.Client());
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -107,6 +110,9 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 BlocProvider(
                                     create: (context) => BookingBloc(
                                         bookingRepository: _bookingRepository)),
+                                BlocProvider(
+                                    create: (context) => CommentBloc(
+                                        commentRepository: _commentRepository)),
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,

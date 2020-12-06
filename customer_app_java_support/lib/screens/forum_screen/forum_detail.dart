@@ -6,6 +6,7 @@ import 'package:customer_app_java_support/screens/forum_screen/reply_to_screen.d
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class ForumDetail extends StatefulWidget {
   final Thread thread;
@@ -87,7 +88,8 @@ class _ForumDetailState extends State<ForumDetail> {
                               ],
                             ),
                             Text(
-                              widget.thread.createdAt,
+                              DateFormat('dd/MM/yyyy HH:mm a').format(
+                                  DateTime.parse(widget.thread.createdAt)),
                               style:
                                   TextStyle(fontSize: 12.0, color: Colors.grey),
                             ),
@@ -194,7 +196,8 @@ class _ForumDetailState extends State<ForumDetail> {
                                   ],
                                 ),
                                 Text(
-                                  comment.owner.fullname,
+                                  DateFormat('dd/MM/yyyy HH:mm a').format(
+                                      DateTime.parse(comment.createdAt)),
                                   style: TextStyle(
                                       fontSize: 12.0, color: Colors.grey),
                                 ),

@@ -16,6 +16,11 @@ class CommentByPhotographerIdEventFetch extends CommentEvent {
   CommentByPhotographerIdEventFetch({@required this.id});
 }
 
+class CommentByBookingIdEventFetch extends CommentEvent {
+  final int id;
+  CommentByBookingIdEventFetch({@required this.id});
+}
+
 class CommentEventLoadSuccess extends CommentEvent {
   CommentEventLoadSuccess(List<CommentBlocModel> list);
 }
@@ -24,3 +29,5 @@ class CommentEventPost extends CommentEvent {
   final CommentBlocModel comment;
   CommentEventPost({this. comment});
 }
+
+

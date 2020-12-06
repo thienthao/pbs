@@ -39,7 +39,9 @@ class _NavScreenState extends State<NavScreen> {
   SharedPreferences prefs;
   _getPreference() async {
     prefs = await SharedPreferences.getInstance();
-    unreadNoti = prefs.getInt('unreadNoti');
+    if(prefs.getInt('unreadNoti') != null) {
+      unreadNoti = prefs.getInt('unreadNoti');
+    }
     setState(() {});
   }
 

@@ -1,6 +1,8 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/blocs/comment_blocs/comment_bloc.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
+import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,13 +12,11 @@ import 'package:http/http.dart' as http;
 class BookingWidget extends StatefulWidget {
   final bool hasReachedEnd;
   final List<BookingBlocModel> blocBookings;
-  final Function onGoBack;
   final ScrollController scrollController;
   final Function(bool) isEdited;
 
   const BookingWidget(
       {this.blocBookings,
-      this.onGoBack,
       this.isEdited,
       this.hasReachedEnd,
       this.scrollController});
@@ -28,6 +28,9 @@ class BookingWidget extends StatefulWidget {
 class _BookingWidgetState extends State<BookingWidget> {
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
+
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -108,6 +111,9 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 BlocProvider(
                                     create: (context) => BookingBloc(
                                         bookingRepository: _bookingRepository)),
+                                BlocProvider(
+                                    create: (context) => CommentBloc(
+                                        commentRepository: _commentRepository)),
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,
@@ -116,7 +122,7 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 },
                               ),
                             );
-                          })).then(widget.onGoBack);
+                          }));
                 },
                 child: Container(
                   margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),

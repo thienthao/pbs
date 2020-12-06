@@ -72,16 +72,10 @@ class _InfoState extends State<Info> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  iconSize: 20.0,
-                  color: Colors.white,
-                  onPressed: () => Navigator.pop(context),
-                ),
                 IconButton(
                   icon: Icon(Icons.camera_alt_rounded),
                   iconSize: 20.0,

@@ -202,6 +202,8 @@ class CalendarRepository {
       },
     );
 
+    print(baseUrl + 'photographers/$ptgId/busydays/$busyDayId');
+
     bool result = false;
     if (response.statusCode == 200) {
       result = true;

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
@@ -34,6 +35,7 @@ class _PhotographCarouselState extends State<PhotographCarousel> {
       CommentRepository(httpClient: http.Client());
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -101,11 +103,11 @@ class _PhotographCarouselState extends State<PhotographCarousel> {
             color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(30.0),
           ),
-          margin: const EdgeInsets.only(left: 21.0, right: 300.0),
+          margin: const EdgeInsets.only(left: 20.0, right: 300.0),
           height: 3.0,
         ),
         Padding(
-          padding: EdgeInsets.only(left: 7.0),
+          padding: EdgeInsets.only(left: 0.0),
           child: Container(
             height: 240.0,
             child: ListView.builder(
@@ -178,11 +180,16 @@ class _PhotographCarouselState extends State<PhotographCarousel> {
                             children: <Widget>[
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(20.0),
-                                child: Image(
-                                  image: NetworkImage(photographer.avatar),
-                                  height: 240.0,
-                                  width: 240.0,
-                                  fit: BoxFit.cover,
+                                child: CachedNetworkImage(
+                                  imageUrl: photographer.avatar,
+                                  placeholder: (context, url) =>
+                                      Container(
+                                        width: 240,
+                                          height: 240,
+                                          color: Colors.red,
+                                          child: Icon(Icons.camera_alt_outlined, size: 30,)),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
                                 ),
                               ),
                               Positioned(

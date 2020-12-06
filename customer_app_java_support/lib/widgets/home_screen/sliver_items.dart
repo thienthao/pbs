@@ -65,7 +65,7 @@ class _SliverItemsState extends State<SliverItems> {
           padding: EdgeInsets.only(
             left: 10.0,
             right: 20.0,
-            top: 30.0,
+            top: 20.0,
           ),
           child: Text(
             'Bạn muốn chụp ảnh ở đâu?',

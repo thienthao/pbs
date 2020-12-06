@@ -74,7 +74,31 @@ class CommentRepository {
     } else {
       throw Exception('Error at cancel a booking');
     }
-
     return result;
+  }
+
+  Future<List<CommentBlocModel>> getCommentByBookingId(int id) async {
+    final response = await this.httpClient.get(
+      baseUrl +
+          'bookings/${id.toString()}/comments',
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
+      final List<CommentBlocModel> comments = data.map((comment) {
+        return CommentBlocModel(
+          comment: comment['comment'],
+          rating: comment['rating'],
+          username: comment['username'],
+          fullname: comment['fullname'],
+          createdAt: comment['createdAt'],
+          location: comment['location'],
+          avatar: comment['avatar'],
+        );
+      }).toList();
+
+      return comments;
+    } else {
+      throw Exception('Error getting list of comments');
+    }
   }
 }

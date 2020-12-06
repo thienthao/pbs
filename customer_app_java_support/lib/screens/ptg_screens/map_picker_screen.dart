@@ -110,7 +110,7 @@ class _MapPickerState extends State<MapPicker> {
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 380, left: 20, right: 20),
+                  padding: EdgeInsets.only(top: 450, left: 20, right: 20),
                   child: RaisedButton(
                     onPressed: () {
                       Navigator.pop(context, returnLocation);

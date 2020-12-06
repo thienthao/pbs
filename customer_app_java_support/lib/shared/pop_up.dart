@@ -1,21 +1,35 @@
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:status_alert/status_alert.dart';
 
 void popNotice(BuildContext context) {
-  StatusAlert.show(
-    context,
-    duration: Duration(seconds: 60),
-    title: 'Đang gửi yêu cầu',
-    configuration: IconConfiguration(
-      icon: Icons.send_to_mobile,
-    ),
-  );
+  showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) {
+        return Dialog(
+          elevation: 0.0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.4,
+            width: MediaQuery.of(context).size.width * 0.6,
+            child: Material(
+              type: MaterialType.card,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+              elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+              child: Image.asset(
+                'assets/images/loading.gif',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        );
+      });
 }
 
-void removeNotice() {
-  StatusAlert.hide();
+void removeNotice(BuildContext context) {
+  Navigator.of(context).pop();
 }
 
 void popUp(BuildContext context, String title, String content) {

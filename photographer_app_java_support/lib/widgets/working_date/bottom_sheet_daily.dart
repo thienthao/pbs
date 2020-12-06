@@ -19,13 +19,13 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
   List<WorkingDayBlocModel> _newListWorkingDays = List<WorkingDayBlocModel>();
   updateWorkingDays(Map<String, bool> _days) async {
     List<bool> listIsWorkingDays = [
+      _days[sun],
       _days[mon],
       _days[tue],
       _days[wed],
       _days[thur],
       _days[fri],
       _days[sat],
-      _days[sun]
     ];
     _newListWorkingDays.clear();
     for (var i = 0; i < 7; i++) {
@@ -72,19 +72,19 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
   void initState() {
     super.initState();
     for (var item in widget.listWorkingDays) {
-      if (item.day == 1) {
+      if (item.day == 2) {
         days[mon] = item.workingDay;
-      } else if (item.day == 2) {
-        days[tue] = item.workingDay;
       } else if (item.day == 3) {
-        days[wed] = item.workingDay;
+        days[tue] = item.workingDay;
       } else if (item.day == 4) {
-        days[thur] = item.workingDay;
+        days[wed] = item.workingDay;
       } else if (item.day == 5) {
-        days[fri] = item.workingDay;
+        days[thur] = item.workingDay;
       } else if (item.day == 6) {
-        days[sat] = item.workingDay;
+        days[fri] = item.workingDay;
       } else if (item.day == 7) {
+        days[sat] = item.workingDay;
+      } else if (item.day == 1) {
         days[sun] = item.workingDay;
       }
     }

@@ -17,6 +17,8 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     if (commentEvent is CommentEventFetch) {
     } else if (commentEvent is CommentByPhotographerIdEventFetch) {
       yield* _mapCommentsByPhotographerIdLoadedToState(commentEvent.id);
+    } else if (commentEvent is CommentByBookingIdEventFetch) {
+      yield* _mapCommentsByBookingIdLoadedToState(commentEvent.id);
     } else if (commentEvent is CommentEventPost) {
       yield* _mapPostCommentToState(commentEvent.comment);
     }
@@ -27,6 +29,17 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     try {
       final comments =
           await this.commentRepository.getCommentByPhotographerId(id);
+      yield CommentStateSuccess(comments: comments);
+    } catch (_) {
+      yield CommentStateFailure();
+    }
+  }
+
+  Stream<CommentState> _mapCommentsByBookingIdLoadedToState(
+      int id) async* {
+    try {
+      final comments =
+      await this.commentRepository.getCommentByBookingId(id);
       yield CommentStateSuccess(comments: comments);
     } catch (_) {
       yield CommentStateFailure();

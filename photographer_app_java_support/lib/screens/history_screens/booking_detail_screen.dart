@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:photographer_app_java_support/constant/chat_name.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
@@ -277,8 +278,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     });
   }
 
-
-
   @override
   void initState() {
     super.initState();
@@ -288,6 +287,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget formatBottomComponentBasedOnStatus(String status) {
     if (status.toUpperCase().trim() == 'DONE') {
+      BlocProvider.of<CommentBloc>(context)
+          .add(CommentByBookingIdEventFetch(id: bookingObj.id));
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(
           height: 20,
@@ -368,139 +369,181 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
           ),
         ),
-        bookingObj.comment == null
-            ? Container(
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        CircleAvatar(
-                          backgroundImage: AssetImage('assets/images/girl.jpg'),
-                          radius: 28,
+        BlocBuilder<CommentBloc, CommentState>(
+          builder: (BuildContext context, state) {
+            if (state is CommentStateSuccess) {
+              if (state.comments == null) {
+                return Center(
+                  child:
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text('Khách hàng của bạn chưa nhận xét về lần hẹn này'),
+                      ),
+                );
+              } else if (state.comments.isEmpty) {
+                return Center(
+
+                  child:
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Text('Khách hàng của bạn chưa nhận xét về lần hẹn này'),
+                      ),
+                );
+              } else {
+                return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey[300],
+                                offset: Offset(-1.0, 2.0),
+                                blurRadius: 6.0)
+                          ],
                         ),
-                        Container(
-                          margin: EdgeInsets.only(left: 10.0),
-                          width: MediaQuery.of(context).size.width * 0.68,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  SmoothStarRating(
-                                      allowHalfRating: false,
-                                      onRated: (v) {
-                                        print('You have rate $v stars');
-                                      },
-                                      starCount: 5,
-                                      rating: 4.0,
-                                      size: 15.0,
-                                      isReadOnly: true,
-                                      defaultIconData: Icons.star_border,
-                                      filledIconData: Icons.star,
-                                      halfFilledIconData: Icons.star_half,
-                                      color: Colors.amber,
-                                      borderColor: Colors.amber,
-                                      spacing: 0.0),
-                                  Text(
-                                    '18/10/2020',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(state.comments[0].avatar),
+                                  radius: 28,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(left: 10.0),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.68,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          SmoothStarRating(
+                                              allowHalfRating: false,
+                                              onRated: (v) {
+                                                print('You have rate $v stars');
+                                              },
+                                              starCount: 5,
+                                              rating: state.comments[0].rating,
+                                              size: 15.0,
+                                              isReadOnly: true,
+                                              defaultIconData:
+                                                  Icons.star_border,
+                                              filledIconData: Icons.star,
+                                              halfFilledIconData:
+                                                  Icons.star_half,
+                                              color: Colors.amber,
+                                              borderColor: Colors.amber,
+                                              spacing: 0.0),
+                                          Text(
+                                            DateFormat('dd/MM/yyyy HH:mm a')
+                                                .format(DateTime.parse(state
+                                                    .comments[0].createdAt)),
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: '',
+                                          style: TextStyle(
+                                              color: Colors.black54,
+                                              fontFamily: 'Quicksand'),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                                text: 'bởi: ',
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            TextSpan(
+                                                text:
+                                                    state.comments[0].fullname,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.normal)),
+                                          ],
+                                        ),
+                                      ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: '',
+                                          style: TextStyle(
+                                              color: Colors.black54,
+                                              fontFamily: 'Quicksand'),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                                text: 'Địa điểm: ',
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            TextSpan(
+                                                text: 'Hồ Chí Minh',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.normal)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                text: '',
+                                style: TextStyle(
+                                    color: Colors.black54,
+                                    fontFamily: 'Quicksand'),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: 'Bình luận: ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold)),
+                                  TextSpan(
+                                      text: state.comments[0].comment,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.normal)),
                                 ],
                               ),
-                              RichText(
-                                text: TextSpan(
-                                  text: '',
-                                  style: TextStyle(
-                                      color: Colors.black54,
-                                      fontFamily: 'Quicksand'),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'bởi: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold)),
-                                    TextSpan(
-                                        text: 'Uyển Nhi',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.normal)),
-                                  ],
-                                ),
-                              ),
-                              RichText(
-                                text: TextSpan(
-                                  text: '',
-                                  style: TextStyle(
-                                      color: Colors.black54,
-                                      fontFamily: 'Quicksand'),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'Địa điểm: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold)),
-                                    TextSpan(
-                                        text: 'Hồ Chí Minh',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.normal)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        text: '',
-                        style: TextStyle(
-                            color: Colors.black54, fontFamily: 'Quicksand'),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: 'Bình luận: ',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text:
-                                  'Anh nhiệt tình, có góc nghệ thuật đẹp, em sẽ đặt nữa nếu có nhu cầu ^^',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                        ],
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-              )
-            : Center(
-                child: Text('Khách hàng của bạn chưa nhận xét về lần hẹn này'),
-              )
+                    ]);
+              }
+            }
+            return Text('');
+          },
+        ),
       ]);
     } else if (status.toUpperCase().trim() == 'PENDING') {
       return Container(
@@ -543,7 +586,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     width: 10.0,
                   ),
                   Text(
-                    'Giao hàng qua ứng dụng',
+                    bookingObj.returningType == 1
+                        ? 'Giao hàng qua ứng dụng'
+                        : 'Gặp mặt',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -642,7 +687,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     width: 10.0,
                   ),
                   Text(
-                    'Giao hàng qua ứng dụng',
+                    bookingObj.returningType == 1
+                        ? 'Giao hàng qua ứng dụng'
+                        : 'Gặp mặt',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -744,7 +791,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       width: 10.0,
                     ),
                     Text(
-                      'Giao hàng qua ứng dụng',
+                      bookingObj.returningType == 1
+                          ? 'Giao hàng qua ứng dụng'
+                          : 'Gặp mặt',
                       style: TextStyle(
                           fontSize: 17.0, fontWeight: FontWeight.bold),
                     ),
@@ -848,7 +897,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
- Widget _buildTimeAndLocationList(
+  Widget _buildTimeAndLocationList(
       List<TimeAndLocationBlocModel> listTimeAndLocation) {
     return Column(
       children: listTimeAndLocation.asMap().entries.map((MapEntry mapEntry) {
@@ -985,6 +1034,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
+  Widget reason(String title, String content) {
+    return RichText(
+      text: TextSpan(
+        text: '',
+        style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+        children: <TextSpan>[
+          TextSpan(
+              text: '$title:   ',
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          TextSpan(
+              text: content, style: TextStyle(fontWeight: FontWeight.normal)),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTimeAndLocationInfoMultiDay(BookingBlocModel bookingBlocModel) {
     return Container(
@@ -1070,6 +1135,27 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
+                bookingBlocModel.status.toUpperCase() != 'CANCELED' &&
+                        bookingBlocModel.status.toUpperCase() != 'REJECTED'
+                    ? SizedBox()
+                    : bookingBlocModel.customerCanceledReason != null &&
+                            bookingBlocModel.status.toUpperCase() != 'CANCELED'
+                        ? reason('Lý do hủy của khách hàng',
+                            bookingBlocModel.customerCanceledReason)
+                        : bookingBlocModel.photographerCanceledReason != null &&
+                                bookingBlocModel.status.toUpperCase() !=
+                                    'CANCELED'
+                            ? reason('Lý do hủy của bạn',
+                                bookingBlocModel.photographerCanceledReason)
+                            : bookingBlocModel.rejectedReason != null &&
+                                    bookingBlocModel.status.toUpperCase() !=
+                                        'REJECTED'
+                                ? reason('Lý từ chối của bạn',
+                                    bookingBlocModel.rejectedReason)
+                                : SizedBox(),
+                SizedBox(
+                  height: 10,
+                ),
                 Text('Địa điểm và thời gian cụ thể:   ',
                     style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.bold)),
@@ -1081,7 +1167,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
                 SizedBox(
                   height: 10,
                 ),
@@ -1198,8 +1283,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       bookingBlocModel.listTimeAndLocations.isNotEmpty
                           ? TextSpan(
                               text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                  DateTime.parse(
-                                      bookingBlocModel.endDate)),
+                                  DateTime.parse(bookingBlocModel.endDate)),
                               style: TextStyle(fontWeight: FontWeight.normal))
                           : bookingBlocModel.endDate == null
                               ? TextSpan(text: '')
@@ -1272,7 +1356,27 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
+                bookingBlocModel.status.toUpperCase() != 'CANCELED' &&
+                        bookingBlocModel.status.toUpperCase() != 'REJECTED'
+                    ? SizedBox()
+                    : bookingBlocModel.customerCanceledReason != null &&
+                            bookingBlocModel.status.toUpperCase() != 'CANCELED'
+                        ? reason('Lý do hủy của khách hàng',
+                            bookingBlocModel.customerCanceledReason)
+                        : bookingBlocModel.photographerCanceledReason != null &&
+                                bookingBlocModel.status.toUpperCase() !=
+                                    'CANCELED'
+                            ? reason('Lý do hủy của bạn',
+                                bookingBlocModel.photographerCanceledReason)
+                            : bookingBlocModel.rejectedReason != null &&
+                                    bookingBlocModel.status.toUpperCase() !=
+                                        'REJECTED'
+                                ? reason('Lý từ chối của bạn',
+                                    bookingBlocModel.rejectedReason)
+                                : SizedBox(),
+                SizedBox(
+                  height: 10,
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -1283,69 +1387,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       ),
     );
   }
-
-  Widget displayCancelReasonBasedOnStatus(String status) {
-    if (status.toUpperCase().trim() == 'CANCELED') {
-      if (bookingObj.customerCanceledReason == null &&
-          bookingObj.photographerCanceledReason != null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do hủy của photographer:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.photographerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      } else if (bookingObj.customerCanceledReason != null &&
-          bookingObj.photographerCanceledReason == null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do hủy của tôi:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.customerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      }
-    } else if (status.toUpperCase().trim() == 'REJECTED') {
-      if (bookingObj.rejectedReason != null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do của photographer:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.photographerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      }
-    }
-    return SizedBox(
-      height: 0,
-    );
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -1406,7 +1447,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ),
                             ),
                           ),
-                         ///////////////////////////////////info
+                          ///////////////////////////////////info
 
                           bookingState.booking.isMultiday
                               ? _buildTimeAndLocationInfoMultiDay(
@@ -1695,31 +1736,43 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   }
                 }
                 if (bookingState is BookingStateCanceledSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
                 if (bookingState is BookingStateAcceptedSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateRejectedSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateCanceledSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateMovedToEditSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateMovedToDoneSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 

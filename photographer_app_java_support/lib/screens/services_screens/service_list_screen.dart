@@ -10,6 +10,8 @@ import 'package:photographer_app_java_support/models/package_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/category_respository.dart';
 import 'package:photographer_app_java_support/respositories/package_repository.dart';
 import 'package:photographer_app_java_support/screens/services_screens/service_new_screen.dart';
+import 'package:photographer_app_java_support/widgets/shared/package_list_screen_loading.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'service_edit_screen.dart';
@@ -123,7 +125,13 @@ class _ListServiceState extends State<ListService> {
                               categoryRepository: _categoryRepository),
                         ),
                       ],
-                      child: NewService(),
+                      child: NewService(
+                        isAdded: (bool isAdded) {
+                          if (isAdded) {
+                            _loadPackages();
+                          }
+                        },
+                      ),
                     )),
           );
         },
@@ -134,7 +142,23 @@ class _ListServiceState extends State<ListService> {
         backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Center(
-        child: BlocBuilder<PackageBloc, PackageState>(
+        child: BlocConsumer<PackageBloc, PackageState>(
+          listener: (context, packageState) {
+            if (packageState is PackageStateDeletedSuccess) {
+              removeNotice();
+              popUp(
+                  context, 'Xoá gói dịch vụ', 'Xóa gói dịch vụ thành công!!!!');
+              _loadPackages();
+            }
+            if (packageState is PackageStateDeletedInProgress) {
+              popNotice(context);
+            }
+            if (packageState is PackageStateDeletedFailure) {
+              removeNotice();
+              popUp(context, '${packageState.error}',
+                  'Gói dịch vụ hiện đang được sử đặt. Bạn không thể xóa!!!!');
+            }
+          },
           builder: (context, packageState) {
             if (packageState is PackageStateSuccess) {
               if (packageState.packages.isEmpty) {
@@ -322,6 +346,12 @@ class _ListServiceState extends State<ListService> {
                                                         ),
                                                       ],
                                                       child: EditService(
+                                                        isUpdated:
+                                                            (bool isUpdated) {
+                                                          if (isUpdated) {
+                                                            _loadPackages();
+                                                          }
+                                                        },
                                                         package: package,
                                                       ),
                                                     )),
@@ -363,104 +393,8 @@ class _ListServiceState extends State<ListService> {
               }
             }
 
-            if (packageState is PackageStateDeletedSuccess) {
-              _loadPackages();
-            }
-
             if (packageState is PackageStateLoading) {
-              return Shimmer.fromColors(
-                period: Duration(milliseconds: 1100),
-                baseColor: Colors.grey[200],
-                highlightColor: Colors.grey[400],
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-                  width: double.infinity,
-                  child: ListView.builder(
-                    physics: BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: 3,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: EdgeInsets.all(10.0),
-                        width: double.infinity,
-                        height: 360.0,
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black26,
-                                        offset: Offset(0.0, 2.0),
-                                        blurRadius: 6.0)
-                                  ]),
-                              child: Stack(
-                                children: <Widget>[
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            Colors.grey[400],
-                                            Colors.grey[300],
-                                          ], // whitish to gray
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(1.0),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 15.0,
-                                    bottom: 15.0,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[400],
-                                            borderRadius:
-                                                BorderRadius.circular(1.0),
-                                          ),
-                                          width: 100,
-                                          height: 24,
-                                        ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[400],
-                                                borderRadius:
-                                                    BorderRadius.circular(1.0),
-                                              ),
-                                              width: 35,
-                                              height: 15,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              );
+              return PackageListScreenLoadingWidget();
             }
 
             if (packageState is PackageStateFailure) {

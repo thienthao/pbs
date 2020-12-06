@@ -43,7 +43,7 @@ class BookingStateEditedSuccess extends BookingState {
 
   @override
   String toString() =>
-      'BookingStateCreatedSuccess { Booking Created: $isSuccess }';
+      'BookingStateEditedSuccess { Booking Updated: $isSuccess }';
 }
 
 class BookingStateCancelInProgress extends BookingState {}

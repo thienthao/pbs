@@ -349,7 +349,7 @@ class _CustomerPhotographerDetailState
                           ),
                         );
                       } else {
-                        Column(
+                        return Column(
                           children: [
                             CommentShow(
                               blocComments: commentState.comments,

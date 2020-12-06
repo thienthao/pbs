@@ -26,7 +26,7 @@ class BlocDatePicker extends StatefulWidget {
 class _BlocDatePickerState extends State<BlocDatePicker> {
   CalendarController controller;
   TimeOfDay _time = TimeOfDay.now();
-  DateTime _selectedDateTime = DateTime.now().toLocal().add(Duration(days: 1));
+  DateTime _selectedDateTime = DateTime.now().toLocal();
   CalendarModel photographerDays;
   // List _selectedEvents;
 
@@ -66,7 +66,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
 
   bool _predicate(DateTime day) {
     DateFormat dateFormat = DateFormat('yyyy/MM/dd');
-    if ((day.isBefore(DateTime.now().toLocal()))) {
+    if ((day.isBefore(DateTime.now()))) {
       return false;
     }
     for (var item in photographerDays.busyDays) {
@@ -120,10 +120,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
           outsideDaysVisible: false,
           weekendStyle: TextStyle().copyWith(color: Colors.black87),
           todayColor: Colors.white,
-          holidayStyle: TextStyle().copyWith(
-            color: Colors.black87,
-            decoration: TextDecoration.lineThrough,
-          ),
+          holidayStyle: TextStyle().copyWith(color: Colors.black87),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
           weekendStyle: TextStyle().copyWith(color: Colors.black87),
@@ -260,7 +257,13 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                             return Text('fail!!');
                           }
                           if (state is BookingStateGetBookingByDateSuccess) {
-                            return _buildEventList(state.listBookings);
+                            final tempListBooking = List<BookingBlocModel>();
+                            for (var booking in state.listBookings) {
+                              if (booking.status.toUpperCase() == 'ONGOING') {
+                                tempListBooking.add(booking);
+                              }
+                            }
+                            return _buildEventList(tempListBooking);
                           }
                           return Text('');
                         },
@@ -318,7 +321,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                       SizedBox(height: 30.0),
                       RaisedButton(
                         onPressed: () {
-                          widget.onSelecParam(_selectedDateTime.toUtc());
+                          widget.onSelecParam(_selectedDateTime);
                           Navigator.pop(context,
                               '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
                         },

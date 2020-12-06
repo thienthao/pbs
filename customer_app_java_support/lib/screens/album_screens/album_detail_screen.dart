@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
@@ -6,6 +7,7 @@ import 'package:customer_app_java_support/blocs/photographer_blocs/photographers
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/photographer_detail.dart';
+import 'package:customer_app_java_support/shared/scale_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:intl/intl.dart';
@@ -150,14 +152,20 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                           elevation: 2,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Image.network(
-                              '${widget.album.images[index].imageLink}',
-                              fit: BoxFit.cover,
+                            child: GestureDetector(
+                              onTap: () {
+                                scaleNavigator(context, DetailScreen(imageUrl: widget.album.images[index].imageLink,));
+                              },
+                              child: Image.network(
+                                '${widget.album.images[index].imageLink}',
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       cardController: controller = CardController(),
+
                       swipeUpdateCallback:
                           (DragUpdateDetails details, Alignment align) {
                         if (align.x < 0) {
@@ -373,6 +381,41 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DetailScreen extends StatelessWidget {
+  final String imageUrl;
+
+  const DetailScreen({this.imageUrl});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GestureDetector(
+        child: Center(
+          child: Hero(
+            tag: imageUrl,
+            child: CachedNetworkImage(
+              imageUrl:  imageUrl,
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.contain,
+                      colorFilter:
+                      ColorFilter.mode(Colors.black12, BlendMode.screen)),
+                ),
+              ),
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
+          ),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+        },
       ),
     );
   }

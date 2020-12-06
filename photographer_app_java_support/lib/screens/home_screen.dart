@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
 
-  String filterType = 'Đang chờ';
+  String filterType = 'Chờ xác nhận';
   Completer<void> _completer;
   String _selectedDate;
   @override
@@ -111,11 +111,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     InkWell(
                       onTap: () {
-                        changeFilter('Đang chờ');
+                        changeFilter('Chờ xác nhận');
                         _loadPendingBookings();
                       },
                       child: Text(
-                        'Đang chờ',
+                        'Chờ xác nhận',
                         style: TextStyle(
                           color: Colors.black87,
                           fontSize: 18.0,
@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       height: 4.0,
                       width: 120.0,
-                      color: filterType == 'Đang chờ'
+                      color: filterType == 'Chờ xác nhận'
                           ? Theme.of(context).primaryColor
                           : Colors.transparent,
                     ),
@@ -315,17 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         }
-                        final bookings =
-                            (bookingState as BookingStateSuccess).bookings;
-                        return RefreshIndicator(
-                            child: Container(
-                              child: UpComSlidable(),
-                            ),
-                            onRefresh: () {
-                              // BlocProvider.of<BookingBloc>(context)
-                              //     .add(BookingEventRefresh(booking: bookings[0]));
-                              return _completer.future;
-                            });
+                       return Text('');
                       },
                     ),
                   ),

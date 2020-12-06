@@ -51,12 +51,6 @@ class _BookHistoryState extends State<BookHistory> {
         .add(BookingEventFetchInfinite(cusId: 2, status: _status));
   }
 
-  FutureOr onGoBack(dynamic value) {
-    if (isBookingEdited) {
-      _loadBookingsByPaging(statusForFilter);
-      setState(() {});
-    }
-  }
 
   _restartEvent() async {
     BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
@@ -90,9 +84,10 @@ class _BookHistoryState extends State<BookHistory> {
                       scrollController: _scrollController,
                       hasReachedEnd: bookingState.hasReachedEnd,
                       blocBookings: bookingState.bookings,
-                      onGoBack: onGoBack,
                       isEdited: (bool isEdit) {
-                        isBookingEdited = isEdit;
+                        if(isEdit) {
+                          _loadBookingsByPaging(statusForFilter);
+                        }
                       },
                     ),
                   ),

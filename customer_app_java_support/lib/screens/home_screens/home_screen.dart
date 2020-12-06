@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
@@ -82,23 +81,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             expandedHeight: 220,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             actions: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.search,
-                  color: Colors.white,
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return BlocProvider(
+                          create: (context) => PhotographerBloc(
+                              photographerRepository: _photographerRepository),
+                          child: SearchPtgService(),
+                        );
+                      }),
+                    );
+                  },
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) {
-                      return BlocProvider(
-                        create: (context) => PhotographerBloc(
-                            photographerRepository: _photographerRepository),
-                        child: SearchPtgService(),
-                      );
-                    }),
-                  );
-                },
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -324,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     },
                   ),
                 ),
-                SizedBox(height: 100.0),
+                SizedBox(height: 30.0),
               ],
             ),
           ),

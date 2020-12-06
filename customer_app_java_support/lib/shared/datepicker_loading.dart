@@ -11,15 +11,18 @@ class DatePickerLoadingWidget extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(height: 10.0),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: 150,
-              height: 35,
-              padding: EdgeInsets.only(left: 12, top: 20.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(5.0),
+          Padding(
+            padding: const EdgeInsets.only(left:15.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                width: 150,
+                height: 35,
+                padding: EdgeInsets.only(left: 12, top: 20.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
               ),
             ),
           ),

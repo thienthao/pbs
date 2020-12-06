@@ -8,7 +8,6 @@ class SearchLocation extends StatefulWidget {
   final double currentLongitude;
 
   const SearchLocation({this.currentLatitude, this.currentLongitude});
-
   // bắn qua để init location
   @override
   _SearchLocationState createState() => _SearchLocationState();
@@ -120,7 +119,7 @@ class _SearchLocationState extends State<SearchLocation> {
                   },
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: 380, left: 20, right: 20),
+                  padding: EdgeInsets.only(top: 450, left: 20, right: 20),
                   child: RaisedButton(
                     onPressed: () {
                       Navigator.pop(context, returnLocation);

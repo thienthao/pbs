@@ -207,7 +207,7 @@ class BookingRepository {
         photographerCanceledReason: data['photographerCanceledReason'] ?? '',
         rejectedReason: data['rejectedReason'] ?? '',
         rating: data['rating'] ?? 0.0,
-        comment: data['comment'] ?? '',
+        comment: data['comment'],
         address: data['location'] ?? '',
         commentDate: data['commentDate'],
         photographer: photographer,
@@ -406,6 +406,7 @@ class BookingRepository {
         listBookings = bookingInfos.map((booking) {
           return BookingBlocModel(
               id: booking['id'],
+              status: booking['status'],
               latitude: booking['lat'],
               startDate: booking['start'],
               endDate: booking['end']);

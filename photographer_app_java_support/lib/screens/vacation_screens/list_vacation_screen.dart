@@ -65,7 +65,7 @@ class _ListVacationState extends State<ListVacation> {
         ),
         elevation: 3.0,
       ),
-      body: Column(
+      body: ListView(
         children: [
           SizedBox(height: 5.0),
           Row(

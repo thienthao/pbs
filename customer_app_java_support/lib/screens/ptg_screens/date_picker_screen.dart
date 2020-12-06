@@ -15,7 +15,7 @@ class DatePicker extends StatefulWidget {
 class _DatePickerState extends State<DatePicker> {
   CalendarController controller;
   TimeOfDay _time = TimeOfDay.now();
-  DateTime _selectedDateTime = DateTime.now();
+  DateTime _selectedDateTime = DateTime.now().toLocal();
 
   final Map<DateTime, List> _holidays = {};
 
@@ -41,7 +41,7 @@ class _DatePickerState extends State<DatePicker> {
   }
 
   bool _predicate(DateTime day) {
-    if ((day.isAfter(widget.lastDay))) {
+    if ((!day.isBefore(widget.lastDay))) {
       return true;
     }
     return false;

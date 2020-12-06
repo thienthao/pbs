@@ -1,10 +1,9 @@
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:customer_app_java_support/models/customer_bloc_model.dart';
-import 'package:customer_app_java_support/models/location.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:status_alert/status_alert.dart';
 
 class Detail extends StatefulWidget {
   final CustomerBlocModel customer;
@@ -40,20 +39,20 @@ class _DetailState extends State<Detail> {
         .add(CustomerEventUpdateProfile(customer: customerBlocModel));
   }
 
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 60),
-      title: 'Đang gửi yêu cầu',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
-  }
-
-  void removeNotice() {
-    StatusAlert.hide();
-  }
+  // void popNotice() {
+  //   StatusAlert.show(
+  //     context,
+  //     duration: Duration(seconds: 60),
+  //     title: 'Đang gửi yêu cầu',
+  //     configuration: IconConfiguration(
+  //       icon: Icons.send_to_mobile,
+  //     ),
+  //   );
+  // }
+  //
+  // void removeNotice() {
+  //   StatusAlert.hide();
+  // }
 
   void popUp(String title, String content) {
     Flushbar(
@@ -128,15 +127,15 @@ class _DetailState extends State<Detail> {
         body: BlocListener<CustomerBloc, CustomerState>(
           listener: (context, state) {
             if (state is CustomerStateUpdatedProfileSuccess) {
-              removeNotice();
+              removeNotice(context);
               popUp(
                   'Cập nhật thông tin', 'Thông tin của bạn đã được cập nhật!!');
             }
             if (state is CustomerStateLoading) {
-              popNotice();
+              popNotice(context);
             }
             if (state is CustomerStateFailure) {
-              removeNotice();
+              removeNotice(context);
               popUp('Cập nhật thông tin',
                   'Đã có lỗi xảy ra trong lúc cập nhật. Bạn vui lòng thử lại sau!');
             }

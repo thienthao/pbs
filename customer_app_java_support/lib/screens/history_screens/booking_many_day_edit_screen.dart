@@ -10,12 +10,12 @@ import 'package:customer_app_java_support/respositories/calendar_repository.dart
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:status_alert/status_alert.dart';
 
 class ReturnTypeModel {
   int id;
@@ -195,7 +195,7 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                 ),
               ).show(context);
               widget.isEdited(true);
-              removeNotice();
+              removeNotice(context);
               Flushbar(
                 flushbarPosition: FlushbarPosition.TOP,
                 flushbarStyle: FlushbarStyle.FLOATING,
@@ -223,10 +223,10 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
             }
 
             if (state is BookingStateLoading) {
-              popNotice();
+              popNotice(context);
             }
             if (state is BookingStateFailure) {
-              removeNotice();
+              removeNotice(context);
               Flushbar(
                 flushbarPosition: FlushbarPosition.TOP,
                 flushbarStyle: FlushbarStyle.FLOATING,
@@ -370,6 +370,7 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => BookingManyDetail(
+
                                     ptgId: widget.photographer.id,
                                     onUpdateList:
                                         (TimeAndLocationBlocModel model) {
@@ -814,18 +815,18 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
         : SizedBox();
   }
 
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 60),
-      title: 'Đang gửi yêu cầu',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
-  }
-
-  void removeNotice() {
-    StatusAlert.hide();
-  }
+  // void popNotice() {
+  //   // StatusAlert.show(
+  //   //   context,
+  //   //   duration: Duration(seconds: 60),
+  //   //   title: 'Đang gửi yêu cầu',
+  //   //   configuration: IconConfiguration(
+  //   //     icon: Icons.send_to_mobile,
+  //   //   ),
+  //   // );
+  // }
+  //
+  // void removeNotice() {
+  //   // StatusAlert.hide();
+  // }
 }

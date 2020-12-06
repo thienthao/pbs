@@ -13,8 +13,9 @@ import 'package:status_alert/status_alert.dart';
 
 class EditService extends StatefulWidget {
   final PackageBlocModel package;
+  final Function(bool) isUpdated;
 
-  EditService({this.package});
+  EditService({this.package, this.isUpdated});
 
   @override
   _EditServiceState createState() => _EditServiceState();
@@ -192,8 +193,8 @@ class _EditServiceState extends State<EditService> {
 
   bool _validatePackage() {
     if (!isMultiDay) {
-      if (int.parse(onAirTimeTextController.text.trim()) > 0 &&
-          int.parse(onAirTimeTextController.text.trim()) < 24) {
+      if (!(int.parse(onAirTimeTextController.text.trim()) > 0 &&
+          int.parse(onAirTimeTextController.text.trim()) < 24)) {
         popUp('Thời gian tác nghiệp',
             'Thời gian tác nghiệp ít hơn 1 giờ và quá 24 giờ!');
         return false;
@@ -275,6 +276,7 @@ class _EditServiceState extends State<EditService> {
         body: BlocListener<PackageBloc, PackageState>(
           listener: (context, state) {
             if (state is PackageStateUpdatedSuccess) {
+              widget.isUpdated(true);
               removeNotice();
               popUp(
                   'Cập nhật gói dịch vụ', 'Cập nhật gói dịch vụ thành công!!');

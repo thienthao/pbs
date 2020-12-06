@@ -31,6 +31,10 @@ class _ServiceShowState extends State<ServiceShow> {
     return Column(
       children: [
         ExpandChild(
+          expandArrowStyle: ExpandArrowStyle.both,
+          collapsedHint: "Gói chụp trong ngày",
+          expandedHint: "Gói chụp trong ngày",
+          hintTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           child: Column(
             children:
                 widget.blocPackages.asMap().entries.map((MapEntry mapEntry) {
@@ -222,6 +226,10 @@ class _ServiceShowState extends State<ServiceShow> {
         : Column(
             children: [
               ExpandChild(
+                expandArrowStyle: ExpandArrowStyle.both,
+                collapsedHint: "Gói chụp nhiều ngày",
+                expandedHint: "Gói chụp nhiều ngày",
+                hintTextStyle: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
                 child: Column(
                   children: widget.blocPackages
                       .asMap()
@@ -387,22 +395,16 @@ class _ServiceShowState extends State<ServiceShow> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Column(children: [
-          Text(
-            'Gói chụp trong ngày',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          _buildSingleDayPackages(),
-        ]),
+        Column(
+          children: [
+            _buildSingleDayPackages(),
+          ],
+        ),
         SizedBox(
           height: 20,
         ),
         Column(
           children: [
-            Text(
-              'Gói chụp nhiều ngày',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
             _buildMultiDaysPackages(),
           ],
         ),
