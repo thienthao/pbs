@@ -8,6 +8,22 @@ import java.util.List;
 
 public class DtoMapper {
 
+    public static CancelledBooking toCancelledBooking(Booking booking) {
+        CancelledBooking cancelledBooking = new CancelledBooking();
+        if(booking.getUpdatedAt() != null) {
+            cancelledBooking.setCancelledAt(DateHelper.convertToLocalDateTimeViaInstant(booking.getUpdatedAt()));
+        }
+        cancelledBooking.setCustomerName(booking.getCustomer().getFullname());
+        cancelledBooking.setPhotographerName(booking.getPhotographer().getFullname());
+        cancelledBooking.setPrice(booking.getPrice());
+        cancelledBooking.setCustomerAvatar(booking.getCustomer().getAvatar());
+        if(booking.getTimeLocationDetails().get(0).getStart() != null) {
+            cancelledBooking.setShootingAt(DateHelper.convertToLocalDateTimeViaInstant(booking.getTimeLocationDetails().get(0).getStart()));
+        }
+        cancelledBooking.setShootingLocation(booking.getTimeLocationDetails().get(0).getFormattedAddress());
+        return cancelledBooking;
+    }
+
     public static PhotographerDto toPhotographerDto(User photographer) {
         List<AlbumDto2> albumDto2s = new ArrayList<>();
         for (Album album: photographer.getAlbums()) {
@@ -36,18 +52,17 @@ public class DtoMapper {
     }
 
     public static SplitedPhotographerDto toSplitedPhotographerDto(User photographer) {
-        return new SplitedPhotographerDto(
-                photographer.getId(),
-                photographer.getUsername(),
-                photographer.getFullname(),
-                photographer.getDescription(),
-                photographer.getAvatar(),
-                photographer.getPhone(),
-                photographer.getEmail(),
-                photographer.getRatingCount(),
-                photographer.getCover(),
-                photographer.getBooked()
-        );
+        SplitedPhotographerDto result = new SplitedPhotographerDto();
+        result.setId(photographer.getId());
+        result.setUsername(photographer.getUsername());
+        result.setFullname(photographer.getFullname());
+        result.setDescription(photographer.getDescription());
+        result.setAvatar(photographer.getAvatar());
+        result.setPhone(photographer.getPhone());
+        result.setEmail(photographer.getEmail());
+        result.setCover(photographer.getCover());
+
+        return result;
     }
 
     public static AlbumDto2 toAlbumDto(Album album) {
@@ -70,6 +85,7 @@ public class DtoMapper {
         return new ServicePackageDto(
                 servicePackage.getId(),
                 servicePackage.getName(),
+                servicePackage.getTimeAnticipate(),
                 servicePackage.getPrice(),
                 servicePackage.getDescription(),
                 servicePackage.getSupportMultiDays(),
@@ -195,6 +211,25 @@ public class DtoMapper {
         bInfo.setAddress(tld.getFormattedAddress());
         bInfo.setLat(tld.getLat());
         bInfo.setLon(tld.getLon());
+        bInfo.setTimeAnticipate(b.getTimeAnticipate());
+//        bInfo.setEditDeadline(b.getEditDeadline());
+        bInfo.setPackageName(b.getServiceName());
+        bInfo.setPackagePrice(b.getPrice());
+        bInfo.setCustomerId(b.getCustomer().getId());
+        bInfo.setCustomerName(b.getCustomer().getFullname());
+        bInfo.setStart(tld.getStart());
+        bInfo.setEnd(tld.getEnd());
+        return bInfo;
+    }
+
+    public static BookingInfo toEditBookingInfo(Booking b, TimeLocationDetail tld) {
+        BookingInfo bInfo = new BookingInfo();
+        bInfo.setId(b.getId());
+        bInfo.setStatus(b.getBookingStatus().toString());
+        bInfo.setAddress(tld.getFormattedAddress());
+        bInfo.setLat(tld.getLat());
+        bInfo.setLon(tld.getLon());
+        bInfo.setEditDeadline(b.getEditDeadline());
         bInfo.setPackageName(b.getServiceName());
         bInfo.setPackagePrice(b.getPrice());
         bInfo.setCustomerId(b.getCustomer().getId());
@@ -211,7 +246,9 @@ public class DtoMapper {
         bInfo.setStatus(b.getBookingStatus().toString());
         bInfo.setPackageName(b.getServiceName());
         bInfo.setPackagePrice(b.getPrice());
+        bInfo.setTimeAnticipate(b.getTimeAnticipate());
         bInfo.setCustomerId(b.getCustomer().getId());
+        bInfo.setEditDeadline(b.getEditDeadline());
         bInfo.setCustomerName(b.getCustomer().getFullname());
         bInfo.setStart(b.getEditDeadline());
         bInfo.setEnd(b.getEditDeadline());

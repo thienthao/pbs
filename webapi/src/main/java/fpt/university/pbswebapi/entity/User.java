@@ -70,6 +70,10 @@ public class User {
     private List<Album> albums;
 
     @JsonIgnore
+    @ManyToMany(mappedBy = "users")
+    private List<Album> likedAlbums;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "photographer")
     private List<ServicePackage> packages;
 

@@ -6,6 +6,7 @@ import fpt.university.pbswebapi.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
@@ -16,9 +17,14 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.AntPathMatcher;
+
+import java.util.Properties;
 
 @Configuration
 @EnableWebSecurity
@@ -49,12 +55,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new AuthTokenFilter();
     }
 
-    /*
-      By default, Spring OAuth2 uses HttpSessionOAuth2AuthorizationRequestRepository to save
-      the authorization request. But, since our service is stateless, we can't save it in
-      the session. We'll save the request in a Base64 encoded cookie instead.
-    */
-
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder
@@ -67,6 +67,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        Properties users = null;
+//        try {
+//            users = PropertiesLoaderUtils.loadAllProperties("users.properties");
+//        } catch (Exception e) {
+//            System.out.println(e.toString());
+//        }
+//        return new InMemoryUserDetailsManager(users);
+//    }
+
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
@@ -76,19 +87,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .requestMatchers(req-> req.getRequestURI().contains("images")).permitAll()
+                .requestMatchers(req-> req.getRequestURI().contains("download")).permitAll()
+                .requestMatchers(req-> req.getRequestURI().contains("upload")).permitAll()
+                .requestMatchers(req-> req.getRequestURI().contains("cover")).permitAll();
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/test/**").permitAll()
-                .antMatchers("/api/albums/**").permitAll()
+//                .antMatchers("/api/test/**").permitAll()
+//                .antMatchers("/api/albums/**").permitAll()
                 .antMatchers("/api/categories/**").permitAll()
-                .antMatchers("/api/photographers/**").permitAll()
-                .antMatchers("/api/**").permitAll()
+//                .antMatchers("/api/photographers/**").permitAll()
+//                .antMatchers("/api/**").permitAll()
                 .antMatchers("/admin/**").permitAll()
+                .antMatchers("/api/users/**").permitAll()
                 .antMatchers("/resources/**").permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .antMatchers(
                         HttpMethod.GET,
                         "/",

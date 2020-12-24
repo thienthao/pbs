@@ -51,17 +51,14 @@ public class AlbumController {
             @RequestParam(defaultValue = "5") int size
     ) {
         try {
-            List<Album> albums = new ArrayList<Album>();
-            Pageable paging = PageRequest.of(page, size);
 
-            Page<Album> pageAlbums = albumService.findAllByPhotographerId(id, paging);
+            List<Album> albums = albumService.findAllByPhotographerId(id);
 
-            albums = pageAlbums.getContent();
             Map<String, Object> response = new HashMap<>();
             response.put("albums", albums);
-            response.put("currentPage", pageAlbums.getNumber());
-            response.put("totalItems", pageAlbums.getTotalElements());
-            response.put("totalPages", pageAlbums.getTotalPages());
+            response.put("currentPage", 0);
+            response.put("totalItems", albums.size());
+            response.put("totalPages", 0);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -76,12 +73,9 @@ public class AlbumController {
             @RequestParam(defaultValue = "5") int size
     ) {
         try {
-            List<Album> albums = new ArrayList<Album>();
-            Pageable paging = PageRequest.of(page, size);
 
-            Page<Album> pageAlbums = albumService.findAllByPhotographerId(id, paging);
+            List<Album> albums = albumService.findAllByPhotographerId(id);
 
-            albums = pageAlbums.getContent();
             List<AlbumDto2> albumDto2s = new ArrayList<>();
             for(Album album : albums) {
                 albumDto2s.add(DtoMapper.toAlbumDto(album));
@@ -89,9 +83,9 @@ public class AlbumController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("albums", albumDto2s);
-            response.put("currentPage", pageAlbums.getNumber());
-            response.put("totalItems", pageAlbums.getTotalElements());
-            response.put("totalPages", pageAlbums.getTotalPages());
+            response.put("currentPage", 0);
+            response.put("totalItems", albumDto2s.size());
+            response.put("totalPages", 0);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -107,21 +101,18 @@ public class AlbumController {
     ) {
         try {
             List<Album> albums = new ArrayList<Album>();
-            Pageable paging = PageRequest.of(page, size);
-            Page<Album> pageAlbums;
 
             if(categoryId != 1) {
-                pageAlbums = albumService.findByCategoryIdSortByLike(paging, categoryId);
+                albums = albumService.findByCategoryIdSortByLike(categoryId);
             } else {
-                pageAlbums = albumService.findAllSortByLike(paging);
+                albums = albumService.findAllSortByLike();
             }
 
-            albums = pageAlbums.getContent();
             Map<String, Object> response = new HashMap<>();
             response.put("albums", albums);
-            response.put("currentPage", pageAlbums.getNumber());
-            response.put("totalItems", pageAlbums.getTotalElements());
-            response.put("totalPages", pageAlbums.getTotalPages());
+            response.put("currentPage", 0);
+            response.put("totalItems", albums.size());
+            response.put("totalPages", 0);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -261,5 +252,29 @@ public class AlbumController {
         for(Album album : albums) {
             albumService.uploadAlbumThumbnail(album.getPhotographer().getId().toString(), album.getId().toString(), file[i++]);
         }
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<?> likeAlbum(@RequestParam("albumId") Long albumId, @RequestParam("userId") Long userId) {
+        if (albumService.likeAlbum(albumId, userId) > 0) {
+            return new ResponseEntity<>("Success", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Failed", HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/unlike")
+    public ResponseEntity<?> unlikeAlbum(@RequestParam("albumId") Long albumId, @RequestParam("userId") Long userId) {
+        if (albumService.unlikeAlbum(albumId, userId) > 0) {
+            return new ResponseEntity<>("Success", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Failed", HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/like")
+    public ResponseEntity<?> isLike(@RequestParam("albumId") Long albumId, @RequestParam("userId") Long userId) {
+        if (albumService.isLike(albumId, userId) > 0) {
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
 }

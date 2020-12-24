@@ -47,7 +47,7 @@ public class PhotographerController {
         return new ResponseEntity<>(phtrService.updateProfile(user), HttpStatus.OK);
     }
 
-    @GetMapping("/byrating")
+    @GetMapping("/byrating-old")
     public ResponseEntity<Map<String, Object>> findPhotographersByRatingCount(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -74,16 +74,50 @@ public class PhotographerController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/byrating")
+    public ResponseEntity<Map<String, Object>> findPhotographersByRatingCountCustom(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "1") long categoryId,
+            @RequestParam(defaultValue = "0") double lat,
+            @RequestParam(defaultValue = "0") double lon,
+            @RequestParam(defaultValue = "") String city
+    ) {
+        try {
+            Pageable paging = PageRequest.of(page, size);
+            List<User> users;
+
+            if(categoryId == 1) {
+                 users = phtrService.findPhotographersByRatingCustom(city);
+            } else {
+                users = phtrService.findPhotographersByCategorySortByRatingCustom(categoryId, city);
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", users);
+            response.put("currentPage", 0);
+            response.put("totalItems", 0);
+            response.put("totalPages", 0);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/byfactors")
     public ResponseEntity<Map<String, Object>> findPhotographersByFactors(@RequestParam(name = "lat", defaultValue = "10.7757") double lat,
-                                                                          @RequestParam(name = "long", defaultValue = "106.7004") double lon) {
+                                                                          @RequestParam(name = "long", defaultValue = "106.7004") double lon,
+                                                                          @RequestParam(name= "category", defaultValue = "1") long category,
+                                                                          @RequestParam(name = "city", defaultValue = "Thành phố Hồ Chí Minh") String city) {
         try {
-            List<User> photographers = phtrService.findPhotographersByFactors(lat, lon);
+            List<User> photographers = phtrService.findPhotographersByFactors(lat, lon, category, city);
 
             Map<String, Object> response = new HashMap<>();
             response.put("users", photographers);
@@ -105,12 +139,12 @@ public class PhotographerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findOne(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(DtoMapper.toPhotographerDto(phtrService.findOne(id)), HttpStatus.OK);
+        return new ResponseEntity<>(phtrService.findOne(id), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/split")
     public ResponseEntity<?> findOneSplited(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(DtoMapper.toSplitedPhotographerDto(phtrService.findOne(id)), HttpStatus.OK);
+        return new ResponseEntity<>(phtrService.findOne(id), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/packages")
@@ -311,5 +345,10 @@ public class PhotographerController {
     @PostMapping("/locations")
     public ResponseEntity<?> addLocation(@RequestBody Location location) {
         return new ResponseEntity<>(phtrService.addLocation(location), HttpStatus.OK);
+    }
+
+    @GetMapping("/{ptgId}/working-days/check")
+    public ResponseEntity<?> checkWorkingTime(@RequestParam("time") String time, @PathVariable("ptgId") Long photographerId) {
+        return new ResponseEntity<>(phtrService.checkWorkingTime(time, photographerId), HttpStatus.OK);
     }
 }

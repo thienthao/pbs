@@ -9,6 +9,7 @@ import fpt.university.pbswebapi.entity.Album;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
+import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
 import fpt.university.pbswebapi.service.FCMService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,19 @@ public class TestController {
     private ServicePackageRepository packageRepository;
     private AlbumRepository albumRepository;
     private FCMService fcmService;
+    private CustomRepository customRepository;
 
     @Autowired
-    public TestController(ServicePackageRepository packageRepository, AlbumRepository albumRepository, FCMService fcmService) {
+    public TestController(ServicePackageRepository packageRepository, AlbumRepository albumRepository, FCMService fcmService, CustomRepository customRepository) {
         this.packageRepository = packageRepository;
         this.albumRepository = albumRepository;
         this.fcmService = fcmService;
+        this.customRepository = customRepository;
+    }
+
+    @GetMapping("/users/byrating")
+    public void testNative() {
+        customRepository.getAllByRating();
     }
 
 

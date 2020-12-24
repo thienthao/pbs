@@ -60,6 +60,14 @@ public class Album {
     )
     private List<Image> images;
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "customers_albums",
+            joinColumns = @JoinColumn(name = "album_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users;
+
     public Album(String name, String thumbnail, String location, String description, User photographer, List<Image> images) {
         this.name = name;
         this.thumbnail = thumbnail;

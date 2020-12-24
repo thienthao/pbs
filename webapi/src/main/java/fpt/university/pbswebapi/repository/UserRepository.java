@@ -12,9 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
+
+    Optional<User> findByUsernameAndIsBlockedFalse(String username);
+
+    @Query("select u from User u where u.isBlocked =:isBlocked and u.username=':username'")
+    Optional<User> findByusername(String username, int isBlocked);
 
     @Query("select distinct photographer " +
             "from User photographer " +
@@ -35,6 +39,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("FROM User customer where customer.role.id =:roleId")
     List<User> findAllCustomers(Long roleId);
+
+    @Query("select distinct photographer from User photographer " +
+            "inner join photographer.packages package " +
+            "inner join package.category category " +
+            "where category.id =:category ")
+    List<User> findPhotographerWithCategoryAndRole(Long category);
 
     @Query("select distinct photographer from User photographer " +
             "inner join photographer.packages package " +

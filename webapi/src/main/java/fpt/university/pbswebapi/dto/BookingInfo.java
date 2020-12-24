@@ -24,6 +24,10 @@ public class BookingInfo {
 
     private String packageName;
 
+    private Integer timeAnticipate;
+
+    private Date editDeadline;
+
     private Integer packagePrice;
 
     private String address;

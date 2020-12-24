@@ -30,19 +30,19 @@ if(!$.jgrid.hasOwnProperty("regional")) {
 }
 $.jgrid.regional["cn"] = {
     defaults : {
-        recordtext: "第{0}到第{1}条\u3000共 {2} 条", // 共字前是全角空格
+        recordtext: "Page{0}To First{1}Page\u3000共 {2} Page",
         emptyrecords: "No data founded！",
         loadtext: "Loading...",
-	savetext: "保存中...",
-        pgtext : "第{0}页\u3000共{1}页",
-		pgfirst : "第一页",
-		pglast : "最后一页",
-		pgnext : "下一页",
-		pgprev : "上一页",
-		pgrecs : "每页记录数",
-		showhide: "切换 展开 折叠 表格",
+	savetext: "Saving...",
+        pgtext : "Page{0}",
+		pgfirst : "First Page",
+		pglast : "Last Page",
+		pgnext : "Next",
+		pgprev : "Prev",
+		pgrecs : "Number of Records",
+		showhide: "Switch Expand Collapse Table",
 		// mobile
-		pagerCaption : "表格::页面设置",
+		pagerCaption : "Table: Page Setup",
 		pageText : "Page:",
 		recordPage : "每页记录数",
 		nomorerecs : "没有更多记录...",

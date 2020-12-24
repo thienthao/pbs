@@ -54,9 +54,9 @@ public class CategoryService {
             fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
 //            String fullpath = String.format("%s/%s", path, filename);
             Category category = categoryRepository.getOne(id);
-            category.setIconLink("https://pbs-webapi.herokuapp.com/api/categories/" + id + "/download");
+            category.setIconLink("http://194.59.165.195:8080/pbs-webapi/api/categories/" + id + "/download");
             categoryRepository.save(category);
-            return "https://pbs-webapi.herokuapp.com/api/categories/" + id + "/download";
+            return "http://194.59.165.195:8080/pbs-webapi/api/categories/" + id + "/download";
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

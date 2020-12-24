@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.security.services;
 
 import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -20,8 +21,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameAndIsBlockedFalse(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
         return UserDetailsImpl.build(user);
     }
+
 }

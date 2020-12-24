@@ -36,11 +36,19 @@
 
                                 <ul class="list-group list-group-unbordered mb-3">
                                     <li class="list-group-item">
-                                        <b>Deal</b> <a class="float-right">0</a>
+                                        <b>Number of Bookings</b> <a class="float-right" th:text="${info.numOfBooking}">0</a>
                                     </li>
+
                                     <li class="list-group-item">
-                                        <b>Cancelling</b> <a class="float-right">0%</a>
+                                        <b>Number of Cancellation</b> <a class="float-right" th:text="${info.numOfCancelled}">0</a>
                                     </li>
+
+                                    <li class="list-group-item">
+                                        <b>Cancellation Rate</b>
+                                        <b><a th:if="${info.cancellationRate}>=40" class="float-right alert-warning" th:text="${info.cancellationRate} + '%'">0%</a></b>
+                                        <a th:if="${info.cancellationRate}<40" class="float-right" th:text="${info.cancellationRate} + '%'">0%</a>
+                                    </li>
+
                                 </ul>
 
 <!--                                <a href="#" class="btn btn-danger btn-block"><b>Block</b></a>-->
@@ -146,242 +154,330 @@
                     </div>
                     <!-- /.col -->
                     <div class="col-md-9">
-                        <div class="card">
-                            <div class="card-header p-2">
-                                <ul class="nav nav-pills">
-                                    <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>
+                        <div class="card card-tabs">
+                            <div class="card-header p-0 pt-1">
+                                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+<!--                                    <li class="nav-item">-->
+<!--                                        <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Home</a>-->
+<!--                                    </li>-->
+<!--                                    <li class="nav-item">-->
+<!--                                        <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Profile</a>-->
+<!--                                    </li>-->
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill" href="#custom-tabs-one-messages" role="tab" aria-controls="custom-tabs-one-messages" aria-selected="false">Cancelled</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-one-settings-tab" data-toggle="pill" href="#custom-tabs-one-settings" role="tab" aria-controls="custom-tabs-one-settings" aria-selected="false">Bookings</a>
+                                    </li>
                                 </ul>
-                            </div><!-- /.card-header -->
+                            </div>
                             <div class="card-body">
-                                <div class="tab-content">
-                                    <div class="active tab-pane" id="activity">
+                                <div class="tab-content" id="custom-tabs-one-tabContent">
+<!--                                    <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">-->
+<!--                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin malesuada lacus ullamcorper dui molestie, sit amet congue quam finibus. Etiam ultricies nunc non magna feugiat commodo. Etiam odio magna, mollis auctor felis vitae, ullamcorper ornare ligula. Proin pellentesque tincidunt nisi, vitae ullamcorper felis aliquam id. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin id orci eu lectus blandit suscipit. Phasellus porta, ante et varius ornare, sem enim sollicitudin eros, at commodo leo est vitae lacus. Etiam ut porta sem. Proin porttitor porta nisl, id tempor risus rhoncus quis. In in quam a nibh cursus pulvinar non consequat neque. Mauris lacus elit, condimentum ac condimentum at, semper vitae lectus. Cras lacinia erat eget sapien porta consectetur.-->
+<!--                                    </div>-->
+<!--                                    <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">-->
+<!--                                        Mauris tincidunt mi at erat gravida, eget tristique urna bibendum. Mauris pharetra purus ut ligula tempor, et vulputate metus facilisis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Maecenas sollicitudin, nisi a luctus interdum, nisl ligula placerat mi, quis posuere purus ligula eu lectus. Donec nunc tellus, elementum sit amet ultricies at, posuere nec nunc. Nunc euismod pellentesque diam.-->
+<!--                                    </div>-->
+                                    <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel" aria-labelledby="custom-tabs-one-messages-tab">
                                         <!-- Post -->
-                                        <div class="post">
-                                            <div class="user-block">
-                                                <img class="img-circle img-bordered-sm" src="https://pbs-webapi.herokuapp.com/api/photographers/2/download" alt="user image">
-                                                <span class="username">
-                          <a href="#">Chụp ảnh với Uyển Nhi</a>
-                        </span>
-                                                <span class="description"> 7:30 AM 08/12/2020</span>
+                                        <th:block th:each="obj : ${cancelled}">
+                                            <div class="post">
+                                                <div class="user-block">
+                                                    <img class="img-circle img-bordered-sm" th:src="${obj.customerAvatar}" alt="user image">
+                                                    <span class="username">
+                                                  <a href="#" th:text="${obj.customerName}">Chụp ảnh với Uyển Nhi</a>
+                                                </span>
+<!--                                                    <span th:text="${obj.createdAt}" class="description"> 7:30 AM 08/12/2020</span>-->
+                                                </div>
+                                                <!-- /.user-block -->
+                                                <p>
+                                                    Hủy lúc <span th:text="${obj.cancelledAt}" class="description"> 1,600,000</span>
+                                                    <br/>
+                                                    Thời gian chụp: <span th:text="${obj.shootingAt}" class="description"> 1,600,000</span>
+                                                    <br/>
+                                                    Địa điểm: <span th:text="${obj.shootingLocation}" class="description"> 1,600,000</span>
+                                                    <br/>
+<!--                                                    Phương thức trả ảnh: <span th:text="${obj.returningType.type}" class="description">Qua ứng dụng</span>-->
+<!--                                                    <br/>-->
+<!--                                                    Gói dịch vụ: <span th:text="${obj.serviceName}" class="description">Chụp ảnh Cổ Trang</span>-->
+<!--                                                    <br/>-->
+                                                    Giá dịch vụ: <span th:text="${obj.price}" class="description"> 1,600,000</span> VND
+                                                </p>
+
                                             </div>
-                                            <!-- /.user-block -->
-                                            <p>
-                                                Trạng thái: Sắp diễn ra
-                                                <br/>
-                                                Địa điểm: Phố đi bộ Nguyễn Huệ
-                                                <br/>
-                                                Phương thức trả ảnh: Qua ứng dụng
-                                                <br/>
-                                                Gói dịch vụ: Chụp ảnh Cổ Trang
-                                                <br/>
-                                                Giá dịch vụ: 1,600,000 Vnd
-                                            </p>
-
-                                        </div>
+                                        </th:block>
                                         <!-- /.post -->
-
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-one-settings" role="tabpanel" aria-labelledby="custom-tabs-one-settings-tab">
                                         <!-- Post -->
-                                        <div class="post">
-                                            <div class="user-block">
-                                                <img class="img-circle img-bordered-sm" src="https://pbs-webapi.herokuapp.com/api/photographers/179/download" alt="user image">
-                                                <span class="username">
-                          <a href="#">Chụp ảnh với Nhi Lưu</a>
-                        </span>
-                                                <span class="description"> 8:30 AM 04/12/2020</span>
-                                            </div>
-                                            <!-- /.user-block -->
-                                            <p>
-                                                Trạng thái: Sắp diễn ra
-                                                <br/>
-                                                Địa điểm: Phố đi bộ Nguyễn Huệ
-                                                <br/>
-                                                Phương thức trả ảnh: Qua ứng dụng
-                                                <br/>
-                                                Gói dịch vụ: Chụp ảnh Cổ Trang
-                                                <br/>
-                                                Giá dịch vụ: 1,600,000 Vnd
-                                            </p>
+                                        <th:block th:each="obj : ${booking}">
+                                            <div class="post">
+                                                <div class="user-block">
+                                                    <img class="img-circle img-bordered-sm" th:src="${obj.customer.avatar}" alt="user image">
+                                                    <span class="username">
+                                                  <a href="#" th:text="${obj.customer.fullname}">Chụp ảnh với Uyển Nhi</a>
+                                                </span>
+                                                    <span th:text="${obj.createdAt}" class="description"> 7:30 AM 08/12/2020</span>
+                                                </div>
+                                                <!-- /.user-block -->
+                                                <p>
+                                                    Địa điểm: Phố đi bộ Nguyễn Huệ
+                                                    <br/>
+                                                    Phương thức trả ảnh: <span th:text="${obj.returningType.type}" class="description">Qua ứng dụng</span>
+                                                    <br/>
+                                                    Gói dịch vụ: <span th:text="${obj.serviceName}" class="description">Chụp ảnh Cổ Trang</span>
+                                                    <br/>
+                                                    Giá dịch vụ: <span th:text="${obj.price}" class="description"> 1,600,000</span> VND
+                                                </p>
 
-                                        </div>
+                                            </div>
+                                        </th:block>
                                         <!-- /.post -->
-
-                                        <!-- Post -->
-                                        <div class="post">
-                                            <div class="user-block">
-                                                <img class="img-circle img-bordered-sm" src="https://pbs-webapi.herokuapp.com/api/photographers/180/download" alt="user image">
-                                                <span class="username">
-                          <a href="#">Chụp ảnh với Minh Anh</a>
-                        </span>
-                                                <span class="description"> 7:30 AM 26/11/2020</span>
-                                            </div>
-                                            <!-- /.user-block -->
-                                            <p>
-                                                Trạng thái: Đã hoàn thành
-                                                <br/>
-                                                Địa điểm: Phố đi bộ Nguyễn Huệ
-                                                <br/>
-                                                Phương thức trả ảnh: Qua ứng dụng
-                                                <br/>
-                                                Gói dịch vụ: Chụp ảnh Cổ Trang
-                                                <br/>
-                                                Giá dịch vụ: 1,600,000 Vnd
-                                            </p>
-
-                                        </div>
-                                        <!-- /.post -->
-
-
                                     </div>
-                                    <!-- /.tab-pane -->
-                                    <div class="tab-pane" id="timeline">
-                                        <!-- The timeline -->
-                                        <div class="timeline timeline-inverse">
-                                            <!-- timeline time label -->
-                                            <div class="time-label">
-                        <span class="bg-danger">
-                          10 Feb. 2014
-                        </span>
-                                            </div>
-                                            <!-- /.timeline-label -->
-                                            <!-- timeline item -->
-                                            <div>
-                                                <i class="fas fa-envelope bg-primary"></i>
-
-                                                <div class="timeline-item">
-                                                    <span class="time"><i class="far fa-clock"></i> 12:05</span>
-
-                                                    <h3 class="timeline-header"><a href="#">Support Team</a> sent you an email</h3>
-
-                                                    <div class="timeline-body">
-                                                        Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
-                                                        weebly ning heekya handango imeem plugg dopplr jibjab, movity
-                                                        jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
-                                                        quora plaxo ideeli hulu weebly balihoo...
-                                                    </div>
-                                                    <div class="timeline-footer">
-                                                        <a href="#" class="btn btn-primary btn-sm">Read more</a>
-                                                        <a href="#" class="btn btn-danger btn-sm">Delete</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- END timeline item -->
-                                            <!-- timeline item -->
-                                            <div>
-                                                <i class="fas fa-user bg-info"></i>
-
-                                                <div class="timeline-item">
-                                                    <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>
-
-                                                    <h3 class="timeline-header border-0"><a href="#">Sarah Young</a> accepted your friend request
-                                                    </h3>
-                                                </div>
-                                            </div>
-                                            <!-- END timeline item -->
-                                            <!-- timeline item -->
-                                            <div>
-                                                <i class="fas fa-comments bg-warning"></i>
-
-                                                <div class="timeline-item">
-                                                    <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>
-
-                                                    <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>
-
-                                                    <div class="timeline-body">
-                                                        Take me to your leader!
-                                                        Switzerland is small and neutral!
-                                                        We are more like Germany, ambitious and misunderstood!
-                                                    </div>
-                                                    <div class="timeline-footer">
-                                                        <a href="#" class="btn btn-warning btn-flat btn-sm">View comment</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- END timeline item -->
-                                            <!-- timeline time label -->
-                                            <div class="time-label">
-                        <span class="bg-success">
-                          3 Jan. 2014
-                        </span>
-                                            </div>
-                                            <!-- /.timeline-label -->
-                                            <!-- timeline item -->
-                                            <div>
-                                                <i class="fas fa-camera bg-purple"></i>
-
-                                                <div class="timeline-item">
-                                                    <span class="time"><i class="far fa-clock"></i> 2 days ago</span>
-
-                                                    <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded new photos</h3>
-
-                                                    <div class="timeline-body">
-                                                        <img src="http://placehold.it/150x100" alt="...">
-                                                        <img src="http://placehold.it/150x100" alt="...">
-                                                        <img src="http://placehold.it/150x100" alt="...">
-                                                        <img src="http://placehold.it/150x100" alt="...">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- END timeline item -->
-                                            <div>
-                                                <i class="far fa-clock bg-gray"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- /.tab-pane -->
-
-                                    <div class="tab-pane" id="settings">
-                                        <form class="form-horizontal">
-                                            <div class="form-group row">
-                                                <label for="inputName" class="col-sm-2 col-form-label">Name</label>
-                                                <div class="col-sm-10">
-                                                    <input type="email" class="form-control" id="inputName" placeholder="Name">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                                                <div class="col-sm-10">
-                                                    <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label for="inputName2" class="col-sm-2 col-form-label">Name</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" class="form-control" id="inputName2" placeholder="Name">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>
-                                                <div class="col-sm-10">
-                                                    <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <div class="offset-sm-2 col-sm-10">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <div class="offset-sm-2 col-sm-10">
-                                                    <button type="submit" class="btn btn-danger">Submit</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <!-- /.tab-pane -->
                                 </div>
-                                <!-- /.tab-content -->
-                            </div><!-- /.card-body -->
+                            </div>
+                            <!-- /.card -->
                         </div>
+<!--                        <div class="card">-->
+<!--                            <div class="card-header p-2">-->
+<!--                                <ul class="nav nav-pills">-->
+<!--                                    <li class="nav-item"><a class="nav-link active" href="#activity" data-toggle="tab">Activity</a></li>-->
+<!--                                </ul>-->
+<!--                                <ul class="nav nav-pills">-->
+<!--                                    <li class="nav-item"><a class="nav-link" href="#cancellation" data-toggle="tab">Cancellation</a></li>-->
+<!--                                </ul>-->
+<!--                            </div>&lt;!&ndash; /.card-header &ndash;&gt;-->
+<!--                            <div class="card-body">-->
+<!--                                <div class="tab-content">-->
+<!--                                    <div class="active tab-pane" id="activity">-->
+<!--                                        &lt;!&ndash; Post &ndash;&gt;-->
+<!--                                        <div class="post">-->
+<!--                                            <div class="user-block">-->
+<!--                                                <img class="img-circle img-bordered-sm" src="https://pbs-webapi.herokuapp.com/api/photographers/2/download" alt="user image">-->
+<!--                                                <span class="username">-->
+<!--                          <a href="#">Chụp ảnh với Uyển Nhi</a>-->
+<!--                        </span>-->
+<!--                                                <span class="description"> 7:30 AM 08/12/2020</span>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; /.user-block &ndash;&gt;-->
+<!--                                            <p>-->
+<!--                                                Trạng thái: Sắp diễn ra-->
+<!--                                                <br/>-->
+<!--                                                Địa điểm: Phố đi bộ Nguyễn Huệ-->
+<!--                                                <br/>-->
+<!--                                                Phương thức trả ảnh: Qua ứng dụng-->
+<!--                                                <br/>-->
+<!--                                                Gói dịch vụ: Chụp ảnh Cổ Trang-->
+<!--                                                <br/>-->
+<!--                                                Giá dịch vụ: 1,600,000 Vnd-->
+<!--                                            </p>-->
+
+<!--                                        </div>-->
+<!--                                        &lt;!&ndash; /.post &ndash;&gt;-->
+
+<!--                                        &lt;!&ndash; Post &ndash;&gt;-->
+<!--                                        <div class="post">-->
+<!--                                            <div class="user-block">-->
+<!--                                                <img class="img-circle img-bordered-sm" src="https://pbs-webapi.herokuapp.com/api/photographers/179/download" alt="user image">-->
+<!--                                                <span class="username">-->
+<!--                          <a href="#">Chụp ảnh với Nhi Lưu</a>-->
+<!--                        </span>-->
+<!--                                                <span class="description"> 8:30 AM 04/12/2020</span>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; /.user-block &ndash;&gt;-->
+<!--                                            <p>-->
+<!--                                                Trạng thái: Sắp diễn ra-->
+<!--                                                <br/>-->
+<!--                                                Địa điểm: Phố đi bộ Nguyễn Huệ-->
+<!--                                                <br/>-->
+<!--                                                Phương thức trả ảnh: Qua ứng dụng-->
+<!--                                                <br/>-->
+<!--                                                Gói dịch vụ: Chụp ảnh Cổ Trang-->
+<!--                                                <br/>-->
+<!--                                                Giá dịch vụ: 1,600,000 Vnd-->
+<!--                                            </p>-->
+
+<!--                                        </div>-->
+<!--                                        &lt;!&ndash; /.post &ndash;&gt;-->
+
+<!--                                        &lt;!&ndash; Post &ndash;&gt;-->
+<!--                                        <div class="post">-->
+<!--                                            <div class="user-block">-->
+<!--                                                <img class="img-circle img-bordered-sm" src="https://pbs-webapi.herokuapp.com/api/photographers/180/download" alt="user image">-->
+<!--                                                <span class="username">-->
+<!--                          <a href="#">Chụp ảnh với Minh Anh</a>-->
+<!--                        </span>-->
+<!--                                                <span class="description"> 7:30 AM 26/11/2020</span>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; /.user-block &ndash;&gt;-->
+<!--                                            <p>-->
+<!--                                                Trạng thái: Đã hoàn thành-->
+<!--                                                <br/>-->
+<!--                                                Địa điểm: Phố đi bộ Nguyễn Huệ-->
+<!--                                                <br/>-->
+<!--                                                Phương thức trả ảnh: Qua ứng dụng-->
+<!--                                                <br/>-->
+<!--                                                Gói dịch vụ: Chụp ảnh Cổ Trang-->
+<!--                                                <br/>-->
+<!--                                                Giá dịch vụ: 1,600,000 Vnd-->
+<!--                                            </p>-->
+
+<!--                                        </div>-->
+<!--                                        &lt;!&ndash; /.post &ndash;&gt;-->
+
+
+<!--                                    </div>-->
+<!--                                    &lt;!&ndash; /.tab-pane &ndash;&gt;-->
+<!--                                    <div class="tab-pane" id="timeline">-->
+<!--                                        &lt;!&ndash; The timeline &ndash;&gt;-->
+<!--                                        <div class="timeline timeline-inverse">-->
+<!--                                            &lt;!&ndash; timeline time label &ndash;&gt;-->
+<!--                                            <div class="time-label">-->
+<!--                        <span class="bg-danger">-->
+<!--                          10 Feb. 2014-->
+<!--                        </span>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; /.timeline-label &ndash;&gt;-->
+<!--                                            &lt;!&ndash; timeline item &ndash;&gt;-->
+<!--                                            <div>-->
+<!--                                                <i class="fas fa-envelope bg-primary"></i>-->
+
+<!--                                                <div class="timeline-item">-->
+<!--                                                    <span class="time"><i class="far fa-clock"></i> 12:05</span>-->
+
+<!--                                                    <h3 class="timeline-header"><a href="#">Support Team</a> sent you an email</h3>-->
+
+<!--                                                    <div class="timeline-body">-->
+<!--                                                        Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,-->
+<!--                                                        weebly ning heekya handango imeem plugg dopplr jibjab, movity-->
+<!--                                                        jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle-->
+<!--                                                        quora plaxo ideeli hulu weebly balihoo...-->
+<!--                                                    </div>-->
+<!--                                                    <div class="timeline-footer">-->
+<!--                                                        <a href="#" class="btn btn-primary btn-sm">Read more</a>-->
+<!--                                                        <a href="#" class="btn btn-danger btn-sm">Delete</a>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; END timeline item &ndash;&gt;-->
+<!--                                            &lt;!&ndash; timeline item &ndash;&gt;-->
+<!--                                            <div>-->
+<!--                                                <i class="fas fa-user bg-info"></i>-->
+
+<!--                                                <div class="timeline-item">-->
+<!--                                                    <span class="time"><i class="far fa-clock"></i> 5 mins ago</span>-->
+
+<!--                                                    <h3 class="timeline-header border-0"><a href="#">Sarah Young</a> accepted your friend request-->
+<!--                                                    </h3>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; END timeline item &ndash;&gt;-->
+<!--                                            &lt;!&ndash; timeline item &ndash;&gt;-->
+<!--                                            <div>-->
+<!--                                                <i class="fas fa-comments bg-warning"></i>-->
+
+<!--                                                <div class="timeline-item">-->
+<!--                                                    <span class="time"><i class="far fa-clock"></i> 27 mins ago</span>-->
+
+<!--                                                    <h3 class="timeline-header"><a href="#">Jay White</a> commented on your post</h3>-->
+
+<!--                                                    <div class="timeline-body">-->
+<!--                                                        Take me to your leader!-->
+<!--                                                        Switzerland is small and neutral!-->
+<!--                                                        We are more like Germany, ambitious and misunderstood!-->
+<!--                                                    </div>-->
+<!--                                                    <div class="timeline-footer">-->
+<!--                                                        <a href="#" class="btn btn-warning btn-flat btn-sm">View comment</a>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; END timeline item &ndash;&gt;-->
+<!--                                            &lt;!&ndash; timeline time label &ndash;&gt;-->
+<!--                                            <div class="time-label">-->
+<!--                        <span class="bg-success">-->
+<!--                          3 Jan. 2014-->
+<!--                        </span>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; /.timeline-label &ndash;&gt;-->
+<!--                                            &lt;!&ndash; timeline item &ndash;&gt;-->
+<!--                                            <div>-->
+<!--                                                <i class="fas fa-camera bg-purple"></i>-->
+
+<!--                                                <div class="timeline-item">-->
+<!--                                                    <span class="time"><i class="far fa-clock"></i> 2 days ago</span>-->
+
+<!--                                                    <h3 class="timeline-header"><a href="#">Mina Lee</a> uploaded new photos</h3>-->
+
+<!--                                                    <div class="timeline-body">-->
+<!--                                                        <img src="http://placehold.it/150x100" alt="...">-->
+<!--                                                        <img src="http://placehold.it/150x100" alt="...">-->
+<!--                                                        <img src="http://placehold.it/150x100" alt="...">-->
+<!--                                                        <img src="http://placehold.it/150x100" alt="...">-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            &lt;!&ndash; END timeline item &ndash;&gt;-->
+<!--                                            <div>-->
+<!--                                                <i class="far fa-clock bg-gray"></i>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    &lt;!&ndash; /.tab-pane &ndash;&gt;-->
+
+<!--                                    <div class="tab-pane" id="settings">-->
+<!--                                        <form class="form-horizontal">-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <label for="inputName" class="col-sm-2 col-form-label">Name</label>-->
+<!--                                                <div class="col-sm-10">-->
+<!--                                                    <input type="email" class="form-control" id="inputName" placeholder="Name">-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>-->
+<!--                                                <div class="col-sm-10">-->
+<!--                                                    <input type="email" class="form-control" id="inputEmail" placeholder="Email">-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <label for="inputName2" class="col-sm-2 col-form-label">Name</label>-->
+<!--                                                <div class="col-sm-10">-->
+<!--                                                    <input type="text" class="form-control" id="inputName2" placeholder="Name">-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <label for="inputExperience" class="col-sm-2 col-form-label">Experience</label>-->
+<!--                                                <div class="col-sm-10">-->
+<!--                                                    <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>-->
+<!--                                                <div class="col-sm-10">-->
+<!--                                                    <input type="text" class="form-control" id="inputSkills" placeholder="Skills">-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <div class="offset-sm-2 col-sm-10">-->
+<!--                                                    <div class="checkbox">-->
+<!--                                                        <label>-->
+<!--                                                            <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>-->
+<!--                                                        </label>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <div class="form-group row">-->
+<!--                                                <div class="offset-sm-2 col-sm-10">-->
+<!--                                                    <button type="submit" class="btn btn-danger">Submit</button>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                        </form>-->
+<!--                                    </div>-->
+<!--                                    &lt;!&ndash; /.tab-pane &ndash;&gt;-->
+<!--                                </div>-->
+<!--                                &lt;!&ndash; /.tab-content &ndash;&gt;-->
+<!--                            </div>&lt;!&ndash; /.card-body &ndash;&gt;-->
+<!--                        </div>-->
                         <!-- /.nav-tabs-custom -->
                     </div>
                     <!-- /.col -->

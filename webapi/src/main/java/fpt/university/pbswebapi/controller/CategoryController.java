@@ -30,7 +30,6 @@ public class CategoryController {
     }
 
     @GetMapping
-    @Cacheable("categories")
     public ResponseEntity<?> getAll() {
         return new ResponseEntity<>(categoryRepository.findAll(), HttpStatus.OK);
     }

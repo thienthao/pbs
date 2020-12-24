@@ -5,6 +5,7 @@ import fpt.university.pbswebapi.entity.Album;
 import fpt.university.pbswebapi.entity.Image;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.AlbumRepository;
+import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,18 +26,25 @@ public class AlbumService {
     private final ImageRepository imageRepository;
 
     @Autowired
+    private CustomRepository customRepository;
+
+    @Autowired
     public AlbumService(AlbumRepository albumRepository, FileStore fileStore, ImageRepository imageRepository) {
         this.albumRepository = albumRepository;
         this.fileStore = fileStore;
         this.imageRepository = imageRepository;
     }
 
-    @Cacheable("albums")
-    public Page<Album> findAllSortByLike(Pageable paging) {
-        return albumRepository.findAllSortByLike(paging);
+    public List<Album> findAllSortByLike() {
+        List<Album> results = customRepository.getAlbumSortByLikes();
+        for(Album album : results) {
+            album.setImages(customRepository.getImageOfAlbum(album.getId()));
+        }
+        return results;
     }
 
     public Album createAlbum(Album album) {
+        album.setCreatedAt(new Date());
         return albumRepository.save(album);
     }
 
@@ -68,9 +76,9 @@ public class AlbumService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 Album album = albumOptional.get();
-                album.setThumbnail("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId+ "/" + albumId +"/download");
+                album.setThumbnail("http://194.59.165.195:8080/pbs-webapi/api/albums/" + ptgId+ "/" + albumId +"/download");
                 albumRepository.save(album);
-                return "https://pbs-webapi.herokuapp.com/api/albums/" + ptgId+ "/" + albumId +"/download";
+                return "http://194.59.165.195:8080/pbs-webapi/api/albums/" + ptgId+ "/" + albumId +"/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -100,9 +108,12 @@ public class AlbumService {
         return images;
     }
 
-    @Cacheable("albums")
-    public Page<Album> findAllByPhotographerId(Long id, Pageable paging) {
-        return albumRepository.findAllByPhotographerId(id, paging);
+    public List<Album> findAllByPhotographerId(Long photographerId) {
+        List<Album> results = customRepository.getAlbumSortByLikes(photographerId);
+        for(Album album : results) {
+            album.setImages(customRepository.getImageOfAlbum(album.getId()));
+        }
+        return results;
     }
 
     public List<String> uploadImages(String ptgId, String albumId, MultipartFile[] files) {
@@ -135,10 +146,10 @@ public class AlbumService {
             try {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
-                image.setImageLink("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
+                image.setImageLink("http://194.59.165.195:8080/pbs-webapi/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
                 image.setAlbums(new ArrayList<>(List.of(album)));
                 imageRepository.save(image);
-                paths.add("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
+                paths.add("http://194.59.165.195:8080/pbs-webapi/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
                 images.add(image);
             } catch (Exception e) {
                 imageRepository.delete(image);
@@ -176,7 +187,7 @@ public class AlbumService {
 
         // format file name and path
         String path = String.format("%s/%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), ptgId, albumId);
-        String filename = String.format("https://pbs-webapi.herokuapp.com/api/albums/%s/%s/download", ptgId, albumId);
+        String filename = String.format("http://194.59.165.195:8080/pbs-webapi/api/albums/%s/%s/download", ptgId, albumId);
 
         // Get album to set thumbnail link
         Optional<Album> albumOptional = albumRepository.findById(Long.parseLong(albumId));
@@ -219,7 +230,7 @@ public class AlbumService {
         try {
             fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
             String fullpath = String.format("%s/%s", path, filename);
-            image.setImageLink("https://pbs-webapi.herokuapp.com/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
+            image.setImageLink("http://194.59.165.195:8080/pbs-webapi/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
             imageRepository.save(image);
         } catch (Exception e) {
             imageRepository.delete(image);
@@ -227,7 +238,23 @@ public class AlbumService {
         }
     }
 
-    public Page<Album> findByCategoryIdSortByLike(Pageable paging, long categoryId) {
-        return albumRepository.findByCategoryIdSortByLike(paging, categoryId);
+    public List<Album> findByCategoryIdSortByLike(long categoryId) {
+        List<Album> results = customRepository.getAlbumByCategorySortByLikes(categoryId);
+        for(Album album : results) {
+            album.setImages(customRepository.getImageOfAlbum(album.getId()));
+        }
+        return results;
+    }
+
+    public int likeAlbum(Long albumId, Long userId) {
+        return customRepository.likeAlbum(albumId, userId);
+    }
+
+    public int unlikeAlbum(Long albumId, Long userId) {
+        return customRepository.unlikeAlbum(albumId, userId);
+    }
+
+    public int isLike(Long albumId, Long userId) {
+        return customRepository.isLike(albumId, userId);
     }
 }
