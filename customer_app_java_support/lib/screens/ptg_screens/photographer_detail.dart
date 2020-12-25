@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
@@ -6,15 +7,19 @@ import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
+import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/plane_indicator.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_screen.dart';
 import 'package:customer_app_java_support/shared/block_loading.dart';
 import 'package:customer_app_java_support/shared/loading.dart';
 import 'package:customer_app_java_support/shared/photographer_album_loading.dart';
 import 'package:customer_app_java_support/shared/photographer_info_loading.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/album_of_ptg_carousel.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/bottom_sheet_ptg.dart';
 import 'package:customer_app_java_support/widgets/ptg_screen/calendar_show_ptg.dart';
@@ -40,11 +45,14 @@ class _CustomerPhotographerDetailState
     extends State<CustomerPhotographerDetail> {
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
   List<PackageBlocModel> blocPackages;
 
   Completer<void> _completer;
   PackageBlocModel selectedPackage;
   Photographer _photographer;
+  bool packageIsNotEmpty = false;
 
   @override
   void initState() {
@@ -91,8 +99,14 @@ class _CustomerPhotographerDetailState
                                         photographerState.photographer.fullname,
                                     child: Container(
                                       child: Image(
-                                        image: NetworkImage(photographerState
-                                            .photographer.cover),
+                                        image: NetworkImage(
+                                            photographerState
+                                                    .photographer.cover ??
+                                                'https://atlasadventuretravel.com/wp-content/uploads/2018/03/events-placeholder.jpg',
+                                            headers: {
+                                              HttpHeaders.authorizationHeader:
+                                                  'Bearer $globalCusToken'
+                                            }),
                                         height: 220.0,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
@@ -130,7 +144,12 @@ class _CustomerPhotographerDetailState
                                       child: CircleAvatar(
                                         backgroundImage: NetworkImage(
                                             photographerState
-                                                .photographer.avatar),
+                                                    .photographer.avatar ??
+                                                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
+                                            headers: {
+                                              HttpHeaders.authorizationHeader:
+                                                  'Bearer $globalCusToken'
+                                            }),
                                         radius: 55,
                                       ),
                                     ),
@@ -280,6 +299,13 @@ class _CustomerPhotographerDetailState
                         );
                       } else {
                         AlbumOfPhotographerCarouselWidget(
+                          onUpdateAlbum: (bool onUpdated) {
+                            if (onUpdated) {
+                              BlocProvider.of<AlbumBloc>(context).add(
+                                  AlbumByPhotographerIdEventFetch(
+                                      id: widget.id));
+                            }
+                          },
                           blocAlbums: albumState.albums,
                         );
                       }
@@ -298,6 +324,13 @@ class _CustomerPhotographerDetailState
                     final albumsTemp = (albumState as AlbumStateSuccess).albums;
                     return RefreshIndicator(
                         child: AlbumOfPhotographerCarouselWidget(
+                          onUpdateAlbum: (bool onUpdated) {
+                            if (onUpdated) {
+                              BlocProvider.of<AlbumBloc>(context).add(
+                                  AlbumByPhotographerIdEventFetch(
+                                      id: widget.id));
+                            }
+                          },
                           blocAlbums: albumsTemp,
                         ),
                         onRefresh: () {
@@ -349,7 +382,7 @@ class _CustomerPhotographerDetailState
                           ),
                         );
                       } else {
-                        Column(
+                        return Column(
                           children: [
                             CommentShow(
                               blocComments: commentState.comments,
@@ -444,15 +477,32 @@ class _CustomerPhotographerDetailState
                   builder: (context, packageState) {
                     if (packageState is PackageStateSuccess) {
                       if (packageState.packages == null) {
-                        return Text(
-                          'Đà Lạt',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17.0,
-                            fontWeight: FontWeight.w400,
+                        return Center(
+                          child: Text(
+                            'Hiện tại ${widget.name} chưa có dịch vụ nào.',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 17.0,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        );
+                      } else if (packageState.packages.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Hiện tại ${widget.name} chưa có dịch vụ nào.',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 17.0,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
                           ),
                         );
                       } else {
+                        packageIsNotEmpty = true;
                         blocPackages = packageState.packages;
                         ServiceShow(
                           blocPackages: packageState.packages,
@@ -496,8 +546,12 @@ class _CustomerPhotographerDetailState
                 padding: EdgeInsets.all(30.0),
                 child: RaisedButton(
                   onPressed: () {
-                    if (_photographer != null) {
+                    if (_photographer != null && packageIsNotEmpty) {
                       onPressedButton();
+                    }
+                    if (!packageIsNotEmpty) {
+                      popUp(context, 'Không thể đặt lịch với ${widget.name}',
+                          'Do ${widget.name} chưa có dịch vụ nên bạn không thể đặt hẹn');
                     }
                   },
                   textColor: Colors.white,
@@ -556,6 +610,10 @@ class _CustomerPhotographerDetailState
                         create: (context) =>
                             BookingBloc(bookingRepository: _bookingRepository),
                       ),
+                      BlocProvider(
+                        create: (context) =>
+                            WarningBloc(warningRepository: _warningRepository),
+                      )
                     ],
                     child: BottomSheetShow(
                       photographerName:

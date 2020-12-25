@@ -1,22 +1,29 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
+import 'package:customer_app_java_support/blocs/working_day_blocs/working_day_bloc.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
+import 'package:customer_app_java_support/models/weather_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/map_picker_screen.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class BookingManyDetail extends StatefulWidget {
   final int ptgId;
+  final int timeAnticipate;
   final Function(TimeAndLocationBlocModel) onUpdateList;
 
-  const BookingManyDetail({this.onUpdateList, this.ptgId});
+  const BookingManyDetail({this.onUpdateList, this.ptgId, this.timeAnticipate});
   @override
   _BookingManyDetailState createState() => _BookingManyDetailState();
 }
@@ -26,6 +33,8 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
       CalendarRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
   String locationResult = 'Hãy chọn nơi bạn muốn chụp ảnh';
   String timeResult = 'Hãy chọn thời gian chụp';
   String startDate = '';
@@ -52,19 +61,28 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
 
   void getDataAndPop() {
     if (locationResult.compareTo('Hãy chọn nơi bạn muốn chụp ảnh') == 0) {
+      popUp(
+          context, 'Chọn địa điểm', 'Hãy chọn địa điểm mà bạn muốn chụp ảnh!');
     } else if (timeResult.compareTo('Hãy chọn thời gian chụp') == 0) {
+      popUp(context, 'Chọn thời gian chụp', 'Hãy chọn thời gian chụp!');
     } else {
       print(startDate);
       widget.onUpdateList(TimeAndLocationBlocModel(
-          start: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+          start: DateFormat("yyyy-MM-dd'T'HH:mm")
               .format(DateTime.parse(startDate)),
-          end: DateFormat("yyyy-MM-dd'T'23:59:59.999'Z'")
-              .format(DateTime.parse(startDate)),
+          end: DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.parse(startDate)
+              .add(Duration(hours: (widget.timeAnticipate / 3600).round()))),
           latitude: location.latitude,
           longitude: location.longitude,
           formattedAddress: locationResult));
-      Navigator.pop(context);
+      _getWeatherWarning();
     }
+  }
+
+  _getWeatherWarning() async {
+    BlocProvider.of<WarningBloc>(context).add(WarningEventGetWeatherWarning(
+        dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(startDate)),
+        latLng: location));
   }
 
   @override
@@ -81,12 +99,40 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.done,
-              color: Colors.blue,
+          BlocListener<WarningBloc, WarningState>(
+            listener: (context, state) {
+              if (state is WarningStateLoading) {
+                _showLoadingAlert();
+              }
+              if (state is WarningStateGetWeatherWarningSuccess) {
+                Navigator.pop(context);
+                if (state.notice == null) {
+                  Navigator.pop(context);
+                  return;
+                } else if (state.notice.humidity == null ||
+                    state.notice.noti == null ||
+                    state.notice.outlook == null ||
+                    state.notice.temperature == null ||
+                    state.notice.windSpeed == null) {
+                  Navigator.pop(context);
+                  return;
+                } else {
+                  _showWeatherWarning(state.notice);
+                }
+              }
+
+              if (state is WarningStateFailure) {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              }
+            },
+            child: IconButton(
+              icon: Icon(
+                Icons.done,
+                color: Colors.blue,
+              ),
+              onPressed: getDataAndPop,
             ),
-            onPressed: getDataAndPop,
           ),
         ],
         title: Text('Thêm ngày chụp'),
@@ -171,6 +217,14 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
                           BlocProvider(
                             create: (context) => BookingBloc(
                                 bookingRepository: _bookingRepository),
+                          ),
+                          BlocProvider(
+                            create: (context) => WarningBloc(
+                                warningRepository: _warningRepository),
+                          ),
+                          BlocProvider(
+                            create: (context) => WorkingDayBloc(
+                                calendarRepository: _calendarRepository),
                           )
                         ],
                         child: BlocDatePicker(
@@ -212,5 +266,97 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
         ),
       ),
     );
+  }
+
+  String convertOutLookToVietnamese(String outlook) {
+    String result = '';
+    switch (outlook) {
+      case 'freezing':
+        result = 'Trời lạnh';
+        break;
+      case 'ice':
+        result = 'Trời lạnh';
+        break;
+      case 'rainy':
+        result = 'Trời mưa';
+        break;
+      case 'cloudy':
+        result = 'Trời mây';
+        break;
+      case 'clear':
+        result = 'Trời hoang';
+        break;
+      case 'sunny':
+        result = 'Trời nắng';
+        break;
+    }
+    return result;
+  }
+
+  Future<void> _showWeatherWarning(WeatherBlocModel notice) async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/alert.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Nhắc nhở',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                '☁ ${convertOutLookToVietnamese(notice.outlook)}   🌡${notice.temperature.round()}°C\n💧${notice.humidity.round()}%       ༄ ${notice.windSpeed.roundToDouble()} m/s\n${notice.noti}',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              onCancelButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
+              buttonCancelText: Text(
+                'Trở lại',
+                style: TextStyle(color: Colors.black87),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
   }
 }

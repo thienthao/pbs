@@ -11,8 +11,8 @@ import 'package:photographer_app_java_support/widgets/chat_screen/flat_profile_i
 class ChatPage extends StatefulWidget {
   static final String id = "ChatPage";
   final String chatRoomId;
-
-  const ChatPage({this.chatRoomId});
+  final String avatar;
+  const ChatPage({this.chatRoomId, this.avatar});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -102,7 +102,7 @@ class _ChatPageState extends State<ChatPage> {
                 size: 35.0,
                 onlineIndicator: true,
                 imageUrl:
-                    'https://images.pexels.com/photos/3866555/pexels-photo-3866555.png?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
+                     widget.avatar,
                 onPressed: () {
                   print("Clicked Profile Image");
                 },

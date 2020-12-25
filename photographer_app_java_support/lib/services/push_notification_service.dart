@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,21 +12,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
   final NavigationService _navigationService = locator<NavigationService>();
+
   final http.Client httpClient = http.Client();
+  bool onUpdate;
+  SharedPreferences prefs;
+  Stream<int> get notificationNow async* {
+    prefs = await SharedPreferences.getInstance();
+    yield prefs.getInt('unreadNoti');
+  }
+
+  final StreamController<int> _notificationCounter = StreamController<int>();
+  Stream<int> get notificationCounter => _notificationCounter.stream;
+
+  PushNotificationService() {
+    notificationNow.listen((number) {
+      _notificationCounter.add(number);
+    });
+  }
 
   Future init() async {
 //    _fcm.getToken().then((token) {
 //      print(token);
 //      httpClient.post(
-//        "https://pbs-webapi.herokuapp.com/api/users/168/devicetoken",
+//        "https://pbs-webapi.herokuapp.com/api/users/globalPtgId/devicetoken",
 //        headers: {"Content-Type": "application/json; charset=UTF-8"},
 //        body: token,
 //      );
 //    });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     _fcm.unsubscribeFromTopic("topic");
     _fcm.subscribeToTopic("photographer-topic");
     int unreadNoti = 0;
+    prefs = await SharedPreferences.getInstance();
     if (prefs.getInt('unreadNoti') != null) {
       unreadNoti = prefs.getInt('unreadNoti');
     }
@@ -35,19 +53,22 @@ class PushNotificationService {
       onMessage: (Map<String, dynamic> msg) async {
         print("onMessage ne");
         print('onMessage: $msg');
+        unreadNoti = prefs.getInt('unreadNoti');
         prefs.setInt('unreadNoti', unreadNoti + 1);
-        print(prefs.getInt('unreadNoti'));
+
         BotToast.showSimpleNotification(
           enableSlideOff: true,
-          onTap: () => _seralizeAndNavigate(msg),
+          onTap: () {
+            _seralizeAndNavigate(msg);
+          },
           title: msg["notification"]["body"],
-          backgroundColor: Colors.red[200],
+          backgroundColor: Colors.grey[100],
           titleStyle: TextStyle(
-              color: Colors.white, fontFamily: "Quicksand", fontSize: 16.0),
+              color: Colors.black, fontFamily: "Quicksand", fontSize: 18.0),
           duration: Duration(seconds: 10),
           hideCloseButton: false,
-          
         );
+
         // BotToast.showCustomNotification(toastBuilder: (widget) {
         //   return Container(
         //     alignment: Alignment.topCenter,
@@ -65,16 +86,21 @@ class PushNotificationService {
         //   fontSize: 16.0,
         // );
       },
+      // onBackgroundMessage: (Map<String, dynamic> msg) async {
+      //   print('onBackgroundMessage: $msg');
+      //   prefs.setInt('unreadNoti', unreadNoti + 1);
+      //   print(prefs.getInt('unreadNoti'));
+      //   _seralizeAndNavigate(msg);
+      // },
       onLaunch: (Map<String, dynamic> msg) async {
         print('onLaunch: $msg');
         prefs.setInt('unreadNoti', unreadNoti + 1);
-        print(prefs.getInt('unreadNoti'));
         _seralizeAndNavigate(msg);
       },
       onResume: (Map<String, dynamic> msg) async {
         print('onResume: $msg');
         prefs.setInt('unreadNoti', unreadNoti + 1);
-        print(prefs.getInt('unreadNoti'));
+
         _seralizeAndNavigate(msg);
       },
     );
@@ -132,6 +158,7 @@ class _CustomNotificationState extends State<CustomNotification> {
                           Duration(milliseconds: animationReverseMilliseconds),
                       duration: Duration(seconds: seconds),
                       backButtonBehavior: backButtonBehavior,
+                      // ignore: missing_return
                       toastBuilder: (cancel) {},
                       enableSlideOff: enableSlideOff,
                       onlyOne: onlyOne,

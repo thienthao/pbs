@@ -3,6 +3,7 @@ import 'package:customer_app_java_support/models/thread_model.dart';
 import 'package:customer_app_java_support/respositories/thread_repository.dart';
 import 'package:customer_app_java_support/screens/forum_screen/reply_screen.dart';
 import 'package:customer_app_java_support/screens/forum_screen/reply_to_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,8 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ForumDetail extends StatefulWidget {
   final Thread thread;
   final ThreadRepository threadRepository;
+  final Function(bool) isPosted;
 
-  ForumDetail({this.thread, this.threadRepository});
+  ForumDetail({this.thread, this.threadRepository, this.isPosted});
 
   @override
   _ForumDetailState createState() => _ForumDetailState();
@@ -39,6 +41,11 @@ class _ForumDetailState extends State<ForumDetail> {
                       ThreadBloc(repository: widget.threadRepository),
                   child: Reply(
                     thread: widget.thread,
+                    isPosted: (bool _isPosted) {
+                      if (_isPosted) {
+                        widget.isPosted(true);
+                      }
+                    },
                   ),
                 ),
               ));
@@ -87,7 +94,8 @@ class _ForumDetailState extends State<ForumDetail> {
                               ],
                             ),
                             Text(
-                              widget.thread.createdAt,
+                              DateFormat('dd/MM/yyyy hh:mm a').format(
+                                  DateTime.parse(widget.thread.createdAt)),
                               style:
                                   TextStyle(fontSize: 12.0, color: Colors.grey),
                             ),
@@ -194,7 +202,8 @@ class _ForumDetailState extends State<ForumDetail> {
                                   ],
                                 ),
                                 Text(
-                                  comment.owner.fullname,
+                                  DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(comment.createdAt)),
                                   style: TextStyle(
                                       fontSize: 12.0, color: Colors.grey),
                                 ),

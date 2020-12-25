@@ -1,21 +1,25 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
+import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
-import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
+import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:status_alert/status_alert.dart';
 
 class ReturnTypeModel {
   int id;
@@ -25,8 +29,8 @@ class ReturnTypeModel {
 
   static List<ReturnTypeModel> getReturnTypes() {
     return <ReturnTypeModel>[
-      ReturnTypeModel(1, 'Thông qua ứng dụng'),
       ReturnTypeModel(2, 'Gặp mặt tận nơi'),
+      ReturnTypeModel(1, 'Thông qua ứng dụng'),
     ];
   }
 }
@@ -52,13 +56,15 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
       CalendarRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   String timeReturnResult = 'Hãy chọn thời gian nhận';
   String endDate = '';
   String editDeadLine = '';
   String startDate = '';
-
-  
+  DateTime lastDay = DateTime.now();
+  bool notDuplicate = true;
   List<PackageBlocModel> listPackages = List<PackageBlocModel>();
 
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
@@ -116,34 +122,65 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
   }
 
   _editBooking() async {
-    if (selectedPackage != null) {
-      List<TimeAndLocationBlocModel> timeAndLocations = listTimeAndLocation;
+    if (_validateBooking()) {
+      if (selectedPackage != null) {
+        List<TimeAndLocationBlocModel> timeAndLocations = listTimeAndLocation;
 
-      BookingBlocModel booking = BookingBlocModel(
-          id: widget.bookingBlocModel.id,
-          serviceName: selectedPackage.name,
-          price: selectedPackage.price,
-          editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-              .format(DateTime.parse(editDeadLine)),
-          photographer: Photographer(id: widget.photographer.id),
-          package: selectedPackage,
-          returningType: selectedType.id,
-          listTimeAndLocations: timeAndLocations);
+        BookingBlocModel booking = BookingBlocModel(
+            id: widget.bookingBlocModel.id,
+            serviceName: selectedPackage.name,
+            price: selectedPackage.price,
+            editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm")
+                .format(DateTime.parse(editDeadLine)),
+            photographer: Photographer(id: widget.photographer.id),
+            package: selectedPackage,
+            returningType: selectedType.id,
+            listTimeAndLocations: timeAndLocations);
 
-      BlocProvider.of<BookingBloc>(context)
-          .add(BookingEventEdit(booking: booking));
+        BlocProvider.of<BookingBloc>(context)
+            .add(BookingEventEdit(booking: booking, cusId: globalCusId));
+      }
     }
+  }
+
+  bool _validateBooking() {
+    print(lastDay);
+    if (listTimeAndLocation == null) {
+      popUp(context, 'Địa điểm và thời gian chụp',
+          'Xin hãy chọn thời gian chụp và địa điểm');
+      return false;
+    } else if (listTimeAndLocation.isEmpty) {
+      popUp(context, 'Địa điểm và thời gian chụp',
+          'Xin hãy chọn thời gian chụp và địa điểm');
+      return false;
+    } else if (timeReturnResult == 'Hãy chọn thời gian nhận') {
+      popUp(context, 'Nhập thời gian nhận', 'Xin hãy chọn thời gian nhận');
+      return false;
+    } else if (!lastDay.isBefore(DateTime.parse(editDeadLine))) {
+      popUp(context, 'Thời gian nhận',
+          'Thời gian nhận ảnh phải sau ngày chụp cuối ít nhất 1 ngày');
+      return false;
+    }
+    return true;
   }
 
   @override
   void initState() {
     super.initState();
     dropDownMenuItems = buildDropdownMenuItems(returnedTypes);
-    selectedType = dropDownMenuItems[0].value;
+    print(widget.bookingBlocModel.returningType);
+    selectedType =
+        dropDownMenuItems[widget.bookingBlocModel.returningType - 1].value;
     listTimeAndLocation = widget.bookingBlocModel.listTimeAndLocations;
-    timeReturnResult = DateFormat('dd/MM/yyy HH:mm a')
-        .format(DateTime.parse(widget.bookingBlocModel.editDeadLine));
+    timeReturnResult = DateFormat('dd/MM/yyy hh:mm a')
+        .format(DateTime.parse(widget.bookingBlocModel.editDeadLine).toLocal());
     editDeadLine = widget.bookingBlocModel.editDeadLine;
+
+    for (var item in listTimeAndLocation) {
+      if (lastDay.isBefore(DateTime.parse(item.end))) {
+        lastDay = DateTime.parse(item.end);
+      }
+    }
   }
 
   @override
@@ -170,87 +207,19 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
         body: BlocListener<BookingBloc, BookingState>(
           listener: (context, state) {
             if (state is BookingStateEditedSuccess) {
-              Flushbar(
-                flushbarPosition: FlushbarPosition.TOP,
-                flushbarStyle: FlushbarStyle.FLOATING,
-                backgroundColor: Colors.black87,
-                reverseAnimationCurve: Curves.decelerate,
-                forwardAnimationCurve: Curves.elasticOut,
-                isDismissible: false,
-                duration: Duration(seconds: 5),
-                titleText: Text(
-                  "Cập nhật cuộc hẹn",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      fontFamily: "Quicksand"),
-                ),
-                messageText: Text(
-                  "Cập nhật thành công!!",
-                  style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.white,
-                      fontFamily: "Quicksand"),
-                ),
-              ).show(context);
+              Navigator.pop(context);
               widget.isEdited(true);
-              removeNotice();
-              Flushbar(
-                flushbarPosition: FlushbarPosition.TOP,
-                flushbarStyle: FlushbarStyle.FLOATING,
-                backgroundColor: Colors.black87,
-                reverseAnimationCurve: Curves.decelerate,
-                forwardAnimationCurve: Curves.elasticOut,
-                isDismissible: false,
-                duration: Duration(seconds: 5),
-                titleText: Text(
-                  "Cập nhật cuộc hẹn",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      fontFamily: "Quicksand"),
-                ),
-                messageText: Text(
-                  "Cập nhật thành công!!",
-                  style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.white,
-                      fontFamily: "Quicksand"),
-                ),
-              ).show(context);
+              _showSuccessAlert();
+              popUp(context, 'Cập nhật cuộc hẹn', 'Cập nhật thành công!!');
             }
 
             if (state is BookingStateLoading) {
-              popNotice();
+              _showLoadingAlert();
             }
             if (state is BookingStateFailure) {
-              removeNotice();
-              Flushbar(
-                flushbarPosition: FlushbarPosition.TOP,
-                flushbarStyle: FlushbarStyle.FLOATING,
-                backgroundColor: Colors.black87,
-                reverseAnimationCurve: Curves.decelerate,
-                forwardAnimationCurve: Curves.elasticOut,
-                isDismissible: false,
-                duration: Duration(seconds: 5),
-                titleText: Text(
-                  "Cập nhật cuộc hẹn",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                      color: Colors.white,
-                      fontFamily: "Quicksand"),
-                ),
-                messageText: Text(
-                  "Cập nhật thất bại!!",
-                  style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.white,
-                      fontFamily: "Quicksand"),
-                ),
-              ).show(context);
+              Navigator.pop(context);
+              popUp(
+                  context, 'Cập nhật cuộc hẹn', 'Cập nhật không thành công!!');
             }
           },
           child: ListView(
@@ -368,16 +337,52 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => BookingManyDetail(
-                                    ptgId: widget.photographer.id,
-                                    onUpdateList:
-                                        (TimeAndLocationBlocModel model) {
+                          MaterialPageRoute(builder: (context) {
+                            return MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) => WarningBloc(
+                                        warningRepository: _warningRepository),
+                                  ),
+                                ],
+                                child: BookingManyDetail(
+                                  timeAnticipate:
+                                      selectedPackage.timeAnticipate,
+                                  ptgId: widget.photographer.id,
+                                  onUpdateList:
+                                      (TimeAndLocationBlocModel model) {
+                                    for (var item in listTimeAndLocation) {
+                                      if (DateFormat('dd/MM/yyyy').format(
+                                              DateTime.parse(model.start)) ==
+                                          DateFormat('dd/MM/yyyy').format(
+                                              DateTime.parse(item.start))) {
+                                        notDuplicate = false;
+                                        return;
+                                      }
+                                    }
+                                    if (notDuplicate) {
                                       listTimeAndLocation.add(model);
-                                      setState(() {});
-                                    },
-                                  )),
-                        );
+                                      if (DateTime.parse(model.start)
+                                              .add(Duration(days: 1))
+                                              .isAfter(lastDay) ||
+                                          DateTime.parse(model.start)
+                                              .add(Duration(days: 1))
+                                              .isAtSameMomentAs(lastDay)) {
+                                        lastDay = DateTime.parse(model.start);
+                                      }
+                                    }
+
+                                    setState(() {});
+                                  },
+                                ));
+                          }),
+                        ).then((value) {
+                          if (!notDuplicate) {
+                            popUp(context, 'Chọn ngày chụp',
+                                'Bạn không được chọn trùng ngày với nhau!');
+                            notDuplicate = true;
+                          }
+                        });
                       },
                       child: Padding(
                         padding: EdgeInsets.only(right: 20.0),
@@ -424,16 +429,58 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                               pageBuilder: (BuildContext context,
                                   Animation<double> animation,
                                   Animation<double> secAnimation) {
-                                return BookingManyDetailEdit(
-                                  ptgId: widget.photographer.id,
-                                  model: listTimeAndLocation[mapEntry.key],
-                                  onUpdateList:
-                                      (TimeAndLocationBlocModel model) {
-                                    listTimeAndLocation[mapEntry.key] = model;
-                                    setState(() {});
-                                  },
-                                );
-                              }));
+                                return MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => WarningBloc(
+                                            warningRepository:
+                                                _warningRepository),
+                                      ),
+                                    ],
+                                    child: BookingManyDetailEdit(
+                                      ptgId: widget.photographer.id,
+                                      model: listTimeAndLocation[mapEntry.key],
+                                      onUpdateList:
+                                          (TimeAndLocationBlocModel model) {
+                                        if (listTimeAndLocation.length > 1) {
+                                          for (var item
+                                              in listTimeAndLocation) {
+                                            if (DateFormat('dd/MM/yyyy').format(
+                                                    DateTime.parse(
+                                                        model.start)) ==
+                                                DateFormat('dd/MM/yyyy').format(
+                                                    DateTime.parse(
+                                                        item.start))) {
+                                              notDuplicate = false;
+                                              return;
+                                            }
+                                          }
+                                        }
+
+                                        if (notDuplicate) {
+                                          listTimeAndLocation[mapEntry.key] =
+                                              model;
+                                          if (DateTime.parse(model.start)
+                                                  .add(Duration(days: 1))
+                                                  .isAfter(lastDay) ||
+                                              DateTime.parse(model.start)
+                                                  .add(Duration(days: 1))
+                                                  .isAtSameMomentAs(lastDay)) {
+                                            lastDay =
+                                                DateTime.parse(model.start);
+                                          }
+                                        }
+
+                                        setState(() {});
+                                      },
+                                    ));
+                              })).then((value) {
+                        if (!notDuplicate) {
+                          popUp(context, 'Chọn ngày chụp',
+                              'Bạn không được chọn trùng ngày với nhau!');
+                          notDuplicate = true;
+                        }
+                      });
                     },
                     child: Container(
                       margin: EdgeInsets.all(10),
@@ -514,10 +561,11 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                     ),
                                     SizedBox(width: 5.0),
                                     Text(
-                                      DateFormat("dd/MM/yyyy HH:mm a").format(
-                                          DateTime.parse(
-                                              listTimeAndLocation[mapEntry.key]
-                                                  .start)),
+                                      DateFormat("dd/MM/yyyy hh:mm a").format(
+                                          DateTime.parse(listTimeAndLocation[
+                                                      mapEntry.key]
+                                                  .start)
+                                              .toLocal()),
                                       style: TextStyle(
                                         fontSize: 13.0,
                                         color: Colors.black54,
@@ -525,6 +573,69 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                     ),
                                   ],
                                 ),
+                                SizedBox(height: 10.0),
+                                GestureDetector(
+                                  onTap: () {
+                                    int tempKey = mapEntry.key;
+                                    TimeAndLocationBlocModel tempModel =
+                                        listTimeAndLocation[mapEntry.key];
+                                    listTimeAndLocation.removeAt(mapEntry.key);
+                                    Flushbar(
+                                      flushbarPosition: FlushbarPosition.BOTTOM,
+                                      flushbarStyle: FlushbarStyle.GROUNDED,
+                                      backgroundColor: Colors.black54,
+                                      reverseAnimationCurve: Curves.decelerate,
+                                      forwardAnimationCurve: Curves.elasticOut,
+                                      isDismissible: true,
+                                      onStatusChanged: (v) {
+                                        print(v);
+                                      },
+                                      duration: Duration(seconds: 10),
+                                      titleText: Text(
+                                        "Xóa ngày chụp",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18.0,
+                                            color: Colors.white,
+                                            fontFamily: "Quicksand"),
+                                      ),
+                                      mainButton: FlatButton(
+                                        color: Colors.black12,
+                                        onPressed: () {
+                                          listTimeAndLocation.insert(
+                                              tempKey, tempModel);
+                                          Navigator.pop(context);
+                                          setState(() {});
+                                        },
+                                        child: Text('Hoàn tác',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 20,
+                                              color: Colors.white,
+                                            )),
+                                      ),
+                                      messageText: Text(
+                                        "Bạn đã xóa 1 ngày chụp",
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                            fontFamily: "Quicksand"),
+                                      ),
+                                    ).show(context);
+                                    setState(() {});
+                                  },
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.65,
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text('Xóa ngày này',
+                                          style: TextStyle(
+                                              color: Colors.blueAccent,
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -576,8 +687,8 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                 bookingRepository: _bookingRepository),
                           )
                         ],
-                        child: BlocDatePicker(
-                          ptgId: widget.photographer.id,
+                        child: DatePicker(
+                          lastDay: lastDay,
                           onSelecParam: (DateTime result) {
                             editDeadLine = result.toString();
                           },
@@ -814,18 +925,95 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
         : SizedBox();
   }
 
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 60),
-      title: 'Đang gửi yêu cầu',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thành Công',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã cập nhật thành công yêu cầu của bạn.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 
-  void removeNotice() {
-    StatusAlert.hide();
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  // ignore: unused_element
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

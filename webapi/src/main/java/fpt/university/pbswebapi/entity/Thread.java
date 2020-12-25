@@ -46,4 +46,7 @@ public class Thread {
     @JoinColumn(name = "thread_id", referencedColumnName = "id")
     @JsonManagedReference
     private List<ThreadComment> comments;
+
+    @Column(name = "is_ban")
+    private Boolean isBan;
 }

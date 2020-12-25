@@ -22,22 +22,22 @@ class _CalendarViewState extends State<CalendarView> {
     super.initState();
     controller = CalendarController();
     for (String day in widget.photographerDays.bookedDays) {
-      _events[DateTime.parse(day)] = [day];
+      _events[DateTime.parse(day).toLocal()] = [day];
     }
     for (String day in widget.photographerDays.busyDays) {
-      _holidays[DateTime.parse(day)] = [day];
+      _holidays[DateTime.parse(day).toLocal()] = [day];
     }
   }
 
   bool _predicate(DateTime day) {
     DateFormat dateFormat = DateFormat('yyyy/MM/dd');
-    if ((day.isBefore(DateTime.now()))) {
+    if ((day.isBefore(DateTime.now().toLocal()))) {
       return false;
     }
     for (var item in widget.photographerDays.busyDays) {
       if (dateFormat
-              .format(day)
-              .compareTo(dateFormat.format(DateTime.parse(item))) ==
+              .format(day.toLocal())
+              .compareTo(dateFormat.format(DateTime.parse(item).toLocal())) ==
           0) {
         return false;
       }

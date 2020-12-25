@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.only(top: 14.0),
                                     prefixIcon: Icon(
-                                      Icons.supervised_user_circle,
+                                      Icons.person,
                                       color: Color(0xFFF67062),
                                     ),
                                     hintText: 'Tên đăng nhập của bạn',
@@ -252,77 +252,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                '- HOẶC -',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              SizedBox(height: 20.0),
-                              Text(
-                                'Đăng nhập với',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 30.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    height: 60.0,
-                                    width: 60.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 2),
-                                          blurRadius: 6.0,
-                                        ),
-                                      ],
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/images/facebook.jpg'),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    height: 60.0,
-                                    width: 60.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 2),
-                                          blurRadius: 6.0,
-                                        ),
-                                      ],
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/images/google.jpg'),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                           GestureDetector(

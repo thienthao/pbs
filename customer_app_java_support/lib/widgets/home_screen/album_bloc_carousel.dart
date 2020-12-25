@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/album_respository.dart';
@@ -12,9 +13,8 @@ import 'package:http/http.dart' as http;
 
 class AlbumCarousel extends StatefulWidget {
   final List<AlbumBlocModel> blocAlbums;
-  AlbumCarousel({
-    @required this.blocAlbums,
-  });
+  final Function(bool) onUpdateAlbum;
+  AlbumCarousel({@required this.blocAlbums, this.onUpdateAlbum});
   @override
   _AlbumCarouselState createState() => _AlbumCarouselState();
 }
@@ -88,11 +88,11 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
             color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(30.0),
           ),
-          margin: const EdgeInsets.only(left: 21.0, right: 300.0),
+          margin: const EdgeInsets.only(left: 20.0, right: 300.0),
           height: 3.0,
         ),
         Padding(
-          padding: EdgeInsets.only(left: 7.0),
+          padding: EdgeInsets.only(left: 10.0),
           child: Container(
             height: 400.0,
             child: ListView.builder(
@@ -120,12 +120,17 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                           pageBuilder: (BuildContext context,
                               Animation<double> animation,
                               Animation<double> secAnimation) {
-                            return ImageFullScreen(
-                              album: blocAlbum,
+                            return BlocProvider(
+                              create: (context) =>
+                                  AlbumBloc(albumRepository: _albumRepository),
+                              child: ImageFullScreen(
+                                album: blocAlbum,
+                              ),
                             );
-                          })),
+                          })).then((value) => widget.onUpdateAlbum(true)),
                   child: Container(
                     margin: EdgeInsets.all(10.0),
+                    height: 400,
                     width: 240.0,
                     child: Stack(
                       alignment: Alignment.topCenter,
@@ -146,11 +151,22 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                 tag: blocAlbum.id,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(20.0),
-                                  child: Image(
-                                    image: NetworkImage(blocAlbum.thumbnail),
-                                    height: 400.0,
-                                    width: 240.0,
+                                  child: CachedNetworkImage(
+                                    height: 400,
+                                    width: 240,
                                     fit: BoxFit.cover,
+                                    imageUrl: blocAlbum.thumbnail,
+                                    placeholder: (context, url) => Container(
+                                        width: 240,
+                                        height: 400,
+                                        color: Colors.white,
+                                        child: Icon(
+                                          Icons.camera_alt_outlined,
+                                          size: 54,
+                                          color: Colors.black54,
+                                        )),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
                                   ),
                                 ),
                               ),
@@ -256,7 +272,7 @@ class _AlbumCarouselState extends State<AlbumCarousel> {
                                     SizedBox(width: 5.0),
                                     Text(
                                       blocAlbum.likes == null
-                                          ? _random.nextInt(1000).toString()
+                                          ? _random.nextInt(30).toString()
                                           : '${blocAlbum.likes}',
                                       style: TextStyle(
                                         color: Colors.white,

@@ -1,15 +1,34 @@
+import 'dart:io';
+
+import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:customer_app_java_support/respositories/album_respository.dart';
 import 'package:customer_app_java_support/screens/album_screens/album_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
-class AlbumOfPhotographerCarouselWidget extends StatelessWidget {
+class AlbumOfPhotographerCarouselWidget extends StatefulWidget {
   final List<AlbumBlocModel> blocAlbums;
+  final Function(bool) onUpdateAlbum;
 
-  const AlbumOfPhotographerCarouselWidget({this.blocAlbums});
+  const AlbumOfPhotographerCarouselWidget(
+      {this.blocAlbums, this.onUpdateAlbum});
+
+  @override
+  _AlbumOfPhotographerCarouselWidgetState createState() =>
+      _AlbumOfPhotographerCarouselWidgetState();
+}
+
+class _AlbumOfPhotographerCarouselWidgetState
+    extends State<AlbumOfPhotographerCarouselWidget> {
+  AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   @override
   Widget build(BuildContext context) {
-    final List<Widget> imageSliders = blocAlbums
+    final List<Widget> imageSliders = widget.blocAlbums
         .map((item) => Hero(
               tag: item.id,
               child: Container(
@@ -38,8 +57,14 @@ class AlbumOfPhotographerCarouselWidget extends StatelessWidget {
                             pageBuilder: (BuildContext context,
                                 Animation<double> animation,
                                 Animation<double> secAnimation) {
-                              return ImageFullScreen(album: item);
-                            }));
+                              return BlocProvider(
+                                create: (context) => AlbumBloc(
+                                    albumRepository: _albumRepository),
+                                child: ImageFullScreen(album: item),
+                              );
+                            })).then((value) {
+                      return widget.onUpdateAlbum(true);
+                    });
                   },
                   child: Stack(
                     children: <Widget>[
@@ -49,7 +74,13 @@ class AlbumOfPhotographerCarouselWidget extends StatelessWidget {
                               horizontal: 5.0, vertical: 0.0),
                           child: Center(
                             child: Image(
-                              image: NetworkImage(item.thumbnail),
+                              image: NetworkImage(
+                                item.thumbnail,
+                                headers: {
+                                  HttpHeaders.authorizationHeader:
+                                      'Bearer $globalCusToken'
+                                },
+                              ),
                               height: 460.0,
                               fit: BoxFit.cover,
                             ),
@@ -76,7 +107,10 @@ class AlbumOfPhotographerCarouselWidget extends StatelessWidget {
                                       Text(
                                         item.location.toString() == 'null'
                                             ? ''
-                                            : item.location,
+                                            : item.location.toString() ==
+                                                    'Thành Phố Hồ Chí Minh'
+                                                ? 'TP HCM'
+                                                : item.location,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                             color: Colors.white,
@@ -93,9 +127,9 @@ class AlbumOfPhotographerCarouselWidget extends StatelessWidget {
                                   Wrap(
                                     children: [
                                       Text(
-                                        item.createAt == null
+                                        item.createdAt == null
                                             ? '20/11/2019'
-                                            : item.createAt.toString(),
+                                            : '${DateFormat('dd/MM/yyyy').format(DateTime.parse(item.createdAt))}',
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
                                         style: TextStyle(
@@ -200,7 +234,7 @@ class AlbumOfPhotographerCarouselWidget extends StatelessWidget {
       children: [
         Container(
             width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.5,
+            height: MediaQuery.of(context).size.height * 0.6,
             child: Column(
               children: <Widget>[
                 CarouselSlider(

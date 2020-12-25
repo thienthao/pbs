@@ -103,6 +103,10 @@ class _MiniListEditState extends State<MiniListEdit> {
                   trailing: GestureDetector(
                     onTap: () {
                       tempServices.removeAt(index);
+                      if(tempServices.isEmpty) {
+                        isEditing = false;
+                        txtController.text ='';
+                      }
                       setState(() {});
                     },
                     child: Icon(

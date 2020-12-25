@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/comment_bloc_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,11 +18,8 @@ class CommentRepository {
 
   Future<List<CommentBlocModel>> getCommentByPhotographerId(int id) async {
     final response = await this.httpClient.get(
-          baseUrl +
-              'bookings/photographer/' +
-              id.toString() +
-              '/comments?size=3',
-        );
+        BaseApi.BOOKING_URL + '/photographer/$id/comments?size=3',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
@@ -62,9 +62,10 @@ class CommentRepository {
     String str = json.encode(resBody);
     print(str);
     final response = await httpClient.post(
-        baseUrl + 'bookings/${comment.bookingId}/comments/',
+        BaseApi.BOOKING_URL + '/${comment.bookingId}/comments/',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
         },
         body: str);
 
@@ -74,7 +75,30 @@ class CommentRepository {
     } else {
       throw Exception('Error at cancel a booking');
     }
-
     return result;
+  }
+
+  Future<List<CommentBlocModel>> getCommentByBookingId(int id) async {
+    final response = await this.httpClient.get(
+        BaseApi.BOOKING_URL + '/$id/comments',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
+      final List<CommentBlocModel> comments = data.map((comment) {
+        return CommentBlocModel(
+          comment: comment['comment'],
+          rating: comment['rating'],
+          username: comment['username'],
+          fullname: comment['fullname'],
+          createdAt: comment['createdAt'],
+          location: comment['location'],
+          avatar: comment['avatar'],
+        );
+      }).toList();
+
+      return comments;
+    } else {
+      throw Exception('Error getting list of comments');
+    }
   }
 }

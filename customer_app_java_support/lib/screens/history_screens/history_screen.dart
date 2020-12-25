@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/shared/list_booking_loading.dart';
 import 'package:customer_app_java_support/widgets/history_screen/booking_widget.dart';
 import 'package:customer_app_java_support/widgets/history_screen/customshapeclipper.dart';
 import 'package:customer_app_java_support/widgets/history_screen/drop_menu_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookHistory extends StatefulWidget {
   @override
@@ -20,6 +21,7 @@ class _BookHistoryState extends State<BookHistory> {
   final _scrollThreshold = 0.0;
   String statusForFilter = 'ALL';
   bool isBookingEdited = false;
+  int cusId;
   @override
   void dispose() {
     super.dispose();
@@ -27,12 +29,12 @@ class _BookHistoryState extends State<BookHistory> {
   }
 
   Completer<void> _completer;
-
+  SharedPreferences prefs;
   @override
   void initState() {
     super.initState();
     _completer = Completer<void>();
-
+    getCusId();
     // BlocProvider.of<BookingBloc>(context).add(BookingRestartEvent());
     _loadBookingsByPaging(AUTO_FIRST_STATUS);
 
@@ -46,16 +48,14 @@ class _BookHistoryState extends State<BookHistory> {
     });
   }
 
-  _loadBookingsByPaging(String _status) async {
-    BlocProvider.of<BookingBloc>(context)
-        .add(BookingEventFetchInfinite(cusId: 2, status: _status));
+  void getCusId() async {
+    prefs = await SharedPreferences.getInstance();
+    cusId = prefs.getInt('customerId');
   }
 
-  FutureOr onGoBack(dynamic value) {
-    if (isBookingEdited) {
-      _loadBookingsByPaging(statusForFilter);
-      setState(() {});
-    }
+  _loadBookingsByPaging(String _status) async {
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventFetchInfinite(cusId: globalCusId, status: _status));
   }
 
   _restartEvent() async {
@@ -64,55 +64,61 @@ class _BookHistoryState extends State<BookHistory> {
 
   Widget refreshData() {
     return Expanded(
-      child: Center(
-        child: BlocBuilder<BookingBloc, BookingState>(
-          builder: (context, bookingState) {
-            if (bookingState is BookingStateInfiniteFetchedSuccess) {
-              if (bookingState.bookings.isEmpty) {
-                return Text(
-                  'Đà Lạt',
+      child: BlocBuilder<BookingBloc, BookingState>(
+        builder: (context, bookingState) {
+          if (bookingState is BookingStateInfiniteFetchedSuccess) {
+            if (bookingState.bookings.isEmpty) {
+              return GestureDetector(
+                onTap: () {
+                  _loadBookingsByPaging(statusForFilter);
+                },
+                child: Text(
+                  'Hiện tại bạn chưa có lịch hẹn nào',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black87,
                     fontSize: 17.0,
                     fontWeight: FontWeight.w400,
                   ),
-                );
-              } else {
-                return RefreshIndicator(
-                  onRefresh: () {
-                    BlocProvider.of<BookingBloc>(context)
-                        .add(BookingRestartEvent());
-                    _loadBookingsByPaging(statusForFilter);
-                    return _completer.future;
-                  },
-                  child: Container(
-                    child: BookingWidget(
-                      scrollController: _scrollController,
-                      hasReachedEnd: bookingState.hasReachedEnd,
-                      blocBookings: bookingState.bookings,
-                      onGoBack: onGoBack,
-                      isEdited: (bool isEdit) {
-                        isBookingEdited = isEdit;
-                      },
-                    ),
+                ),
+              );
+            } else {
+              return RefreshIndicator(
+                onRefresh: () {
+                  BlocProvider.of<BookingBloc>(context)
+                      .add(BookingRestartEvent());
+                  _loadBookingsByPaging(statusForFilter);
+                  return _completer.future;
+                },
+                child: Container(
+                  child: BookingWidget(
+                    scrollController: _scrollController,
+                    hasReachedEnd: bookingState.bookings.length < 4
+                        ? true
+                        : bookingState.hasReachedEnd,
+                    blocBookings: bookingState.bookings,
+                    isEdited: (bool isEdit) {
+                      if (isEdit) {
+                        _loadBookingsByPaging(statusForFilter);
+                      }
+                    },
                   ),
-                );
-              }
-            }
-
-            if (bookingState is BookingStateLoading) {
-              return ListBookingLoadingWidget();
-            }
-
-            if (bookingState is BookingStateFailure) {
-              return Text(
-                'Đã xảy ra lỗi khi tải dữ liệu',
-                style: TextStyle(color: Colors.red[300], fontSize: 16),
+                ),
               );
             }
-            return Text('');
-          },
-        ),
+          }
+
+          if (bookingState is BookingStateLoading) {
+            return ListBookingLoadingWidget();
+          }
+
+          if (bookingState is BookingStateFailure) {
+            return Text(
+              'Đã xảy ra lỗi khi tải dữ liệu',
+              style: TextStyle(color: Colors.red[300], fontSize: 16),
+            );
+          }
+          return Text('');
+        },
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/respositories/customer_repository.dart';
 import 'package:customer_app_java_support/screens/profile_screens/profile_detail_screen.dart';
 import 'package:customer_app_java_support/widgets/profile_screen/profile_body_info.dart';
@@ -54,7 +55,7 @@ class _BodyState extends State<Body> {
 
   _loadProfile() async {
     BlocProvider.of<CustomerBloc>(context)
-        .add(CustomerEventProfileFetch(cusId: 2));
+        .add(CustomerEventProfileFetch(cusId: globalCusId));
   }
 
   @override
@@ -115,7 +116,7 @@ class _BodyState extends State<Body> {
                                       customer: state.customer,
                                     ),
                                   );
-                                }));
+                                })).then((value) => _loadProfile());
                       },
                     ),
                     ProfileMenuItem(

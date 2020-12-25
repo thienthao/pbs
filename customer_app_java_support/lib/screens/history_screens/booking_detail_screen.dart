@@ -4,13 +4,16 @@ import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/package_bloc.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
+import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
 import 'package:customer_app_java_support/constant/chat_name.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
 import 'package:customer_app_java_support/respositories/package_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/chat_screens/chat_screen.dart';
 import 'package:customer_app_java_support/shared/booking_detail_screen_loading.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_many_day_edit_screen.dart';
@@ -24,7 +27,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
-import 'package:status_alert/status_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BookingDetailScreen extends StatefulWidget {
@@ -42,7 +44,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   double cuLong = 0;
   double destinationLat = 11.939346;
   double destinationLong = 108.445173;
-
   Completer<void> _completer;
   final _formKey = GlobalKey<FormState>();
 
@@ -55,17 +56,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       CommentRepository(httpClient: http.Client());
   PackageRepository _packageRepository =
       PackageRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
   final TextEditingController _reasonTextController = TextEditingController();
 
   bool isBookingEdited = false;
-
-  FutureOr onGoBack(dynamic value) {
-    if (isBookingEdited) {
-      _loadBookingDetail();
-      widget.isEdited(true);
-      setState(() {});
-    }
-  }
 
   getChatRoomId(String a, String b) {
     if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
@@ -91,6 +86,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => ChatPage(
+              avatar: bookingObj.photographer.avatar,
                   chatRoomId: chatRoomId,
                 )));
   }
@@ -126,74 +122,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget formatBottomComponentBasedOnStatus(String status) {
     if (status.toUpperCase().trim() == 'DONE') {
-      print(bookingObj.comment);
-      if (bookingObj.comment.isEmpty) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Text(
-                'Nhận xét của tôi',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  wordSpacing: -1,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: 20),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                          transitionDuration: Duration(milliseconds: 1000),
-                          transitionsBuilder: (BuildContext context,
-                              Animation<double> animation,
-                              Animation<double> secAnimation,
-                              Widget child) {
-                            animation = CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.fastLinearToSlowEaseIn);
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(1, 0),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            );
-                          },
-                          pageBuilder: (BuildContext context,
-                              Animation<double> animation,
-                              Animation<double> secAnimation) {
-                            return BlocProvider(
-                              create: (context) => CommentBloc(
-                                  commentRepository: _commentRepository),
-                              child: RatingScreen(
-                                bookingId: bookingObj.id,
-                              ),
-                            );
-                          }));
-                },
-                child: Text(
-                  'Nhận xét',
-                  style: TextStyle(
-                      color: Colors.cyan,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15.0),
-                ),
-              ),
-            ),
-          ],
-        );
-      } else {
-        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-            height: 20,
-          ),
+      BlocProvider.of<CommentBloc>(context)
+          .add(CommentByBookingIdEventFetch(id: bookingObj.id));
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Padding(
             padding: const EdgeInsets.only(left: 10),
             child: Text(
@@ -233,171 +166,334 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       width: 10.0,
                     ),
                     Text(
-                      'Giao hàng qua ứng dụng',
+                      bookingObj.returningType == 1
+                          ? 'Giao hàng qua ứng dụng'
+                          : 'Gặp mặt photographer',
                       style: TextStyle(
                           fontSize: 17.0, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'https://drive.google.com/',
-                    style: TextStyle(
-                      fontSize: 13.0,
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
+                bookingObj.returningType == 1
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            launch(bookingObj.returningLink == 'drive' ? 'http://drive.google.com': bookingObj.returningLink);
+                          },
+                          child: Text(
+                            bookingObj.returningLink ?? '',
+                            style: TextStyle(
+                              fontSize: 13.0,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
               ],
             ),
           ),
           SizedBox(
             height: 20,
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Text(
-              'Nhận xét của tôi',
-              style: TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-                wordSpacing: -1,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.grey[300],
-                    offset: Offset(-1.0, 2.0),
-                    blurRadius: 6.0)
-              ],
-            ),
-            padding: EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/girl.jpg'),
-                      radius: 28,
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 10.0),
-                      width: MediaQuery.of(context).size.width * 0.68,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          BlocBuilder<CommentBloc, CommentState>(
+            builder: (BuildContext context, state) {
+              if (state is CommentStateSuccess) {
+                if (state.comments == null) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          'Nhận xét của tôi',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                            wordSpacing: -1,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 20),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                    transitionDuration:
+                                        Duration(milliseconds: 1000),
+                                    transitionsBuilder: (BuildContext context,
+                                        Animation<double> animation,
+                                        Animation<double> secAnimation,
+                                        Widget child) {
+                                      animation = CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.fastLinearToSlowEaseIn);
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(1, 0),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      );
+                                    },
+                                    pageBuilder: (BuildContext context,
+                                        Animation<double> animation,
+                                        Animation<double> secAnimation) {
+                                      return BlocProvider(
+                                        create: (context) => CommentBloc(
+                                            commentRepository:
+                                                _commentRepository),
+                                        child: RatingScreen(
+                                          bookingId: bookingObj.id,
+                                          onRatingSuccess:
+                                              (bool ratingSuccess) {
+                                            if (ratingSuccess) {
+                                              _loadBookingDetail();
+                                            }
+                                          },
+                                        ),
+                                      );
+                                    }));
+                          },
+                          child: Text(
+                            'Nhận xét',
+                            style: TextStyle(
+                                color: Colors.cyan,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (state.comments.isEmpty) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          'Nhận xét của tôi',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                            wordSpacing: -1,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 20),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                    transitionDuration:
+                                        Duration(milliseconds: 1000),
+                                    transitionsBuilder: (BuildContext context,
+                                        Animation<double> animation,
+                                        Animation<double> secAnimation,
+                                        Widget child) {
+                                      animation = CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.fastLinearToSlowEaseIn);
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(1, 0),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      );
+                                    },
+                                    pageBuilder: (BuildContext context,
+                                        Animation<double> animation,
+                                        Animation<double> secAnimation) {
+                                      return BlocProvider(
+                                        create: (context) => CommentBloc(
+                                            commentRepository:
+                                                _commentRepository),
+                                        child: RatingScreen(
+                                          bookingId: bookingObj.id,
+                                          onRatingSuccess:
+                                              (bool ratingSuccess) {
+                                            if (ratingSuccess) {
+                                              _loadBookingDetail();
+                                            }
+                                          },
+                                        ),
+                                      );
+                                    }));
+                          },
+                          child: Text(
+                            'Nhận xét',
+                            style: TextStyle(
+                                color: Colors.cyan,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15.0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Text(
+                            'Nhận xét của tôi',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              wordSpacing: -1,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey[300],
+                                  offset: Offset(-1.0, 2.0),
+                                  blurRadius: 6.0)
+                            ],
+                          ),
+                          padding: EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              SmoothStarRating(
-                                  allowHalfRating: false,
-                                  onRated: (v) {
-                                    print('You have rate $v stars');
-                                  },
-                                  starCount: 5,
-                                  rating: 4.0,
-                                  size: 15.0,
-                                  isReadOnly: true,
-                                  defaultIconData: Icons.star_border,
-                                  filledIconData: Icons.star,
-                                  halfFilledIconData: Icons.star_half,
-                                  color: Colors.amber,
-                                  borderColor: Colors.amber,
-                                  spacing: 0.0),
-                              Text(
-                                '18/10/2020',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w400,
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  CircleAvatar(
+                                    backgroundImage: NetworkImage(state
+                                            .comments[0].avatar ??
+                                        'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'),
+                                    radius: 28,
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(left: 10.0),
+                                    width: MediaQuery.of(context).size.width *
+                                        0.68,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            SmoothStarRating(
+                                                allowHalfRating: false,
+                                                onRated: (v) {
+                                                  print(
+                                                      'You have rate $v stars');
+                                                },
+                                                starCount: 5,
+                                                rating:
+                                                    state.comments[0].rating,
+                                                size: 15.0,
+                                                isReadOnly: true,
+                                                defaultIconData:
+                                                    Icons.star_border,
+                                                filledIconData: Icons.star,
+                                                halfFilledIconData:
+                                                    Icons.star_half,
+                                                color: Colors.amber,
+                                                borderColor: Colors.amber,
+                                                spacing: 0.0),
+                                            Text(
+                                              DateFormat('dd/MM/yyyy hh:mm a')
+                                                  .format(DateTime.parse(state
+                                                          .comments[0]
+                                                          .createdAt)
+                                                      .toLocal()),
+                                              textAlign: TextAlign.right,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        RichText(
+                                          text: TextSpan(
+                                            text: '',
+                                            style: TextStyle(
+                                                color: Colors.black54,
+                                                fontFamily: 'Quicksand'),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                  text: 'bởi: ',
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              TextSpan(
+                                                  text: state
+                                                      .comments[0].fullname,
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.normal)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  text: '',
+                                  style: TextStyle(
+                                      color: Colors.black54,
+                                      fontFamily: 'Quicksand'),
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                        text: 'Bình luận: ',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold)),
+                                    TextSpan(
+                                        text: state.comments[0].comment,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.normal)),
+                                  ],
                                 ),
+                              ),
+                              SizedBox(
+                                height: 10,
                               ),
                             ],
                           ),
-                          RichText(
-                            text: TextSpan(
-                              text: '',
-                              style: TextStyle(
-                                  color: Colors.black54,
-                                  fontFamily: 'Quicksand'),
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: 'bởi: ',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold)),
-                                TextSpan(
-                                    text: 'Uyển Nhi',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.normal)),
-                              ],
-                            ),
-                          ),
-                          RichText(
-                            text: TextSpan(
-                              text: '',
-                              style: TextStyle(
-                                  color: Colors.black54,
-                                  fontFamily: 'Quicksand'),
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: 'Địa điểm: ',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold)),
-                                TextSpan(
-                                    text: 'Hồ Chí Minh',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.normal)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                RichText(
-                  text: TextSpan(
-                    text: '',
-                    style: TextStyle(
-                        color: Colors.black54, fontFamily: 'Quicksand'),
-                    children: <TextSpan>[
-                      TextSpan(
-                          text: 'Bình luận: ',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold)),
-                      TextSpan(
-                          text:
-                              'Anh nhiệt tình, có góc nghệ thuật đẹp, em sẽ đặt nữa nếu có nhu cầu ^^',
-                          style: TextStyle(fontWeight: FontWeight.normal)),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-              ],
-            ),
+                        ),
+                      ]);
+                }
+              }
+              return Text('');
+            },
           ),
-        ]);
-      }
+        ],
+      );
     } else if (status.toUpperCase().trim() == 'PENDING') {
       return Container(
         child: Column(
@@ -406,7 +502,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Text(
-                'Phương thức giao hàng',
+                bookingObj.returningType == 1
+                    ? 'Giao hàng qua ứng dụng'
+                    : 'Gặp mặt photographer',
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
@@ -441,7 +539,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   Text(
                     bookingObj.returningType == 1
                         ? 'Giao hàng qua ứng dụng'
-                        : 'Gặp mặt',
+                        : 'Gặp mặt photographer',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -512,6 +610,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                     _bookingRepository),
                                           ),
                                           BlocProvider(
+                                            create: (context) => WarningBloc(
+                                                warningRepository:
+                                                    _warningRepository),
+                                          ),
+                                          BlocProvider(
                                               create: (BuildContext context) =>
                                                   PackageBloc(
                                                       packageRepository:
@@ -524,7 +627,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                         ],
                                         child: BookingOneDayEditScreen(
                                           isEdited: (bool isEdited) {
-                                            isBookingEdited = isEdited;
+                                            print('on BKDET $isEdited');
+                                            if (isEdited) {
+                                              widget.isEdited(true);
+                                              _loadBookingDetail();
+                                            }
                                           },
                                           bookingBlocModel: bookingObj,
                                           selectedPackage: bookingObj.package,
@@ -553,11 +660,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                           selectedPackage: bookingObj.package,
                                           photographer: bookingObj.photographer,
                                           isEdited: (bool isEdited) {
-                                            isBookingEdited = isEdited;
+                                            if (isEdited) {
+                                              widget.isEdited(true);
+                                              _loadBookingDetail();
+                                            }
                                           },
                                         ),
                                       );
-                              })).then(onGoBack);
+                              }));
 
                       // _acceptBooking(bookingObj);
                       // Navigator.pop(context);
@@ -621,7 +731,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     width: 10.0,
                   ),
                   Text(
-                    'Giao hàng qua ứng dụng',
+                    bookingObj.returningType == 1
+                        ? 'Giao hàng qua ứng dụng'
+                        : 'Gặp mặt photographer',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -700,7 +812,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       width: 10.0,
                     ),
                     Text(
-                      'Giao hàng qua ứng dụng',
+                      bookingObj.returningType == 1
+                          ? 'Giao hàng qua ứng dụng'
+                          : 'Gặp mặt photographer',
                       style: TextStyle(
                           fontSize: 17.0, fontWeight: FontWeight.bold),
                     ),
@@ -736,64 +850,20 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     return Text('');
   }
 
-  Widget displayCancelReasonBasedOnStatus(String status) {
-    if (status.toUpperCase().trim() == 'CANCELED') {
-      if (bookingObj.customerCanceledReason == null &&
-          bookingObj.photographerCanceledReason != null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do hủy của photographer:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.photographerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      } else if (bookingObj.customerCanceledReason != null &&
-          bookingObj.photographerCanceledReason == null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do hủy của tôi:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.customerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      }
-    } else if (status.toUpperCase().trim() == 'REJECTED') {
-      if (bookingObj.rejectedReason != null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do của photographer:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.photographerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      }
-    }
-    return SizedBox(
-      height: 0,
+  Widget reason(String title, String content) {
+    return RichText(
+      text: TextSpan(
+        text: '',
+        style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+        children: <TextSpan>[
+          TextSpan(
+              text: '$title:   ',
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          TextSpan(
+              text: content, style: TextStyle(fontWeight: FontWeight.normal)),
+        ],
+      ),
     );
   }
 
@@ -853,27 +923,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       photographer:
                           Photographer(id: bookingObj.photographer.id),
                       package: bookingObj.package);
-                  BlocProvider.of<BookingBloc>(context)
-                      .add(BookingEventCancel(booking: booking));
+                  BlocProvider.of<BookingBloc>(context).add(
+                      BookingEventCancel(booking: booking, cusId: globalCusId));
                 }
               },
             ),
           ],
         );
       },
-    );
-  }
-
-  void selectItem(String name) async {
-    isAbleToCanceled = false;
-
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 2),
-      title: 'Đã hủy hoạt động này',
-      configuration: IconConfiguration(
-        icon: Icons.done,
-      ),
     );
   }
 
@@ -1036,9 +1093,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ),
                           SizedBox(width: 5.0),
                           Text(
-                            DateFormat("dd/MM/yyyy HH:mm a").format(
+                            DateFormat("dd/MM/yyyy hh:mm a").format(
                                 DateTime.parse(
-                                    listTimeAndLocation[mapEntry.key].start)),
+                                        listTimeAndLocation[mapEntry.key].start)
+                                    .toLocal()),
                             maxLines: 3,
                             style: TextStyle(
                               fontSize: 13.0,
@@ -1106,13 +1164,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
                     children: <TextSpan>[
                       TextSpan(
-                          text: 'Thời gian bắt đầu:   ',
+                          text: 'Thời gian tác nghiệp dự kiến/1 ngày:   ',
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
                       TextSpan(
-                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel.startDate)),
+                          text: bookingObj.timeAnticipate == null
+                              ? '3 giờ'
+                              : '${(bookingObj.timeAnticipate / 3600).round()} giờ',
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
@@ -1134,11 +1193,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       TextSpan(
                           text: DateFormat('dd/MM/yyyy hh:mm a').format(
                               DateTime.parse(bookingBlocModel.editDeadLine)
-                                  .add(Duration(days: 5))),
+                                  .toLocal()),
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                _buildCanceledReason(),
                 SizedBox(
                   height: 10,
                 ),
@@ -1153,7 +1216,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
                 SizedBox(
                   height: 10,
                 ),
@@ -1221,15 +1283,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ? TextSpan(
                               text: DateFormat('dd/MM/yyyy hh:mm a').format(
                                   DateTime.parse(bookingBlocModel
-                                      .listTimeAndLocations[0].start)),
+                                          .listTimeAndLocations[0].start)
+                                      .toLocal()),
                               style: TextStyle(fontWeight: FontWeight.normal))
-                          : bookingBlocModel.startDate == null
-                              ? TextSpan(text: '')
-                              : TextSpan(
-                                  text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                      DateTime.parse(
-                                          bookingBlocModel.startDate)),
-                                ),
+                          : SizedBox()
                     ],
                   ),
                 ),
@@ -1248,7 +1305,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
                       TextSpan(
-                          text: '6 giờ',
+                          text: bookingObj.timeAnticipate == null
+                              ? '3 giờ'
+                              : '${(bookingObj.timeAnticipate / 3600).round()} giờ',
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
@@ -1270,14 +1329,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       bookingBlocModel.listTimeAndLocations.isNotEmpty
                           ? TextSpan(
                               text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                  DateTime.parse(
-                                      bookingBlocModel.editDeadLine)),
+                                  DateTime.parse(bookingBlocModel.editDeadLine)
+                                      .toLocal()),
                               style: TextStyle(fontWeight: FontWeight.normal))
                           : bookingBlocModel.endDate == null
                               ? TextSpan(text: '')
                               : TextSpan(
                                   text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                      DateTime.parse(bookingBlocModel.endDate)),
+                                      DateTime.parse(bookingBlocModel.endDate)
+                                          .toLocal()),
                                 ),
                     ],
                   ),
@@ -1344,7 +1404,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
+                _buildCanceledReason(),
                 SizedBox(
                   height: 10,
                 ),
@@ -1354,6 +1414,26 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildCanceledReason() {
+    print(bookingObj.customerCanceledReason.isNotEmpty);
+    print(bookingObj.photographerCanceledReason.isNotEmpty);
+    print(bookingObj.rejectedReason.isNotEmpty);
+    if (bookingObj.status.toUpperCase() == 'CANCELED') {
+      if (bookingObj.customerCanceledReason.isNotEmpty) {
+        return reason('Lý do hủy của bạn', bookingObj.customerCanceledReason);
+      } else if (bookingObj.photographerCanceledReason.isNotEmpty) {
+        return reason('Lý do hủy của photographer',
+            bookingObj.photographerCanceledReason);
+      }
+    } else if (bookingObj.status.toUpperCase() == 'REJECTED') {
+      if (bookingObj.rejectedReason.isNotEmpty) {
+        return reason(
+            'Lý do từ chối của photographer', bookingObj.rejectedReason);
+      }
+    }
+    return SizedBox();
   }
 
   @override
@@ -1373,7 +1453,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       ),
       backgroundColor: Colors.grey[50],
       body: ListView(
-        physics: BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         children: <Widget>[
           Center(
@@ -1382,6 +1461,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 if (bookingState is BookingDetailStateSuccess) {
                   widget.isEdited(true);
                   bookingObj = bookingState.booking;
+                  
                   if (bookingState.booking == null) {
                     return Text(
                       'Đà Lạt',
@@ -1415,6 +1495,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ),
                             ),
                           ),
+
 ///////////////////////////////////info
 
                           bookingState.booking.isMultiday
@@ -1439,14 +1520,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             ),
                           ),
 
-                          // Container(
-                          //   decoration: BoxDecoration(
-                          //     color: Theme.of(context).primaryColor,
-                          //     borderRadius: BorderRadius.circular(30.0),
-                          //   ),
-                          //   margin: const EdgeInsets.only(left: 5.0, right: 300.0),
-                          //   height: 3.0,
-                          // ),
                           Container(
                             margin: EdgeInsets.all(10),
                             decoration: BoxDecoration(
@@ -1478,8 +1551,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                           children: [
                                             CircleAvatar(
                                               backgroundImage: NetworkImage(
-                                                  bookingState.booking
-                                                      .photographer.avatar),
+                                                  bookingState
+                                                          .booking
+                                                          .photographer
+                                                          .avatar ??
+                                                      'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'),
                                               radius: 30,
                                             ),
                                             SizedBox(
@@ -1522,7 +1598,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                               'You have rate $v stars');
                                                         },
                                                         starCount: 5,
-                                                        rating: 4.5,
+                                                        rating: bookingState
+                                                                .booking
+                                                                .photographer
+                                                                .ratingCount ??
+                                                            0.0,
                                                         size: 15.0,
                                                         isReadOnly: true,
                                                         defaultIconData:
@@ -1556,20 +1636,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                               icon:
                                                   Icon(Icons.comment_outlined),
                                               onPressed: () {
+                                                // ignore: unrelated_type_equality_checks
                                                 if (ChatMethods()
                                                         .checkChatRoomExist(
-                                                            'Uyển Nhi_Cao Tiến') ==
+                                                            '${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}') ==
                                                     true) {
                                                   Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
                                                               ChatPage(
+                                                                avatar: bookingObj.photographer.avatar,
                                                                 chatRoomId:
-                                                                    "Uyển Nhi_Cao Tiến",
+                                                                    "${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}",
                                                               )));
                                                 } else {
-                                                  sendMessage('Cao Tiến');
+                                                  sendMessage('${bookingState.booking.photographer.fullname}');
                                                 }
                                               },
                                             ),

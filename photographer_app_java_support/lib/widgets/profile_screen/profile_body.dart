@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/album_respository.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
@@ -22,6 +23,17 @@ class _BodyState extends State<Body> {
   AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
+
+  _loadProfile() async {
+    BlocProvider.of<PhotographerBloc>(context)
+        .add(PhotographerbyIdEventFetch(id: globalPtgId));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +75,7 @@ class _BodyState extends State<Body> {
                               ),
                             );
                           }),
-                        );
+                        ).then((value) => _loadProfile());
                       },
                     ),
                     ProfileMenuItem(

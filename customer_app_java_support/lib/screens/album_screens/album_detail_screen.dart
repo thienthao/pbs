@@ -1,11 +1,16 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/photographer_detail.dart';
+import 'package:customer_app_java_support/shared/scale_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +23,6 @@ import 'package:http/http.dart' as http;
 
 class ImageFullScreen extends StatefulWidget {
   final AlbumBlocModel album;
-
   const ImageFullScreen({this.album});
 
   @override
@@ -38,10 +42,30 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
   CardController controller;
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   int indexOfAlbum = 0;
+  bool liked = false;
+  int likes = 0;
   @override
   void initState() {
     super.initState();
+    _isLikedAlbumFetch();
     widget.album.images.length == 0 ? indexOfAlbum = 0 : indexOfAlbum = 1;
+    likes = widget.album.likes;
+    widget.album.likes == null ? likes = 0 : likes = widget.album.likes;
+  }
+
+  _isLikedAlbumFetch() async {
+    BlocProvider.of<AlbumBloc>(context)
+        .add(AlbumEventIsLikedAlbumFetch(albumId: widget.album.id));
+  }
+
+  _likeAlbum() async {
+    BlocProvider.of<AlbumBloc>(context)
+        .add(AlbumEventLikeAlbum(albumId: widget.album.id));
+  }
+
+  _unlikeAlbum() async {
+    BlocProvider.of<AlbumBloc>(context)
+        .add(AlbumEventUnlikeAlbum(albumId: widget.album.id));
   }
 
   @override
@@ -66,6 +90,31 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
         children: <Widget>[
           Column(
             children: [
+              BlocListener<AlbumBloc, AlbumState>(
+                listener: (context, state) {
+                  if (state is AlbumStateIsLikedAlbumFetchSuccess) {
+                    if (state.isLiked) {
+                      liked = true;
+                      setState(() {});
+                    }
+                  }
+                  if (state is AlbumStateLikeAlbumSuccess) {
+                    if (state.isLiked) {
+                      liked = true;
+                      likes++;
+                      setState(() {});
+                    }
+                  }
+                  if (state is AlbumStateUnlikeAlbumSuccess) {
+                    if (state.isUnLiked) {
+                      liked = false;
+                      likes--;
+                      setState(() {});
+                    }
+                  }
+                },
+                child: SizedBox(),
+              ),
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
@@ -150,9 +199,45 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                           elevation: 2,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Image.network(
-                              '${widget.album.images[index].imageLink}',
-                              fit: BoxFit.cover,
+                            child: GestureDetector(
+                              onTap: () {
+                                scaleNavigator(
+                                    context,
+                                    DetailScreen(
+                                      imageUrl:
+                                          widget.album.images[index].imageLink,
+                                    ));
+                              },
+                              child: widget.album.images[index].imageLink ==
+                                          null ||
+                                      widget
+                                          .album.images[index].imageLink.isEmpty
+                                  ? NetworkImage(
+                                      'https://cerusfitness.com/wp-content/uploads/2020/01/placeholder-img-300x225.jpg')
+                                  : CachedNetworkImage(
+                                      imageUrl:
+                                          widget.album.images[index].imageLink,
+                                      httpHeaders: {
+                                        HttpHeaders.authorizationHeader:
+                                            'Bearer $globalCusToken'
+                                      },
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover,
+                                              colorFilter: ColorFilter.mode(
+                                                  Colors.black12,
+                                                  BlendMode.screen)),
+                                        ),
+                                      ),
+                                      placeholder: (context, url) => Container(
+                                        color: Colors.white,
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    ),
                             ),
                           ),
                         ),
@@ -220,32 +305,36 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                 SizedBox(height: 10.0),
                 Wrap(
                   children: [
-                    Icon(
-                      Icons.favorite_border,
-                      size: 28,
+                    GestureDetector(
+                      onTap: () {
+                        if (!liked) {
+                          _likeAlbum();
+                        } else {
+                          _unlikeAlbum();
+                        }
+
+                        setState(() {});
+                      },
+                      child: !liked
+                          ? Icon(
+                              Icons.favorite_border,
+                              size: 28,
+                            )
+                          : Icon(
+                              Icons.favorite_outlined,
+                              size: 28,
+                              color: Colors.redAccent,
+                            ),
                     ),
                     SizedBox(
                       width: 10,
-                    ),
-                    Icon(
-                      Icons.chat_bubble_outline_outlined,
-                      size: 28,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Icon(
-                      Icons.share,
-                      size: 28,
                     ),
                   ],
                 ),
                 SizedBox(height: 10.0),
                 RichText(
                   text: TextSpan(
-                      text:
-                          // '${oCcy.format(widget.album.likes)} lượt yêu thích ',
-                          '209 lượt yêu thích',
+                      text: '${oCcy.format(likes)} lượt yêu thích ',
                       style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Quicksand',
@@ -274,9 +363,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold)),
                           TextSpan(
-                              text: widget.album.createAt == null
-                                  ? '20/12/2012'
-                                  : '${widget.album.createAt}',
+                              text: widget.album.createdAt == null
+                                  ? '20/12/2019'
+                                  : '${DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.album.createdAt))}',
                               style: TextStyle(fontWeight: FontWeight.normal)),
                         ],
                       ),
@@ -360,7 +449,9 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                             fontSize: 16.0),
                       ),
                       TextSpan(
-                        text: '${widget.album.description}',
+                        text: widget.album.description == 'null'
+                            ? 'Chưa có mô tả'
+                            : '${widget.album.description}',
                         style: TextStyle(fontWeight: FontWeight.normal),
                       ),
                     ],
@@ -373,6 +464,44 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DetailScreen extends StatelessWidget {
+  final String imageUrl;
+
+  const DetailScreen({this.imageUrl});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GestureDetector(
+        child: Center(
+          child: Hero(
+            tag: imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              httpHeaders: {
+                HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'
+              },
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.contain,
+                      colorFilter:
+                          ColorFilter.mode(Colors.black12, BlendMode.screen)),
+                ),
+              ),
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
+          ),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+        },
       ),
     );
   }

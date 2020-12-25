@@ -2,6 +2,7 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.repository.CategoryRepository;
+import fpt.university.pbswebapi.repository.ReturningTypeRepository;
 import fpt.university.pbswebapi.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;

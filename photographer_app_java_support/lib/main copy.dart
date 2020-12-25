@@ -124,6 +124,7 @@ class _MyAppState extends State<MyApp> {
         accentColor: Color(0xFFFFBDAC),
         scaffoldBackgroundColor: Color(0xFFF3F5F7),
       ),
+      // ignore: missing_required_param
       home: LoginScreen(),
     );
   }

@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/customer_bloc_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -17,15 +19,16 @@ class CustomerRepository {
 
   Future<CustomerBlocModel> getProfileById(int id) async {
     // final albumsTemp = getAlbumOfPhotographer(id) as List;
-    final response = await this.httpClient.get(baseUrl + 'photographers/$id');
+    final response = await this.httpClient.get(BaseApi.USER_URL + '/$id',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
-
       final customer = CustomerBlocModel(
         id: data['id'],
         avatar: data['avatar'],
         email: data['email'],
         phone: data['phone'],
+        username: data['username'],
         description: data['description'],
         fullname: data['fullname'],
       );
@@ -44,9 +47,10 @@ class CustomerRepository {
     resBody["phone"] = customer.phone;
     String str = json.encode(resBody);
     print(str);
-    final response = await httpClient.put(baseUrl + 'photographers/',
+    final response = await httpClient.put(BaseApi.USER_URL,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
         },
         body: str);
 
@@ -61,9 +65,10 @@ class CustomerRepository {
   }
 
   Future<bool> updateAvatar(int cusId, File avatar) async {
-    var request =
-        http.MultipartRequest("POST", Uri.parse(baseUrl + 'photographers/$cusId/upload'));
-
+    var request = http.MultipartRequest(
+        "POST", Uri.parse(BaseApi.PHOTOGRAPHER_URL + '/$cusId/upload'));
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     request.files.add(http.MultipartFile(
         'file',
         File(avatar.path).readAsBytes().asStream(),

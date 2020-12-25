@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/package_bloc_model.dart';
 import 'package:photographer_app_java_support/models/service_bloc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/widgets/shared/base_api.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/';
 
@@ -16,17 +19,13 @@ class PackageRepository {
   Future<List<PackageBlocModel>> getPackagesByPhotographerId(int id) async {
     print('packages of photographer');
     final response = await this.httpClient.get(
-          baseUrl +
-              'packages/photographer/' +
-              id.toString() +
-              '/split?page=0&size=10',
+          BaseApi.PACKAGE_URL +
+              '/photographer/$globalPtgId/split?page=0&size=10' ,
+              headers: {
+                HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+              }
         );
-    final temp = baseUrl +
-        'packages/photographer/' +
-        id.toString() +
-        '/split?page=0&size=10';
-    print('url $temp');
-
+  
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['package'] as List;
@@ -43,6 +42,7 @@ class PackageRepository {
             name: package['name'].toString(),
             price: package['price'],
             description: package['description'].toString(),
+            timeAnticipate: package['timeAnticipate'],
             serviceDtos: services,
             supportMultiDays: package['supportMultiDays']);
       }).toList();
@@ -66,8 +66,9 @@ class PackageRepository {
     resBody["price"] = package.price;
     resBody["description"] = package.description;
     resBody["supportMultiDays"] = package.supportMultiDays;
+    resBody["timeAnticipate"] = package.timeAnticipate;
 
-    ptgResBody["id"] = 168;
+    ptgResBody["id"] = globalPtgId;
     resBody["photographer"] = ptgResBody;
 
     for (var service in package.serviceDtos) {
@@ -85,9 +86,10 @@ class PackageRepository {
     String str = json.encode(resBody);
     print(str);
 
-    final response = await httpClient.post(baseUrl + 'packages',
+    final response = await httpClient.post(BaseApi.PACKAGE_URL,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
         },
         body: str);
 
@@ -119,8 +121,9 @@ class PackageRepository {
     resBody["price"] = package.price;
     resBody["description"] = package.description;
     resBody["supportMultiDays"] = package.supportMultiDays;
+    resBody["timeAnticipate"] = package.timeAnticipate;
 
-    ptgResBody["id"] = 168;
+    ptgResBody["id"] = globalPtgId;
     resBody["photographer"] = ptgResBody;
 
     for (var service in package.serviceDtos) {
@@ -135,9 +138,10 @@ class PackageRepository {
     String str = json.encode(resBody);
     print(str);
 
-    final response = await httpClient.post(baseUrl + 'packages',
+    final response = await httpClient.post(BaseApi.PACKAGE_URL,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
         },
         body: str);
 
@@ -158,25 +162,26 @@ class PackageRepository {
 
     resBody["id"] = package.id;
 
-    ptgResBody["id"] = 168;
+    ptgResBody["id"] = globalPtgId;
     resBody["photographer"] = ptgResBody;
 
     String str = json.encode(resBody);
     print(str);
 
     final response = await httpClient.delete(
-      baseUrl + 'packages/168/${package.id}',
+      BaseApi.PACKAGE_URL + '/$globalPtgId/${package.id}',
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
       },
     );
-
     bool result = false;
     if (response.statusCode == 200) {
-      print('create package success: $result');
       result = true;
     } else {
-      throw Exception('Error Delete a Package');
+      print(json.decode(response.body).toString());
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      throw Exception(data['message']);
     }
 
     return result;

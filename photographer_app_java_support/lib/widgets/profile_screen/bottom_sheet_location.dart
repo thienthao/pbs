@@ -18,15 +18,13 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
   @override
   void initState() {
     super.initState();
-    selectedLocation = widget.inputList;
+    // selectedLocation = widget.inputList;
     for (var item in listCityLocations) {
       photographerLocations.add(LocationBlocModel(
           formattedAddress: item.name,
           latitude: item.latLng.latitude,
           longitude: item.latLng.longitude));
     }
-
-
   }
 
   @override
@@ -75,22 +73,19 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
                         onSortColumn(columnIndex, ascending);
                       }),
                 ],
-                rows: photographerLocations
-                    .map(
-                      (location) => DataRow(
-
-                        selected: selectedLocation.contains(location),
-                        onSelectChanged: (b) {
-                          onSelectedRow(b, location);
-                        },
-                        cells: [
-                          DataCell(
-                            Text(location.formattedAddress),
-                          ),
-                        ],
+                rows: photographerLocations.map((location) {
+                  return DataRow(
+                    selected: selectedLocation.contains(location),
+                    onSelectChanged: (b) {
+                      onSelectedRow(b, location);
+                    },
+                    cells: [
+                      DataCell(
+                        Text(location.formattedAddress),
                       ),
-                    )
-                    .toList(),
+                    ],
+                  );
+                }).toList(),
               ),
             ],
           ),
@@ -133,8 +128,8 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
       } else {
         selectedLocation.remove(location);
       }
+      print(selectedLocation[0].id);
       widget.onSelecteListLocation(selectedLocation);
-      
     });
   }
 }

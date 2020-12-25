@@ -64,87 +64,87 @@ class _BookHistoryState extends State<BookHistory> {
 
   Widget refreshData() {
     return Expanded(
-      child: Center(
-        child: BlocBuilder<BookingBloc, BookingState>(
-          builder: (context, bookingState) {
-            if (bookingState is BookingStateInitialPagingFetched) {
+      child: BlocBuilder<BookingBloc, BookingState>(
+        builder: (context, bookingState) {
+          if (bookingState is BookingStateInitialPagingFetched) {
+            return Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+              ),
+            );
+          }
+          if (bookingState is BookingStateInfiniteFetchedSuccess) {
+            if (bookingState.bookings.isEmpty) {
               return Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 1.5,
+                child: Text(
+                  'Hiện tại bạn chưa có lịch hẹn nào',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 17.0,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              );
+            } else {
+              return RefreshIndicator(
+                onRefresh: () {
+                  BlocProvider.of<BookingBloc>(context)
+                      .add(BookingRestartEvent());
+                  _loadBookingsByPaging(statusForFilter);
+                  return _completer.future;
+                },
+                child: Container(
+                  child: BookingWidget(
+                    hasReachedEnd: bookingState.bookings.length < 4
+                        ? true
+                        : bookingState.hasReachedEnd,
+                    blocBookings: bookingState.bookings,
+                    onGoBack: onGoBack,
+                    isEdited: (bool _isEdited) {
+                      isBookingEdited = _isEdited;
+                    },
+                    scrollController: _scrollController,
+                  ),
                 ),
               );
             }
-            if (bookingState is BookingStateInfiniteFetchedSuccess) {
-              if (bookingState.bookings.isEmpty) {
-                return Center(
-                  child: Text(
-                    'Hiện tại bạn chưa có lịch hẹn nào',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 17.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                );
-              } else {
-                return RefreshIndicator(
-                  onRefresh: () {
-                    BlocProvider.of<BookingBloc>(context)
-                        .add(BookingRestartEvent());
+          }
+
+          if (bookingState is BookingStateLoading) {
+            return ListBookingLoadingWidget();
+          }
+
+          if (bookingState is BookingStateFailure) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Đã xảy ra lỗi khi tải dữ liệu',
+                  style: TextStyle(color: Colors.red[300], fontSize: 16),
+                ),
+                InkWell(
+                  onTap: () {
                     _loadBookingsByPaging(statusForFilter);
-                    return _completer.future;
                   },
-                  child: Container(
-                    child: BookingWidget(
-                      hasReachedEnd: bookingState.hasReachedEnd,
-                      blocBookings: bookingState.bookings,
-                      onGoBack: onGoBack,
-                      isEdited: (bool _isEdited) {
-                        isBookingEdited = _isEdited;
-                      },
-                      scrollController: _scrollController,
-                    ),
-                  ),
-                );
-              }
-            }
-
-            if (bookingState is BookingStateLoading) {
-              return ListBookingLoadingWidget();
-            }
-
-            if (bookingState is BookingStateFailure) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Đã xảy ra lỗi khi tải dữ liệu',
+                  child: Text(
+                    'Nhấn để tải lại',
                     style: TextStyle(color: Colors.red[300], fontSize: 16),
                   ),
-                  InkWell(
-                    onTap: () {
-                      _loadBookingsByPaging(statusForFilter);
-                    },
-                    child: Text(
-                      'Nhấn để tải lại',
-                      style: TextStyle(color: Colors.red[300], fontSize: 16),
-                    ),
-                  ),
-                ],
-              );
-            }
-            // final bookings = (bookingState as BookingStateSuccess).bookings;
-            // return RefreshIndicator(
-            //     child: Container(child: BookingWidget()),
-            //     onRefresh: () {
-            //       // BlocProvider.of<BookingBloc>(context)
-            //       //     .add(BookingEventRefresh(booking: bookings[0]));
-            //       return _completer.future;
-            //     });
-            return Text('Oh no!');
-          },
-        ),
+                ),
+              ],
+            );
+          }
+          // final bookings = (bookingState as BookingStateSuccess).bookings;
+          // return RefreshIndicator(
+          //     child: Container(child: BookingWidget()),
+          //     onRefresh: () {
+          //       // BlocProvider.of<BookingBloc>(context)
+          //       //     .add(BookingEventRefresh(booking: bookings[0]));
+          //       return _completer.future;
+          //     });
+          return Text('Oh no!');
+        },
       ),
     );
   }

@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/service_bloc_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -15,8 +18,8 @@ class PackageRepository {
 
   Future<List<PackageBlocModel>> getPackagesByPhotographerId(int id) async {
     final response = await this.httpClient.get(
-          baseUrl + 'packages/photographer/' + id.toString() + '/split',
-        );
+        BaseApi.PACKAGE_URL + '/photographer/$id/split',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
@@ -32,6 +35,7 @@ class PackageRepository {
         return PackageBlocModel(
           id: package['id'],
           name: package['name'].toString(),
+          timeAnticipate: package['timeAnticipate'],
           price: package['price'],
           supportMultiDays: package['supportMultiDays'],
           description: package['description'].toString(),

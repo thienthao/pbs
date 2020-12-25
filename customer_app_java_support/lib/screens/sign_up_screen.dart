@@ -24,8 +24,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String username = this.username.text;
     String email = this.email.text;
     String password = this.password.text;
+    // ignore: unused_local_variable
     String repassword = this.repassword.text;
-    print("zo on click");
     UserRegister userRegister =
         UserRegister(username: username, email: email, password: password);
     BlocProvider.of<RegisterBloc>(context)

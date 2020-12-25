@@ -5,16 +5,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:photographer_app_java_support/constant/chat_name.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
 import 'package:photographer_app_java_support/models/time_and_location_bloc_model.dart';
+import 'package:photographer_app_java_support/models/weather_bloc_model.dart';
 import 'package:photographer_app_java_support/screens/chat_screens/chat_screen.dart';
 import 'package:photographer_app_java_support/screens/history_screens/location_guide.dart';
 import 'package:photographer_app_java_support/services/chat_service.dart';
 import 'package:photographer_app_java_support/widgets/shared/booking_detail_screen_loading.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weather_icons/weather_icons.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final Function(bool) onCheckIfEdited;
@@ -51,6 +55,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => ChatPage(
+              avatar: bookingObj.customer.avatar,
                   chatRoomId: chatRoomId,
                 )));
   }
@@ -62,6 +67,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   final TextEditingController _reasonTextController = TextEditingController();
+  final TextEditingController _returningLinkController =
+      TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   Completer<void> _completer;
 
   BookingBlocModel bookingObj;
@@ -77,18 +85,27 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(5.0),
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
-                  child: TextFormField(
-                    controller: _reasonTextController,
-                    cursorColor: Color(0xFFF77474),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 6,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Lý do hủy của bạn là gì...?'),
+                Form(
+                  key: _formKey,
+                  child: Container(
+                    padding: EdgeInsets.all(5.0),
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Xin hãy nhập lý do';
+                        }
+                        return null;
+                      },
+                      controller: _reasonTextController,
+                      cursorColor: Color(0xFFF77474),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Lý do hủy của bạn là gì...?'),
+                    ),
                   ),
                 ),
               ],
@@ -98,8 +115,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             FlatButton(
               child: Text('Xác nhận'),
               onPressed: () {
-                _cancelBooking(bookingObj, _reasonTextController.text);
-                Navigator.pop(context);
+                if (_formKey.currentState.validate()) {
+                  Navigator.pop(context);
+                  _cancelBooking(bookingObj, _reasonTextController.text);
+                }
+
                 // selectItem('Done');
               },
             ),
@@ -112,6 +132,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   Future<void> _rejectDialog() async {
     return showDialog<void>(
       context: context,
+
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext aContext) {
         return AlertDialog(
@@ -201,8 +222,52 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 } else {
                   _moveToDoneBooking(bookingObj);
                 }
+                // Navigator.pop(context);
+                // selectItem('Done');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _changeLinkDialog(String title) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext aContext) {
+        return AlertDialog(
+          title: Text('Lưu thay đổi',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
+                  child: Text('Xác nhận thay đổi',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Hủy bỏ'),
+              onPressed: () {
                 Navigator.pop(context);
                 // selectItem('Done');
+              },
+            ),
+            FlatButton(
+              child: Text('Xác nhận'),
+              onPressed: () {
+                _moveToDoneBooking(bookingObj);
               },
             ),
           ],
@@ -227,6 +292,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   _moveToEditBooking(BookingBlocModel _booking) async {
+    Navigator.pop(context);
     BookingBlocModel bookingTemp = BookingBlocModel(
         id: _booking.id,
         customer: CustomerBlocModel(id: _booking.customer.id),
@@ -237,13 +303,30 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   _moveToDoneBooking(BookingBlocModel _booking) async {
-    BookingBlocModel bookingTemp = BookingBlocModel(
-        id: _booking.id,
-        customer: CustomerBlocModel(id: _booking.customer.id),
-        package: _booking.package);
-    print('${bookingTemp.customer.id}');
-    BlocProvider.of<BookingBloc>(context)
-        .add(BookingEventMoveToDone(booking: bookingTemp));
+    Navigator.pop(context);
+    if (_booking.returningType == 1) {
+      if (_returningLinkController.text.isEmpty) {
+        popUp(context, 'Nhập link trả ảnh',
+            'Vui lòng nhập link trả ảnh trước khi nộp');
+      } else {
+        BookingBlocModel bookingTemp = BookingBlocModel(
+            id: _booking.id,
+            returningLink: _returningLinkController.text,
+            customer: CustomerBlocModel(id: _booking.customer.id),
+            package: _booking.package);
+        print('${bookingTemp.customer.id}');
+        BlocProvider.of<BookingBloc>(context)
+            .add(BookingEventMoveToDone(booking: bookingTemp));
+      }
+    } else {
+      BookingBlocModel bookingTemp = BookingBlocModel(
+          id: _booking.id,
+          customer: CustomerBlocModel(id: _booking.customer.id),
+          package: _booking.package);
+      print('${bookingTemp.customer.id}');
+      BlocProvider.of<BookingBloc>(context)
+          .add(BookingEventMoveToDone(booking: bookingTemp));
+    }
   }
 
   _rejectBooking(BookingBlocModel _booking, String _rejectReason) async {
@@ -277,8 +360,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     });
   }
 
-
-
   @override
   void initState() {
     super.initState();
@@ -288,6 +369,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Widget formatBottomComponentBasedOnStatus(String status) {
     if (status.toUpperCase().trim() == 'DONE') {
+      if (_returningLinkController.text.isEmpty) {
+        _returningLinkController.text = bookingObj.returningLink;
+      }
+      BlocProvider.of<CommentBloc>(context)
+          .add(CommentByBookingIdEventFetch(id: bookingObj.id));
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         SizedBox(
           height: 20,
@@ -333,23 +419,51 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   Text(
                     bookingObj.returningType == 1
                         ? 'Giao hàng qua ứng dụng'
-                        : 'Gặp mặt',
+                        : 'Gặp mặt khách hàng',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'https://drive.google.com/',
-                  style: TextStyle(
-                    fontSize: 13.0,
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
+              bookingObj.returningType == 1
+                  ? TextFormField(
+                      controller: _returningLinkController,
+                      validator: (value) {
+                        if (value.isNotEmpty) {
+                          return 'Xin hãy nhập link cần giao';
+                        } else {
+                          return null;
+                        }
+                      },
+                      keyboardType: TextInputType.text,
+                      style: TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(8.0),
+                        hintText: 'Nhập đường link hình ảnh cần giao',
+                        hintStyle: TextStyle(
+                          fontSize: 13.0,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    )
+                  : SizedBox(),
+              bookingObj.returningType == 1
+                  ? Align(
+                      alignment: Alignment.centerRight,
+                      child: FlatButton(
+                        onPressed: () {
+                          _changeLinkDialog('');
+                        },
+                        child: Text('Lưu thay đổi',
+                            style: TextStyle(
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold)),
+                      ))
+                  : SizedBox()
             ],
           ),
         ),
@@ -368,139 +482,160 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
           ),
         ),
-        bookingObj.comment == null
-            ? Container(
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey[300],
-                        offset: Offset(-1.0, 2.0),
-                        blurRadius: 6.0)
-                  ],
-                ),
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        CircleAvatar(
-                          backgroundImage: AssetImage('assets/images/girl.jpg'),
-                          radius: 28,
+        BlocBuilder<CommentBloc, CommentState>(
+          builder: (BuildContext context, state) {
+            if (state is CommentStateSuccess) {
+              if (state.comments == null) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child:
+                        Text('Khách hàng của bạn chưa nhận xét về lần hẹn này'),
+                  ),
+                );
+              } else if (state.comments.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child:
+                        Text('Khách hàng của bạn chưa nhận xét về lần hẹn này'),
+                  ),
+                );
+              } else {
+                return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey[300],
+                                offset: Offset(-1.0, 2.0),
+                                blurRadius: 6.0)
+                          ],
                         ),
-                        Container(
-                          margin: EdgeInsets.only(left: 10.0),
-                          width: MediaQuery.of(context).size.width * 0.68,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  SmoothStarRating(
-                                      allowHalfRating: false,
-                                      onRated: (v) {
-                                        print('You have rate $v stars');
-                                      },
-                                      starCount: 5,
-                                      rating: 4.0,
-                                      size: 15.0,
-                                      isReadOnly: true,
-                                      defaultIconData: Icons.star_border,
-                                      filledIconData: Icons.star,
-                                      halfFilledIconData: Icons.star_half,
-                                      color: Colors.amber,
-                                      borderColor: Colors.amber,
-                                      spacing: 0.0),
-                                  Text(
-                                    '18/10/2020',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.w400,
-                                    ),
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(state.comments[0].avatar),
+                                  radius: 28,
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(left: 10.0),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.68,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          SmoothStarRating(
+                                              allowHalfRating: false,
+                                              onRated: (v) {
+                                                print('You have rate $v stars');
+                                              },
+                                              starCount: 5,
+                                              rating: state.comments[0].rating,
+                                              size: 15.0,
+                                              isReadOnly: true,
+                                              defaultIconData:
+                                                  Icons.star_border,
+                                              filledIconData: Icons.star,
+                                              halfFilledIconData:
+                                                  Icons.star_half,
+                                              color: Colors.amber,
+                                              borderColor: Colors.amber,
+                                              spacing: 0.0),
+                                          Text(
+                                            DateFormat('dd/MM/yyyy hh:mm a')
+                                                .format(DateTime.parse(state
+                                                        .comments[0].createdAt)
+                                                    .toLocal()),
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: '',
+                                          style: TextStyle(
+                                              color: Colors.black54,
+                                              fontFamily: 'Quicksand'),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                                text: 'bởi: ',
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                            TextSpan(
+                                                text:
+                                                    state.comments[0].fullname,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.normal)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                text: '',
+                                style: TextStyle(
+                                    color: Colors.black54,
+                                    fontFamily: 'Quicksand'),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: 'Bình luận: ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold)),
+                                  TextSpan(
+                                      text: state.comments[0].comment,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.normal)),
                                 ],
                               ),
-                              RichText(
-                                text: TextSpan(
-                                  text: '',
-                                  style: TextStyle(
-                                      color: Colors.black54,
-                                      fontFamily: 'Quicksand'),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'bởi: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold)),
-                                    TextSpan(
-                                        text: 'Uyển Nhi',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.normal)),
-                                  ],
-                                ),
-                              ),
-                              RichText(
-                                text: TextSpan(
-                                  text: '',
-                                  style: TextStyle(
-                                      color: Colors.black54,
-                                      fontFamily: 'Quicksand'),
-                                  children: <TextSpan>[
-                                    TextSpan(
-                                        text: 'Địa điểm: ',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold)),
-                                    TextSpan(
-                                        text: 'Hồ Chí Minh',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.normal)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        text: '',
-                        style: TextStyle(
-                            color: Colors.black54, fontFamily: 'Quicksand'),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: 'Bình luận: ',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text:
-                                  'Anh nhiệt tình, có góc nghệ thuật đẹp, em sẽ đặt nữa nếu có nhu cầu ^^',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                        ],
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-              )
-            : Center(
-                child: Text('Khách hàng của bạn chưa nhận xét về lần hẹn này'),
-              )
+                    ]);
+              }
+            }
+            return Text('');
+          },
+        ),
       ]);
     } else if (status.toUpperCase().trim() == 'PENDING') {
       return Container(
@@ -543,7 +678,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     width: 10.0,
                   ),
                   Text(
-                    'Giao hàng qua ứng dụng',
+                    bookingObj.returningType == 1
+                        ? 'Giao hàng qua ứng dụng'
+                        : 'Gặp mặt khách hàng',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -566,7 +703,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      'Hủy',
+                      'Từ chối',
                       style: TextStyle(fontSize: 21.0, color: Colors.black87),
                     ),
                   ),
@@ -642,7 +779,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     width: 10.0,
                   ),
                   Text(
-                    'Giao hàng qua ứng dụng',
+                    bookingObj.returningType == 1
+                        ? 'Giao hàng qua ứng dụng'
+                        : 'Gặp mặt khách hàng',
                     style:
                         TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500),
                   ),
@@ -744,27 +883,39 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       width: 10.0,
                     ),
                     Text(
-                      'Giao hàng qua ứng dụng',
+                      bookingObj.returningType == 1
+                          ? 'Giao hàng qua ứng dụng'
+                          : 'Gặp mặt khách hàng',
                       style: TextStyle(
                           fontSize: 17.0, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
-                TextField(
-                  keyboardType: TextInputType.text,
-                  style: TextStyle(
-                    color: Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText: 'Nhập đường link hình ảnh cần giao',
-                    hintStyle: TextStyle(
-                      fontSize: 13.0,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
+                bookingObj.returningType == 1
+                    ? TextFormField(
+                        controller: _returningLinkController,
+                        validator: (value) {
+                          if (value.isNotEmpty) {
+                            return 'Xin hãy nhập link cần giao';
+                          } else {
+                            return null;
+                          }
+                        },
+                        keyboardType: TextInputType.text,
+                        style: TextStyle(
+                          color: Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: 'Nhập đường link hình ảnh cần giao',
+                          hintStyle: TextStyle(
+                            fontSize: 13.0,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
               ],
             ),
           ),
@@ -848,7 +999,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
- Widget _buildTimeAndLocationList(
+  Widget _buildTimeAndLocationList(
       List<TimeAndLocationBlocModel> listTimeAndLocation) {
     return Column(
       children: listTimeAndLocation.asMap().entries.map((MapEntry mapEntry) {
@@ -941,7 +1092,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             width: MediaQuery.of(context).size.width * 0.50,
                             child: Text(
                               listTimeAndLocation[mapEntry.key]
-                                  .formattedAddress,
+                                      .formattedAddress ??
+                                  '',
                               maxLines: null,
                               style: TextStyle(
                                 fontSize: 13.0,
@@ -963,9 +1115,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ),
                           SizedBox(width: 5.0),
                           Text(
-                            DateFormat("dd/MM/yyyy HH:mm a").format(
+                            DateFormat("dd/MM/yyyy hh:mm a").format(
                                 DateTime.parse(
-                                    listTimeAndLocation[mapEntry.key].start)),
+                                        listTimeAndLocation[mapEntry.key].start)
+                                    .toLocal()),
                             maxLines: 3,
                             style: TextStyle(
                               fontSize: 13.0,
@@ -985,6 +1138,295 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
+  Widget reason(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0),
+      child: RichText(
+        text: TextSpan(
+          text: '',
+          style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
+          children: <TextSpan>[
+            TextSpan(
+                text: '$title:   ',
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
+            TextSpan(
+                text: content, style: TextStyle(fontWeight: FontWeight.normal)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String convertOutLookToVietnamese(String outlook) {
+    String result = '';
+    switch (outlook) {
+      case 'freezing':
+        result = 'Trời lạnh';
+        break;
+      case 'ice':
+        result = 'Trời lạnh';
+        break;
+      case 'rainy':
+        result = 'Trời mưa';
+        break;
+      case 'cloudy':
+        result = 'Trời mây';
+        break;
+      case 'clear':
+        result = 'Trời hoang';
+        break;
+      case 'sunny':
+        result = 'Trời nắng';
+        break;
+    }
+    return result;
+  }
+
+  Widget _buildWeatherNotice(
+      WeatherBlocModel notice, int noticeIndex, int length) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(
+              children: [
+                BoxedIcon(WeatherIcons.day_cloudy),
+                Text('${convertOutLookToVietnamese(notice.outlook)}')
+              ],
+            ),
+            Column(
+              children: [
+                BoxedIcon(WeatherIcons.thermometer),
+                Text('${notice.temperature.round()} °C')
+              ],
+            ),
+            Column(
+              children: [
+                BoxedIcon(WeatherIcons.humidity),
+                Text('${notice.humidity.round()} %')
+              ],
+            ),
+            Column(
+              children: [
+                BoxedIcon(WeatherIcons.wind),
+                Text('${notice.windSpeed.roundToDouble()} m/s')
+              ],
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Text('${notice.noti}'),
+        SizedBox(
+          height: 10,
+        ),
+        (noticeIndex + 1) == length
+            ? SizedBox()
+            : Divider(
+                height: 10,
+              ),
+        SizedBox(
+          height: 10,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotice() {
+    if ((bookingObj.weatherWarnings.isNotEmpty ||
+            bookingObj.locationWarnings.isNotEmpty ||
+            bookingObj.timeWarnings.isNotEmpty ||
+            bookingObj.selfWarnDistance.isNotEmpty) &&
+        ((bookingObj.status.toUpperCase() != 'DONE') &&
+            (bookingObj.status.toUpperCase() != 'EDITING') &&
+            (bookingObj.status.toUpperCase() != 'CANCELED') &&
+            (bookingObj.status.toUpperCase() != 'REJECTED'))) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Divider(
+            color: Colors.black26,
+            endIndent: 15,
+            indent: 15,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            'Chú ý:',
+            style: TextStyle(
+                color: Colors.red[300],
+                fontSize: 24,
+                fontWeight: FontWeight.w600),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          bookingObj.weatherWarnings.isNotEmpty
+              ? Column(
+                  children: bookingObj.listWeatherNoticeDetails
+                      .asMap()
+                      .entries
+                      .map((MapEntry map) {
+                    return _buildWeatherNotice(
+                        bookingObj.listWeatherNoticeDetails[map.key],
+                        map.key,
+                        bookingObj.listWeatherNoticeDetails.length);
+                  }).toList(),
+                )
+              : SizedBox(),
+          bookingObj.locationWarnings.isNotEmpty
+              ? Column(
+                  children: bookingObj.locationWarnings
+                      .asMap()
+                      .entries
+                      .map((MapEntry map) {
+                    String locationWarning = '';
+                    var distanceAndName = [];
+                    if (bookingObj.locationWarnings.isNotEmpty) {
+                      locationWarning =
+                          bookingObj.locationWarnings[map.key].toString();
+                      distanceAndName = locationWarning.split(',');
+                    }
+
+                    return Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.location_off_outlined,
+                              size: 24,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Flexible(
+                                child: RichText(
+                              text: TextSpan(
+                                text: '',
+                                style: TextStyle(
+                                    color: Colors.black54,
+                                    fontFamily: 'Quicksand'),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text:
+                                          'Địa điểm của lịch hẹn này với khách hàng ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal)),
+                                  TextSpan(
+                                      text: distanceAndName[0],
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold)),
+                                  TextSpan(
+                                      text: ' là ',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal)),
+                                  TextSpan(
+                                      text: '${distanceAndName[1]} km',
+                                      style: TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.bold)),
+                                  TextSpan(
+                                      text: '!',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal)),
+                                ],
+                              ),
+                            ))
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                )
+              : SizedBox(),
+          bookingObj.timeWarnings.isNotEmpty
+              ? Column(
+                  children: bookingObj.timeWarnings
+                      .asMap()
+                      .entries
+                      .map((MapEntry map) {
+                    return Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.alarm_off,
+                              size: 24,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Flexible(
+                                child: Text(
+                              bookingObj.timeWarnings[map.key].toString(),
+                              style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold),
+                            ))
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                )
+              : SizedBox(),
+          bookingObj.selfWarnDistance.isNotEmpty
+              ? Column(
+                  children: bookingObj.selfWarnDistance
+                      .asMap()
+                      .entries
+                      .map((MapEntry map) {
+                    return Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.wrong_location_outlined,
+                              size: 24,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Flexible(
+                                child: Text(
+                              bookingObj.selfWarnDistance[map.key].toString(),
+                              style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold),
+                            ))
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                )
+              : SizedBox(),
+        ],
+      );
+    } else {
+      return SizedBox();
+    }
+  }
 
   Widget _buildTimeAndLocationInfoMultiDay(BookingBlocModel bookingBlocModel) {
     return Container(
@@ -1034,13 +1476,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
                     children: <TextSpan>[
                       TextSpan(
-                          text: 'Thời gian bắt đầu:   ',
+                          text: 'Thời gian tác nghiệp dự kiến/1 ngày:   ',
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
                       TextSpan(
-                          text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel.startDate)),
+                          text: bookingObj.timeAnticipate == null
+                              ? '3 giờ'
+                              : '${(bookingObj.timeAnticipate / 3600).round()} giờ',
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
@@ -1061,12 +1504,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               fontWeight: FontWeight.bold)),
                       TextSpan(
                           text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                              DateTime.parse(bookingBlocModel.endDate)
-                                  .add(Duration(days: 5))),
+                              DateTime.parse(bookingBlocModel.editDeadLine)
+                                  .toLocal()),
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
                 ),
+                _buildCanceledReason(),
                 SizedBox(
                   height: 10,
                 ),
@@ -1081,7 +1525,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
+                _buildNotice(),
                 SizedBox(
                   height: 10,
                 ),
@@ -1149,14 +1593,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ? TextSpan(
                               text: DateFormat('dd/MM/yyyy hh:mm a').format(
                                   DateTime.parse(bookingBlocModel
-                                      .listTimeAndLocations[0].start)),
+                                          .listTimeAndLocations[0].start)
+                                      .toLocal()),
                               style: TextStyle(fontWeight: FontWeight.normal))
                           : bookingBlocModel.startDate == null
                               ? TextSpan(text: '')
                               : TextSpan(
                                   text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                      DateTime.parse(
-                                          bookingBlocModel.startDate)),
+                                      DateTime.parse(bookingBlocModel.startDate)
+                                          .toLocal()),
                                 ),
                     ],
                   ),
@@ -1176,7 +1621,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               color: Colors.black,
                               fontWeight: FontWeight.bold)),
                       TextSpan(
-                          text: '6 giờ',
+                          text: bookingObj.timeAnticipate == null
+                              ? '3 giờ'
+                              : '${(bookingObj.timeAnticipate / 3600).round()} giờ',
                           style: TextStyle(fontWeight: FontWeight.normal)),
                     ],
                   ),
@@ -1198,14 +1645,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       bookingBlocModel.listTimeAndLocations.isNotEmpty
                           ? TextSpan(
                               text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                  DateTime.parse(
-                                      bookingBlocModel.endDate)),
+                                  DateTime.parse(bookingBlocModel.editDeadLine)
+                                      .toLocal()),
                               style: TextStyle(fontWeight: FontWeight.normal))
                           : bookingBlocModel.endDate == null
                               ? TextSpan(text: '')
                               : TextSpan(
                                   text: DateFormat('dd/MM/yyyy hh:mm a').format(
-                                      DateTime.parse(bookingBlocModel.endDate)),
+                                      DateTime.parse(
+                                              bookingBlocModel.editDeadLine)
+                                          .toLocal()),
                                 ),
                     ],
                   ),
@@ -1272,7 +1721,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                displayCancelReasonBasedOnStatus(bookingBlocModel.status),
+                _buildCanceledReason(),
+                SizedBox(
+                  height: 10,
+                ),
+                _buildNotice(),
                 SizedBox(
                   height: 10,
                 ),
@@ -1284,68 +1737,25 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
   }
 
-  Widget displayCancelReasonBasedOnStatus(String status) {
-    if (status.toUpperCase().trim() == 'CANCELED') {
-      if (bookingObj.customerCanceledReason == null &&
-          bookingObj.photographerCanceledReason != null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do hủy của photographer:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.photographerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
-      } else if (bookingObj.customerCanceledReason != null &&
-          bookingObj.photographerCanceledReason == null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do hủy của tôi:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.customerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
+  Widget _buildCanceledReason() {
+    print(bookingObj.customerCanceledReason.isNotEmpty);
+    print(bookingObj.photographerCanceledReason.isNotEmpty);
+    print(bookingObj.rejectedReason.isNotEmpty);
+    if (bookingObj.status.toUpperCase() == 'CANCELED') {
+      if (bookingObj.customerCanceledReason.isNotEmpty) {
+        return reason(
+            'Lý do hủy của khách hàng', bookingObj.customerCanceledReason);
+      } else if (bookingObj.photographerCanceledReason.isNotEmpty) {
+        return reason(
+            'Lý do hủy của bạn', bookingObj.photographerCanceledReason);
       }
-    } else if (status.toUpperCase().trim() == 'REJECTED') {
-      if (bookingObj.rejectedReason != null) {
-        return RichText(
-          text: TextSpan(
-            text: '',
-            style: TextStyle(color: Colors.black, fontFamily: 'Quicksand'),
-            children: <TextSpan>[
-              TextSpan(
-                  text: 'Lý do của photographer:   ',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-              TextSpan(
-                  text: bookingObj.photographerCanceledReason,
-                  style: TextStyle(fontWeight: FontWeight.normal)),
-            ],
-          ),
-        );
+    } else if (bookingObj.status.toUpperCase() == 'REJECTED') {
+      if (bookingObj.rejectedReason.isNotEmpty) {
+        return reason('Lý do từ chối của bạn', bookingObj.rejectedReason);
       }
     }
-    return SizedBox(
-      height: 0,
-    );
+    return SizedBox();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -1364,7 +1774,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       ),
       backgroundColor: Colors.grey[50],
       body: ListView(
-        physics: BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         children: <Widget>[
           Center(
@@ -1406,7 +1815,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ),
                             ),
                           ),
-                         ///////////////////////////////////info
+                          ///////////////////////////////////info
 
                           bookingState.booking.isMultiday
                               ? _buildTimeAndLocationInfoMultiDay(
@@ -1490,20 +1899,23 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                               icon:
                                                   Icon(Icons.comment_outlined),
                                               onPressed: () {
+                                                // ignore: unrelated_type_equality_checks
                                                 if (ChatMethods()
                                                         .checkChatRoomExist(
-                                                            'Uyển Nhi_Cao Tiến') ==
+                                                            '${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}') ==
                                                     true) {
                                                   Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
                                                               ChatPage(
+                                                                avatar: bookingObj.customer.avatar,
                                                                 chatRoomId:
-                                                                    "Uyển Nhi_Cao Tiến",
+                                                                    "${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}",
                                                               )));
                                                 } else {
-                                                  sendMessage('Uyển Nhi');
+                                                  sendMessage(
+                                                      '${bookingState.booking.customer.fullname}');
                                                 }
                                               },
                                             ),
@@ -1695,31 +2107,43 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   }
                 }
                 if (bookingState is BookingStateCanceledSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
                 if (bookingState is BookingStateAcceptedSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateRejectedSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateCanceledSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateMovedToEditSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 
                 if (bookingState is BookingStateMovedToDoneSuccess) {
-                  widget.onCheckIfEdited(true);
+                  if (widget.onCheckIfEdited != null) {
+                    widget.onCheckIfEdited(true);
+                  }
                   _loadBookingDetail();
                 }
 

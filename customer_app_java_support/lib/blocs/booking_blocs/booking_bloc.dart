@@ -22,15 +22,15 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
             (state as BookingStateInfiniteFetchedSuccess).hasReachedEnd);
 
     if (bookingEvent is BookingEventFetch) {
-      yield* _mapBookingsLoadedToState();
+      yield* _mapBookingsLoadedToState(bookingEvent.cusId);
     } else if (bookingEvent is BookingEventDetailFetch) {
       yield* _mapBookingDetailLoadedToState(bookingEvent.id);
     } else if (bookingEvent is BookingEventCreate) {
-      yield* _mapBookingCreatedtoState(bookingEvent.booking);
+      yield* _mapBookingCreatedtoState(bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventEdit) {
-      yield* _mapBookingEditedtoState(bookingEvent.booking);
+      yield* _mapBookingEditedtoState(bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventCancel) {
-      yield* _mapBookingCanceledtoState(bookingEvent.booking);
+      yield* _mapBookingCanceledtoState(bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventGetBookingOnDate) {
       yield* _mapGetBookingByDayToState(bookingEvent.ptgId, bookingEvent.date);
     } else if (bookingEvent is BookingEventFetchInfinite &&
@@ -43,11 +43,11 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     }
   }
 
-  Stream<BookingState> _mapBookingsLoadedToState() async* {
+  Stream<BookingState> _mapBookingsLoadedToState(int cusId) async* {
     yield BookingStateLoading();
     try {
       final bookings =
-          await this.bookingRepository.getListBookingByCustomerId();
+          await this.bookingRepository.getListBookingByCustomerId(cusId);
       yield BookingStateSuccess(bookings: bookings);
     } catch (_) {
       yield BookingStateFailure();
@@ -65,10 +65,10 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   Stream<BookingState> _mapBookingCreatedtoState(
-      BookingBlocModel booking) async* {
+      BookingBlocModel booking, int cusId) async* {
     yield BookingStateLoading();
     try {
-      final bookingId = await this.bookingRepository.createBooking(booking);
+      final bookingId = await this.bookingRepository.createBooking(booking, cusId);
       yield BookingStateCreatedSuccess(bookingId: bookingId);
     } catch (_) {
       yield BookingStateFailure();
@@ -76,10 +76,10 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   Stream<BookingState> _mapBookingEditedtoState(
-      BookingBlocModel booking) async* {
+      BookingBlocModel booking, int cusId) async* {
     yield BookingStateLoading();
     try {
-      final isSuccess = await this.bookingRepository.editBooking(booking);
+      final isSuccess = await this.bookingRepository.editBooking(booking, cusId);
       yield BookingStateEditedSuccess(isSuccess: isSuccess);
     } catch (_) {
       yield BookingStateFailure();
@@ -87,10 +87,10 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   Stream<BookingState> _mapBookingCanceledtoState(
-      BookingBlocModel booking) async* {
+      BookingBlocModel booking,  int cusId) async* {
     yield BookingStateLoading();
     try {
-      final isSuccess = await this.bookingRepository.cancelBooking(booking);
+      final isSuccess = await this.bookingRepository.cancelBooking(booking, cusId);
       yield BookingStateCanceledSuccess(isSuccess: isSuccess);
     } catch (_) {
       yield BookingStateFailure();

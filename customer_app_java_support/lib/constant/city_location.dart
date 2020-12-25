@@ -199,7 +199,8 @@ List<CityLocation> listCityLocations = [
       id: 33,
       name: 'Lâm Đồng',
       latLng: LatLng(11.94646, 108.44193),
-      image: '_image'),
+      image:
+          'https://d13jio720g7qcs.cloudfront.net/images/destinations/origin/5ccac30400a47.png'),
   CityLocation(
       id: 34,
       name: 'Lai Châu',
@@ -344,7 +345,8 @@ List<CityLocation> listCityLocations = [
       id: 62,
       name: 'Bà Rịa - Vũng Tàu',
       latLng: LatLng(10.499998, 107.166666),
-      image: '_image'),
+      image:
+          'https://image.vietnamnews.vn/uploadvnnews/Article/2020/2/5/66146_VTAU.jpg'),
   CityLocation(
       id: 63,
       name: 'An Giang',

@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/customer_bloc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
-
 
 class Info extends StatefulWidget {
   final CustomerBlocModel customer;
@@ -23,11 +23,11 @@ class _InfoState extends State<Info> {
       context: context,
       source: source,
     );
-     
+
     setState(() {
       if (image != null) {
         _avatar = image;
-        
+
         _updateAvatar();
       }
     });
@@ -45,7 +45,7 @@ class _InfoState extends State<Info> {
 
   _updateAvatar() async {
     BlocProvider.of<CustomerBloc>(context)
-        .add(CustomerEventUpdateAvatar(cusId: 2, image: _avatar));
+        .add(CustomerEventUpdateAvatar(cusId: globalCusId, image: _avatar));
   }
 
   @override
@@ -72,16 +72,10 @@ class _InfoState extends State<Info> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  iconSize: 20.0,
-                  color: Colors.white,
-                  onPressed: () => Navigator.pop(context),
-                ),
                 IconButton(
                   icon: Icon(Icons.camera_alt_rounded),
                   iconSize: 20.0,
@@ -111,7 +105,13 @@ class _InfoState extends State<Info> {
                           fit: BoxFit.cover,
                           image: _avatar != null
                               ? FileImage(_avatar)
-                              : NetworkImage(widget.customer.avatar),
+                              : NetworkImage(
+                                  widget.customer.avatar ??
+                                      'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
+                                  headers: {
+                                      HttpHeaders.authorizationHeader:
+                                          'Bearer $globalCusToken'
+                                    }),
                         ),
                       ),
                     ),
@@ -131,7 +131,7 @@ class _InfoState extends State<Info> {
                   ],
                 ),
                 Text(
-                  widget.customer.fullname ?? '',
+                  widget.customer.fullname ?? '${widget.customer.username}',
                   style: TextStyle(
                     fontSize: 22.0, // 22
                     color: Colors.black87,

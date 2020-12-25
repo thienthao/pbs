@@ -1,23 +1,26 @@
+import 'dart:math' as math;
+
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/comment_bloc_model.dart';
 import 'package:customer_app_java_support/screens/rating_screen/backgroundColorTween.dart';
 import 'package:customer_app_java_support/screens/rating_screen/flare_controller.dart';
 import 'package:customer_app_java_support/screens/rating_screen/slider_painter.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flare_flutter/flare_actor.dart';
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 enum SlideState { Worst, Bad, OK, Good, Excellent }
 
 class RatingScreen extends StatefulWidget {
   final int bookingId;
+  final Function(bool) onRatingSuccess;
+  const RatingScreen({this.bookingId, this.onRatingSuccess});
 
-  const RatingScreen({this.bookingId});
   @override
   _RatingScreenState createState() => _RatingScreenState();
 }
@@ -35,11 +38,11 @@ class _RatingScreenState extends State<RatingScreen>
   _postComment() async {
     CommentBlocModel _comment = CommentBlocModel(
         bookingId: widget.bookingId,
-        cusId: 2,
+        cusId: globalCusId,
         rating: rating,
         comment: _commentTextController.text,
         createdAt:
-            DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(DateTime.now()));
+            DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.now()));
     print('${_comment.bookingId} ${_comment.cusId} '
         ' ${_comment.rating} '
         ' ${_comment.comment} '
@@ -53,7 +56,7 @@ class _RatingScreenState extends State<RatingScreen>
   Future<void> _showMyDialog() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext aContext) {
         return AlertDialog(
           title: Text('Ý kiến của bạn',
@@ -221,77 +224,21 @@ class _RatingScreenState extends State<RatingScreen>
     return BlocListener<CommentBloc, CommentState>(
       listener: (context, state) {
         if (state is CommentStateLoading) {
-          Flushbar(
-            flushbarPosition: FlushbarPosition.TOP,
-            flushbarStyle: FlushbarStyle.FLOATING,
-            backgroundColor: Colors.red[200],
-            reverseAnimationCurve: Curves.decelerate,
-            forwardAnimationCurve: Curves.elasticOut,
-            isDismissible: false,
-            duration: Duration(seconds: 2),
-            titleText: Text(
-              "Posting comment",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                  color: Colors.white,
-                  fontFamily: "Quicksand"),
-            ),
-            messageText: Text(
-              "Posting Comment!!",
-              style: TextStyle(
-                  fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-            ),
-          ).show(context);
+          popNotice(context);
         }
 
         if (state is CommentStateFailure) {
-          Flushbar(
-            flushbarPosition: FlushbarPosition.TOP,
-            flushbarStyle: FlushbarStyle.FLOATING,
-            backgroundColor: Colors.red[200],
-            reverseAnimationCurve: Curves.decelerate,
-            forwardAnimationCurve: Curves.elasticOut,
-            isDismissible: false,
-            duration: Duration(seconds: 2),
-            titleText: Text(
-              "Post Comment",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                  color: Colors.white,
-                  fontFamily: "Quicksand"),
-            ),
-            messageText: Text(
-              "Post Comment Fail!!",
-              style: TextStyle(
-                  fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-            ),
-          ).show(context);
+          removeNotice(context);
+          popUp(context, 'Bình luận',
+              'Bình luận thất bại, bình luận của bạn sẽ không được hiển thị');
         }
         if (state is CommentStatePostedSuccess) {
-          Flushbar(
-            flushbarPosition: FlushbarPosition.TOP,
-            flushbarStyle: FlushbarStyle.FLOATING,
-            backgroundColor: Colors.red[200],
-            reverseAnimationCurve: Curves.decelerate,
-            forwardAnimationCurve: Curves.elasticOut,
-            isDismissible: false,
-            duration: Duration(seconds: 2),
-            titleText: Text(
-              "Post Comment",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                  color: Colors.white,
-                  fontFamily: "Quicksand"),
-            ),
-            messageText: Text(
-              "Comment Posted!!",
-              style: TextStyle(
-                  fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-            ),
-          ).show(context);
+          widget.onRatingSuccess(true);
+          removeNotice(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pop(context);
+          });
+          popUp(context, 'Bình luận', 'Bình luận thành công!!');
         }
       },
       child: AnimatedContainer(

@@ -5,6 +5,7 @@ import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_
 import 'package:photographer_app_java_support/blocs/authen_blocs/login_bloc.dart';
 import 'package:photographer_app_java_support/blocs/authen_blocs/user_repository.dart';
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/album_respository.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
@@ -27,6 +28,17 @@ class _ProfileState extends State<Profile> {
   AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
+
+  _loadProfile() async {
+    BlocProvider.of<PhotographerBloc>(context)
+        .add(PhotographerbyIdEventFetch(id: globalPtgId));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +72,7 @@ class _ProfileState extends State<Profile> {
                                       photographer: _photographer,
                                     ),
                                   )),
-                        );
+                        ).then((value) => _loadProfile());
                       },
                     ),
                     ProfileMenuItem(
@@ -114,7 +126,7 @@ class _ProfileState extends State<Profile> {
           child: InkWell(
             onTap: () {
               BlocProvider.of<PhotographerBloc>(context)
-                  .add(PhotographerbyIdEventFetch(id: 168));
+                  .add(PhotographerbyIdEventFetch(id: globalPtgId));
             },
             child: Text(
               'Đã xảy ra lỗi trong lúc tải dữ liệu \n Ấn để thử lại',

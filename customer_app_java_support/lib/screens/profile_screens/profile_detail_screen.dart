@@ -1,10 +1,9 @@
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:customer_app_java_support/models/customer_bloc_model.dart';
-import 'package:customer_app_java_support/models/location.dart';
-import 'package:flushbar/flushbar.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:status_alert/status_alert.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 
 class Detail extends StatefulWidget {
   final CustomerBlocModel customer;
@@ -20,6 +19,9 @@ class _DetailState extends State<Detail> {
   TextEditingController phoneController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+  final fullNameFocusNode = FocusNode();
+  final emailFocusNode = FocusNode();
+  final phoneFocusNode = FocusNode();
 
   String _checkEmpty(String value) {
     if (value.isEmpty) {
@@ -28,7 +30,14 @@ class _DetailState extends State<Detail> {
     return null;
   }
 
+  _unFocus() {
+    fullNameFocusNode.unfocus();
+    emailFocusNode.unfocus();
+    phoneFocusNode.unfocus();
+  }
+
   _updateProfile() async {
+    _unFocus();
     CustomerBlocModel customerBlocModel = CustomerBlocModel(
       id: widget.customer.id,
       fullname: fullnameController.text,
@@ -40,45 +49,6 @@ class _DetailState extends State<Detail> {
         .add(CustomerEventUpdateProfile(customer: customerBlocModel));
   }
 
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 60),
-      title: 'Đang gửi yêu cầu',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
-  }
-
-  void removeNotice() {
-    StatusAlert.hide();
-  }
-
-  void popUp(String title, String content) {
-    Flushbar(
-      flushbarPosition: FlushbarPosition.TOP,
-      flushbarStyle: FlushbarStyle.FLOATING,
-      backgroundColor: Colors.black87,
-      reverseAnimationCurve: Curves.decelerate,
-      forwardAnimationCurve: Curves.elasticOut,
-      isDismissible: false,
-      duration: Duration(seconds: 5),
-      titleText: Text(
-        title,
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18.0,
-            color: Colors.white,
-            fontFamily: "Quicksand"),
-      ),
-      messageText: Text(
-        content,
-        style: TextStyle(
-            fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-      ),
-    ).show(context);
-  }
 
   @override
   void initState() {
@@ -128,17 +98,19 @@ class _DetailState extends State<Detail> {
         body: BlocListener<CustomerBloc, CustomerState>(
           listener: (context, state) {
             if (state is CustomerStateUpdatedProfileSuccess) {
-              removeNotice();
-              popUp(
-                  'Cập nhật thông tin', 'Thông tin của bạn đã được cập nhật!!');
+              Navigator.pop(context);
+              _showSuccessAlert();
+              popUp(context, 'Cập nhật thông tin',
+                  'Thông tin của bạn đã được cập nhật!!');
             }
             if (state is CustomerStateLoading) {
-              popNotice();
+              _showLoadingAlert();
             }
             if (state is CustomerStateFailure) {
-              removeNotice();
-              popUp('Cập nhật thông tin',
+              Navigator.pop(context);
+              popUp(context, 'Cập nhật thông tin',
                   'Đã có lỗi xảy ra trong lúc cập nhật. Bạn vui lòng thử lại sau!');
+              _showFailDialog();
             }
           },
           child: Form(
@@ -161,6 +133,7 @@ class _DetailState extends State<Detail> {
                                 color: Colors.black87, fontSize: 12.0),
                           ),
                           TextFormField(
+                            focusNode: fullNameFocusNode,
                             controller: fullnameController,
                             validator: _checkEmpty,
                             keyboardType: TextInputType.text,
@@ -190,6 +163,7 @@ class _DetailState extends State<Detail> {
                                 color: Colors.black87, fontSize: 12.0),
                           ),
                           TextFormField(
+                            focusNode: emailFocusNode,
                             controller: emailController,
                             validator: _checkEmpty,
                             keyboardType: TextInputType.emailAddress,
@@ -219,6 +193,7 @@ class _DetailState extends State<Detail> {
                                 color: Colors.black87, fontSize: 12.0),
                           ),
                           TextFormField(
+                            focusNode: phoneFocusNode,
                             controller: phoneController,
                             validator: _checkEmpty,
                             keyboardType: TextInputType.phone,
@@ -245,5 +220,96 @@ class _DetailState extends State<Detail> {
             ),
           ),
         ));
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Cập nhật thông tin thành công!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

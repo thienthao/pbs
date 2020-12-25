@@ -4,7 +4,10 @@ import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -27,5 +30,10 @@ public class UserController {
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> all() {
+        return ResponseEntity.ok().body(userRepository.findAll());
     }
 }

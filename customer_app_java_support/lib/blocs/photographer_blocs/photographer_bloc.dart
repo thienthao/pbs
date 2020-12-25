@@ -23,10 +23,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
         (state is PhotographerStateInifiniteFetchedSuccess &&
             (state as PhotographerStateInifiniteFetchedSuccess).hasReachedEnd);
     if (photographerEvent is PhotographerEventFetch) {
-      yield* _mapPhotographersLoadedToState(
-          photographerEvent.categoryId, photographerEvent.latLng, photographerEvent.city);
-    } else if (photographerEvent is PhotographerEventFetchByFactorAlg) {
-      yield* _mapPhotographersFetchByFactorAlgToState();
+      yield* _mapPhotographersLoadedToState(photographerEvent.categoryId,
+          photographerEvent.latLng, photographerEvent.city);
     } else if (photographerEvent is PhotographerEventFetchInfinite &&
         !hasReachedEndOfOnePage) {
       yield* _mapPhotographersLoadedInfiniteToState();
@@ -51,18 +49,6 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           .photographerRepository
           .getListPhotographerByRating(categoryId, latLng, city);
       yield PhotographerStateSuccess(photographers: photographers);
-    } catch (_) {
-      yield PhotographerStateFailure();
-    }
-  }
-
-  Stream<PhotographerState> _mapPhotographersFetchByFactorAlgToState() async* {
-    yield PhotographerStateFetchByFactorAlgInProgress();
-    try {
-      final photographers =
-          await this.photographerRepository.getListPhotographerByFactorAlg();
-      yield PhotographerStateFetchByFactorAlgSuccess(
-          photographers: photographers);
     } catch (_) {
       yield PhotographerStateFailure();
     }
