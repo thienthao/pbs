@@ -1,5 +1,7 @@
 package fpt.university.pbswebapi.controller;
 
+import fpt.university.pbswebapi.dto.BookingWithWarningDetail;
+import fpt.university.pbswebapi.dto.BookingWithWarningDto;
 import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BookingComment;
@@ -188,9 +190,39 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/photographer/{photographerId}/with-warnings")
+    public ResponseEntity<Map<String, Object>> getBookingWithWarningByStatusSortById(@RequestParam(defaultValue = "0") int page,
+                                                                                     @RequestParam(defaultValue = "5") int size,
+                                                                                     @PathVariable("photographerId") Long photographerId) {
+        try {
+            List<BookingWithWarningDto> bookings = new ArrayList<>();
+            Pageable paging = PageRequest.of(page, size);
+
+            Page<Booking> pageBookings;
+            pageBookings = bookingService.findAllOfPhotographerByStatus(EBookingStatus.PENDING, paging, photographerId);
+
+            bookings = bookingService.getWarning(pageBookings.getContent());
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", bookings);
+            response.put("currentPage", pageBookings.getNumber());
+            response.put("totalItems", pageBookings.getTotalElements());
+            response.put("totalPages", pageBookings.getTotalPages());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
         return new ResponseEntity<>(bookingRepository.findById(id).get(), HttpStatus.OK);
+    }
+
+    @GetMapping("/with-warnings/{id}")
+    public ResponseEntity<BookingWithWarningDetail> getBookingWithWarningById(@PathVariable Long id) {
+        return new ResponseEntity<>(bookingService.findById(id), HttpStatus.OK);
     }
 
     @GetMapping("/customer/{customerId}/status")
@@ -234,6 +266,27 @@ public class BookingController {
         return new ResponseEntity<List<CommentDto>>(bookingService.findCommentsOfPhotographer(photographerId, pageable) ,HttpStatus.OK);
     }
 
+    @GetMapping("/testtimewarning")
+    public ResponseEntity<?> testTimeWarning() {
+        Booking booking = bookingRepository.findById(Long.parseLong("257")).get();
+        return new ResponseEntity<>(bookingService.warnBookingTime(booking), HttpStatus.OK);
+    }
+
+    @PostMapping("/distance-warning")
+    public ResponseEntity<?> warnDistance(@RequestBody Booking booking) {
+        return new ResponseEntity<>(bookingService.warnDistance(booking), HttpStatus.OK);
+    }
+
+    @GetMapping("/time-warning")
+    public ResponseEntity<?> warnTiming(@RequestParam("datetime") String datetime, @RequestParam("ptgId") Long ptgId) {
+        return new ResponseEntity<>(bookingService.warnTiming(ptgId, datetime), HttpStatus.OK);
+    }
+
+    @GetMapping("/weather-warning")
+    public ResponseEntity<?> warnWeather(@RequestParam("datetime") String datetime, @RequestParam("lat") Double lat, @RequestParam("lon") Double lon) {
+        return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, lat, lon), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Booking> book(@RequestBody Booking booking) {
         // require status
@@ -270,6 +323,11 @@ public class BookingController {
     @PutMapping("/editing")
     public ResponseEntity<Booking> editing(@RequestBody Booking booking) {
         return new ResponseEntity<Booking>(bookingService.editing(booking), HttpStatus.OK);
+    }
+
+    @PutMapping("/re-editing")
+    public ResponseEntity<Booking> reEditing(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.reEditing(booking), HttpStatus.OK);
     }
 
     private Long getCurrentUserId() {

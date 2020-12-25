@@ -61,7 +61,7 @@ public class User {
     private Date updatedAt;
 
     @JsonIgnore
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
@@ -70,11 +70,15 @@ public class User {
     private List<Album> albums;
 
     @JsonIgnore
+    @ManyToMany(mappedBy = "users")
+    private List<Album> likedAlbums;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "photographer")
     private List<ServicePackage> packages;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
     private List<Location> locations;
 
     @Column(name = "device_token")

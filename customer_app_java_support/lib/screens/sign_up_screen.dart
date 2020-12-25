@@ -46,7 +46,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             isDismissible: false,
             duration: Duration(seconds: 2),
             titleText: Text(
-              "Đăng nhập thất bại",
+              "Đăng ký thất bại",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18.0,
@@ -71,7 +71,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             isDismissible: false,
             duration: Duration(seconds: 2),
             titleText: Text(
-              "Đăng nhập thanh cong",
+              "Đăng ký thanh cong",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18.0,

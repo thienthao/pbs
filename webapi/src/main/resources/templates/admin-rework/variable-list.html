@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="admin-rework/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<style>
+    .ui-jqgrid {
+        font-family: Roboto;
+    }
+
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+</style>
+<div class="wrapper">
+    <!-- header-fragment -->
+    <div th:replace="admin-rework/header::header-nav"></div>
+    <!-- sidebar-fragment -->
+    <div th:replace="admin-rework/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Sorting Weights</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <form th:action="@{/admin/variable}" method="post">
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Weights</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <th:block th:each="obj : ${variable}">
+                                <tr>
+                                    <td>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" readonly name="id" th:value="${obj.id}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" readonly name="variableName" th:value="${obj.variableName}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <input name="weight" class="form-control" th:value="${obj.weight}">
+                                        </div>
+                                    </td>
+                                </tr>
+                            </th:block>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer clearfix">
+                        <input type="submit" class="btn btn-primary">
+                    </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+<!--                <div class="card card-primary card-outline">-->
+<!--                    <div class="card-header">-->
+<!--                        <h3 class="card-title">User Management</h3>-->
+<!--                    </div> &lt;!&ndash; /.card-body &ndash;&gt;-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="grid-btn">-->
+<!--                            <button class="btn btn-info" onclick="editUser()"><i-->
+<!--                                    class="fa fa-edit"></i>&nbsp;Edit-->
+<!--                            </button>-->
+<!--                            <input type="text" placeholder="Search..." id="keyword" class="form-control col-2">&nbsp;-->
+<!--                            <button class="btn btn-info" onclick="search()"><i-->
+<!--                                    class="fa fa-search"></i>&nbsp;Search-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                        &lt;!&ndash; JqGrid &ndash;&gt;-->
+<!--                        <table id="jqGrid" class="table table-bordered"></table>-->
+<!--                        &lt;!&ndash; JqGrid &ndash;&gt;-->
+<!--                        <div id="jqGridPager"></div>-->
+<!--                    </div>&lt;!&ndash; /.card-body &ndash;&gt;-->
+<!--                </div>-->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- footer-fragment -->
+    <div th:replace="admin-rework/footer::footer-fragment"></div>
+</div>
+<!-- jQuery -->
+<script th:src="@{/admin/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/admin/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/admin/dist/js/adminlte.min.js}"></script>
+<!-- jqgrid -->
+<script th:src="@{/admin/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/admin/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/admin/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/admin/dist/js/public.js}"></script>
+<script th:src="@{/admin/dist/js/variable.js}"></script>
+</body>
+</html>

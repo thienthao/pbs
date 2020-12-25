@@ -7,10 +7,7 @@ import fpt.university.pbswebapi.dto.Calendar;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.filesstore.FileStore;
-import fpt.university.pbswebapi.helper.DateHelper;
-import fpt.university.pbswebapi.helper.DtoMapper;
-import fpt.university.pbswebapi.helper.MapHelper;
-import fpt.university.pbswebapi.helper.StringUtils;
+import fpt.university.pbswebapi.helper.*;
 import fpt.university.pbswebapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,6 +24,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -42,12 +40,14 @@ public class PhotographerService {
     private final LocationRepository locationRepository;
     private final ServicePackageRepository packageRepository;
     private final WorkingDayRepository workingDayRepository;
+    private final CommentRepository commentRepository;
+    private final CustomRepository customRepository;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .build();
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository, WorkingDayRepository workingDayRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository, WorkingDayRepository workingDayRepository, CommentRepository commentRepository, CustomRepository customRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
@@ -55,6 +55,8 @@ public class PhotographerService {
         this.locationRepository = locationRepository;
         this.packageRepository = packageRepository;
         this.workingDayRepository = workingDayRepository;
+        this.commentRepository = commentRepository;
+        this.customRepository = customRepository;
     }
 
     public List<User> findAllPhotographers() {
@@ -94,9 +96,9 @@ public class PhotographerService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 User photographer = phtrOptional.get();
-                photographer.setAvatar("https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/download");
+                photographer.setAvatar("http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/download");
                 phtrRepo.save(photographer);
-                return "https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/download";
+                return "http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -112,20 +114,33 @@ public class PhotographerService {
         return fileStore.download(path, id + "-avatar");
     }
 
-    public User findOne(Long id) {
+    public SplitedPhotographerDto findOne(Long id) {
         Optional<User> photographer = phtrRepo.findById(id);
-        if(photographer.isPresent())
-            return photographer.get();
-        else
+        if(photographer.isPresent()) {
+            SplitedPhotographerDto result = DtoMapper.toSplitedPhotographerDto(photographer.get());
+            Integer booked = bookingRepository.countBooking(result.getId());
+            Double ratingCount = customRepository.getRatingCount(result.getId());
+            result.setRatingCount(ratingCount);
+            result.setBooked(booked);
+            return result;
+        }
+        else {
             throw new BadRequestException("Photographer not exists");
+        }
     }
 
-    @Cacheable("photographers")
     public Page<User> findPhotographersByRating(Pageable paging, String city) {
         if(city.equalsIgnoreCase("")) {
             return phtrRepo.findPhotographersOrderByRating(paging, Long.parseLong("2"));
         }
         return phtrRepo.findPhotographersInCityOrderByRating(paging, Long.parseLong("2"), city);
+    }
+
+    public List<User> findPhotographersByRatingCustom(String city) {
+        if(city.equalsIgnoreCase("")) {
+            return customRepository.getAllByRating();
+        }
+        return customRepository.findPhotographersInCityOrderByRating(city);
     }
 
 
@@ -157,9 +172,9 @@ public class PhotographerService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 User photographer = phtrOptional.get();
-                photographer.setAvatar("https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/download");
+                photographer.setAvatar("http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/download");
                 phtrRepo.save(photographer);
-                return "https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/download";
+                return "http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -196,9 +211,9 @@ public class PhotographerService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 User photographer = phtrOptional.get();
-                photographer.setCover("https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/cover/download");
+                photographer.setCover("http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/cover/download");
                 phtrRepo.save(photographer);
-                return "https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/cover/download";
+                return "http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/cover/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -242,9 +257,9 @@ public class PhotographerService {
                 fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
                 String fullpath = String.format("%s/%s", path, filename);
                 User photographer = phtrOptional.get();
-                photographer.setCover("https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/cover/download");
+                photographer.setCover("http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/cover/download");
                 phtrRepo.save(photographer);
-                return "https://pbs-webapi.herokuapp.com/api/photographers/" + id + "/cover/download";
+                return "http://194.59.165.195:8080/pbs-webapi/api/photographers/" + id + "/cover/download";
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -253,9 +268,21 @@ public class PhotographerService {
         }
     }
 
-    @Cacheable("photographers")
-    public List<User> findPhotographersByFactors(double lat, double lon) {
-        List<User> photographers =  phtrRepo.findAllPhotographer(Long.parseLong("2"));
+    public List<User> findPhotographersByFactors(double lat, double lon, long category, String city) {
+        List<User> photographers = new ArrayList<>();
+        if(category == 1) {
+            if(city.equalsIgnoreCase("")) {
+                photographers = customRepository.getAllByRating();
+            } else {
+                photographers = customRepository.findPhotographersInCityOrderByRating(city);
+            }
+        } else {
+            if(city.equalsIgnoreCase("")) {
+                photographers = customRepository.findPhotographersByCategorySortByRating(category);
+            } else {
+                photographers = customRepository.findPhotographersByCategoryAndCitySortByRating(city, category);
+            }
+        }
         List<User> sorted = new ArrayList<>();
         Map<Long, Float> result = new HashMap<>();
         int sumPrice = 0;
@@ -264,6 +291,7 @@ public class PhotographerService {
         for(int i = 0; i < photographers.size(); i++) {
             // cal sum distance
             List<Location> locations = locationRepository.findAllByUserId(photographers.get(i).getId());
+            // dang fake khoang cach photographer
             double tmpDistance = 100;
             for (Location location : locations) {
                 double distance = MapHelper.distance(lat, location.getLatitude(), lon, location.getLongitude());
@@ -285,7 +313,7 @@ public class PhotographerService {
             //cal rating
             float rating = 0;
             if(photographers.get(i).getRatingCount() != null)
-                rating = (float) (0.2 * (photographers.get(i).getRatingCount() / 5.0));
+                rating = (float) (0.3 * (photographers.get(i).getRatingCount() / 5.0));
 
             //cal distance
             List<Location> locations = locationRepository.findAllByUserId(photographers.get(i).getId());
@@ -297,11 +325,10 @@ public class PhotographerService {
             }
             double distanceRatio = tmpDistance / sumDistance;
             double distanceSub = (double) 1.0 - distanceRatio;
-            double distance = (double) (0.2 * distanceSub);
-            System.out.println(distance);
+            double distance = (double) (0.3 * distanceSub);
 
             //cal price
-            float price = (float) (0 * 0.6);
+            float price = (float) (0 * 0.4);
             float tile = 0;
             float tru = 0;
             if(photographers.get(i).getPackages() != null) {
@@ -309,20 +336,18 @@ public class PhotographerService {
                     if (photographers.get(i).getPackages().get(0).getPrice() != null)
                         tile =  ((float)photographers.get(i).getPackages().get(0).getPrice() / (float)sumPrice);
                         tru =  (float) 1.0 - tile;
-                        price = (float) (0.6 * tru);
+                        price = (float) (0.4 * tru);
                 }
             }
 
             //score
             float score = (float) (rating + price + distance);
             result.put(photographers.get(i).getId(), score);
-            System.out.println(score);
         }
         result = sortByValue(result);
         result.forEach((id, score) -> {
-            System.out.println(id);
             // add to sorted where id = id
-            sorted.add(phtrRepo.findById(id).get());
+            sorted.add(customRepository.findOne(id));
         });
         return sorted;
     }
@@ -377,12 +402,18 @@ public class PhotographerService {
         return results;
     }
 
-    @Cacheable("photographers")
     public Page<User> findPhotographersByCategorySortByRating(Pageable paging, long categoryId, String city) {
         if(city.equalsIgnoreCase("")) {
             return phtrRepo.findPhotographersByCategorySortByRating(paging, categoryId);
         }
         return phtrRepo.findPhotographersByCategoryAndCitySortByRating(paging, categoryId, city);
+    }
+
+    public List<User> findPhotographersByCategorySortByRatingCustom(long categoryId, String city) {
+        if(city.equalsIgnoreCase("")) {
+            return customRepository.findPhotographersByCategorySortByRating(categoryId);
+        }
+        return customRepository.findPhotographersByCategoryAndCitySortByRating(city, categoryId);
     }
 
     public List<BusyDay> getBusyDays(Long ptgId) {
@@ -513,7 +544,7 @@ public class PhotographerService {
             dows.add(DateHelper.getNotWorkingDay(dow));
         }
 
-        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 10, 1), LocalDate.of(2021, 1, 31));
+        List<LocalDate> datesBetween = DateHelper.getDatesBetweenUsingJava9(LocalDate.of(2020, 10, 1), LocalDate.of(2021, 3, 31));
         for(LocalDate date : datesBetween) {
             for(java.time.DayOfWeek dow : dows) {
                 if(DateHelper.isDateDayOfWeek(date, dow)) {
@@ -586,7 +617,6 @@ public class PhotographerService {
         return result;
     }
 
-    @Cacheable("calendar")
     public DayEvent getPhotographerEventOnDay(long ptgId, String date) {
         DayEvent dayEvent = new DayEvent();
         Date from;
@@ -612,12 +642,14 @@ public class PhotographerService {
                 bookings = bookingRepository.findOngoingBookingOnDate(from, to, ptgId);
                 for(Booking booking : bookings) {
                     for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
-                        bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                        if(DateHelper.convertToLocalDateViaInstant(tld.getStart()).toString().equalsIgnoreCase(date)) {
+                            bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                        }
                     }
                 }
 
                 // find editing booking
-                bookings = bookingRepository.findEditingBookingOnDate(from, to, ptgId);
+                bookings = bookingRepository.findEditingDeadlineOnDate(from, to, ptgId);
                 for(Booking booking : bookings) {
                     bookingInfos.add(DtoMapper.toBookingInfo(booking));
                 }
@@ -632,7 +664,6 @@ public class PhotographerService {
         return dayEvent;
     }
 
-    @Cacheable("calendar")
     public DayEvent getPhotographerEventOnDayForCustomer(long ptgId, String date) {
         DayEvent dayEvent = new DayEvent();
         Date from;
@@ -658,7 +689,10 @@ public class PhotographerService {
                 bookings = bookingRepository.findOngoingBookingOnDate(from, to, ptgId);
                 for(Booking booking : bookings) {
                     for(TimeLocationDetail tld : booking.getTimeLocationDetails()) {
-                        bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                        if(DateHelper.convertToLocalDateViaInstant(tld.getStart()).toString().equalsIgnoreCase(date)) {
+                            bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
+                        }
+//                        bookingInfos.add(DtoMapper.toBookingInfo(booking, tld));
                     }
                 }
 
@@ -683,6 +717,8 @@ public class PhotographerService {
                     DayOfWeek dayOfWeek = new DayOfWeek();
                     dayOfWeek.setDay(dow.getDay());
                     dayOfWeek.setWorkingDay(dow.isWorkingDay());
+                    dayOfWeek.setStartTime(dow.getStartTime());
+                    dayOfWeek.setEndTime(dow.getEndTime());
                     User photographer = phtrRepo.findById(ptgId).get();
                     dayOfWeek.setPhotographer(photographer);
                     results.add(workingDayRepository.save(dayOfWeek));
@@ -713,12 +749,37 @@ public class PhotographerService {
         return "Delete success";
     }
 
-    public List<Location> getPhotographerLocations() {
-        return locationRepository.findAll();
+    public List<Location> getPhotographerLocations(long userId) {
+        return locationRepository.findAllByUserId(userId);
     }
 
-    public Location addLocation(long ptgId, Location location) {
+    public Location addLocation(Location location) {
         Location result = locationRepository.save(location);
         return result;
+    }
+
+    public User updateProfile(User user) {
+        User save = phtrRepo.findById(user.getId()).get();
+        save.setFullname(user.getFullname());
+        save.setLocations(user.getLocations());
+        save.setEmail(user.getEmail());
+        save.setPhone(user.getPhone());
+        save.setDescription(user.getDescription());
+        return phtrRepo.save(save);
+    }
+
+    public Boolean checkWorkingTime(String time, Long photographerId) {
+        try {
+            DayOfWeek dayOfWeek = workingDayRepository.findByPhotographerIdAndDay(photographerId, 1);
+            LocalTime startTime = LocalTime.parse(dayOfWeek.getStartTime().toString());
+            LocalTime endTime = LocalTime.parse(dayOfWeek.getEndTime().toString());
+            LocalTime comparingTime = LocalTime.parse(time);
+            if(startTime.compareTo(comparingTime) <= 0 && endTime.compareTo(comparingTime) >= 0) {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 }

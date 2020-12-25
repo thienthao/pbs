@@ -1,22 +1,34 @@
 package fpt.university.pbswebapi.controller;
 
-import fpt.university.pbswebapi.entity.ReturningType;
-import fpt.university.pbswebapi.entity.User;
-import fpt.university.pbswebapi.repository.CategoryRepository;
-import fpt.university.pbswebapi.repository.ReturningTypeRepository;
-import fpt.university.pbswebapi.repository.UserRepository;
+import fpt.university.pbswebapi.dto.CancelledBooking;
+import fpt.university.pbswebapi.dto.UserBookingInfo;
+import fpt.university.pbswebapi.dto.UserBookingInfoList;
+import fpt.university.pbswebapi.entity.*;
+import fpt.university.pbswebapi.helper.DtoMapper;
+import fpt.university.pbswebapi.payload.own.response.MessageResponse;
+import fpt.university.pbswebapi.repository.*;
+import fpt.university.pbswebapi.security.services.UserDetailsImpl;
+import fpt.university.pbswebapi.service.BookingService;
 import fpt.university.pbswebapi.service.ThreadService;
 import fpt.university.pbswebapi.service.UserService;
+import fpt.university.pbswebapi.service.VariableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+
+import javax.servlet.http.HttpSession;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -24,19 +36,37 @@ public class AdminController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private static DecimalFormat df = new DecimalFormat("#.##");
+
     private CategoryRepository categoryRepository;
     private ReturningTypeRepository returningTypeRepository;
     private UserRepository userRepository;
     private UserService userService;
     private ThreadService threadService;
+    private BookingService bookingService;
 
     @Autowired
-    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService) {
+    private VariableService variableService;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService) {
         this.categoryRepository = categoryRepository;
         this.returningTypeRepository = returningTypeRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.threadService = threadService;
+        this.bookingService = bookingService;
+    }
+
+    @GetMapping("/login")
+    public String login(Model model, String error, String logout) {
+        return "admin-rework/login";
     }
 
     @RequestMapping({"/dashboard", "/"})
@@ -58,13 +88,43 @@ public class AdminController {
     @GetMapping(value = {"/users/{userId}/edit"})
     public String showEditUserPage(Model model, @PathVariable long userId) {
         User user = null;
+        List<Booking> userBooking = null;
+        List<CancelledBooking> cancelledBooking = new ArrayList<>();
+        UserBookingInfo userBookingInfo = new UserBookingInfo();
         try {
             user = userRepository.findById(userId).get();
+            userBooking = bookingRepository.findAllByUserId(userId);
+            List<Booking> cancelledBookingtmp = bookingRepository.findCancelledBookingsOf(userId);
+
+            int numOfCancelled = 0;
+            for(Booking booking : userBooking) {
+                if(booking.getBookingStatus() == EBookingStatus.CANCELED) {
+                    numOfCancelled += 1;
+                }
+            }
+
+            double cancellationRate = 0.0;
+            if(userBooking.size() > 0) {
+                cancellationRate = ((double) numOfCancelled / (double) userBooking.size()) * 100;
+            }
+
+            for(Booking cancelled : cancelledBookingtmp) {
+                cancelledBooking.add(DtoMapper.toCancelledBooking(cancelled));
+            }
+            cancellationRate = Double.parseDouble(df.format(cancellationRate));
+            userBookingInfo.setNumOfBooking(userBooking.size());
+            userBookingInfo.setNumOfCancelled(numOfCancelled);
+            cancellationRate = Double.parseDouble(df.format(cancellationRate));
+            userBookingInfo.setCancellationRate(cancellationRate);
         } catch (Exception e) {
+            e.printStackTrace();
             model.addAttribute("errorMessage", "User Not Found");
         }
         model.addAttribute("add", false);
         model.addAttribute("user", user);
+        model.addAttribute("booking", userBooking);
+        model.addAttribute("info", userBookingInfo);
+        model.addAttribute("cancelled", cancelledBooking);
         return "admin-rework/user-detail";
     }
 
@@ -104,6 +164,21 @@ public class AdminController {
     public String returningTypeList(Model model) {
         model.addAttribute("returningTypes", returningTypeRepository.findAll());
         return "admin-rework/returning-list";
+    }
+
+    @RequestMapping("/variable")
+    public String getVariablePage(Model model) {
+        model.addAttribute("variable", variableService.findAll());
+        return "admin-rework/variable-list";
+    }
+
+    @PostMapping("/variable")
+    public String changeVariable(ArrayList<Variable> variable) {
+        for (Variable var : variable) {
+            System.out.println(var.getWeight());
+            System.out.println(var.getVariableName());
+        }
+        return "admin-rework/variable-list";
     }
 
     @GetMapping(value = {"/returningTypes/{returningTypeId}/edit"})

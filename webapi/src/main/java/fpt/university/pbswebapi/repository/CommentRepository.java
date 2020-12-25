@@ -20,4 +20,11 @@ public interface CommentRepository extends JpaRepository<BookingComment, Long> {
             "and b.bookingStatus='DONE' " +
             "order by c.commentedAt desc")
     List<BookingComment> findCommentOfPhotographer(Long photographerId, Pageable pageable);
+
+    @Query("SELECT AVG(c.rating) " +
+            "FROM BookingComment c " +
+            "inner join Booking b " +
+            "inner join User u " +
+            "where u.id = :photographerId")
+    Double getRatingCount(Long photographerId);
 }

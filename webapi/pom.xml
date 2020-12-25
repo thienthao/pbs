@@ -11,7 +11,7 @@
     <groupId>fpt.university</groupId>
     <artifactId>pbs-webapi</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <name>pbs-webapi</name>
     <description>Photographer booking system - WebAPI</description>
 
@@ -131,6 +131,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

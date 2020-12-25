@@ -32,6 +32,12 @@ public class Booking {
 
     private Integer price;
 
+    @Column(name = "returning_link")
+    private String returningLink;
+
+    @Column(name = "time_anticipate")
+    private Integer timeAnticipate;
+
     @Column(name = "created_at")
     private Date createdAt;
 
@@ -90,5 +96,35 @@ public class Booking {
         this.customer = customer;
         this.photographer = photographer;
         this.servicePackage = servicePackage;
+    }
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id=" + id +
+                ", bookingStatus=" + bookingStatus +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", serviceName='" + serviceName + '\'' +
+                ", price=" + price +
+                ", returningLink='" + returningLink + '\'' +
+                ", timeAnticipate=" + timeAnticipate +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", customerCanceledReason='" + customerCanceledReason + '\'' +
+                ", photographerCanceledReason='" + photographerCanceledReason + '\'' +
+                ", rejectedReason='" + rejectedReason + '\'' +
+                ", rating=" + rating +
+                ", comment='" + comment + '\'' +
+                ", location='" + location + '\'' +
+                ", editDeadline=" + editDeadline +
+                ", commentDate=" + commentDate +
+                ", customer=" + customer +
+                ", photographer=" + photographer +
+                ", servicePackage=" + servicePackage +
+                ", returningType=" + returningType +
+                ", bookingDetails=" + bookingDetails +
+                ", timeLocationDetails=" + timeLocationDetails +
+                '}';
     }
 }

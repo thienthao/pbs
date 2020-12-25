@@ -45,7 +45,7 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(

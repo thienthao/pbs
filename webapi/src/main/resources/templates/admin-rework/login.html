@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>personal blog | Log in</title>
+    <title>Admin Page</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" th:href="@{/admin/dist/img/favicon.png}"/>
@@ -33,41 +33,32 @@
 </div>
 <div class="login-box">
     <div class="login-logo" style="color: #007bff;">
-        <h1>personal blog</h1>
+        <h1>Login</h1>
     </div>
     <!-- /.login-logo -->
     <div class="card">
         <div class="card-body login-card-body">
-            <p class="login-box-msg">your personal blog , enjoy it</p>
-            <form th:action="@{/admin/login}" method="post">
+            <p class="login-box-msg">Enter your Account</p>
+            <form th:action="@{/auth/login}" method="post" id="login-form">
                 <div th:if="${not #strings.isEmpty(session.errorMsg)}" class="form-group">
                     <div class="alert alert-danger" th:text="${session.errorMsg}"></div>
                 </div>
                 <div class="form-group has-feedback">
                     <span class="fa fa-user form-control-feedback"></span>
-                    <input type="text" id="userName" name="userName" class="form-control" placeholder="请输入账号"
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Username"
                            required="true">
                 </div>
                 <div class="form-group has-feedback">
                     <span class="fa fa-lock form-control-feedback"></span>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="请输入密码"
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Password"
                            required="true">
-                </div>
-                <div class="row">
-                    <div class="col-6">
-                        <input type="text" class="form-control" name="verifyCode" placeholder="请输入验证码" required="true">
-                    </div>
-                    <div class="col-6">
-                        <img alt="单击图片刷新！" class="pointer" th:src="@{/common/kaptcha}"
-                             onclick="this.src='/common/kaptcha?d='+new Date()*1">
-                    </div>
                 </div>
                 <div class="form-group has-feedback"></div>
                 <div class="row">
                     <div class="col-8">
                     </div>
                     <div class="col-4">
-                        <button type="submit" class="btn btn-primary btn-block btn-flat">登录
+                        <button id="btn-login" type="submit" class="btn btn-primary btn-block btn-flat">Login
                         </button>
                     </div>
                 </div>
@@ -85,5 +76,6 @@
 <script th:src="@{/admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/admin/dist/js/plugins/particles.js}"></script>
 <script th:src="@{/admin/dist/js/plugins/login-bg-particles.js}"></script>
+
 </body>
 </html>

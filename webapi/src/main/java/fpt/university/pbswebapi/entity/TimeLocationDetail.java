@@ -37,4 +37,15 @@ public class TimeLocationDetail {
     @Temporal(TemporalType.TIMESTAMP)
     private Date end;
 
+    @Override
+    public String toString() {
+        return "TimeLocationDetail{" +
+                "id=" + id +
+                ", lat=" + lat +
+                ", lon=" + lon +
+                ", formattedAddress='" + formattedAddress + '\'' +
+                ", start=" + start +
+                ", end=" + end +
+                '}';
+    }
 }

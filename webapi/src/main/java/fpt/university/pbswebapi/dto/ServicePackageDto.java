@@ -15,6 +15,8 @@ public class ServicePackageDto {
 
     private String name;
 
+    private Integer timeAnticipate;
+
     private Integer price;
 
     private String description;

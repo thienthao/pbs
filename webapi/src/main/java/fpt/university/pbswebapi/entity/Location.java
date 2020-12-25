@@ -32,7 +32,7 @@ public class Location {
 
     private double longitude;
 
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

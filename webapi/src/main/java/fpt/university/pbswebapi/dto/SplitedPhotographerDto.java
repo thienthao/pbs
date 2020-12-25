@@ -24,7 +24,7 @@ public class SplitedPhotographerDto {
 
     private String email;
 
-    private Float ratingCount;
+    private Double ratingCount;
 
     private String cover;
 
