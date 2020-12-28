@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:badges/badges.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -44,6 +46,8 @@ class _NavScreenState extends State<NavScreen> {
 
   PushNotificationService notificationService = PushNotificationService();
 
+  DatabaseReference _notifiRef;
+
   // Stream<int> get onCurrentChanged => _currentStreamController.stream;
 
   SharedPreferences prefs;
@@ -70,6 +74,14 @@ class _NavScreenState extends State<NavScreen> {
     setState(() {});
   }
 
+  _fromFirebase() {
+    _notifiRef.once().then((DataSnapshot snapshot) {
+      var keys = snapshot.value.keys;
+      var data = snapshot.value as Map;
+      print(data.length);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +90,9 @@ class _NavScreenState extends State<NavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _notifiRef = FirebaseDatabase.instance
+        .reference()
+        .child('Notification_$globalPtgId');
     _pageOptions = [
       MultiBlocProvider(
         providers: [
@@ -122,13 +137,10 @@ class _NavScreenState extends State<NavScreen> {
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-            child: StreamBuilder<int>(
-                stream: notificationService.notificationNow,
+            child: StreamBuilder(
+                stream: _notifiRef.onValue,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active) {
-                    print(snapshot.data);
-                  }
-                  print(snapshot.connectionState);
+
                   return GNav(
                       gap: 2,
                       activeColor: Colors.white,
@@ -159,21 +171,25 @@ class _NavScreenState extends State<NavScreen> {
                           text: '',
                           leading: _selectedTab == 2
                               ? null
-                              : snapshot.data != null
-                                  ? snapshot.data != 0
-                                      ? Badge(
-                                          badgeContent: Text(
-                                            snapshot.data.toString(),
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                          child: Icon(
-                                            Icons.library_books,
-                                            color: Colors.grey[600],
-                                          ))
-                                      : Icon(Icons.library_books,
-                                          color: Colors.grey[600])
-                                  : null,
+                              : snapshot.data == null
+                                  ? null
+                                  : snapshot.data.snapshot.value != null
+                                      ? snapshot.data.snapshot.value.length != 0
+                                          ? Badge(
+                                              badgeContent: Text(
+                                                snapshot.data.snapshot.value !=
+                                                        null
+                                                    ? '${snapshot.data.snapshot.value.length}'
+                                                    : '0',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              child: Icon(
+                                                Icons.library_books,
+                                                color: Colors.grey[600],
+                                              ))
+                                          : null
+                                      : null,
                         ),
                         GButton(
                           icon: Icons.account_circle_sharp,
@@ -195,6 +211,7 @@ class _NavScreenState extends State<NavScreen> {
                         } else {
                           unreadNoti = 0;
                           _setPreference(0);
+                          _notifiRef.remove();
                         }
                       });
                 }),

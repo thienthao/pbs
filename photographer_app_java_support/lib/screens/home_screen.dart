@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,11 +28,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
-
+  DatabaseReference _notificationRef;
   String filterType = 'Chờ xác nhận';
   Completer<void> _completer;
   String _selectedDate;
   SharedPreferences prefs;
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _notificationRef = FirebaseDatabase.instance
+        .reference()
+        .child('Notification_$globalPtgId');
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -76,34 +81,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.all(5.0),
-            child: IconButton(
-              icon: Icon(Icons.calendar_today),
-              color: Colors.black54,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) {
-                    return MultiBlocProvider(
-                      providers: [
-                        BlocProvider(
-                          create: (context) => WorkingDayBloc(
-                              calendarRepository: _calendarRepository)
-                            ,
-                        ),
-                        BlocProvider(
-                          create: (context) => BusyDayBloc(
-                              calendarRepository: _calendarRepository),
-                        ),
-                      ],
-                      child: ListVacation(),
-                    );
-                  }),
+          StreamBuilder(
+              stream: _notificationRef.onValue,
+              builder: (context, snapshot) {
+                if (snapshot.data != null &&
+                    snapshot.data.snapshot.value != null) {
+                  _loadPendingBookings();
+                  _loadCalendar();
+                }
+
+                return Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    color: Colors.black54,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => WorkingDayBloc(
+                                    calendarRepository: _calendarRepository),
+                              ),
+                              BlocProvider(
+                                create: (context) => BusyDayBloc(
+                                    calendarRepository: _calendarRepository),
+                              ),
+                            ],
+                            child: ListVacation(),
+                          );
+                        }),
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          ),
+              }),
         ],
       ),
       body: Column(

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
@@ -7,6 +8,8 @@ import 'package:photographer_app_java_support/widgets/customshapeclipper.dart';
 import 'package:photographer_app_java_support/widgets/history/booking_widget.dart';
 import 'package:photographer_app_java_support/widgets/history/drop_menu_history.dart';
 import 'package:photographer_app_java_support/widgets/shared/list_booking_loading.dart';
+
+import '../../globals.dart';
 
 class BookHistory extends StatefulWidget {
   @override
@@ -19,6 +22,7 @@ class _BookHistoryState extends State<BookHistory> {
   final _scrollThreshold = 0.0;
   String statusForFilter = 'ALL';
   bool isBookingEdited = false;
+  DatabaseReference _notificationRef;
 
   @override
   void dispose() {
@@ -151,6 +155,9 @@ class _BookHistoryState extends State<BookHistory> {
 
   @override
   Widget build(BuildContext context) {
+    _notificationRef = FirebaseDatabase.instance
+        .reference()
+        .child('Notification_$globalPtgId');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -172,58 +179,68 @@ class _BookHistoryState extends State<BookHistory> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Stack(
-            children: <Widget>[
-              ClipPath(
-                clipper: CustomShapeClipper(),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Color(0xFFF88F8F),
-                      Color(0xFFF88Fa9),
-                    ]),
-                  ),
-                  height: 120.0,
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
-                height: 54.0,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(0, 4),
-                      blurRadius: 5,
-                      color: Colors.grey.withOpacity(0.5),
+      body: StreamBuilder(
+          stream: _notificationRef.onValue,
+          builder: (context, snapshot) {
+            if (snapshot.data != null && snapshot.data.snapshot.value != null) {
+              BlocProvider.of<BookingBloc>(context)
+                  .add(BookingRestartEvent());
+              _loadBookingsByPaging(statusForFilter);
+            }
+            return Column(
+              children: [
+                Stack(
+                  children: <Widget>[
+                    ClipPath(
+                      clipper: CustomShapeClipper(),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [
+                            Color(0xFFF88F8F),
+                            Color(0xFFF88Fa9),
+                          ]),
+                        ),
+                        height: 120.0,
+                      ),
+                    ),
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
+                      height: 54.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: Offset(0, 4),
+                            blurRadius: 5,
+                            color: Colors.grey.withOpacity(0.5),
+                          ),
+                        ],
+                      ),
+                      child: DropMenu(
+                        onSelectParam: (String selectedStatus) {
+                          print(selectedStatus.compareTo(statusForFilter));
+                          if (selectedStatus == statusForFilter) {
+                            statusForFilter = selectedStatus;
+                            _loadBookingsByPaging(statusForFilter);
+                          } else {
+                            statusForFilter = selectedStatus;
+                            _restartEvent();
+                            _loadBookingsByPaging(statusForFilter);
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
-                child: DropMenu(
-                  onSelectParam: (String selectedStatus) {
-                    print(selectedStatus.compareTo(statusForFilter));
-                    if (selectedStatus == statusForFilter) {
-                      statusForFilter = selectedStatus;
-                      _loadBookingsByPaging(statusForFilter);
-                    } else {
-                      statusForFilter = selectedStatus;
-                      _restartEvent();
-                      _loadBookingsByPaging(statusForFilter);
-                    }
-                  },
+                SizedBox(
+                  height: 20.0,
                 ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 20.0,
-          ),
-          refreshData(),
-        ],
-      ),
+                refreshData(),
+              ],
+            );
+          }),
     );
   }
 }

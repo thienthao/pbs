@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/locator.dart';
 import 'package:photographer_app_java_support/routing_constants.dart';
 import 'package:photographer_app_java_support/services/navigation_service.dart';
@@ -12,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
   final NavigationService _navigationService = locator<NavigationService>();
+  final referenceDatabase = FirebaseDatabase.instance;
 
   final http.Client httpClient = http.Client();
   bool onUpdate;
@@ -20,6 +24,7 @@ class PushNotificationService {
     prefs = await SharedPreferences.getInstance();
     yield prefs.getInt('unreadNoti');
   }
+
 
   final StreamController<int> _notificationCounter = StreamController<int>();
   Stream<int> get notificationCounter => _notificationCounter.stream;
@@ -31,14 +36,17 @@ class PushNotificationService {
   }
 
   Future init() async {
-//    _fcm.getToken().then((token) {
-//      print(token);
-//      httpClient.post(
-//        "https://pbs-webapi.herokuapp.com/api/users/globalPtgId/devicetoken",
-//        headers: {"Content-Type": "application/json; charset=UTF-8"},
-//        body: token,
-//      );
-//    });
+   // _fcm.getToken().then((token) {
+   //   print(token);
+   //   httpClient.post(
+   //     "https://pbs-webapi.herokuapp.com/api/users/globalPtgId/devicetoken",
+   //     headers: {"Content-Type": "application/json; charset=UTF-8"},
+   //     body: token,
+   //   );
+   // });
+
+  final ref = referenceDatabase.reference();
+
 
     _fcm.unsubscribeFromTopic("topic");
     _fcm.subscribeToTopic("photographer-topic");
@@ -55,6 +63,8 @@ class PushNotificationService {
         print('onMessage: $msg');
         unreadNoti = prefs.getInt('unreadNoti');
         prefs.setInt('unreadNoti', unreadNoti + 1);
+        print('say hi!');
+        ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
 
         BotToast.showSimpleNotification(
           enableSlideOff: true,
@@ -67,7 +77,9 @@ class PushNotificationService {
               color: Colors.black, fontFamily: "Quicksand", fontSize: 18.0),
           duration: Duration(seconds: 10),
           hideCloseButton: false,
+
         );
+        print('say hello!');
 
         // BotToast.showCustomNotification(toastBuilder: (widget) {
         //   return Container(
@@ -86,22 +98,22 @@ class PushNotificationService {
         //   fontSize: 16.0,
         // );
       },
-      // onBackgroundMessage: (Map<String, dynamic> msg) async {
-      //   print('onBackgroundMessage: $msg');
-      //   prefs.setInt('unreadNoti', unreadNoti + 1);
-      //   print(prefs.getInt('unreadNoti'));
-      //   _seralizeAndNavigate(msg);
-      // },
+
       onLaunch: (Map<String, dynamic> msg) async {
         print('onLaunch: $msg');
         prefs.setInt('unreadNoti', unreadNoti + 1);
         _seralizeAndNavigate(msg);
+        String refName = 'Notification$globalPtgId';
+        ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
       },
       onResume: (Map<String, dynamic> msg) async {
         print('onResume: $msg');
         prefs.setInt('unreadNoti', unreadNoti + 1);
 
         _seralizeAndNavigate(msg);
+        String refName = 'Notification$globalPtgId';
+        ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
+
       },
     );
   }
