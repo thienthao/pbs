@@ -6,7 +6,9 @@ import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
+import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.repository.BookingRepository;
+import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
 import fpt.university.pbswebapi.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +29,13 @@ public class BookingController {
 
     private BookingService bookingService;
     private BookingRepository bookingRepository;
+    private CustomRepository customRepository;
 
     @Autowired
-    public BookingController(BookingService bookingService, BookingRepository bookingRepository) {
+    public BookingController(BookingService bookingService, BookingRepository bookingRepository, CustomRepository customRepository) {
         this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
+        this.customRepository = customRepository;
     }
 
     @GetMapping("/test")
@@ -217,7 +221,9 @@ public class BookingController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
-        return new ResponseEntity<>(bookingRepository.findById(id).get(), HttpStatus.OK);
+        Booking booking = bookingRepository.findById(id).get();
+        booking.setPhotographer(customRepository.findOne(booking.getPhotographer().getId()));
+        return new ResponseEntity<>(booking, HttpStatus.OK);
     }
 
     @GetMapping("/with-warnings/{id}")
