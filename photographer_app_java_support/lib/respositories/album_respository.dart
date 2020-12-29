@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/album_bloc_model.dart';
 import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/models/image_bloc_model.dart';
@@ -8,6 +9,7 @@ import 'package:photographer_app_java_support/models/photographer_bloc_model.dar
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/widgets/shared/base_api.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/albums/';
 
@@ -19,10 +21,8 @@ class AlbumRepository {
   }) : assert(httpClient != null);
 
   Future<List<AlbumBlocModel>> getListAlbum() async {
-    final response = await this.httpClient.get(baseUrl + '?size=20', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(BaseApi.ALBUM_URL + '?size=20',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['albums'] as List;
@@ -70,8 +70,8 @@ class AlbumRepository {
 
   Future<List<AlbumBlocModel>> getAlbumOfPhotographer(int id) async {
     final response = await this.httpClient.get(
-          baseUrl + 'photographer/' + id.toString() + '?page=0&size=15',
-        );
+        BaseApi.ALBUM_URL + '/photographer/$globalPtgId/?page=0&size=15',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['albums'] as List;
@@ -121,7 +121,9 @@ class AlbumRepository {
 
   Future<bool> createAlbum(
       AlbumBlocModel album, File thumbnail, List<File> images) async {
-    var request = http.MultipartRequest("POST", Uri.parse(baseUrl));
+    var request = http.MultipartRequest("POST", Uri.parse(BaseApi.ALBUM_URL));
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
 
     if (thumbnail == null) {
       request.files.add(http.MultipartFile(

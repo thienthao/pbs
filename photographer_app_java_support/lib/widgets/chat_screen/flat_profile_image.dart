@@ -159,12 +159,12 @@ class FlatIndicatorImage extends StatelessWidget {
   Widget profileImage() {
     if (image == null || image.isEmpty) {
       return Image.asset(
-        'assets/avatars/girl.jpg',
+        'assets/avatars/uyennhi.jpg',
         fit: BoxFit.cover,
       );
     } else {
-      return Image.asset(
-        'assets/avatars/girl.jpg',
+      return Image.network(
+        image,
         fit: BoxFit.cover,
       );
     }

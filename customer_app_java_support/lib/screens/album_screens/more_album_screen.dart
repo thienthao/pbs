@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
+import 'package:customer_app_java_support/respositories/album_respository.dart';
 import 'package:customer_app_java_support/shared/loading_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'album_detail_screen.dart';
+import 'package:http/http.dart' as http;
 
 class MoreAlbumScreen extends StatefulWidget {
   @override
@@ -13,6 +15,7 @@ class MoreAlbumScreen extends StatefulWidget {
 }
 
 class _MoreAlbumScreenState extends State<MoreAlbumScreen> {
+  AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   final ScrollController _scrollController = ScrollController();
   final _scrollThreshold = 0.0;
@@ -81,8 +84,12 @@ class _MoreAlbumScreenState extends State<MoreAlbumScreen> {
                     pageBuilder: (BuildContext context,
                         Animation<double> animation,
                         Animation<double> secAnimation) {
-                      return ImageFullScreen(
-                        album: album,
+                      return BlocProvider(
+                        create: (context) =>
+                            AlbumBloc(albumRepository: _albumRepository),
+                        child: ImageFullScreen(
+                          album: album,
+                        ),
                       );
                     })),
             child: Container(

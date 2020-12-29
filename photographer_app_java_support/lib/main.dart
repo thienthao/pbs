@@ -1,24 +1,25 @@
 import 'package:bot_toast/bot_toast.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/locator.dart';
 import 'package:photographer_app_java_support/nav_screen.dart';
 import 'package:photographer_app_java_support/screens/login_screen.dart';
 import 'package:photographer_app_java_support/services/push_notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'blocs/authen_blocs/authen_export.dart';
+import 'blocs/bloc_observer.dart';
 import 'router.dart' as router;
 import 'services/navigation_service.dart';
-import 'blocs/bloc_observer.dart';
-import 'blocs/authen_blocs/authen_export.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 void main() {
   initializeDateFormatting('vi_VN', null).then((_) {
     final userRepository = UserRepository();
     Bloc.observer = PBSBlocObserver();
-    SystemChrome.setEnabledSystemUIOverlays([]);
     setupLocator();
     runApp(App(
       userRepository: userRepository,
@@ -51,8 +52,17 @@ class _AppState extends State<App> {
     });
   }
 
+  getPreference() async {
+    prefs = await SharedPreferences.getInstance();
+    globalPtgId = prefs.getInt('photographerId');
+    globalPtgToken = prefs.getString('photographerToken');
+  }
+
+
   @override
+
   Widget build(BuildContext context) {
+    getPreference();
     SystemChrome.setEnabledSystemUIOverlays([]);
     return BlocProvider(
         create: (context) =>
@@ -124,6 +134,7 @@ class _MyAppState extends State<MyApp> {
         accentColor: Color(0xFFFFBDAC),
         scaffoldBackgroundColor: Color(0xFFF3F5F7),
       ),
+       // ignore: missing_required_param
       home: LoginScreen(),
     );
   }

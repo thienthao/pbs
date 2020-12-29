@@ -1,3 +1,4 @@
+import 'package:photographer_app_java_support/models/location_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -23,20 +24,32 @@ class PhotographerStateSuccess extends PhotographerState {
       'PhotographersLoadSuccess { photographers: $photographers }';
 }
 
-class PhotograherStateOnChangedAvatarSuccess extends PhotographerState {
+class PhotographerStateOnChangedAvatarSuccess extends PhotographerState {
   final bool isSuccess;
-  PhotograherStateOnChangedAvatarSuccess({this.isSuccess});
+  PhotographerStateOnChangedAvatarSuccess({this.isSuccess});
 }
 
-class PhotograherStateOnChangedCoverSuccess extends PhotographerState {
+class PhotographerStateOnChangedCoverSuccess extends PhotographerState {
   final bool isSuccess;
-  PhotograherStateOnChangedCoverSuccess({this.isSuccess});
+  PhotographerStateOnChangedCoverSuccess({this.isSuccess});
 }
 
-class PhotograherStateUpdatedProfileSuccess extends PhotographerState {
+class PhotographerStateUpdatedProfileSuccess extends PhotographerState {
   final bool isSuccess;
-  PhotograherStateUpdatedProfileSuccess({this.isSuccess});
+  PhotographerStateUpdatedProfileSuccess({this.isSuccess});
 }
+
+class PhotographerStateGetLocationsSuccess extends PhotographerState {
+  final List<LocationBlocModel> locations;
+  PhotographerStateGetLocationsSuccess({this.locations});
+}
+
+class PhotographerStateUpdatedLocationsSuccess extends PhotographerState {
+  final bool isSuccess;
+  PhotographerStateUpdatedLocationsSuccess({this.isSuccess});
+}
+
+class PhotographerStateLocationUpdatedFail extends PhotographerState {}
 
 class PhotographerIDStateSuccess extends PhotographerState {
   final Photographer photographer;

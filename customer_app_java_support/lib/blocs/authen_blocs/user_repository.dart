@@ -5,16 +5,19 @@ import 'package:customer_app_java_support/blocs/authen_blocs/api_connection.dart
     as api;
 import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRepository {
   final userDao = UserDao();
-
+  SharedPreferences prefs;
   Future<User> authenticate({
     @required String username,
     @required String password,
   }) async {
+    prefs = await SharedPreferences.getInstance();
     UserLogin userLogin = UserLogin(username: username, password: password);
     Token token = await api.getToken(userLogin);
+    prefs.setString('customerToken', token.token);
     User user = User(
       id: 0,
       username: username,

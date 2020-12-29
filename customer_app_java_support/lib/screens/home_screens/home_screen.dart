@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/blocs/category_blocs/categories.dart';
 import 'package:customer_app_java_support/blocs/photographer_alg_blocs/photographers_alg.dart';
@@ -44,14 +45,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays([]);
     _completer = Completer<void>();
-
     _loadAlbums(1);
     _loadPhotographers(1, selectedLatlng, city);
+    _loadPhotographerAlg();
+  }
 
-    Timer(Duration(seconds: 5), () {
-      BlocProvider.of<PhotographerAlgBloc>(context)
-          .add(PhotographerAlgEventFetchByFactorAlg());
-    });
+  _loadPhotographerAlg() async {
+    BlocProvider.of<PhotographerAlgBloc>(context).add(
+        PhotographerAlgEventFetchByFactorAlg(
+            latLng: selectedLatlng, category: selectedCategory, city: city));
   }
 
   _loadAlbums(_categoryId) async {
@@ -69,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _categoryId,
     );
     _loadPhotographers(_categoryId, _latLng, _city);
+    _loadPhotographerAlg();
   }
 
   @override
@@ -125,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       if (categoryState is CategoryStateSuccess) {
                         if (categoryState.categories.isEmpty) {
                           return Text(
-                            'Đà Lạt',
+                            'Hệ thống đang cập nhật!!',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 17.0,
@@ -173,49 +176,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     category: categories[0]));
                             return _completer.future;
                           });
-                    },
-                  ),
-                ),
-                SizedBox(height: 20.0),
-                Center(
-                  child: BlocBuilder<PhotographerBloc, PhotographerState>(
-                    builder: (context, photographerState) {
-                      if (photographerState is PhotographerStateSuccess) {
-                        if (photographerState.photographers.length == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.all(40.0),
-                            child: Text(
-                              'Hiện tại chưa có Photographer nào phù hợp với ý của bạn',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          );
-                        } else {
-                          return Container(
-                            child: PhotographCarousel(
-                              blocPhotographers:
-                                  photographerState.photographers,
-                            ),
-                          );
-                        }
-                      }
-
-                      if (photographerState is PhotographerStateLoading) {
-                        return HomeScreenPtgCarouselLoadingWidget();
-                      }
-
-                      if (photographerState is PhotographerStateFailure) {
-                        return Text(
-                          'Đã xảy ra lỗi khi tải dữ liệu',
-                          style:
-                              TextStyle(color: Colors.red[300], fontSize: 16),
-                        );
-                      }
-                      return Text('');
                     },
                   ),
                 ),
@@ -274,6 +234,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 SizedBox(height: 20.0),
                 Center(
+                  child: BlocBuilder<PhotographerBloc, PhotographerState>(
+                    builder: (context, photographerState) {
+                      if (photographerState is PhotographerStateSuccess) {
+                        if (photographerState.photographers.length == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Text(
+                              'Hiện tại chưa có Photographer nào phù hợp với ý của bạn',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          );
+                        } else {
+                          return Container(
+                            child: PhotographCarousel(
+                              blocPhotographers:
+                                  photographerState.photographers,
+                            ),
+                          );
+                        }
+                      }
+
+                      if (photographerState is PhotographerStateLoading) {
+                        return HomeScreenPtgCarouselLoadingWidget();
+                      }
+
+                      if (photographerState is PhotographerStateFailure) {
+                        return Text(
+                          'Đã xảy ra lỗi khi tải dữ liệu',
+                          style:
+                              TextStyle(color: Colors.red[300], fontSize: 16),
+                        );
+                      }
+                      return Text('');
+                    },
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                Center(
                   child: BlocBuilder<AlbumBloc, AlbumState>(
                     builder: (context, albumState) {
                       if (albumState is AlbumStateSuccess) {
@@ -294,6 +297,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         } else {
                           return Container(
                             child: AlbumCarousel(
+                              onUpdateAlbum: (bool isUpdated) {
+                                if (isUpdated) {
+                                  _loadAlbums(selectedCategory);
+                                }
+                              },
                               blocAlbums: currentState.albums,
                             ),
                           );

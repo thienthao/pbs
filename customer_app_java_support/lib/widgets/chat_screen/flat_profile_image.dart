@@ -163,8 +163,8 @@ class FlatIndicatorImage extends StatelessWidget {
         fit: BoxFit.cover,
       );
     } else {
-      return Image.asset(
-        'assets/avatars/caotien.jpg',
+      return Image.network(
+        image,
         fit: BoxFit.cover,
       );
     }

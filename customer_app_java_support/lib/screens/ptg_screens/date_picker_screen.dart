@@ -14,7 +14,8 @@ class DatePicker extends StatefulWidget {
 
 class _DatePickerState extends State<DatePicker> {
   CalendarController controller;
-  TimeOfDay _time = TimeOfDay.now();
+  TimeOfDay _time =
+      TimeOfDay(hour: DateTime.now().add(Duration(hours: 1)).hour, minute: 0);
   DateTime _selectedDateTime = DateTime.now().toLocal();
 
   final Map<DateTime, List> _holidays = {};
@@ -23,6 +24,7 @@ class _DatePickerState extends State<DatePicker> {
     setState(() {
       _time = newTime;
     });
+    getTime();
   }
 
   void _onDaySelected(DateTime day, List events, List holidays) {
@@ -31,17 +33,24 @@ class _DatePickerState extends State<DatePicker> {
     });
   }
 
+  void getTime() {
+    _selectedDateTime = new DateTime(
+        _selectedDateTime.year,
+        _selectedDateTime.month,
+        _selectedDateTime.day,
+        _time.hour,
+        _time.minute);
+  }
+
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = widget.lastDay;
-
-    print(widget.lastDay);
+    _selectedDateTime = widget.lastDay.add(Duration(days: 1));
     controller = CalendarController();
   }
 
   bool _predicate(DateTime day) {
-    if ((!day.isBefore(widget.lastDay))) {
+    if ((day.isAfter(widget.lastDay.add(Duration(days: 1))))) {
       return true;
     }
     return false;
@@ -50,7 +59,6 @@ class _DatePickerState extends State<DatePicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: ListView(
         children: [
           Align(
@@ -190,9 +198,10 @@ class _DatePickerState extends State<DatePicker> {
             padding: const EdgeInsets.all(10.0),
             child: RaisedButton(
               onPressed: () {
+                getTime();
                 widget.onSelecParam(_selectedDateTime);
                 Navigator.pop(context,
-                    '${DateFormat("dd/MM/yyyy").format(_selectedDateTime)} ${_time.format(context)}');
+                    '${DateFormat('dd/MM/yyyy hh:mm a').format(_selectedDateTime)}');
               },
               textColor: Colors.white,
               color: Theme.of(context).primaryColor,
@@ -211,5 +220,4 @@ class _DatePickerState extends State<DatePicker> {
       ),
     );
   }
-
 }

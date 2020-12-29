@@ -19,7 +19,7 @@ void popNotice(BuildContext context) {
                   borderRadius: BorderRadius.circular(5)),
               elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
               child: Image.asset(
-                'assets/images/loading.gif',
+                'assets/images/loading_2.gif',
                 fit: BoxFit.cover,
               ),
             ),
@@ -36,7 +36,7 @@ void popUp(BuildContext context, String title, String content) {
   Flushbar(
     flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
-    backgroundColor: Colors.black87,
+    backgroundColor: Colors.grey[100],
     reverseAnimationCurve: Curves.decelerate,
     forwardAnimationCurve: Curves.elasticOut,
     isDismissible: false,
@@ -46,13 +46,13 @@ void popUp(BuildContext context, String title, String content) {
       style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 18.0,
-          color: Colors.white,
+          color: Colors.black,
           fontFamily: "Quicksand"),
     ),
     messageText: Text(
       content,
       style: TextStyle(
-          fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
+          fontSize: 16.0, color: Colors.black, fontFamily: "Quicksand"),
     ),
   ).show(context);
 }

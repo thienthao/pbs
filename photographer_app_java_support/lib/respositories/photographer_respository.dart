@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:photographer_app_java_support/globals.dart';
+import 'package:photographer_app_java_support/models/location_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:photographer_app_java_support/widgets/shared/base_api.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/photographers/';
 
@@ -16,11 +19,9 @@ class PhotographerRepository {
   }) : assert(httpClient != null);
 
   Future<List<Photographer>> getListPhotographerByRating() async {
-    final response =
-        await this.httpClient.get(baseUrl + 'byrating?page=1&size=5', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/byrating?page=1&size=5',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;
@@ -43,17 +44,21 @@ class PhotographerRepository {
 
   Future<Photographer> getPhotographerbyId(int id) async {
     // final albumsTemp = getAlbumOfPhotographer(id) as List;
-    final response = await this.httpClient.get(baseUrl + id.toString());
+    print(globalPtgId);
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
 
       final photographer = Photographer(
         id: data['id'],
+        username: data['username'],
         avatar: data['avatar'],
         email: data['email'],
         phone: data['phone'],
         cover: data['cover'],
-        // bookedNumber: data['booked'],
+        bookedNumber: data['booked'],
         description: data['description'],
         fullname: data['fullname'],
         ratingCount: data['ratingCount'],
@@ -65,22 +70,36 @@ class PhotographerRepository {
     }
   }
 
-  Future<bool> updateProfile(Photographer photographer) async {
+  Future<bool> updateProfile(
+      Photographer photographer, List<LocationBlocModel> locations) async {
     var resBody = {};
-
-    resBody["id"] = 168;
+    var listLocation = [];
+    resBody["id"] = globalPtgId;
     resBody["fullname"] = photographer.fullname;
     resBody["description"] = photographer.description;
     resBody["email"] = photographer.email;
     resBody["phone"] = photographer.phone;
+
+    for (var item in locations) {
+      var location = {};
+      if (item.id != null) {
+        location["id"] = item.id;
+      }
+      location["formattedAddress"] = item.formattedAddress;
+      location["latitude"] = item.latitude;
+      location["longitude"] = item.longitude;
+      listLocation.add(location);
+    }
+    resBody["locations"] = listLocation;
     String str = json.encode(resBody);
 
-    final response = await httpClient.put(baseUrl,
+    final response = await httpClient.post(BaseApi.PHOTOGRAPHER_URL,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
         },
         body: str);
-
+    print(str);
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
@@ -92,9 +111,10 @@ class PhotographerRepository {
   }
 
   Future<bool> updateAvatar(File avatar) async {
-    var request =
-        http.MultipartRequest("POST", Uri.parse(baseUrl + '168/upload'));
-
+    var request = http.MultipartRequest(
+        "POST", Uri.parse(BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/upload'));
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     request.files.add(http.MultipartFile(
         'file',
         File(avatar.path).readAsBytes().asStream(),
@@ -115,9 +135,11 @@ class PhotographerRepository {
   }
 
   Future<bool> updateCover(File cover) async {
-    var request =
-        http.MultipartRequest("POST", Uri.parse(baseUrl + '168/cover/upload'));
+    var request = http.MultipartRequest("POST",
+        Uri.parse(BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/cover/upload'));
 
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     request.files.add(http.MultipartFile(
         'file',
         File(cover.path).readAsBytes().asStream(),
@@ -135,5 +157,24 @@ class PhotographerRepository {
       throw Exception('Error at create album!');
     }
     return result;
+  }
+
+  Future<List<LocationBlocModel>> getPhotographerLocations(int ptgId) async {
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/locations',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'});
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
+      final locations = data.map((location) {
+        return LocationBlocModel(
+            id: location['id'],
+            formattedAddress: location['formattedAddress'],
+            latitude: location['latitude'],
+            longitude: location['longitude']);
+      }).toList();
+      return locations;
+    } else {
+      throw Exception();
+    }
   }
 }

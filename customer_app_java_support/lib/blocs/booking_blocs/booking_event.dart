@@ -9,7 +9,11 @@ abstract class BookingEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class BookingEventFetch extends BookingEvent {}
+class BookingEventFetch extends BookingEvent {
+  final int cusId;
+
+  BookingEventFetch({this.cusId});
+}
 
 class BookingRestartEvent extends BookingEvent {}
 
@@ -27,17 +31,20 @@ class BookingEventFetchInfinite extends BookingEvent {
 
 class BookingEventCreate extends BookingEvent {
   final BookingBlocModel booking;
-  BookingEventCreate({this.booking});
+  final int cusId;
+  BookingEventCreate({this.booking, this.cusId});
 }
 
 class BookingEventEdit extends BookingEvent {
   final BookingBlocModel booking;
-  BookingEventEdit({this.booking});
+  final int cusId;
+  BookingEventEdit({this.booking, this.cusId});
 }
 
 class BookingEventCancel extends BookingEvent {
   final BookingBlocModel booking;
-  BookingEventCancel({this.booking});
+  final int cusId;
+  BookingEventCancel({this.booking, this.cusId});
 }
 
 class BookingEventGetBookingOnDate extends BookingEvent {

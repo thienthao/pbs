@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:photographer_app_java_support/models/location_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -34,13 +35,20 @@ class PhotographerbyIdEventLoadSuccess extends PhotographerEvent {
 
 class PhotographerEventUpdateProfile extends PhotographerEvent {
   final Photographer photographer;
+  final List<LocationBlocModel> locations;
 
-  PhotographerEventUpdateProfile({this.photographer});
+  PhotographerEventUpdateProfile({this.photographer, this.locations});
 }
 
 class PhotographerEventLoadSuccess extends PhotographerEvent {
   PhotographerEventLoadSuccess(List<Photographer> list);
 }
+
+class PhotographerEventGetLocations extends PhotographerEvent {
+  final int ptgId;
+  PhotographerEventGetLocations({this.ptgId});
+}
+
 
 class PhotographerEventRequested extends PhotographerEvent {
   final Photographer photographer;

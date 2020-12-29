@@ -1,16 +1,18 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:customer_app_java_support/blocs/warning_blocs/warning_bloc.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
-import 'package:customer_app_java_support/shared/customer_dialog.dart';
 import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -27,8 +29,8 @@ class ReturnTypeModel {
 
   static List<ReturnTypeModel> getReturnTypes() {
     return <ReturnTypeModel>[
-      ReturnTypeModel(1, 'Thông qua ứng dụng'),
       ReturnTypeModel(2, 'Gặp mặt tận nơi'),
+      ReturnTypeModel(1, 'Thông qua ứng dụng'),
     ];
   }
 }
@@ -50,6 +52,8 @@ class _BookingManyState extends State<BookingMany> {
       CalendarRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   String timeReturnResult = 'Hãy chọn thời gian nhận';
   String endDate = '';
@@ -57,6 +61,7 @@ class _BookingManyState extends State<BookingMany> {
   String startDate = '';
   DateTime lastDate = DateTime.now();
   List<PackageBlocModel> listPackages = List<PackageBlocModel>();
+  bool notDuplicate = true;
 
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
   List<DropdownMenuItem<ReturnTypeModel>> dropDownMenuItems;
@@ -155,7 +160,7 @@ class _BookingManyState extends State<BookingMany> {
       BookingBlocModel booking = BookingBlocModel(
           serviceName: selectedPackage.name,
           price: selectedPackage.price,
-          editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+          editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm")
               .format(DateTime.parse(editDeadLine)),
           photographer: Photographer(id: widget.photographer.id),
           package: selectedPackage,
@@ -163,7 +168,7 @@ class _BookingManyState extends State<BookingMany> {
           listTimeAndLocations: timeAndLocations);
 
       BlocProvider.of<BookingBloc>(context)
-          .add(BookingEventCreate(booking: booking));
+          .add(BookingEventCreate(booking: booking, cusId: globalCusId));
     }
   }
 
@@ -191,9 +196,9 @@ class _BookingManyState extends State<BookingMany> {
         body: BlocListener<BookingBloc, BookingState>(
           listener: (context, state) {
             if (state is BookingStateCreatedSuccess) {
-             Navigator.pop(context);
+              Navigator.pop(context);
               _showBookingSuccessAlert(state.bookingId);
-             popUp(context, 'Đặt lịch', 'Đặt lịch thành công!!');
+              popUp(context, 'Đặt lịch', 'Đặt lịch thành công!!');
             }
 
             if (state is BookingStateLoading) {
@@ -323,24 +328,52 @@ class _BookingManyState extends State<BookingMany> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => BookingManyDetail(
-                                    ptgId: widget.photographer.id,
-                                    onUpdateList:
-                                        (TimeAndLocationBlocModel model) {
-                                      listTimeAndLocation.add(model);
-                                      if (DateTime.parse(model.start)
-                                              .add(Duration(days: 1))
-                                              .isAfter(lastDate) ||
-                                          DateTime.parse(model.start)
-                                              .add(Duration(days: 1))
-                                              .isAtSameMomentAs(lastDate)) {
-                                        lastDate = DateTime.parse(model.start);
-                                      }
-                                      setState(() {});
-                                    },
-                                  )),
-                        );
+                          MaterialPageRoute(builder: (context) {
+                            return MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (context) => WarningBloc(
+                                      warningRepository: _warningRepository),
+                                ),
+                              ],
+                              child: BookingManyDetail(
+                                timeAnticipate: selectedPackage.timeAnticipate,
+                                ptgId: widget.photographer.id,
+                                onUpdateList: (TimeAndLocationBlocModel model) {
+                                  for (var item in listTimeAndLocation) {
+                                    if (DateFormat('dd/MM/yyyy').format(
+                                            DateTime.parse(model.start)) ==
+                                        DateFormat('dd/MM/yyyy').format(
+                                            DateTime.parse(item.start))) {
+                                      notDuplicate = false;
+                                      return;
+                                    }
+                                  }
+                                  if (notDuplicate) {
+
+                                    listTimeAndLocation.add(model);
+                                    if (DateTime.parse(model.start)
+                                            .add(Duration(days: 1))
+                                            .isAfter(lastDate) ||
+                                        DateTime.parse(model.start)
+                                            .add(Duration(days: 1))
+                                            .isAtSameMomentAs(lastDate)) {
+                                      lastDate = DateTime.parse(model.start);
+                                    }
+                                  }
+
+                                  setState(() {});
+                                },
+                              ),
+                            );
+                          }),
+                        ).then((value) {
+                          if (!notDuplicate) {
+                            popUp(context, 'Chọn ngày chụp',
+                                'Bạn không được chọn trùng ngày với nhau!');
+                            notDuplicate = true;
+                          }
+                        });
                       },
                       child: Padding(
                         padding: EdgeInsets.only(right: 20.0),
@@ -392,11 +425,40 @@ class _BookingManyState extends State<BookingMany> {
                                   model: listTimeAndLocation[mapEntry.key],
                                   onUpdateList:
                                       (TimeAndLocationBlocModel model) {
-                                    listTimeAndLocation[mapEntry.key] = model;
+                                    if (listTimeAndLocation.length > 1) {
+                                      for (var item in listTimeAndLocation) {
+                                        if (DateFormat('dd/MM/yyyy').format(
+                                                DateTime.parse(model.start)) ==
+                                            DateFormat('dd/MM/yyyy').format(
+                                                DateTime.parse(item.start))) {
+                                          notDuplicate = false;
+                                          return;
+                                        }
+                                      }
+                                    }
+
+                                    if (notDuplicate) {
+                                      listTimeAndLocation[mapEntry.key] = model;
+                                      if (DateTime.parse(model.start)
+                                              .add(Duration(days: 1))
+                                              .isAfter(lastDate) ||
+                                          DateTime.parse(model.start)
+                                              .add(Duration(days: 1))
+                                              .isAtSameMomentAs(lastDate)) {
+                                        lastDate = DateTime.parse(model.start);
+                                      }
+                                    }
+
                                     setState(() {});
                                   },
                                 );
-                              }));
+                              })).then((value) {
+                        if (!notDuplicate) {
+                          popUp(context, 'Chọn ngày chụp',
+                              'Bạn không được chọn trùng ngày với nhau!');
+                          notDuplicate = true;
+                        }
+                      });
                     },
                     child: Container(
                       margin: EdgeInsets.all(10),
@@ -477,7 +539,7 @@ class _BookingManyState extends State<BookingMany> {
                                     ),
                                     SizedBox(width: 5.0),
                                     Text(
-                                      DateFormat("dd/MM/yyyy HH:mm a").format(
+                                      DateFormat("dd/MM/yyyy hh:mm a").format(
                                           DateTime.parse(
                                               listTimeAndLocation[mapEntry.key]
                                                   .start)),
@@ -488,6 +550,69 @@ class _BookingManyState extends State<BookingMany> {
                                     ),
                                   ],
                                 ),
+                                SizedBox(height: 10.0),
+                                GestureDetector(
+                                  onTap: () {
+                                    int tempKey = mapEntry.key;
+                                    TimeAndLocationBlocModel tempModel =
+                                        listTimeAndLocation[mapEntry.key];
+                                    listTimeAndLocation.removeAt(mapEntry.key);
+                                    Flushbar(
+                                      flushbarPosition: FlushbarPosition.BOTTOM,
+                                      flushbarStyle: FlushbarStyle.GROUNDED,
+                                      backgroundColor: Colors.black54,
+                                      reverseAnimationCurve: Curves.decelerate,
+                                      forwardAnimationCurve: Curves.elasticOut,
+                                      isDismissible: true,
+                                      onStatusChanged: (v) {
+                                        print(v);
+                                      },
+                                      duration: Duration(seconds: 10),
+                                      titleText: Text(
+                                        "Xóa ngày chụp",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18.0,
+                                            color: Colors.white,
+                                            fontFamily: "Quicksand"),
+                                      ),
+                                      mainButton: FlatButton(
+                                        color: Colors.black12,
+                                        onPressed: () {
+                                          listTimeAndLocation.insert(
+                                              tempKey, tempModel);
+                                          Navigator.pop(context);
+                                          setState(() {});
+                                        },
+                                        child: Text('Hoàn tác',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 20,
+                                              color: Colors.white,
+                                            )),
+                                      ),
+                                      messageText: Text(
+                                        "Bạn đã xóa 1 ngày chụp",
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                            fontFamily: "Quicksand"),
+                                      ),
+                                    ).show(context);
+                                    setState(() {});
+                                  },
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.65,
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text('Xóa ngày này',
+                                          style: TextStyle(
+                                              color: Colors.blueAccent,
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -668,6 +793,27 @@ class _BookingManyState extends State<BookingMany> {
               SizedBox(
                 height: 10,
               ),
+              RichText(
+                text: TextSpan(
+                  text: '',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Quicksand',
+                      fontSize: 14.0),
+                  children: <TextSpan>[
+                    TextSpan(
+                        text: 'Mô tả:  ',
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                    TextSpan(
+                        text: selectedPackage.description,
+                        style: TextStyle(fontWeight: FontWeight.normal)),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
               Text(
                 'Bao gồm các dịch vụ:',
                 style:
@@ -749,8 +895,7 @@ class _BookingManyState extends State<BookingMany> {
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (BuildContext aContext) =>
-            AssetGiffyDialog(
+        builder: (BuildContext aContext) => AssetGiffyDialog(
               image: Image.asset(
                 'assets/images/done_booking.gif',
                 fit: BoxFit.cover,
@@ -788,9 +933,8 @@ class _BookingManyState extends State<BookingMany> {
                           return MultiBlocProvider(
                             providers: [
                               BlocProvider(
-                                  create: (context) =>
-                                      BookingBloc(
-                                          bookingRepository: _bookingRepository)),
+                                  create: (context) => BookingBloc(
+                                      bookingRepository: _bookingRepository)),
                             ],
                             child: BookingDetailScreen(
                               bookingId: bookingId,
@@ -804,16 +948,12 @@ class _BookingManyState extends State<BookingMany> {
               onCancelButtonPressed: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
-              buttonOkColor: Theme
-                  .of(context)
-                  .primaryColor,
+              buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Đồng ý',
                 style: TextStyle(color: Colors.white),
               ),
-              buttonCancelColor: Theme
-                  .of(context)
-                  .scaffoldBackgroundColor,
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
               buttonCancelText: Text(
                 'Không',
                 style: TextStyle(color: Colors.black87),
@@ -839,7 +979,7 @@ class _BookingManyState extends State<BookingMany> {
                     borderRadius: BorderRadius.circular(5)),
                 elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
                 child: Image.asset(
-                  'assets/images/loading.gif',
+                  'assets/images/loading_2.gif',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -853,8 +993,7 @@ class _BookingManyState extends State<BookingMany> {
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (_) =>
-            AssetGiffyDialog(
+        builder: (_) => AssetGiffyDialog(
               image: Image.asset(
                 'assets/images/fail.gif',
                 fit: BoxFit.cover,
@@ -873,9 +1012,7 @@ class _BookingManyState extends State<BookingMany> {
               onOkButtonPressed: () {
                 Navigator.pop(context);
               },
-              buttonOkColor: Theme
-                  .of(context)
-                  .primaryColor,
+              buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Xác nhận',
                 style: TextStyle(color: Colors.white),

@@ -28,7 +28,14 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
       yield* _mapAlbumsByPhotographerIdLoadedToState(albumEvent.id);
     } else if (albumEvent is AlbumEventLoadSuccess) {
     } else if (albumEvent is AlbumEventRequested) {
-    } else if (albumEvent is AlbumEventRefresh) {}
+    } else if (albumEvent is AlbumEventRefresh) {
+    } else if (albumEvent is AlbumEventIsLikedAlbumFetch) {
+      yield* _mapIsLikedAlbumFetchToState(albumEvent.albumId);
+    } else if (albumEvent is AlbumEventLikeAlbum) {
+      yield* _mapLikeAlbumToState(albumEvent.albumId);
+    } else if (albumEvent is AlbumEventUnlikeAlbum) {
+      yield* _mapUnlikeAlbumToState(albumEvent.albumId);
+    }
   }
 
   Stream<AlbumState> _mapAlbumsLoadedToState(int categoryId) async* {
@@ -71,6 +78,34 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
               hasReachedEnd: false);
         }
       }
+    } catch (_) {
+      yield AlbumStateFailure();
+    }
+  }
+
+  Stream<AlbumState> _mapIsLikedAlbumFetchToState(int albumId) async* {
+    try {
+      final isLiked = await this.albumRepository.isLikedAlbum(albumId);
+      yield AlbumStateIsLikedAlbumFetchSuccess(isLiked: isLiked);
+    } catch (_) {
+      yield AlbumStateFailure();
+    }
+  }
+
+  Stream<AlbumState> _mapLikeAlbumToState(int albumId) async* {
+    try {
+      final isLiked = await this.albumRepository.likeAlbum(albumId);
+      yield AlbumStateLikeAlbumSuccess(isLiked: isLiked);
+    } catch (_) {
+      yield AlbumStateFailure();
+    }
+  }
+
+  Stream<AlbumState> _mapUnlikeAlbumToState(int albumId) async* {
+    try {
+      final isUnLiked = await this.albumRepository.unlikeAlbum(albumId);
+      print(isUnLiked);
+      yield AlbumStateUnlikeAlbumSuccess(isUnLiked: isUnLiked);
     } catch (_) {
       yield AlbumStateFailure();
     }

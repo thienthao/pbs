@@ -1,10 +1,10 @@
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/busy_day_bloc_model.dart';
-import 'package:status_alert/status_alert.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class VacationPickerEdit extends StatefulWidget {
@@ -28,19 +28,18 @@ class _VacationPickerEditState extends State<VacationPickerEdit> {
 
   _updateBusyDay() async {
     BlocProvider.of<BusyDayBloc>(context).add(BusyDayEventUpdate(
-        ptgId: 168,
+        ptgId: globalPtgId,
         busyDayBlocModel: BusyDayBlocModel(
           id: widget.busyDayBlocModel.id,
           title: titleTxtController.text,
           description: descriptionTxtController.text,
-          startDate:
-              DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(daySelected),
+          startDate: DateFormat("yyyy-MM-dd'T'HH:mm").format(daySelected),
         )));
   }
 
   _deleteBusyDay() async {
-    BlocProvider.of<BusyDayBloc>(context).add(
-        BusyDayEventDelete(ptgId: 168, busyDayId: widget.busyDayBlocModel.id));
+    BlocProvider.of<BusyDayBloc>(context).add(BusyDayEventDelete(
+        ptgId: globalPtgId, busyDayId: widget.busyDayBlocModel.id));
   }
 
   String checkTextFormFieldIsEmpty(value) {
@@ -64,47 +63,6 @@ class _VacationPickerEditState extends State<VacationPickerEdit> {
     titleTxtController.text = widget.busyDayBlocModel.title;
     descriptionTxtController.text = widget.busyDayBlocModel.description;
     daySelected = DateTime.parse(widget.busyDayBlocModel.startDate);
-  }
-
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      blurPower: 20,
-      duration: Duration(seconds: 60),
-      title: 'Đang cập nhật',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
-  }
-
-  void removeNotice() {
-    StatusAlert.hide();
-  }
-
-  void popUp(String title, String content) {
-    Flushbar(
-      flushbarPosition: FlushbarPosition.TOP,
-      flushbarStyle: FlushbarStyle.FLOATING,
-      backgroundColor: Colors.black87,
-      reverseAnimationCurve: Curves.decelerate,
-      forwardAnimationCurve: Curves.elasticOut,
-      isDismissible: false,
-      duration: Duration(seconds: 5),
-      titleText: Text(
-        title,
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18.0,
-            color: Colors.white,
-            fontFamily: "Quicksand"),
-      ),
-      messageText: Text(
-        content,
-        style: TextStyle(
-            fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-      ),
-    ).show(context);
   }
 
   @override
@@ -137,7 +95,7 @@ class _VacationPickerEditState extends State<VacationPickerEdit> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tiêu đề:',
+                        'Tiêu đề: *',
                         style: TextStyle(
                           fontSize: 15.0,
                           color: Colors.black87,
@@ -302,39 +260,162 @@ class _VacationPickerEditState extends State<VacationPickerEdit> {
                 ),
                 BlocListener<BusyDayBloc, BusyDayState>(
                   listener: (context, state) {
-                    if (state is BusyDayStateCreatedSuccess) {
-                      widget.checkIfEdited(true);
-                      removeNotice();
-                      popUp('Tạo ngày nghỉ', 'Tạo ngày nghỉ thành công!');
-                    }
                     if (state is BusyDayStateUpdatedSuccess) {
                       widget.checkIfEdited(true);
-                      removeNotice();
-                      popUp('Cập nhật ngày nghỉ',
-                          'Cập nhật ngày nghỉ thành công!');
+                      Navigator.pop(context);
+                      _showSuccessAlert();
                     }
                     if (state is BusyDayStateDeletedSuccess) {
                       widget.checkIfEdited(true);
-                      removeNotice();
-                      popUp('Hủy bỏ ngày nghỉ', 'Hủy bỏ ngày nghỉ thành công!');
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Navigator.pop(context);
-                      });
+                      Navigator.pop(context);
+                      _showDeleteSuccessAlert();
                     }
                     if (state is BusyDayStateLoading) {
-                      popNotice();
+                      _showLoadingAlert();
                     }
-
-                    return Container();
+                    if (state is BusyDayStateFailure) {
+                      Navigator.pop(context);
+                      _showFailDialog();
+                    }
                   },
                   child: SizedBox(height: 30.0),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 30,)
+          SizedBox(
+            height: 30,
+          )
         ],
       ),
     );
+  }
+
+  Future<void> _showDeleteSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Xóa ngày nghỉ thành công!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                });
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Cập nhật ngày nghỉ thành công!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pop(context);
+                });
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

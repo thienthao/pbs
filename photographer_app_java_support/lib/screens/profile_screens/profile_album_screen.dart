@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:photographer_app_java_support/blocs/category_blocs/categories.dart';
+import 'package:photographer_app_java_support/blocs/category_blocs/category_bloc.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/respositories/album_respository.dart';
+import 'package:photographer_app_java_support/respositories/category_respository.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/album_add_screen.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/album_update_screen.dart';
 import 'package:photographer_app_java_support/widgets/shared/loading_line.dart';
@@ -14,9 +20,12 @@ class AlbumList extends StatefulWidget {
 
 class _AlbumListState extends State<AlbumList> {
   AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
+  CategoryRepository _categoryRepository =
+      CategoryRepository(httpClient: http.Client());
 
   _loadAlbums() {
-    BlocProvider.of<AlbumBloc>(context).add(AlbumEventFetchByPhotographerId(id: 168));
+    BlocProvider.of<AlbumBloc>(context)
+        .add(AlbumEventFetchByPhotographerId(id: globalPtgId));
   }
 
   @override
@@ -42,12 +51,23 @@ class _AlbumListState extends State<AlbumList> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
+                MaterialPageRoute(builder: (context) {
+                  return MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
                         create: (BuildContext context) =>
                             AlbumBloc(albumRepository: _albumRepository),
-                        child: AddAlbum())),
-              );
+                      ),
+                      BlocProvider(
+                        create: (BuildContext context) => CategoryBloc(
+                            categoryRepository: _categoryRepository)
+                          ..add(CategoryEventFetch()),
+                      ),
+                    ],
+                    child: AddAlbum(),
+                  );
+                }),
+              ).then((value) => _loadAlbums());
             },
             child: Center(
               child: Container(
@@ -150,8 +170,13 @@ class _AlbumListState extends State<AlbumList> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(2),
                                         child: Image(
-                                          image: NetworkImage(albumState
-                                              .albums[index].thumbnail),
+                                          image: NetworkImage(
+                                            albumState.albums[index].thumbnail,
+                                            headers: {
+                                              HttpHeaders.authorizationHeader:
+                                                  'Bearer $globalPtgToken'
+                                            },
+                                          ),
                                           width: (size.width - 2.5) / 2.5,
                                           height: (size.width - 2.5) / 2.5,
                                           fit: BoxFit.cover,

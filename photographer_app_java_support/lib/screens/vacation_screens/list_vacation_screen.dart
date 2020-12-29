@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
 import 'package:photographer_app_java_support/blocs/working_day_blocs/working_days.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/busy_day_bloc_model.dart';
 import 'package:photographer_app_java_support/models/working_date_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/calendar_repository.dart';
@@ -31,10 +31,17 @@ class _ListVacationState extends State<ListVacation> {
     super.initState();
     _completer = Completer<void>();
     _loadBusyDays();
+    _loadWorkingDays();
   }
 
   _loadBusyDays() async {
-    BlocProvider.of<BusyDayBloc>(context).add(BusyDayEventFetch(ptgId: 168));
+    BlocProvider.of<BusyDayBloc>(context)
+        .add(BusyDayEventFetch(ptgId: globalPtgId));
+  }
+
+  _loadWorkingDays() async {
+    BlocProvider.of<WorkingDayBloc>(context)
+        .add(WorkingDayEventFetch(ptgId: globalPtgId));
   }
 
   void onTimeChanged(TimeOfDay newTime) {
@@ -65,7 +72,7 @@ class _ListVacationState extends State<ListVacation> {
         ),
         elevation: 3.0,
       ),
-      body: ListView(
+      body: Column(
         children: [
           SizedBox(height: 5.0),
           Row(
@@ -119,7 +126,13 @@ class _ListVacationState extends State<ListVacation> {
                       return BlocProvider(
                         create: (context) => BusyDayBloc(
                             calendarRepository: _calendarRepository),
-                        child: VacationPicker(),
+                        child: VacationPicker(
+                          isAdded: (bool isAdded) {
+                            if (isAdded) {
+                              _loadBusyDays();
+                            }
+                          },
+                        ),
                       );
                     }),
                   );
@@ -190,95 +203,81 @@ class _ListVacationState extends State<ListVacation> {
                               }),
                             );
                           },
-                          child: Slidable(
-                            actionPane: SlidableDrawerActionPane(),
-                            actionExtentRatio: 0.3,
-                            child: Container(
-                              margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    offset: Offset(0, 4),
-                                    blurRadius: 5,
-                                    color: Colors.grey.withOpacity(0.5),
-                                  ),
-                                ],
-                                color: Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(15.0),
-                                  bottomLeft: Radius.circular(15.0),
+                          child: Container(
+                            margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  offset: Offset(0, 4),
+                                  blurRadius: 5,
+                                  color: Colors.grey.withOpacity(0.5),
                                 ),
-                              ),
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      width: 120.0,
-                                      child: Text(
-                                        busyDay.title,
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                      ),
-                                    ),
-                                    SizedBox(height: 10.0),
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.only(right: 10.0),
-                                          child: Icon(
-                                            Icons.timer,
-                                            size: 15,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                            right: 10.0,
-                                          ),
-                                          child: Text(
-                                            'Thời gian:',
-                                            style: TextStyle(
-                                              fontSize: 15.0,
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(right: 10),
-                                          child: Text(
-                                            DateFormat('dd/MM/yyyy').format(
-                                                DateTime.parse(
-                                                    busyDay.startDate)),
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                              ],
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(15.0),
                               ),
                             ),
-                            secondaryActions: [
-                              IconSlideAction(
-                                caption: "Xóa",
-                                color: Theme.of(context).primaryColor,
-                                icon: Icons.close,
-                                onTap: () {},
-                              )
-                            ],
+                            child: Padding(
+                              padding:
+                                  EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    width: 120.0,
+                                    child: Text(
+                                      busyDay.title,
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(right: 10.0),
+                                        child: Icon(
+                                          Icons.timer,
+                                          size: 15,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          right: 10.0,
+                                        ),
+                                        child: Text(
+                                          'Thời gian:',
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.black54,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(right: 10),
+                                        child: Text(
+                                          DateFormat('dd/MM/yyyy').format(
+                                              DateTime.parse(
+                                                  busyDay.startDate)),
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       },
@@ -344,6 +343,6 @@ class _ListVacationState extends State<ListVacation> {
           },
         );
       },
-    );
+    ).then((value) => _loadWorkingDays());
   }
 }

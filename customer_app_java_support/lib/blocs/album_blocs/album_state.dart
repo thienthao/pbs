@@ -31,6 +31,21 @@ class AlbumStateInifiniteFetchedSuccess extends AlbumState {
   }
 }
 
+class AlbumStateIsLikedAlbumFetchSuccess extends AlbumState {
+  final bool isLiked;
+  AlbumStateIsLikedAlbumFetchSuccess({this.isLiked});
+}
+
+class AlbumStateLikeAlbumSuccess extends AlbumState {
+  final bool isLiked;
+  AlbumStateLikeAlbumSuccess({this.isLiked});
+}
+
+class AlbumStateUnlikeAlbumSuccess extends AlbumState {
+  final bool isUnLiked;
+  AlbumStateUnlikeAlbumSuccess({this.isUnLiked});
+}
+
 class AlbumStateSuccess extends AlbumState {
   final List<AlbumBlocModel> albums;
   const AlbumStateSuccess({@required this.albums}) : assert(albums != null);

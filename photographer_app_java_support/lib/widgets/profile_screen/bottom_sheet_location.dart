@@ -1,10 +1,11 @@
 import 'package:photographer_app_java_support/constant/city_location.dart';
 import 'package:flutter/material.dart';
+import 'package:photographer_app_java_support/models/location_bloc_model.dart';
 
 class BottomSheetLocation extends StatefulWidget {
-  final CityLocation location;
-
-  BottomSheetLocation({this.location});
+  final List<LocationBlocModel> inputList;
+  final Function(List<LocationBlocModel>) onSelecteListLocation;
+  BottomSheetLocation({this.inputList, this.onSelecteListLocation});
 
   @override
   _BottomSheetLocationState createState() => _BottomSheetLocationState();
@@ -12,12 +13,18 @@ class BottomSheetLocation extends StatefulWidget {
 
 class _BottomSheetLocationState extends State<BottomSheetLocation> {
   bool sort = false;
-  List<CityLocation> selectedLocation;
-
+  List<LocationBlocModel> selectedLocation;
+  List<LocationBlocModel> photographerLocations = List<LocationBlocModel>();
   @override
   void initState() {
     super.initState();
-    selectedLocation = [];
+    // selectedLocation = widget.inputList;
+    for (var item in listCityLocations) {
+      photographerLocations.add(LocationBlocModel(
+          formattedAddress: item.name,
+          latitude: item.latLng.latitude,
+          longitude: item.latLng.longitude));
+    }
   }
 
   @override
@@ -66,21 +73,19 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
                         onSortColumn(columnIndex, ascending);
                       }),
                 ],
-                rows: listCityLocations
-                    .map(
-                      (location) => DataRow(
-                        selected: selectedLocation.contains(location),
-                        onSelectChanged: (b) {
-                          onSelectedRow(b, location);
-                        },
-                        cells: [
-                          DataCell(
-                            Text(location.name),
-                          ),
-                        ],
+                rows: photographerLocations.map((location) {
+                  return DataRow(
+                    selected: selectedLocation.contains(location),
+                    onSelectChanged: (b) {
+                      onSelectedRow(b, location);
+                    },
+                    cells: [
+                      DataCell(
+                        Text(location.formattedAddress),
                       ),
-                    )
-                    .toList(),
+                    ],
+                  );
+                }).toList(),
               ),
             ],
           ),
@@ -107,20 +112,24 @@ class _BottomSheetLocationState extends State<BottomSheetLocation> {
   onSortColumn(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
       if (ascending) {
-        listCityLocations.sort((a, b) => a.name.compareTo(b.name));
+        photographerLocations
+            .sort((a, b) => a.formattedAddress.compareTo(b.formattedAddress));
       } else {
-        listCityLocations.sort((a, b) => b.name.compareTo(a.name));
+        photographerLocations
+            .sort((a, b) => b.formattedAddress.compareTo(a.formattedAddress));
       }
     }
   }
 
-  onSelectedRow(bool selected, CityLocation location) async {
+  onSelectedRow(bool selected, LocationBlocModel location) async {
     setState(() {
       if (selected) {
         selectedLocation.add(location);
       } else {
         selectedLocation.remove(location);
       }
+      print(selectedLocation[0].id);
+      widget.onSelecteListLocation(selectedLocation);
     });
   }
 }

@@ -30,7 +30,8 @@ class BookingWidget extends StatefulWidget {
 class _BookingWidgetState extends State<BookingWidget> {
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
-  CommentRepository _commentRepository = CommentRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -248,8 +249,9 @@ class _BookingWidgetState extends State<BookingWidget> {
                                             ? ''
                                             : DateFormat('dd/MM/yyyy HH:mm a')
                                                 .format(DateTime.parse(booking
-                                                    .listTimeAndLocations[0]
-                                                    .start)),
+                                                        .listTimeAndLocations[0]
+                                                        .start)
+                                                    .toLocal()),
                                 style: TextStyle(
                                   color: Colors.grey,
                                 ),
@@ -303,6 +305,35 @@ class _BookingWidgetState extends State<BookingWidget> {
                             ),
                           ],
                         ),
+                        SizedBox(height: 5),
+                        booking.isMultiday
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(right: 10.0),
+                                    child: Icon(
+                                      Icons.assistant_photo_outlined,
+                                      size: 17,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      right: 10.0,
+                                    ),
+                                    child: Text(
+                                      'Chụp nhiều ngày',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.blueAccent,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : SizedBox(),
                       ],
                     ),
                   ),

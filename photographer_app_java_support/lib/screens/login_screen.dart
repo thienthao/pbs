@@ -1,11 +1,11 @@
-import 'package:bot_toast/bot_toast.dart';
 import 'package:flushbar/flushbar.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/register_blocs/register_bloc.dart';
 import 'package:photographer_app_java_support/screens/sign_up_screen.dart';
+
 import '../blocs/authen_blocs/authen_export.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -282,78 +282,78 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            Column(
-                              children: <Widget>[
-                                Text(
-                                  '- HOẶC -',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                                SizedBox(height: 20.0),
-                                Text(
-                                  'Đăng nhập với',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 30.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: Container(
-                                      height: 60.0,
-                                      width: 60.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black26,
-                                            offset: Offset(0, 2),
-                                            blurRadius: 6.0,
-                                          ),
-                                        ],
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/images/facebook.jpg'),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {},
-                                    child: Container(
-                                      height: 60.0,
-                                      width: 60.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black26,
-                                            offset: Offset(0, 2),
-                                            blurRadius: 6.0,
-                                          ),
-                                        ],
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/images/google.jpg'),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Column(
+                            //   children: <Widget>[
+                            //     Text(
+                            //       '- HOẶC -',
+                            //       style: TextStyle(
+                            //         color: Colors.white,
+                            //         fontWeight: FontWeight.w400,
+                            //       ),
+                            //     ),
+                            //     SizedBox(height: 20.0),
+                            //     Text(
+                            //       'Đăng nhập với',
+                            //       style: TextStyle(
+                            //         color: Colors.white,
+                            //         fontWeight: FontWeight.w600,
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+                            // Padding(
+                            //   padding: EdgeInsets.symmetric(vertical: 30.0),
+                            //   child: Row(
+                            //     mainAxisAlignment:
+                            //         MainAxisAlignment.spaceEvenly,
+                            //     children: [
+                            //       GestureDetector(
+                            //         onTap: () {},
+                            //         child: Container(
+                            //           height: 60.0,
+                            //           width: 60.0,
+                            //           decoration: BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color: Colors.white,
+                            //             boxShadow: [
+                            //               BoxShadow(
+                            //                 color: Colors.black26,
+                            //                 offset: Offset(0, 2),
+                            //                 blurRadius: 6.0,
+                            //               ),
+                            //             ],
+                            //             image: DecorationImage(
+                            //               image: AssetImage(
+                            //                   'assets/images/facebook.jpg'),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //       GestureDetector(
+                            //         onTap: () {},
+                            //         child: Container(
+                            //           height: 60.0,
+                            //           width: 60.0,
+                            //           decoration: BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color: Colors.white,
+                            //             boxShadow: [
+                            //               BoxShadow(
+                            //                 color: Colors.black26,
+                            //                 offset: Offset(0, 2),
+                            //                 blurRadius: 6.0,
+                            //               ),
+                            //             ],
+                            //             image: DecorationImage(
+                            //               image: AssetImage(
+                            //                   'assets/images/google.jpg'),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(

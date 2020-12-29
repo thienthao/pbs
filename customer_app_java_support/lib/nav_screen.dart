@@ -1,6 +1,7 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:customer_app_java_support/globals.dart' as globals;
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/plane_indicator.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/customer_repository.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'blocs/album_blocs/album.dart';
 import 'blocs/category_blocs/categories.dart';
@@ -40,11 +42,21 @@ class _NavScreenState extends State<NavScreen> {
   CustomerRepository _customerRepository =
       CustomerRepository(httpClient: http.Client());
   List _pageOptions = [];
+  SharedPreferences prefs;
+
+  void getPreference() async {
+    prefs = await SharedPreferences.getInstance();
+    print('TOKEN: ${prefs.getString('customerToken')}');
+    print('CUS ID: ${prefs.getInt('customerId')}');
+    globalCusId = prefs.getInt('customerId');
+    globalCusToken = prefs.getString('customerToken');
+  }
 
   @override
   void initState() {
     super.initState();
     globals.selectedTabGlobal = 0;
+    getPreference();
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
@@ -97,7 +109,7 @@ class _NavScreenState extends State<NavScreen> {
       )
     ];
     return MaterialApp(
-      title: 'Flutter User UI',
+      title: 'Photographer Booking System for Customer',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Quicksand',

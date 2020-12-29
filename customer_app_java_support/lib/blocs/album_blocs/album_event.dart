@@ -23,6 +23,21 @@ class AlbumByPhotographerIdEventFetch extends AlbumEvent {
   AlbumByPhotographerIdEventFetch({@required this.id});
 }
 
+class AlbumEventIsLikedAlbumFetch extends AlbumEvent {
+  final int albumId;
+  AlbumEventIsLikedAlbumFetch({@required this.albumId});
+}
+
+class AlbumEventLikeAlbum extends AlbumEvent {
+  final int albumId;
+  AlbumEventLikeAlbum({@required this.albumId});
+}
+
+class AlbumEventUnlikeAlbum extends AlbumEvent {
+  final int albumId;
+  AlbumEventUnlikeAlbum({@required this.albumId});
+}
+
 class AlbumEventLoadSuccess extends AlbumEvent {
   AlbumEventLoadSuccess(List<AlbumBlocModel> list);
 }

@@ -1,3 +1,4 @@
+
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_bloc.dart';
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_event.dart';
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_state.dart';
@@ -27,6 +28,9 @@ class _ForumPageState extends State<ForumPage>
   List<Tab> _tabList = [
     Tab(
       child: Text('Xu hướng thảo luận'),
+    ),
+    Tab(
+      child: Text('Gần đây nhất'),
     ),
     Tab(
       child: Text('Danh mục'),
@@ -98,12 +102,20 @@ class _ForumPageState extends State<ForumPage>
   }
 }
 
-class ForumBody extends StatelessWidget {
+class ForumBody extends StatefulWidget {
   final TabController _tabController;
   final TopicRepository topicRepository;
   final ThreadRepository threadRepository;
 
   ForumBody(this._tabController, this.topicRepository, this.threadRepository);
+
+  @override
+  _ForumBodyState createState() => _ForumBodyState();
+}
+
+class _ForumBodyState extends State<ForumBody> {
+  bool isCreated = false;
+  bool isCommentPosted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +126,7 @@ class ForumBody extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) {
               return FutureBuilder<List<Topic>>(
-                  future: topicRepository.all(),
+                  future: widget.topicRepository.all(),
                   builder: (BuildContext context,
                       AsyncSnapshot<List<Topic>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -127,14 +139,25 @@ class ForumBody extends StatelessWidget {
                         return Text("Error loading topics");
                       } else {
                         return TopicAdd(
+                          isCreated: (bool _isCreated) {
+                            if (_isCreated) {
+                              isCreated = true;
+                            } else {
+                              isCreated = false;
+                            }
+                          },
                           topics: snapshot.data,
-                          repository: threadRepository,
+                          repository: widget.threadRepository,
                         );
                       }
                     }
                   });
             }),
-          );
+          ).then((value) {
+            if (isCreated) {
+              BlocProvider.of<ThreadBloc>(context).add(FetchThreads());
+            }
+          });
         },
         child: Icon(
           Icons.post_add,
@@ -156,7 +179,7 @@ class ForumBody extends StatelessWidget {
 
           if (state is ThreadLoaded) {
             return TabBarView(
-              controller: _tabController,
+              controller: widget._tabController,
               children: [
                 Container(
                   child: ListView.builder(
@@ -169,8 +192,38 @@ class ForumBody extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => ForumDetail(
+                                isPosted: (bool _isPosted) {
+                                  if (_isPosted) {
+                                    isCommentPosted = true;
+                                  }
+                                },
                                 thread: thread,
-                                threadRepository: threadRepository),
+                                threadRepository: widget.threadRepository),
+                          ),
+                        ).then((value) {
+                          if (isCommentPosted) {
+                            BlocProvider.of<ThreadBloc>(context)
+                                .add(FetchThreads());
+                          }
+                        }),
+                        child: listThread(state.threads[index]),
+                      );
+                    },
+                  ),
+                ),
+                Container(
+                  child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    itemCount: state.threads.length,
+                    itemBuilder: (context, index) {
+                      Thread thread = state.threads[index];
+                      return InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ForumDetail(
+                              thread: thread,
+                            ),
                           ),
                         ),
                         child: listThread(state.threads[index]),

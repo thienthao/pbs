@@ -9,8 +9,8 @@ class InfoLoading extends StatelessWidget {
           children: <Widget>[
             Shimmer.fromColors(
               period: Duration(milliseconds: 1100),
-              baseColor: Colors.grey[300],
-              highlightColor: Colors.grey[500],
+              baseColor: Colors.grey[200],
+              highlightColor: Colors.grey[100],
               child: ClipPath(
                 clipper: CustomShape(),
                 child: Container(
@@ -28,8 +28,8 @@ class InfoLoading extends StatelessWidget {
                     children: [
                       Shimmer.fromColors(
                         period: Duration(milliseconds: 1100),
-                        baseColor: Colors.grey[350],
-                        highlightColor: Colors.grey[500],
+                        baseColor: Colors.grey[200],
+                        highlightColor: Colors.grey[100],
                         child: Container(
                           margin: EdgeInsets.only(top: 150.0), //10
                           height: 140.0, //140
@@ -65,8 +65,8 @@ class InfoLoading extends StatelessWidget {
                   SizedBox(height: 10.0), //5
                   Shimmer.fromColors(
                     period: Duration(milliseconds: 1100),
-                    baseColor: Colors.grey[350],
-                    highlightColor: Colors.grey[500],
+                    baseColor: Colors.grey[200],
+                    highlightColor: Colors.grey[100],
                     child: Container(
                       width: 100,
                       height: 25,
@@ -78,8 +78,8 @@ class InfoLoading extends StatelessWidget {
                   SizedBox(height: 15.0), //5
                   Shimmer.fromColors(
                     period: Duration(milliseconds: 1100),
-                    baseColor: Colors.grey[350],
-                    highlightColor: Colors.grey[500],
+                    baseColor: Colors.grey[200],
+                    highlightColor: Colors.grey[100],
                     child: Wrap(
                       children: [
                         SizedBox(height: 20.0), //5
@@ -158,8 +158,8 @@ class InfoLoading extends StatelessWidget {
         ),
         Shimmer.fromColors(
           period: Duration(milliseconds: 1100),
-          baseColor: Colors.grey[350],
-          highlightColor: Colors.grey[500],
+          baseColor: Colors.grey[200],
+          highlightColor: Colors.grey[100],
           child: Padding(
             padding: const EdgeInsets.only(left: 4.0),
             child: Column(

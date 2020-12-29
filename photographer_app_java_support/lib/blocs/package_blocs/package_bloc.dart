@@ -64,6 +64,7 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
 
   Stream<PackageState> _mapPackageDeletedtoState(
       PackageBlocModel package) async* {
+    yield PackageStateDeletedInProgress();
     try {
       final isSuccess = await this.packageRepository.deletePackage(package);
       yield PackageStateDeletedSuccess(isSuccess: isSuccess);

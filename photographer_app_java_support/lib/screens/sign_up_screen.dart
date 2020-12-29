@@ -24,7 +24,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String username = this.username.text;
     String email = this.email.text;
     String password = this.password.text;
-    String repassword = this.repassword.text;
+    // String repassword = this.repassword.text;
     UserRegister userRegister =
         UserRegister(username: username, email: email, password: password);
     BlocProvider.of<RegisterBloc>(context)

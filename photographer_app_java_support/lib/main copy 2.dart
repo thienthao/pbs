@@ -295,6 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (index == 2) {
             return _listTile('Events', '!');
           }
+          return SizedBox();
         },
       ),
     );

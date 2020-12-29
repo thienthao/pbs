@@ -68,7 +68,7 @@ class _SliverItemsState extends State<SliverItems> {
             top: 20.0,
           ),
           child: Text(
-            'Bạn muốn chụp ảnh ở đâu?',
+            'Bạn đang ở đâu?',
             style: TextStyle(
               fontSize: 27.0,
               fontWeight: FontWeight.w600,
@@ -110,8 +110,12 @@ class _SliverItemsState extends State<SliverItems> {
                                 .toString()
                                 .compareTo(city.name) ==
                             0) {
-                          print(city.image);
-                          return image = city.image;
+                          if (image == '_image') {
+                            return image =
+                                'https://i.pinimg.com/564x/52/d2/94/52d294e56bd9dbf4ebb46099753e69ba.jpg';
+                          } else {
+                            return image = city.image;
+                          }
                         } else {
                           image =
                               'https://i.pinimg.com/564x/52/d2/94/52d294e56bd9dbf4ebb46099753e69ba.jpg';

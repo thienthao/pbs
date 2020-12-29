@@ -1,16 +1,21 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
+import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
+import 'package:customer_app_java_support/blocs/working_day_blocs/working_days.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
+import 'package:customer_app_java_support/models/weather_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
+import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/map_picker_screen.dart';
 import 'package:customer_app_java_support/shared/pop_up.dart';
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,8 +31,8 @@ class ReturnTypeModel {
 
   static List<ReturnTypeModel> getReturnTypes() {
     return <ReturnTypeModel>[
-      ReturnTypeModel(1, 'Thông qua ứng dụng'),
       ReturnTypeModel(2, 'Gặp mặt tận nơi'),
+      ReturnTypeModel(1, 'Thông qua ứng dụng'),
     ];
   }
 }
@@ -54,11 +59,14 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
       CalendarRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
 
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   List<PackageBlocModel> listPackages = List<PackageBlocModel>();
   double cuLat = 0;
   double cuLong = 0;
+  DateTime lastDate = DateTime.now();
 
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
   List<DropdownMenuItem<ReturnTypeModel>> dropDownMenuItems;
@@ -127,25 +135,33 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
     });
   }
 
+  _getWeatherWarning() async {
+    BlocProvider.of<WarningBloc>(context).add(WarningEventGetWeatherWarning(
+        dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(startDate)),
+        latLng: selectedLatLng));
+  }
+
+  bool _validateBooking() {
+    if (timeResult == 'Hãy chọn thời gian chụp') {
+      popUp(context, 'Chọn thời gian chụp', 'Xin hãy chọn thời gian chụp');
+      return false;
+    } else if (timeReturnResult == 'Hãy chọn thời gian nhận') {
+      popUp(context, 'Chọn thời gian nhận', 'Xin hãy chọn thời gian nhận');
+      return false;
+    } else if (locationResult == 'Hãy chọn nơi bạn muốn chụp ảnh') {
+      popUp(context, 'Chọn nơi chụp', 'Xin hãy chọn nơi chụp ảnh');
+      return false;
+    } else if (!lastDate.isBefore(DateTime.parse(endDate))) {
+      popUp(context, 'Thời gian nhận',
+          'Thời gian nhận ảnh phải sau ngày chụp cuối ít nhất 1 ngày');
+      return false;
+    }
+    return true;
+  }
+
   _editBooking() async {
     if (selectedPackage != null) {
-      var startDateTemp =
-          DateFormat("yyyy-MM-dd").format(DateTime.parse(startDate));
-      var endDateTemp =
-          DateFormat("yyyy-MM-dd").format(DateTime.parse(endDate));
-      if (timeResult == 'Hãy chọn thời gian chụp') {
-        popUp(context,'Thời gian chụp','Mời bạn chọn thời gian chụp');
-      } else if (timeReturnResult == 'Hãy chọn thời gian nhận') {
-        popUp(context,'Thời gian nhận ảnh','Mời bạn chọn thời gian nhận ảnh');
-      } else if (locationResult == 'Hãy chọn nơi bạn muốn chụp ảnh') {
-        popUp(context,'Địa điểm chụp','Mời bạn chọn nơi chụp ảnh');
-      } else if (DateTime.parse(startDateTemp)
-                  .compareTo(DateTime.parse(endDateTemp)) +
-              1 >
-          1) {
-        popUp(
-            context,'Thời gian nhận ảnh','Thời gian nhận ảnh phải sau thời gian chụp ít nhất 1 ngày');
-      } else {
+      if (_validateBooking()) {
         List<TimeAndLocationBlocModel> timeAndLocations =
             List<TimeAndLocationBlocModel>();
 
@@ -154,10 +170,11 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
           latitude: selectedLatLng.latitude,
           longitude: selectedLatLng.longitude,
           formattedAddress: locationResult,
-          start: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+          start: DateFormat("yyyy-MM-dd'T'HH:mm")
               .format(DateTime.parse(startDate)),
-          end: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-              .format(DateTime.parse(startDate).add(Duration(hours: 6))),
+          end: DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.parse(startDate)
+              .add(Duration(
+                  hours: (selectedPackage.timeAnticipate / 3600).round()))),
         );
         timeAndLocations.add(timeAndLocationBlocModel);
 
@@ -165,7 +182,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
             id: widget.bookingBlocModel.id,
             serviceName: packageResult.name,
             price: packageResult.price,
-            editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm")
                 .format(DateTime.parse(endDate)),
             photographer: Photographer(id: widget.photographer.id),
             package: packageResult,
@@ -173,9 +190,34 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
             listTimeAndLocations: timeAndLocations);
 
         BlocProvider.of<BookingBloc>(context)
-            .add(BookingEventEdit(booking: booking));
+            .add(BookingEventEdit(booking: booking, cusId: globalCusId));
       }
     }
+  }
+
+  String convertOutLookToVietnamese(String outlook) {
+    String result = '';
+    switch (outlook) {
+      case 'freezing':
+        result = 'Trời lạnh';
+        break;
+      case 'ice':
+        result = 'Trời lạnh';
+        break;
+      case 'rainy':
+        result = 'Trời mưa';
+        break;
+      case 'cloudy':
+        result = 'Trời mây';
+        break;
+      case 'clear':
+        result = 'Trời hoang';
+        break;
+      case 'sunny':
+        result = 'Trời nắng';
+        break;
+    }
+    return result;
   }
 
   getCurrentLocation() async {
@@ -358,11 +400,15 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
     super.initState();
     startDate = widget.bookingBlocModel.listTimeAndLocations[0].start;
     endDate = widget.bookingBlocModel.editDeadLine;
-    timeResult = DateFormat('dd/MM/yyyy HH:mm a').format(
-        DateTime.parse(widget.bookingBlocModel.listTimeAndLocations[0].start));
+    lastDate =
+        DateTime.parse(widget.bookingBlocModel.listTimeAndLocations[0].end)
+            .toLocal();
+    timeResult = DateFormat('dd/MM/yyyy hh:mm a').format(
+        DateTime.parse(widget.bookingBlocModel.listTimeAndLocations[0].start)
+            .toLocal());
 
-    timeReturnResult = DateFormat('dd/MM/yyyy HH:mm a')
-        .format(DateTime.parse(widget.bookingBlocModel.editDeadLine));
+    timeReturnResult = DateFormat('dd/MM/yyyy hh:mm a')
+        .format(DateTime.parse(widget.bookingBlocModel.editDeadLine).toLocal());
     locationResult =
         widget.bookingBlocModel.listTimeAndLocations[0].formattedAddress;
     dropDownMenuItems = buildDropdownMenuItems(returnedTypes);
@@ -463,7 +509,8 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  timeResult,
+                                  DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(startDate).toLocal()),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -482,12 +529,22 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                                   BlocProvider(
                                     create: (context) => BookingBloc(
                                         bookingRepository: _bookingRepository),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) => WarningBloc(
+                                        warningRepository: _warningRepository),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) => WorkingDayBloc(
+                                        calendarRepository:
+                                            _calendarRepository),
                                   )
                                 ],
                                 child: BlocDatePicker(
                                   ptgId: widget.photographer.id,
                                   onSelecParam: (DateTime result) {
                                     startDate = result.toString();
+                                    lastDate = result;
                                   },
                                 ),
                               );
@@ -545,7 +602,8 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  timeReturnResult,
+                                  DateFormat('dd/MM/yyyy hh:mm a')
+                                      .format(DateTime.parse(endDate)),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -564,10 +622,14 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                                   BlocProvider(
                                     create: (context) => BookingBloc(
                                         bookingRepository: _bookingRepository),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) => WarningBloc(
+                                        warningRepository: _warningRepository),
                                   )
                                 ],
-                                child: BlocDatePicker(
-                                  ptgId: widget.photographer.id,
+                                child: DatePicker(
+                                  lastDay: lastDate,
                                   onSelecParam: (DateTime result) {
                                     endDate = result.toString();
                                   },
@@ -758,19 +820,46 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                   _buildPackage(),
 ///////////////////////////////////////packages
                   SizedBox(height: 30.0),
-                  RaisedButton(
-                    onPressed: _editBooking,
-                    textColor: Colors.white,
-                    color: Theme.of(context).primaryColor,
-                    padding:
-                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 80.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    child: Text(
-                      'Cập nhật cuộc hẹn',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  BlocListener<WarningBloc, WarningState>(
+                    listener: (context, state) {
+                      if (state is WarningStateLoading) {
+                        _showLoadingAlert();
+                      }
+                      if (state is WarningStateGetWeatherWarningSuccess) {
+                        Navigator.pop(context);
+                        if (state.notice == null) {
+                          _editBooking();
+                        } else if (state.notice.humidity == null ||
+                            state.notice.noti == null ||
+                            state.notice.outlook == null ||
+                            state.notice.temperature == null ||
+                            state.notice.windSpeed == null) {
+                          _editBooking();
+                          return;
+                        } else {
+                          _showWeatherWarning(state.notice);
+                        }
+                      }
+
+                      if (state is WarningStateFailure) {
+                        Navigator.pop(context);
+                        _showBookingFailDialog();
+                      }
+                    },
+                    child: RaisedButton(
+                      onPressed: _getWeatherWarning,
+                      textColor: Colors.white,
+                      color: Theme.of(context).primaryColor,
+                      padding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 80.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Text(
+                        'Cập nhật cuộc hẹn',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
                   SizedBox(height: 30.0),
@@ -801,13 +890,52 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
     );
   }
 
+  Future<void> _showWeatherWarning(WeatherBlocModel notice) async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/alert.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Nhắc nhở',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                '☁ ${convertOutLookToVietnamese(notice.outlook)}   🌡${notice.temperature.round()}°C\n💧${notice.humidity.round()}%       ༄ ${notice.windSpeed.roundToDouble()} m/s\n${notice.noti}',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                _editBooking();
+              },
+              onCancelButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
+              buttonCancelText: Text(
+                'Trở lại',
+                style: TextStyle(color: Colors.black87),
+              ),
+            ));
+  }
+
   Future<void> _showBookingSuccessAlert() async {
     return showDialog<void>(
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (BuildContext aContext) =>
-            AssetGiffyDialog(
+        builder: (BuildContext aContext) => AssetGiffyDialog(
               image: Image.asset(
                 'assets/images/done_booking.gif',
                 fit: BoxFit.cover,
@@ -826,9 +954,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
               onOkButtonPressed: () {
                 Navigator.pop(context);
               },
-              buttonOkColor: Theme
-                  .of(context)
-                  .primaryColor,
+              buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Xác nhận',
                 style: TextStyle(color: Colors.white),
@@ -851,10 +977,10 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
               child: Material(
                 type: MaterialType.card,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5)),
+                    borderRadius: BorderRadius.circular(10)),
                 elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
                 child: Image.asset(
-                  'assets/images/loading.gif',
+                  'assets/images/loading_2.gif',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -868,8 +994,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (_) =>
-            AssetGiffyDialog(
+        builder: (_) => AssetGiffyDialog(
               image: Image.asset(
                 'assets/images/fail.gif',
                 fit: BoxFit.cover,
@@ -888,9 +1013,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
               onOkButtonPressed: () {
                 Navigator.pop(context);
               },
-              buttonOkColor: Theme
-                  .of(context)
-                  .primaryColor,
+              buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Xác nhận',
                 style: TextStyle(color: Colors.white),

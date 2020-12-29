@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,12 +8,14 @@ import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart'
 import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
 import 'package:photographer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:photographer_app_java_support/blocs/working_day_blocs/working_days.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/respositories/calendar_repository.dart';
 import 'package:photographer_app_java_support/widgets/home/build_pen_task.dart';
 import 'package:photographer_app_java_support/widgets/home/build_task.dart';
 import 'package:photographer_app_java_support/widgets/home/show_calendar.dart';
 import 'package:photographer_app_java_support/widgets/shared/list_booking_loading.dart';
 import 'package:photographer_app_java_support/widgets/shared/loading_line.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'vacation_screens/list_vacation_screen.dart';
 import 'package:http/http.dart' as http;
@@ -25,10 +28,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
-
+  DatabaseReference _notificationRef;
   String filterType = 'Chờ xác nhận';
   Completer<void> _completer;
   String _selectedDate;
+  SharedPreferences prefs;
+
   @override
   void initState() {
     super.initState();
@@ -38,9 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadCalendar();
   }
 
+  getPreference() async {
+    prefs = await SharedPreferences.getInstance();
+    globalPtgId = prefs.getInt('photographerId');
+    globalPtgToken = prefs.getString('photographerToken');
+  }
+
   _loadCalendar() async {
     BlocProvider.of<CalendarBloc>(context)
-        .add(CalendarEventPhotographerDaysFetch(ptgId: 168));
+        .add(CalendarEventPhotographerDaysFetch(ptgId: globalPtgId));
   }
 
   _loadPendingBookings() async {
@@ -55,6 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _notificationRef = FirebaseDatabase.instance
+        .reference()
+        .child('Notification_$globalPtgId');
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -67,34 +81,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.all(5.0),
-            child: IconButton(
-              icon: Icon(Icons.calendar_today),
-              color: Colors.black54,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) {
-                    return MultiBlocProvider(
-                      providers: [
-                        BlocProvider(
-                          create: (context) => WorkingDayBloc(
-                              calendarRepository: _calendarRepository)
-                            ..add(WorkingDayEventFetch(ptgId: 168)),
-                        ),
-                        BlocProvider(
-                          create: (context) => BusyDayBloc(
-                              calendarRepository: _calendarRepository),
-                        ),
-                      ],
-                      child: ListVacation(),
-                    );
-                  }),
+          StreamBuilder(
+              stream: _notificationRef.onValue,
+              builder: (context, snapshot) {
+                if (snapshot.data != null &&
+                    snapshot.data.snapshot.value != null) {
+                  _loadPendingBookings();
+                  _loadCalendar();
+                }
+
+                return Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    color: Colors.black54,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => WorkingDayBloc(
+                                    calendarRepository: _calendarRepository),
+                              ),
+                              BlocProvider(
+                                create: (context) => BusyDayBloc(
+                                    calendarRepository: _calendarRepository),
+                              ),
+                            ],
+                            child: ListVacation(),
+                          );
+                        }),
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          ),
+              }),
         ],
       ),
       body: Column(
@@ -224,6 +247,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: ListView(
                                       children: [
                                         BuildTask(
+                                            isEdited: (bool isEdited) {
+                                              if (isEdited) {
+                                                _loadCalendar();
+                                                _loadBookingsByDate(
+                                                    _selectedDate);
+                                              }
+                                            },
                                             blocBookings:
                                                 bookingState.bookings),
                                       ],
@@ -242,15 +272,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               }
 
                               if (bookingState is BookingStateFailure) {
-                                return InkWell(
-                                  onTap: () {
-                                    _loadBookingsByDate(_selectedDate);
-                                  },
-                                  child: Text(
-                                    'Đã xảy ra lỗi khi tải dữ liệu\n Ấn để thử lại',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.red[300], fontSize: 16),
+                                return Center(
+                                  child: InkWell(
+                                    onTap: () {
+                                      _loadBookingsByDate(_selectedDate);
+                                    },
+                                    child: Text(
+                                      'Đã xảy ra lỗi khi tải dữ liệu\n Ấn để thử lại',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.red[300], fontSize: 16),
+                                    ),
                                   ),
                                 );
                               }
@@ -263,12 +295,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 )
               : Expanded(
-                  child: Center(
-                    child: BlocBuilder<BookingBloc, BookingState>(
-                      builder: (context, bookingState) {
-                        if (bookingState is BookingStateSuccess) {
-                          if (bookingState.bookings.isEmpty) {
-                            return Center(
+                  child: BlocBuilder<BookingBloc, BookingState>(
+                    builder: (context, bookingState) {
+                      if (bookingState is BookingStateSuccess) {
+                        if (bookingState.bookings.isEmpty) {
+                          return Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                _loadPendingBookings();
+                              },
                               child: Text(
                                 'Hiện tại bạn chưa có lịch hẹn nào',
                                 style: TextStyle(
@@ -277,33 +312,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
-                            );
-                          } else {
-                            return RefreshIndicator(
-                              onRefresh: () {
-                                _loadPendingBookings();
-                                return _completer.future;
-                              },
+                            ),
+                          );
+                        } else {
+                          return RefreshIndicator(
+                            onRefresh: () {
+                              _loadPendingBookings();
+                              return _completer.future;
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
                               child: Container(
                                 child: UpComSlidable(
                                   blocPendingBookings: bookingState.bookings,
                                   isEdited: (bool isEdited) {
                                     if (isEdited) {
                                       _loadPendingBookings();
+                                      _loadCalendar();
                                     }
                                   },
                                 ),
                               ),
-                            );
-                          }
+                            ),
+                          );
                         }
+                      }
 
-                        if (bookingState is BookingStateLoading) {
-                          return ListBookingLoadingWidget();
-                        }
+                      if (bookingState is BookingStateLoading) {
+                        return ListBookingLoadingWidget();
+                      }
 
-                        if (bookingState is BookingStateFailure) {
-                          return InkWell(
+                      if (bookingState is BookingStateFailure) {
+                        return Center(
+                          child: InkWell(
                             onTap: () {
                               _loadPendingBookings();
                             },
@@ -313,11 +354,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                   color: Colors.red[300], fontSize: 16),
                             ),
-                          );
-                        }
-                       return Text('');
-                      },
-                    ),
+                          ),
+                        );
+                      }
+                      return Text('');
+                    },
                   ),
                 ),
         ],

@@ -89,7 +89,11 @@ class _ServiceShowState extends State<ServiceShow> {
                                         Flexible(
                                           child: Text(
                                             // '${widget.blocPackages[mapEntry.key].name}  buổi',
-                                            '6 giờ',
+                                            widget.blocPackages[mapEntry.key]
+                                                        .timeAnticipate ==
+                                                    null
+                                                ? '3 giờ'
+                                                : '${(widget.blocPackages[mapEntry.key].timeAnticipate / 3600).round().toString()} giờ',
                                             style: TextStyle(
                                                 color: Colors.black45,
                                                 fontSize: 16.0,
@@ -229,7 +233,8 @@ class _ServiceShowState extends State<ServiceShow> {
                 expandArrowStyle: ExpandArrowStyle.both,
                 collapsedHint: "Gói chụp nhiều ngày",
                 expandedHint: "Gói chụp nhiều ngày",
-                hintTextStyle: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
+                hintTextStyle:
+                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 child: Column(
                   children: widget.blocPackages
                       .asMap()
@@ -275,6 +280,38 @@ class _ServiceShowState extends State<ServiceShow> {
                                                 fontWeight: FontWeight.w600),
                                           ),
                                           SizedBox(height: 10.0),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Thời gian chụp/1 ngày:',
+                                                style: TextStyle(
+                                                    fontSize: 17.0,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                              SizedBox(width: 10.0),
+                                              Flexible(
+                                                child: Text(
+                                                  // '${widget.blocPackages[mapEntry.key].name}  buổi',
+                                                  widget
+                                                              .blocPackages[
+                                                                  mapEntry.key]
+                                                              .timeAnticipate ==
+                                                          null
+                                                      ? '3 giờ'
+                                                      : '${(widget.blocPackages[mapEntry.key].timeAnticipate / 3600).round().toString()} giờ',
+                                                  style: TextStyle(
+                                                      color: Colors.black45,
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 3.0),
                                           Row(
                                             children: [
                                               Text(

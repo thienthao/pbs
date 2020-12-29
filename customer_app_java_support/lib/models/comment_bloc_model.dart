@@ -10,6 +10,7 @@ class CommentBlocModel extends Equatable {
   final String location;
   final int bookingId;
   final int cusId;
+  final int ptgId;
 
   CommentBlocModel({
     this.username,
@@ -21,6 +22,7 @@ class CommentBlocModel extends Equatable {
     this.location,
     this.bookingId,
     this.cusId,
+    this.ptgId
   });
 
   @override

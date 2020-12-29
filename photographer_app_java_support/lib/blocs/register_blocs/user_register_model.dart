@@ -10,6 +10,6 @@ class UserRegister {
         "username": this.username,
         "password": this.password,
         "email": this.email,
-        "role": "ROLE_CUSTOMER"
+        "role": "ROLE_PHOTOGRAPHER"
       };
 }

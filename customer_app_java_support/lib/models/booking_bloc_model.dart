@@ -1,3 +1,4 @@
+import 'package:customer_app_java_support/models/customer_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
@@ -29,6 +30,9 @@ class BookingBlocModel extends Equatable {
   final bool isMultiday;
   final List<String> services;
   final List<TimeAndLocationBlocModel> listTimeAndLocations;
+  final String returningLink;
+  final int timeAnticipate;
+  final CustomerBlocModel customer;
 
   BookingBlocModel(
       {this.id,
@@ -55,7 +59,10 @@ class BookingBlocModel extends Equatable {
       this.package,
       this.returningType,
       this.services,
-      this.listTimeAndLocations});
+      this.listTimeAndLocations,
+      this.returningLink,
+      this.timeAnticipate,
+      this.customer});
 
   @override
   List<Object> get props {

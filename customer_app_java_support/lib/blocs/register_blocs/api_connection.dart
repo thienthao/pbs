@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:customer_app_java_support/blocs/authen_blocs/user_login_model.dart';
 import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
 import 'package:http/http.dart' as http;
 

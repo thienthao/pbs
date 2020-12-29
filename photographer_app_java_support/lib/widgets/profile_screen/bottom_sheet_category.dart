@@ -16,7 +16,6 @@ class _BottomSheetCategoryState extends State<BottomSheetCategory> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     selectedCategory = [];
   }

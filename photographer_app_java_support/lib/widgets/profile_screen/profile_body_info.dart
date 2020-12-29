@@ -1,9 +1,11 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Info extends StatefulWidget {
   final Photographer photographer;
@@ -68,8 +70,12 @@ class _InfoState extends State<Info> {
                     fit: BoxFit.cover,
                   )
                 : Image.network(
-                    widget.photographer.cover,
+                    widget.photographer.cover ??
+                        'https://atlasadventuretravel.com/wp-content/uploads/2018/03/events-placeholder.jpg',
                     fit: BoxFit.cover,
+                    headers: {
+                      HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'
+                    },
                   ),
           ),
         ),
@@ -107,7 +113,14 @@ class _InfoState extends State<Info> {
                         fit: BoxFit.cover,
                         image: _avatar != null
                             ? FileImage(_avatar)
-                            : NetworkImage(widget.photographer.avatar),
+                            : NetworkImage(
+                                widget.photographer.avatar ??
+                                    'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
+                                headers: {
+                                  HttpHeaders.authorizationHeader:
+                                      'Bearer $globalPtgToken'
+                                },
+                              ),
                       ),
                     ),
                   ),
@@ -127,7 +140,7 @@ class _InfoState extends State<Info> {
                 ],
               ),
               Text(
-                widget.photographer.fullname,
+                widget.photographer.fullname ?? widget.photographer.username,
                 style: TextStyle(
                   fontSize: 22.0, // 22
                   color: Colors.black87,
@@ -137,24 +150,24 @@ class _InfoState extends State<Info> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Column(
-                    children: [
-                      Text(
-                        'Lượt thích',
-                        style: TextStyle(
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 5.0),
-                      Text(
-                        '400',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Column(
+                  //   children: [
+                  //     Text(
+                  //       'Lượt thích',
+                  //       style: TextStyle(
+                  //         color: Colors.black54,
+                  //       ),
+                  //     ),
+                  //     SizedBox(height: 5.0),
+                  //     Text(
+                  //       '250',
+                  //       style: TextStyle(
+                  //         color: Colors.black54,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   Column(
                     children: [
                       Text(
@@ -165,7 +178,9 @@ class _InfoState extends State<Info> {
                       ),
                       SizedBox(height: 5.0),
                       Text(
-                        '${widget.photographer.ratingCount} ★',
+                        widget.photographer.ratingCount != null
+                            ? '${widget.photographer.ratingCount} ★'
+                            : '0.0 ★',
                         style: TextStyle(
                           color: Colors.amberAccent,
                           fontWeight: FontWeight.bold,
@@ -183,7 +198,9 @@ class _InfoState extends State<Info> {
                       ),
                       SizedBox(height: 5.0),
                       Text(
-                        '100',
+                        widget.photographer.bookedNumber == null
+                            ? '12'
+                            : '${widget.photographer.bookedNumber}',
                         style: TextStyle(
                           color: Colors.black54,
                           fontWeight: FontWeight.bold,

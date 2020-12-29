@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/album_bloc_model.dart';
 import 'package:customer_app_java_support/models/category_bloc_model.dart';
 import 'package:customer_app_java_support/models/image_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,12 +20,9 @@ class AlbumRepository {
   }) : assert(httpClient != null);
 
   Future<List<AlbumBlocModel>> getListAlbum(int categoryId) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'albums?categoryId=$categoryId', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.ALBUM_URL + '?categoryId=$categoryId',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['albums'] as List;
@@ -43,13 +42,16 @@ class AlbumRepository {
             avatar: photographerTemp['avatar']);
 
         final imageTemp = album['images'] as List;
+        List<ImageBlocModel> images = List<ImageBlocModel>();
+        if (imageTemp != null) {
+          images = imageTemp.map((image) {
+            return ImageBlocModel(
+              id: image['id'],
+              imageLink: image['imageLink'],
+            );
+          }).toList();
+        }
 
-        final images = imageTemp.map((image) {
-          return ImageBlocModel(
-            id: image['id'],
-            imageLink: image['imageLink'],
-          );
-        }).toList();
         return AlbumBlocModel(
             id: album['id'],
             name: album['name'].toString(),
@@ -70,12 +72,9 @@ class AlbumRepository {
   }
 
   Future<List<AlbumBlocModel>> getInfiniteListAlbum(int page, int size) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'albums/?page=$page&size=$size', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.ALBUM_URL + '/?page=$page&size=$size',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['albums'] as List;
@@ -123,8 +122,9 @@ class AlbumRepository {
 
   Future<List<AlbumBlocModel>> getAlbumOfPhotographer(int id) async {
     final response = await this.httpClient.get(
-          baseUrl + 'albums/photographer/' + id.toString(),
-        );
+      BaseApi.ALBUM_URL + '/photographer/$id',
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'},
+    );
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['albums'] as List;
@@ -156,10 +156,10 @@ class AlbumRepository {
           thumbnail: album['thumbnail'].toString(),
           description: album['description'].toString(),
           location: album['location'].toString().length == 0
-              ? 'Sapa'
+              ? ''
               : album['location'].toString(),
-          likes: album['likes'] == null ? 223 : album['likes'],
-          createAt: album['createAt'],
+          likes: album['likes'] == null ? 0 : album['likes'],
+          createdAt: album['createdAt'],
           category: category,
           images: images,
           photographer: photographer,
@@ -168,7 +168,51 @@ class AlbumRepository {
       }).toList();
       return albums;
     } else {
-      throw Exception('Error getting list of photographers');
+      throw Exception('Error getting list of albums');
     }
+  }
+
+  Future<bool> isLikedAlbum(int albumId) async {
+    final response = await this.httpClient.get(
+      BaseApi.ALBUM_URL + '/like?albumId=$albumId&userId=$globalCusId',
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'},
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data;
+    } else {
+      throw Exception('Error getting album like');
+    }
+  }
+
+  Future<bool> likeAlbum(int albumId) async {
+    final response = await this.httpClient.post(
+      BaseApi.ALBUM_URL + '/like?albumId=$albumId&userId=$globalCusId',
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'},
+    );
+    print(albumId);
+    bool isLike = false;
+    if (response.statusCode == 200) {
+      isLike = true;
+    } else {
+      throw Exception('Error at like album');
+    }
+    print('isLike: $isLike');
+    return isLike;
+  }
+
+  Future<bool> unlikeAlbum(int albumId) async {
+    final response = await this.httpClient.post(
+      BaseApi.ALBUM_URL + '/unlike?albumId=$albumId&userId=$globalCusId',
+      headers: {HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'},
+    );
+    bool isUnlike = false;
+    if (response.statusCode == 200) {
+      isUnlike = true;
+    } else {
+      throw Exception('Error getting album like');
+    }
+    print('isUnlike: $isUnlike');
+    return isUnlike;
   }
 }

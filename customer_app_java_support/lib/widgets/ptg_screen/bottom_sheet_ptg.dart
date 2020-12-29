@@ -1,18 +1,21 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
-import 'package:customer_app_java_support/globals.dart' as globals;
+import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
+import 'package:customer_app_java_support/blocs/working_day_blocs/working_days.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
+import 'package:customer_app_java_support/models/weather_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen_bloc.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/map_picker_screen.dart';
 import 'package:customer_app_java_support/shared/pop_up.dart';
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,6 +23,7 @@ import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'drop_menu_book.dart';
 
@@ -31,8 +35,8 @@ class ReturnTypeModel {
 
   static List<ReturnTypeModel> getReturnTypes() {
     return <ReturnTypeModel>[
-      ReturnTypeModel(1, 'Thông qua ứng dụng'),
       ReturnTypeModel(2, 'Gặp mặt tận nơi'),
+      ReturnTypeModel(1, 'Thông qua ứng dụng'),
     ];
   }
 }
@@ -51,15 +55,20 @@ class BottomSheetShow extends StatefulWidget {
 
 class _BottomSheetShowState extends State<BottomSheetShow> {
   CalendarRepository _calendarRepository =
-  CalendarRepository(httpClient: http.Client());
+      CalendarRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
-  BookingRepository(httpClient: http.Client());
+      BookingRepository(httpClient: http.Client());
+  WarningRepository _warningRepository =
+      WarningRepository(httpClient: http.Client());
   double cuLat = 0;
   double cuLong = 0;
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
   List<DropdownMenuItem<ReturnTypeModel>> dropDownMenuItems;
   ReturnTypeModel selectedType;
   LatLng selectedLatLng;
+
+  int cusId;
+  SharedPreferences prefs;
 
   String selectedItem = '';
   dynamic result;
@@ -74,6 +83,11 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
   double longitude;
   DateTime lastDate = DateTime.now();
   PackageBlocModel packageResult;
+
+  void getCusId() async {
+    prefs = await SharedPreferences.getInstance();
+    cusId = prefs.getInt('customerId');
+  }
 
   List<DropdownMenuItem<ReturnTypeModel>> buildDropdownMenuItems(
       List returnedTypes) {
@@ -130,7 +144,6 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
             Navigator.pop(context);
             _showBookingSuccessAlert(bookingState.bookingId);
             popUp(context, 'Đặt hẹn', 'Gửi yêu cầu thành công');
-
           }
 
           if (bookingState is BookingStateLoading) {
@@ -148,15 +161,10 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
             Center(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme
-                      .of(context)
-                      .primaryColor,
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(30.0),
                 ),
-                width: MediaQuery
-                    .of(context)
-                    .size
-                    .width * 0.15,
+                width: MediaQuery.of(context).size.width * 0.15,
                 margin: EdgeInsets.only(top: 10.0),
                 height: 3.0,
               ),
@@ -178,9 +186,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
             SizedBox(height: 3.0),
             Container(
               decoration: BoxDecoration(
-                color: Theme
-                    .of(context)
-                    .primaryColor,
+                color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(30.0),
               ),
               margin: const EdgeInsets.only(left: 15.0, right: 310.0),
@@ -203,17 +209,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.05,
+                      left: MediaQuery.of(context).size.width * 0.05,
                       right: 15),
                   child: Icon(
                     Icons.timer,
                     size: 15,
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Padding(
@@ -250,14 +251,20 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                         return MultiBlocProvider(
                           providers: [
                             BlocProvider(
-                              create: (context) =>
-                                  CalendarBloc(
-                                      calendarRepository: _calendarRepository),
+                              create: (context) => CalendarBloc(
+                                  calendarRepository: _calendarRepository),
                             ),
                             BlocProvider(
-                              create: (context) =>
-                                  BookingBloc(
-                                      bookingRepository: _bookingRepository),
+                              create: (context) => BookingBloc(
+                                  bookingRepository: _bookingRepository),
+                            ),
+                            BlocProvider(
+                              create: (context) => WarningBloc(
+                                  warningRepository: _warningRepository),
+                            ),
+                            BlocProvider(
+                              create: (context) => WorkingDayBloc(
+                                  calendarRepository: _calendarRepository),
                             )
                           ],
                           child: BlocDatePicker(
@@ -292,17 +299,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.05,
+                      left: MediaQuery.of(context).size.width * 0.05,
                       right: 15),
                   child: Icon(
                     Icons.timer,
                     size: 15,
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Padding(
@@ -339,14 +341,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                         return MultiBlocProvider(
                           providers: [
                             BlocProvider(
-                              create: (context) =>
-                                  CalendarBloc(
-                                      calendarRepository: _calendarRepository),
+                              create: (context) => CalendarBloc(
+                                  calendarRepository: _calendarRepository),
                             ),
                             BlocProvider(
-                              create: (context) =>
-                                  BookingBloc(
-                                      bookingRepository: _bookingRepository),
+                              create: (context) => BookingBloc(
+                                  bookingRepository: _bookingRepository),
                             )
                           ],
                           child: DatePicker(
@@ -380,17 +380,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.05,
+                      left: MediaQuery.of(context).size.width * 0.05,
                       right: 15),
                   child: Icon(
                     Icons.location_on,
                     size: 15,
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Padding(
@@ -421,17 +416,16 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                     ),
                     onTap: () async {
                       final pageResult =
-                      await Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              MapPicker(
-                                currentLatitude: cuLat,
-                                currentLongitude: cuLong,
-                                onSelectedLatLgn: (LatLng latlng) {
-                                  if (latlng != null) {
-                                    selectedLatLng = latlng;
-                                  }
-                                },
-                              )));
+                          await Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => MapPicker(
+                                    currentLatitude: cuLat,
+                                    currentLongitude: cuLong,
+                                    onSelectedLatLgn: (LatLng latlng) {
+                                      if (latlng != null) {
+                                        selectedLatLng = latlng;
+                                      }
+                                    },
+                                  )));
                       setState(() {
                         if (pageResult != null) {
                           locationResult = pageResult;
@@ -455,17 +449,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.05,
+                      left: MediaQuery.of(context).size.width * 0.05,
                       right: 15),
                   child: Icon(
                     Icons.delivery_dining,
                     size: 15,
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Padding(
@@ -504,17 +493,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.05,
+                      left: MediaQuery.of(context).size.width * 0.05,
                       right: 15),
                   child: Icon(
                     Icons.loyalty,
                     size: 15,
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Text(
@@ -529,10 +513,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                  left: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.08, right: 15),
+                  left: MediaQuery.of(context).size.width * 0.08, right: 15),
               child: DropMenu(
                 blocPackages: widget.blocPackages,
                 selectedPackage: widget.selectedPackage,
@@ -542,23 +523,48 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               ),
             ),
             SizedBox(height: 30.0),
-            RaisedButton(
-              onPressed: () {
-                if (_validateBooking()) {
-                  _createBooking();
+            BlocListener<WarningBloc, WarningState>(
+              listener: (context, state) {
+                if (state is WarningStateLoading) {
+                  _showLoadingAlert();
+                }
+                if (state is WarningStateGetWeatherWarningSuccess) {
+                  Navigator.pop(context);
+                  if (state.notice == null) {
+                    _createBooking();
+                  } else if (state.notice.humidity == null ||
+                      state.notice.noti == null ||
+                      state.notice.outlook == null ||
+                      state.notice.temperature == null ||
+                      state.notice.windSpeed == null) {
+                    _createBooking();
+                    return;
+                  } else {
+                    _showWeatherWarning(state.notice);
+                  }
+                }
+
+                if (state is WarningStateFailure) {
+                  Navigator.pop(context);
+                  _showBookingFailDialog();
                 }
               },
-              textColor: Colors.white,
-              color: Theme
-                  .of(context)
-                  .primaryColor,
-              padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 80.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: Text(
-                'Đặt dịch vụ',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              child: RaisedButton(
+                onPressed: () {
+                  if (_validateBooking()) {
+                    _getWeatherWarning();
+                  }
+                },
+                textColor: Colors.white,
+                color: Theme.of(context).primaryColor,
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 80.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Text(
+                  'Đặt dịch vụ',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],
@@ -567,34 +573,39 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
     );
   }
 
+  _getWeatherWarning() async {
+    BlocProvider.of<WarningBloc>(context).add(WarningEventGetWeatherWarning(
+        dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(startDate)),
+        latLng: selectedLatLng));
+  }
+
   _createBooking() async {
     List<TimeAndLocationBlocModel> timeAndLocations =
-    List<TimeAndLocationBlocModel>();
+        List<TimeAndLocationBlocModel>();
 
     TimeAndLocationBlocModel timeAndLocationBlocModel =
-    TimeAndLocationBlocModel(
+        TimeAndLocationBlocModel(
       latitude: selectedLatLng.latitude,
       longitude: selectedLatLng.longitude,
       formattedAddress: locationResult,
-      start: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-          .format(DateTime.parse(startDate)),
-      end: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-          .format(DateTime.parse(startDate).add(Duration(hours: 6))),
+      start: DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.parse(startDate)),
+      end: DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.parse(startDate)
+          .add(Duration(hours: (packageResult.timeAnticipate / 3600).round()))),
     );
     timeAndLocations.add(timeAndLocationBlocModel);
 
     BookingBlocModel booking = BookingBlocModel(
         serviceName: packageResult.name,
         price: packageResult.price,
-        editDeadLine: DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-            .format(DateTime.parse(endDate)),
+        editDeadLine:
+            DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.parse(endDate)),
         photographer: Photographer(id: widget.photographerName.id),
         package: packageResult,
         returningType: selectedType.id,
         listTimeAndLocations: timeAndLocations);
 
     BlocProvider.of<BookingBloc>(context)
-        .add(BookingEventCreate(booking: booking));
+        .add(BookingEventCreate(booking: booking, cusId: globalCusId));
   }
 
   bool _validateBooking() {
@@ -615,14 +626,77 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
     return true;
   }
 
+  String convertOutLookToVietnamese(String outlook) {
+    String result = '';
+    switch (outlook) {
+      case 'freezing':
+        result = 'Trời lạnh';
+        break;
+      case 'ice':
+        result = 'Trời lạnh';
+        break;
+      case 'rainy':
+        result = 'Trời mưa';
+        break;
+      case 'cloudy':
+        result = 'Trời mây';
+        break;
+      case 'clear':
+        result = 'Trời hoang';
+        break;
+      case 'sunny':
+        result = 'Trời nắng';
+        break;
+    }
+    return result;
+  }
+
+  Future<void> _showWeatherWarning(WeatherBlocModel notice) async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/alert.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Nhắc nhở',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                '☁ ${convertOutLookToVietnamese(notice.outlook)}   🌡${notice.temperature.round()}°C\n💧${notice.humidity.round()}%       ༄ ${notice.windSpeed.roundToDouble()} m/s\n${notice.noti}',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                _createBooking();
+              },
+              onCancelButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
+              buttonCancelText: Text(
+                'Trở lại',
+                style: TextStyle(color: Colors.black87),
+              ),
+            ));
+  }
 
   Future<void> _showBookingSuccessAlert(int bookingId) async {
     return showDialog<void>(
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (BuildContext aContext) =>
-            AssetGiffyDialog(
+        builder: (BuildContext aContext) => AssetGiffyDialog(
               image: Image.asset(
                 'assets/images/done_booking.gif',
                 fit: BoxFit.cover,
@@ -633,7 +707,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                 style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
               ),
               description: Text(
-                'Yêu cầu đã được gửi. Bạn có muốn đi đến màn hình chi tiết không?',
+                'Yêu cầu đã được gửi. Chuyển đến màn hình chi tiết?',
                 textAlign: TextAlign.center,
                 style: TextStyle(),
               ),
@@ -660,9 +734,8 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                           return MultiBlocProvider(
                             providers: [
                               BlocProvider(
-                                  create: (context) =>
-                                      BookingBloc(
-                                          bookingRepository: _bookingRepository)),
+                                  create: (context) => BookingBloc(
+                                      bookingRepository: _bookingRepository)),
                             ],
                             child: BookingDetailScreen(
                               bookingId: bookingId,
@@ -676,16 +749,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               onCancelButtonPressed: () {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
-              buttonOkColor: Theme
-                  .of(context)
-                  .primaryColor,
+              buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Đồng ý',
                 style: TextStyle(color: Colors.white),
               ),
-              buttonCancelColor: Theme
-                  .of(context)
-                  .scaffoldBackgroundColor,
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
               buttonCancelText: Text(
                 'Không',
                 style: TextStyle(color: Colors.black87),
@@ -711,7 +780,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                     borderRadius: BorderRadius.circular(5)),
                 elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
                 child: Image.asset(
-                  'assets/images/loading.gif',
+                  'assets/images/loading_2.gif',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -725,8 +794,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (_) =>
-            AssetGiffyDialog(
+        builder: (_) => AssetGiffyDialog(
               image: Image.asset(
                 'assets/images/fail.gif',
                 fit: BoxFit.cover,
@@ -745,9 +813,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               onOkButtonPressed: () {
                 Navigator.pop(context);
               },
-              buttonOkColor: Theme
-                  .of(context)
-                  .primaryColor,
+              buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Xác nhận',
                 style: TextStyle(color: Colors.white),

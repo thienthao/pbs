@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/calendar_model.dart';
+import 'package:customer_app_java_support/models/working_date_bloc_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,9 +20,9 @@ class CalendarRepository {
   Future<CalendarModel> getBusyDaysOfPhotographer(int id) async {
     final response = await this
         .httpClient
-        .get(baseUrl + 'photographers/$id/calendar/for-customer', headers: {
+        .get(BaseApi.PHOTOGRAPHER_URL + '/$id/calendar/for-customer', headers: {
       HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
+          globalCusToken
     });
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
@@ -37,6 +40,29 @@ class CalendarRepository {
       CalendarModel photographerCalendar =
           CalendarModel(busyDays: busyDaysTemp, bookedDays: bookedDaysTemp);
       return photographerCalendar;
+    } else {
+      throw Exception('Error getting Photographer Calendar');
+    }
+  }
+
+  Future<List<WorkingDayBlocModel>> getPhotographerWorkingDay(int id) async {
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$id/working-days/',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
+
+      final listWorkingDays = data.map((day) {
+        return WorkingDayBlocModel(
+          id: day['id'],
+          day: day['day'],
+          endTime: day['endTime'],
+          startTime: day['startTime'],
+          workingDay: day['workingDay'],
+        );
+      }).toList();
+
+      return listWorkingDays;
     } else {
       throw Exception('Error getting Photographer Calendar');
     }

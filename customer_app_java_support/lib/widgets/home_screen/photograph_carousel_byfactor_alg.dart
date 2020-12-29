@@ -1,8 +1,12 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/album_respository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
@@ -103,11 +107,11 @@ class _PhotographCarouselByFactorAlgState
             color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(30.0),
           ),
-          margin: const EdgeInsets.only(left: 21.0, right: 300.0),
+          margin: const EdgeInsets.only(left: 20.0, right: 300.0),
           height: 3.0,
         ),
         Padding(
-          padding: EdgeInsets.only(left: 7.0),
+          padding: EdgeInsets.only(left: 10.0),
           child: Container(
             height: 240.0,
             child: ListView.builder(
@@ -180,11 +184,27 @@ class _PhotographCarouselByFactorAlgState
                             children: <Widget>[
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(20.0),
-                                child: Image(
-                                  image: NetworkImage(photographer.avatar),
-                                  height: 240.0,
-                                  width: 240.0,
+                                child: CachedNetworkImage(
                                   fit: BoxFit.cover,
+                                  width: 240,
+                                  height: 240,
+                                  imageUrl: photographer.avatar ??
+                                      'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
+                                  httpHeaders: {
+                                    HttpHeaders.authorizationHeader:
+                                        'Bearer $globalCusToken'
+                                  },
+                                  placeholder: (context, url) => Container(
+                                      width: 240,
+                                      height: 240,
+                                      color: Colors.white,
+                                      child: Icon(
+                                        Icons.camera_alt_outlined,
+                                        size: 54,
+                                        color: Colors.black54,
+                                      )),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
                                 ),
                               ),
                               Positioned(
@@ -215,7 +235,9 @@ class _PhotographCarouselByFactorAlgState
                                         ),
                                         SizedBox(width: 2.0),
                                         Text(
-                                          '${photographer.ratingCount}',
+                                          photographer.ratingCount == null
+                                              ? '0.0'
+                                              : '${photographer.ratingCount}',
                                           style: TextStyle(
                                               color: Colors.amberAccent,
                                               fontSize: 15.0,

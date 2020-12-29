@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/search_bloc_model.dart';
@@ -22,13 +23,10 @@ class PhotographerRepository {
   Future<List<Photographer>> getListPhotographerByRating(
       int categoryId, LatLng latLng, String city) async {
     final response = await this.httpClient.get(
-        BaseApi.PHOTOGRAPHER_URL + 'byrating?categoryId=$categoryId&city=$city',
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer ' +
-              'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-        });
+        BaseApi.PHOTOGRAPHER_URL +
+            '/byrating?categoryId=$categoryId&city=$city&size=20',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
 
-    print(baseUrl + 'byrating?categoryId=$categoryId&city=$city');
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;
@@ -52,11 +50,12 @@ class PhotographerRepository {
     }
   }
 
-  Future<List<Photographer>> getListPhotographerByFactorAlg() async {
-    final response = await this.httpClient.get(baseUrl + 'byfactors', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+  Future<List<Photographer>> getListPhotographerByFactorAlg(
+      LatLng latLng, int category, String city) async {
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL +
+            '/byfactors?category=$category&lat=${latLng.latitude}&lon=${latLng.longitude}&city=$city',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;
@@ -82,11 +81,9 @@ class PhotographerRepository {
   Future<List<Photographer>> getListPhotographerByRatingFilterdByCategoryId(
       int categoryId) async {
     final response = await this.httpClient.get(
-        baseUrl + 'byrating?page=2&size=5&categoryId=$categoryId',
-        headers: {
-          HttpHeaders.authorizationHeader: 'Bearer ' +
-              'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-        });
+        BaseApi.PHOTOGRAPHER_URL +
+            '/byrating?page=0&size=5&categoryId=$categoryId',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;
@@ -111,12 +108,9 @@ class PhotographerRepository {
 
   Future<List<Photographer>> getInfiniteListPhotographer(
       int page, int size) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'byrating?page=$page&size=$size', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/byrating?page=$page&size=$size',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['users'] as List;
@@ -141,12 +135,10 @@ class PhotographerRepository {
 
   Future<SearchModel> findPhotographerAndPackages(
       String search, int page, int size) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'search?search=$search&page=$page&size=$size', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL +
+            '/search?search=$search&page=$page&size=$size',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final listPtgs = data['photographers'] as List;
@@ -196,7 +188,9 @@ class PhotographerRepository {
   }
 
   Future<Photographer> getPhotographerbyId(int id) async {
-    final response = await this.httpClient.get(baseUrl + id.toString());
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$id',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
 

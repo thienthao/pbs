@@ -112,10 +112,10 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                         ..add(CommentByPhotographerIdEventFetch(id: ptg.id)),
                     ),
                     BlocProvider(
-                      create: (context) =>
-                          CalendarBloc(calendarRepository: _calendarRepository)
-                            ..add(CalendarEventPhotographerDaysFetch(
-                                ptgId: ptg.id)),
+                      create: (context) => CalendarBloc(
+                          calendarRepository: _calendarRepository)
+                        ..add(
+                            CalendarEventPhotographerDaysFetch(ptgId: ptg.id)),
                     ),
                   ],
                   child: CustomerPhotographerDetail(
@@ -166,7 +166,7 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                                 allowHalfRating: false,
                                 onRated: (v) {},
                                 starCount: 5,
-                                rating: ptg.ratingCount,
+                                rating: ptg.ratingCount ?? 0.0,
                                 size: 15.0,
                                 isReadOnly: true,
                                 defaultIconData: Icons.star_border,
@@ -231,7 +231,9 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                     child: Image(
                       width: 110.0,
                       image: NetworkImage(
-                        ptg.avatar,
+                        ptg.avatar == 'null'
+                            ? 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'
+                            : ptg.avatar,
                       ),
                       fit: BoxFit.cover,
                     ),
@@ -301,7 +303,7 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                   is PhotographerStateInifiniteFetchedSuccess) {
                 if (photographerState.photographers.isEmpty) {
                   return Text(
-                    'Đà Lạt',
+                    'Hiện tại hệ thống chưa có photographer nào',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17.0,
@@ -334,24 +336,27 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
               }
 
               if (photographerState is PhotographerStateFailure) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Đã xảy ra lỗi khi tải dữ liệu',
-                      style: TextStyle(color: Colors.red[300], fontSize: 16),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        _loadPhotographerInfinite();
-                      },
-                      child: Text(
-                        'Nhấn để tải lại',
+                return Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Đã xảy ra lỗi khi tải dữ liệu',
                         style: TextStyle(color: Colors.red[300], fontSize: 16),
                       ),
-                    ),
-                  ],
+                      InkWell(
+                        onTap: () {
+                          _loadPhotographerInfinite();
+                        },
+                        child: Text(
+                          'Nhấn để tải lại',
+                          style:
+                              TextStyle(color: Colors.red[300], fontSize: 16),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }
               // final bookings = (photographerState as BookingStateSuccess).bookings;

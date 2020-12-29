@@ -8,13 +8,10 @@ import 'package:photographer_app_java_support/blocs/booking_blocs/booking_event.
 import 'package:photographer_app_java_support/main.dart';
 import 'package:photographer_app_java_support/respositories/booking_repository.dart';
 import 'package:photographer_app_java_support/routing_constants.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 BookingRepository _bookingRepository =
     BookingRepository(httpClient: http.Client());
-BookingBloc _bookingBloc = BookingBloc(bookingRepository: _bookingRepository);
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   print(settings.name);
@@ -43,6 +40,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
               ));
     default:
       print("zo case default roi");
+       // ignore: missing_required_param
       return MaterialPageRoute(builder: (context) => LoginScreen());
   }
 }

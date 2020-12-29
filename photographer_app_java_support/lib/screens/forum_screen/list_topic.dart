@@ -7,12 +7,18 @@ import 'package:photographer_app_java_support/widgets/forum_screen/list_topic.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TopicAdd extends StatelessWidget {
+class TopicAdd extends StatefulWidget {
   final List<Topic> topics;
   final ThreadRepository repository;
+  final Function(bool) isCreated;
 
-  TopicAdd({@required this.topics, @required this.repository});
+  TopicAdd({@required this.topics, @required this.repository, this.isCreated});
 
+  @override
+  _TopicAddState createState() => _TopicAddState();
+}
+
+class _TopicAddState extends State<TopicAdd> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,17 +31,22 @@ class TopicAdd extends StatelessWidget {
       body: Container(
         child: ListView.builder(
           physics: BouncingScrollPhysics(),
-          itemCount: topics.length,
+          itemCount: widget.topics.length,
           itemBuilder: (context, index) {
-            Topic topic = topics[index];
+            Topic topic = widget.topics[index];
             return InkWell(
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (_) => BlocProvider(
                           create: (context) =>
-                              ThreadBloc(repository: repository),
+                              ThreadBloc(repository: widget.repository),
                           child: NewThread(
+                            isCreate: (bool _isCreated) {
+                              if (_isCreated) {
+                                widget.isCreated(true);
+                              }
+                            },
                             topic: topic,
                           ),
                         )),

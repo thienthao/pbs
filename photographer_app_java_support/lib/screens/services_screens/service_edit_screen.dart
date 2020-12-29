@@ -1,6 +1,6 @@
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:pattern_formatter/numeric_formatter.dart';
 import 'package:photographer_app_java_support/blocs/category_blocs/categories.dart';
@@ -9,7 +9,7 @@ import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/models/package_bloc_model.dart';
 import 'package:photographer_app_java_support/models/service_bloc_model.dart';
 import 'package:photographer_app_java_support/widgets/service/mini_service_list_edit.dart';
-import 'package:status_alert/status_alert.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 
 class EditService extends StatefulWidget {
   final PackageBlocModel package;
@@ -29,7 +29,7 @@ class _EditServiceState extends State<EditService> {
   bool isMultiDay = false;
   var nameTextController = TextEditingController();
   var priceTextController = TextEditingController();
-  var onAirTimeTextController = TextEditingController();
+  var timeAnticipateController = TextEditingController();
   var descriptionTextController = TextEditingController();
   ScrollController _scrollController;
 
@@ -109,7 +109,36 @@ class _EditServiceState extends State<EditService> {
 
   Widget _timeEstimateTextFormField(bool _isMultiDay) {
     if (_isMultiDay) {
-      return SizedBox();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Thời gian tác nghiệp/1 ngày: *',
+            style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 15.0),
+          ),
+          TextFormField(
+            validator: checkTextFormFieldIsEmpty,
+            controller: timeAnticipateController,
+            keyboardType: TextInputType.number,
+            style: TextStyle(
+              color: Colors.black87,
+            ),
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.all(8.0),
+              hintText: 'Ví dụ: 3 giờ',
+              hintStyle: TextStyle(
+                fontSize: 18.0,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          SizedBox(height: 30.0),
+        ],
+      );
     } else {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +152,7 @@ class _EditServiceState extends State<EditService> {
           ),
           TextFormField(
             validator: checkTextFormFieldIsEmpty,
-            controller: onAirTimeTextController,
+            controller: timeAnticipateController,
             keyboardType: TextInputType.number,
             style: TextStyle(
               color: Colors.black87,
@@ -144,46 +173,6 @@ class _EditServiceState extends State<EditService> {
     }
   }
 
-  void popNotice() {
-    StatusAlert.show(
-      context,
-      duration: Duration(seconds: 60),
-      title: 'Đang gửi yêu cầu',
-      configuration: IconConfiguration(
-        icon: Icons.send_to_mobile,
-      ),
-    );
-  }
-
-  void removeNotice() {
-    StatusAlert.hide();
-  }
-
-  void popUp(String title, String content) {
-    Flushbar(
-      flushbarPosition: FlushbarPosition.TOP,
-      flushbarStyle: FlushbarStyle.FLOATING,
-      backgroundColor: Colors.black87,
-      reverseAnimationCurve: Curves.decelerate,
-      forwardAnimationCurve: Curves.elasticOut,
-      isDismissible: false,
-      duration: Duration(seconds: 5),
-      titleText: Text(
-        title,
-        style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18.0,
-            color: Colors.white,
-            fontFamily: "Quicksand"),
-      ),
-      messageText: Text(
-        content,
-        style: TextStyle(
-            fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
-      ),
-    ).show(context);
-  }
-
   String checkTextFormFieldIsEmpty(value) {
     if (value.isEmpty) {
       return 'Bạn không thể bỏ trống trường này!';
@@ -192,16 +181,15 @@ class _EditServiceState extends State<EditService> {
   }
 
   bool _validatePackage() {
-    if (!isMultiDay) {
-      if (!(int.parse(onAirTimeTextController.text.trim()) > 0 &&
-          int.parse(onAirTimeTextController.text.trim()) < 24)) {
-        popUp('Thời gian tác nghiệp',
-            'Thời gian tác nghiệp ít hơn 1 giờ và quá 24 giờ!');
-        return false;
-      }
+    if (!(int.parse(timeAnticipateController.text.trim()) > 0 &&
+        int.parse(timeAnticipateController.text.trim()) < 24)) {
+      popUp(context, 'Thời gian tác nghiệp',
+          'Thời gian tác nghiệp ít hơn 1 giờ và quá 24 giờ!');
+      return false;
     }
     if (servicesOfPackageResult.isEmpty) {
-      popUp('Chi tiết dịch vụ', 'Xin hãy tạo dịch vụ bên trong gói dịch vụ!');
+      popUp(context, 'Chi tiết dịch vụ',
+          'Xin hãy tạo dịch vụ bên trong gói dịch vụ!');
       return false;
     }
     return true;
@@ -212,15 +200,19 @@ class _EditServiceState extends State<EditService> {
     super.initState();
     _scrollController = ScrollController();
     BlocProvider.of<CategoryBloc>(context).add(CategoryEventFetch());
-    if (widget.package.supportMultiDays !=  null) {
+    if (widget.package.supportMultiDays != null) {
       if (widget.package.supportMultiDays) {
         isMultiDay = true;
         _character = SingingCharacter.multi_day;
       }
     }
     nameTextController.text = widget.package.name;
-    priceTextController.text = '${oCcy.format(widget.package.price)}';
-    onAirTimeTextController.text = '6';
+    priceTextController.text = widget.package.price == null
+        ? '0'
+        : '${oCcy.format(widget.package.price)}';
+    timeAnticipateController.text = widget.package.timeAnticipate == null
+        ? '3'
+        : (widget.package.timeAnticipate / 3600).round().toString();
     descriptionTextController.text = widget.package.description;
   }
 
@@ -236,8 +228,10 @@ class _EditServiceState extends State<EditService> {
           name: nameTextController.text,
           description: descriptionTextController.text,
           supportMultiDays: isMultiDay,
-          price: int.parse(
-              priceTextController.text.replaceAll(new RegExp(r'[^\w\s]+'), '')),
+          timeAnticipate: int.parse(timeAnticipateController.text) * 3600,
+          price: int.parse(priceTextController.text
+                  .replaceAll(new RegExp(r'[^\w\s]+'), ''))
+              .round(),
           serviceDtos: tempServices,
           category: selectedCategory);
       BlocProvider.of<PackageBloc>(context)
@@ -249,7 +243,7 @@ class _EditServiceState extends State<EditService> {
   void dispose() {
     nameTextController.dispose();
     priceTextController.dispose();
-    onAirTimeTextController.dispose();
+    timeAnticipateController.dispose();
     descriptionTextController.dispose();
     super.dispose();
   }
@@ -277,17 +271,20 @@ class _EditServiceState extends State<EditService> {
           listener: (context, state) {
             if (state is PackageStateUpdatedSuccess) {
               widget.isUpdated(true);
-              removeNotice();
-              popUp(
-                  'Cập nhật gói dịch vụ', 'Cập nhật gói dịch vụ thành công!!');
+              Navigator.pop(context);
+              _showSuccessAlert();
+              popUp(context, 'Cập nhật gói dịch vụ',
+                  'Cập nhật gói dịch vụ thành công!!');
             }
 
             if (state is PackageStateLoading) {
-              popNotice();
+              _showLoadingAlert();
             }
             if (state is PackageStateFailure) {
-              removeNotice();
-              popUp('Cập nhật gói dịch vụ', 'Cập nhật gói dịch vụ thất bại!!');
+              Navigator.pop(context);
+              _showFailDialog();
+              popUp(context, 'Cập nhật gói dịch vụ',
+                  'Cập nhật gói dịch vụ thất bại!!');
             }
           },
           child: Form(
@@ -543,6 +540,8 @@ class _EditServiceState extends State<EditService> {
                                   onPressed: () {
                                     if (_formKey.currentState.validate()) {
                                       _updatePackage();
+                                    } else {
+                                      _scrollToTop();
                                     }
                                   },
                                   padding: EdgeInsets.all(15.0),
@@ -588,5 +587,96 @@ class _EditServiceState extends State<EditService> {
         ),
       ],
     );
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Cập nhật thành công!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

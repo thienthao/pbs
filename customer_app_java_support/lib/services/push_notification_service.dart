@@ -1,4 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/routing_constants.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
@@ -12,14 +13,15 @@ class PushNotificationService {
   final http.Client httpClient = http.Client();
 
   Future init() async {
-//    _fcm.getToken().then((token) {
-//      print(token);
-//      httpClient.post(
-//        "https://pbs-webapi.herokuapp.com/api/users/168/devicetoken",
-//        headers: {"Content-Type": "application/json; charset=UTF-8"},
-//        body: token,
-//      );
-//    });
+    _fcm.getToken().then((token) {
+      print(token);
+      print(globalCusId);
+      httpClient.post(
+        "https://pbs-webapi.herokuapp.com/api/users/$globalCusId/devicetoken",
+        headers: {"Content-Type": "application/json; charset=UTF-8"},
+        body: token,
+      );
+    });
 
     _fcm.unsubscribeFromTopic("photographer-topic");
     _fcm.subscribeToTopic("topic");
@@ -30,11 +32,11 @@ class PushNotificationService {
         print('onMessage: $msg');
         BotToast.showSimpleNotification(
           title: msg["notification"]["body"],
-          backgroundColor: Colors.red[200],
+          backgroundColor: Colors.grey[100],
           titleStyle: TextStyle(
-              color: Colors.white, fontFamily: "Quicksand", fontSize: 16.0),
-          duration: Duration(seconds: 2),
-          hideCloseButton: true,
+              color: Colors.black, fontFamily: "Quicksand", fontSize: 16.0),
+          duration: Duration(seconds: 10),
+          hideCloseButton: false,
         );
       },
       onLaunch: (Map<String, dynamic> msg) async {

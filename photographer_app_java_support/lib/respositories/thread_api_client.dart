@@ -1,11 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:intl/intl.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/thread_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/widgets/shared/base_api.dart';
 
 class ThreadApiClient {
-  final _baseUrl = 'https://pbs-webapi.herokuapp.com';
+  // final _baseUrl = 'https://pbs-webapi.herokuapp.com';
   final http.Client httpClient;
 
   ThreadApiClient({
@@ -13,8 +17,10 @@ class ThreadApiClient {
   }) : assert(httpClient != null);
 
   Future<List<Thread>> all() async {
-    final url = '$_baseUrl/api/threads';
-    final response = await this.httpClient.get(url);
+    final url = BaseApi.THREAD_URL;
+    final response = await this.httpClient.get(url, headers: {
+      HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+    });
 
     List<Thread> threads = List<Thread>();
 
@@ -37,8 +43,10 @@ class ThreadApiClient {
   }
 
   Future<List<Topic>> allTopic() async {
-    final url = '$_baseUrl/api/thread-topics';
-    final response = await this.httpClient.get(url);
+    final url = BaseApi.THREAD_TOPIC_URL;
+    final response = await this.httpClient.get(url, headers: {
+      HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+    });
 
     if (response.statusCode != 200) {
       throw new Exception("Error fetching topics");
@@ -58,11 +66,14 @@ class ThreadApiClient {
   }
 
   Future<bool> postThread(Thread thread) async {
-    final url = '$_baseUrl/api/threads';
+    final url = BaseApi.THREAD_URL;
+    thread.createdAt = DateFormat('yyyy-MM-ddTHH:mm:ss')
+        .format(DateTime.parse(thread.createdAt));
     final response = await this.httpClient.post(
           url,
           headers: {
             'Content-Type': 'application/json; charset=UTF-8',
+            HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
           },
           body: jsonEncode(thread.toJson()),
         );
@@ -73,11 +84,12 @@ class ThreadApiClient {
   }
 
   Future<bool> postComment(ThreadComment comment) async {
-    final url = '$_baseUrl/api/threads/comments';
+    final url = BaseApi.THREAD_URL + '/comments';
     print(jsonEncode(comment.toJson()));
     final response = await this.httpClient.post(url,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
         },
         body: jsonEncode(comment.toJson()));
     if (response.statusCode != 200) {

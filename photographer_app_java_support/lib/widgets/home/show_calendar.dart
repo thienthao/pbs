@@ -21,29 +21,31 @@ class _CalendarShowState extends State<CalendarShow> {
 
   final Map<DateTime, List> _events = {};
 
+  // ignore: unused_field
   TimeOfDay _time = TimeOfDay.now();
+  // ignore: unused_field
   DateTime _selectedDateTime = DateTime.now();
 
   String getFormatDate(DateTime day) {
-    return DateFormat('yyyy-MM-dd').format(day);
+    return DateFormat('yyyy-MM-dd').format(day.toLocal());
   }
 
   @override
   void initState() {
     super.initState();
     final _selectedDay = DateTime.now();
-    widget.onSelectedDate(getFormatDate(_selectedDay));
+    widget.onSelectedDate(getFormatDate(_selectedDay.toLocal()));
 
     controller = CalendarController();
 
     for (String day in widget.photographerDays.bookedDays) {
       if (day != 'null') {
-        _events[DateTime.parse(day)] = [day];
+        _events[DateTime.parse(day).toLocal()] = [day];
       }
     }
     for (String day in widget.photographerDays.busyDays) {
       if (day != 'null') {
-        _holidays[DateTime.parse(day)] = [day];
+        _holidays[DateTime.parse(day).toLocal()] = [day];
       }
     }
   }

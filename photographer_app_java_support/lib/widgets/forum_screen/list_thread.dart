@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/models/thread_model.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,8 @@ Widget listThread(Thread thread) {
           Row(
             children: [
               Text(
-                thread.createdAt,
+                DateFormat('dd/MM/yyyy hh:mm a')
+                    .format(DateTime.parse(thread.createdAt)),
                 style: TextStyle(fontSize: 11.0, color: Colors.grey),
               ),
               SizedBox(width: 5.0),

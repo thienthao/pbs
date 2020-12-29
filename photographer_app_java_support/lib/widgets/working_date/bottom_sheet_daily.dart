@@ -1,7 +1,10 @@
 import 'package:day_night_time_picker/lib/daynight_timepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
+import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/working_day_blocs/working_days.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/working_date_bloc_model.dart';
 import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 
@@ -29,14 +32,21 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
     ];
     _newListWorkingDays.clear();
     for (var i = 0; i < 7; i++) {
-      _newListWorkingDays.add(
-          WorkingDayBlocModel(day: i + 1, workingDay: listIsWorkingDays[i]));
+      _newListWorkingDays.add(WorkingDayBlocModel(
+          day: i + 1,
+          workingDay: listIsWorkingDays[i],
+          startTime: DateFormat("yyyy-MM-dd'T'").format(DateTime.now()) +
+              _timeStart.format(context) +
+              ':00',
+          endTime: DateFormat("yyyy-MM-dd'T'").format(DateTime.now()) +
+              _timeEnd.format(context) +
+              ':00'));
     }
     setState(() {
       widget.onListWorkingDaysUpdate(_newListWorkingDays);
     });
     BlocProvider.of<WorkingDayBloc>(context).add(WorkingDayEventUpdate(
-        ptgId: 168, listWorkingDays: _newListWorkingDays));
+        ptgId: globalPtgId, listWorkingDays: _newListWorkingDays));
   }
 
   void onTimeStart(TimeOfDay newTime) {
@@ -88,6 +98,14 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
         days[sun] = item.workingDay;
       }
     }
+    final splitStringStartTime = widget.listWorkingDays[0].startTime.split(':');
+    final splitStringEndTime = widget.listWorkingDays[0].endTime.split(':');
+    _timeStart = TimeOfDay(
+        hour: int.parse(splitStringStartTime[0]) - 1,
+        minute: int.parse(splitStringStartTime[1]));
+    _timeEnd = TimeOfDay(
+        hour: int.parse(splitStringEndTime[0]) -1,
+        minute: int.parse(splitStringEndTime[1]));
   }
 
   @override
@@ -279,15 +297,17 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
         BlocListener<WorkingDayBloc, WorkingDayState>(
           listener: (context, state) {
             if (state is WorkingDayStateUpdateSuccess) {
-              removeNotice();
+              Navigator.pop(context);
+              _showSuccessAlert();
               popUp(context, 'Cập nhật các ngày làm việc hằng tuần',
                   'Đã cập nhật thành công các ngày làm việc hằng tuần');
             }
             if (state is WorkingDayStateLoading) {
-              popNotice(context);
+              _showLoadingAlert();
             }
             if (state is WorkingDayStateFailure) {
-              removeNotice();
+              Navigator.pop(context);
+              _showFailDialog();
               popUp(context, 'Cập nhật các ngày làm việc hằng tuần',
                   'Cập nhật thất bại');
             }
@@ -312,5 +332,98 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
         ),
       ],
     );
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Cập nhật thành công!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pop(context);
+                });
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

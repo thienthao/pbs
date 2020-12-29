@@ -2,25 +2,35 @@ import 'dart:convert';
 
 import 'package:customer_app_java_support/blocs/authen_blocs/user_login_model.dart';
 import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
+import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-final _base = "https://pbs-webapi.herokuapp.com";
-final _login = "/api/auth/signin";
-final _loginUrl = _base + _login;
-final _signup = "/api/auth/signup";
-final _signupUrl = _base + _signup;
-
+// final _base = "https://pbs-webapi.herokuapp.com";
+// final _login = "/api/auth/signin";
+// final _loginUrl = _base + _login;
+// final _signup = "/api/auth/signup";
+// final _signupUrl = _base + _signup;
+SharedPreferences prefs;
 Future<Token> getToken(UserLogin userLogin) async {
-  print(_loginUrl);
+  prefs = await SharedPreferences.getInstance();
   final http.Response response = await http.post(
-    _loginUrl,
+    BaseApi.LOGIN_URL,
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: jsonEncode(userLogin.toDatabaseJson()),
   );
   if (response.statusCode == 200) {
-    return Token.fromJson(json.decode(response.body));
+    final data = json.decode(response.body);
+
+    
+    if (data['role'].toString().toUpperCase() == 'ROLE_CUSTOMER') {
+      prefs.setInt('customerId', data['id']);
+      return Token.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Tài khoản này không hợp lệ');
+    }
   } else {
     print(json.decode(response.body).toString());
     final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
@@ -29,9 +39,8 @@ Future<Token> getToken(UserLogin userLogin) async {
 }
 
 Future<bool> register(UserRegister userRegister) async {
-  print(_signupUrl);
   final http.Response response = await http.post(
-    _signupUrl,
+    BaseApi.SIGNUP_URL,
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },

@@ -250,8 +250,10 @@ class _BookingWidgetState extends State<BookingWidget> {
                                                 : DateFormat(
                                                         'dd/MM/yyyy hh:mm a')
                                                     .format(DateTime.parse(booking
-                                                        .listTimeAndLocations[0]
-                                                        .start)),
+                                                            .listTimeAndLocations[
+                                                                0]
+                                                            .start)
+                                                        .toLocal()),
                                             style: TextStyle(
                                               color: Colors.grey,
                                             ),
@@ -259,7 +261,8 @@ class _BookingWidgetState extends State<BookingWidget> {
                                         : Text(
                                             DateFormat('dd/MM/yyyy hh:mm a')
                                                 .format(DateTime.parse(
-                                                    booking.startDate)),
+                                                        booking.startDate)
+                                                    .toLocal()),
                                           ),
                               ),
                             ),

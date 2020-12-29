@@ -21,7 +21,6 @@ class CustomerBlocModel extends Equatable {
       this.email});
 
   @override
-  // TODO: implement props
   List<Object> get props =>
       [id, username, fullname, description, avatar, cover, phone, email];
 

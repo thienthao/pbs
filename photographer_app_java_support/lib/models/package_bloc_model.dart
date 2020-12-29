@@ -8,6 +8,7 @@ class PackageBlocModel extends Equatable {
   final int price;
   final String description;
   final bool supportMultiDays;
+  final int timeAnticipate;
   final List<ServiceBlocModel> serviceDtos;
   final CategoryBlocModel category;
 
@@ -17,6 +18,7 @@ class PackageBlocModel extends Equatable {
       this.description,
       this.price,
       this.supportMultiDays,
+      this.timeAnticipate,
       this.serviceDtos,
       this.category});
 

@@ -21,7 +21,7 @@ Widget listThread(Thread thread) {
           Row(
             children: [
               Text(
-                DateFormat('dd/MM/yyyy HH:mm a')
+                DateFormat('dd/MM/yyyy hh:mm a')
                     .format(DateTime.parse(thread.createdAt)),
                 style: TextStyle(fontSize: 11.0, color: Colors.grey),
               ),

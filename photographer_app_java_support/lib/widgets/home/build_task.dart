@@ -2,27 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/comment_blocs/comments.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/models/ongoing_model.dart';
 import 'package:photographer_app_java_support/respositories/booking_repository.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/respositories/comment_repository.dart';
 import 'package:photographer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 
-class BuildTask extends StatelessWidget {
+class BuildTask extends StatefulWidget {
   final List<BookingBlocModel> blocBookings;
-  BuildTask({
-    this.blocBookings,
-  });
+  final Function(bool) isEdited;
+  BuildTask({this.blocBookings, this.isEdited});
+
+  @override
+  _BuildTaskState createState() => _BuildTaskState();
+}
+
+class _BuildTaskState extends State<BuildTask> {
+  BookingRepository _bookingRepository =
+      BookingRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
   @override
   Widget build(BuildContext context) {
-    BookingRepository _bookingRepository =
-        BookingRepository(httpClient: http.Client());
     return ListView.builder(
       shrinkWrap: true,
       physics: BouncingScrollPhysics(),
-      itemCount: blocBookings.length,
+      itemCount: widget.blocBookings.length,
       itemBuilder: (BuildContext context, int index) {
-        BookingBlocModel booking = blocBookings[index];
+        BookingBlocModel booking = widget.blocBookings[index];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -65,9 +74,13 @@ class BuildTask extends StatelessWidget {
                       ),
                       SizedBox(height: 20.0),
                       Text(
-                        booking.status == 'ONGOING'
-                            ? '${DateFormat("HH:mm").format(DateTime.parse(booking.startDate).toLocal())}'
-                            : '${DateFormat("HH:mm").format(DateTime.parse(booking.endDate).toLocal())}',
+                        booking.editDeadLine == null
+                            ? (booking.startDate == null
+                                ? ''
+                                : '${DateFormat("HH:mm").format(DateTime.parse(booking.startDate).toLocal())}')
+                            : (booking.editDeadLine == null
+                                ? ''
+                                : '${DateFormat("HH:mm").format(DateTime.parse(booking.editDeadLine).toLocal())}'),
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 19.0,
@@ -128,17 +141,27 @@ class BuildTask extends StatelessWidget {
                             pageBuilder: (BuildContext context,
                                 Animation<double> animation,
                                 Animation<double> secAnimation) {
-                              return BlocProvider(
-                                create: (context) => BookingBloc(
-                                    bookingRepository: _bookingRepository),
+                              return MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) => BookingBloc(
+                                        bookingRepository: _bookingRepository),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) => CommentBloc(
+                                        commentRepository: _commentRepository),
+                                  ),
+                                ],
                                 child: BookingDetailScreen(
+                                  onCheckIfEdited: (bool isEdited) {
+                                    widget.isEdited(isEdited);
+                                  },
                                   bookingId: booking.id,
                                 ),
                               );
                             }));
                   },
                   child: Container(
-                    height: 200.0,
                     width: 260.0,
                     decoration: BoxDecoration(
                       boxShadow: [
@@ -166,7 +189,7 @@ class BuildTask extends StatelessWidget {
                               Container(
                                 width: 120.0,
                                 child: Text(
-                                  booking.status == 'ONGOING'
+                                  booking.editDeadLine == null
                                       ? 'Chụp ảnh'
                                       : 'Trả ảnh',
                                   style: TextStyle(
@@ -272,7 +295,7 @@ class BuildTask extends StatelessWidget {
                             ],
                           ),
                           SizedBox(height: 5.0),
-                          booking.status == 'ONGOING'
+                          booking.location != null
                               ? Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -441,6 +464,7 @@ class BuildTask extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   _getTime(Task booking, context) {
     return Container(
       height: 25.0,

@@ -10,6 +10,7 @@ class ChatMethods {
     });
   }
 
+  // ignore: missing_return
   Future<bool> addChatRoom(chatRoom, chatRoomId) {
     FirebaseFirestore.instance
         .collection("chatRoom")
@@ -18,6 +19,7 @@ class ChatMethods {
         .catchError((e) {
       print(e);
     });
+    
   }
 
   getChats(String chatRoomId) async {
@@ -29,6 +31,7 @@ class ChatMethods {
         .snapshots();
   }
 
+  // ignore: missing_return
   Future<void> addMessage(String chatRoomId, chatMessageData) {
     FirebaseFirestore.instance
         .collection("chatRoom")

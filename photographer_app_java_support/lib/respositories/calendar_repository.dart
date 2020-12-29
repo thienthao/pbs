@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/busy_day_bloc_model.dart';
 import 'package:photographer_app_java_support/models/calendar_model.dart';
 import 'package:photographer_app_java_support/models/working_date_bloc_model.dart';
+import 'package:photographer_app_java_support/widgets/shared/base_api.dart';
 
 const baseUrl = 'https://pbs-webapi.herokuapp.com/api/';
 
@@ -17,12 +19,9 @@ class CalendarRepository {
   }) : assert(httpClient != null);
 
   Future<CalendarModel> getBusyDaysOfPhotographer(int id) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'photographers/$id/calendar/', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/calendar/',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final listBusyDays = data['busyDays'] as List;
@@ -45,12 +44,9 @@ class CalendarRepository {
   }
 
   Future<List<WorkingDayBlocModel>> getPhotographerWorkingDay(int id) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'photographers/$id/working-days/', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$id/working-days/',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
 
@@ -88,13 +84,15 @@ class CalendarRepository {
     }
 
     String str = json.encode(resBody);
+    print(str);
 
-    final response =
-        await httpClient.post(baseUrl + 'photographers/$ptgId/working-days',
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: str);
+    final response = await httpClient.post(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/working-days',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+        },
+        body: str);
 
     bool result = false;
     if (response.statusCode == 200) {
@@ -107,12 +105,9 @@ class CalendarRepository {
   }
 
   Future<List<BusyDayBlocModel>> getPhotographerBusyDaysSpecific(int id) async {
-    final response = await this
-        .httpClient
-        .get(baseUrl + 'photographers/$id/busydays/', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0aG9jaHVwaGluaCIsImlhdCI6MTYwMjMwMzQ5NCwiZXhwIjoxNjE3ODU1NDk0fQ.25Oz4rCRj4pdX6GdpeWdwt1YT7fcY6YTKK8SywVyWheVPGpwB6641yHNz7U2JwlgNUtI3FE89Jf8qwWUXjfxRg'
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/busydays/',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
 
@@ -140,17 +135,18 @@ class CalendarRepository {
     resBody["endDate"] = busyDayBlocModel.endDate;
     resBody["title"] = busyDayBlocModel.title;
     resBody["description"] = busyDayBlocModel.description;
-    photographerResbody["id"] = ptgId;
+    photographerResbody["id"] = globalPtgId;
     resBody["photographer"] = photographerResbody;
 
     String str = json.encode(resBody);
     print(str);
-    final response =
-        await httpClient.post(baseUrl + 'photographers/$ptgId/busydays',
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: str);
+    final response = await httpClient.post(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/busydays',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+        },
+        body: str);
 
     bool result = false;
     if (response.statusCode == 200) {
@@ -172,17 +168,18 @@ class CalendarRepository {
     resBody["endDate"] = busyDayBlocModel.endDate;
     resBody["title"] = busyDayBlocModel.title;
     resBody["description"] = busyDayBlocModel.description;
-    photographerResbody["id"] = ptgId;
+    photographerResbody["id"] = globalPtgId;
     resBody["photographer"] = photographerResbody;
 
     String str = json.encode(resBody);
     print(str);
-    final response =
-        await httpClient.post(baseUrl + 'photographers/$ptgId/busydays',
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: str);
+    final response = await httpClient.post(
+        BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/busydays',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+        },
+        body: str);
 
     bool result = false;
     if (response.statusCode == 200) {
@@ -196,13 +193,13 @@ class CalendarRepository {
 
   Future<bool> deleteBusyDay(int ptgId, int busyDayId) async {
     final response = await httpClient.delete(
-      baseUrl + 'photographers/$ptgId/busydays/$busyDayId',
+      BaseApi.PHOTOGRAPHER_URL + '/$globalPtgId/busydays/$busyDayId',
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
 
-    print(baseUrl + 'photographers/$ptgId/busydays/$busyDayId');
+    print(BaseApi.BOOKING_URL + '/$globalPtgId/busydays/$busyDayId');
 
     bool result = false;
     if (response.statusCode == 200) {

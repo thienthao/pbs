@@ -1,3 +1,4 @@
+import 'package:photographer_app_java_support/respositories/album_respository.dart';
 import 'package:photographer_app_java_support/respositories/category_respository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +9,7 @@ import 'category_state.dart';
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CategoryRepository categoryRepository;
   CategoryBloc({
-    @required this.categoryRepository,
+    @required this.categoryRepository, AlbumRepository albumRepository,
   })  : assert(categoryRepository != null),
         super(CategoryStateLoading());
 

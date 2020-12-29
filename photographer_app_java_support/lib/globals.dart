@@ -1,0 +1,2 @@
+int globalPtgId;
+String globalPtgToken;

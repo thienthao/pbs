@@ -173,7 +173,8 @@ class _SearchPtgServiceState extends State<SearchPtgService>
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: NetworkImage(photographer.avatar),
+                          image: NetworkImage(photographer.avatar ??
+                              'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'),
                         ),
                       ),
                     ),
@@ -343,7 +344,7 @@ class _SearchPtgServiceState extends State<SearchPtgService>
           }
 
           if (state is PhotographerStateFailure) {
-            return Center(child: Text('Đã xảy ra lỗi'));
+            return Center(child: Text('Đã xảy ra lỗi trong lúc tìm kiếm'));
           }
 
           return Text('');
