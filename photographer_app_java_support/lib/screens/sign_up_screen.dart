@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -20,6 +21,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController password = TextEditingController();
   TextEditingController repassword = TextEditingController();
 
+  final _formKey = GlobalKey<FormState>();
+
   void signup() {
     String username = this.username.text;
     String email = this.email.text;
@@ -29,6 +32,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
         UserRegister(username: username, email: email, password: password);
     BlocProvider.of<RegisterBloc>(context)
         .add(SignUp(userRegister: userRegister));
+  }
+
+  String checkUsername(String username) {
+    if (username.isEmpty) {
+      return 'Vui lòng nhập tên đăng nhập của bạn';
+    } else if (!(username.length >= 8 && username.length <= 20)) {
+      return 'Tên đăng nhập phải từ 8 - 20 kí tự.';
+    }
+    return null;
+  }
+
+
+  String checkEmail(String email) {
+    RegExp regExp =
+        new RegExp('^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})\$');
+    if (email.isEmpty) {
+      return 'Vui lòng nhập email của bạn';
+    } else if (!regExp.hasMatch(email)) {
+      return 'Email phải theo định dạng, ví dụ: pbs@fpt.edu.vn';
+    }
+    return null;
+  }
+
+  String checkPassword(String password) {
+    RegExp regExp = new RegExp('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d@\$!%*#?&]{8,}\$');
+    if (password.isEmpty) {
+      return 'Vui lòng không để trống trường này.';
+    } else if (!regExp.hasMatch(password)) {
+      return 'Mật khẩu phải có tối thiểu 8 kí tự, 1 chữ cái, 1 số và 1 kí tự đặt biệt.';
+    }
+    return null;
+  }
+
+  String checkRePassword(String repassword) {
+    if (repassword.isEmpty) {
+      return 'Vui lòng không để trống trường này.';
+    } else if (repassword.trim().toUpperCase() !=
+        password.text.trim().toUpperCase()) {
+      return 'Mật khẩu không khớp.';
+    }
+    return null;
   }
 
   @override
@@ -115,294 +159,303 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       physics: AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.symmetric(
                           horizontal: 40.0, vertical: 70.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Đăng kí',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 30.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Tên tài khoản',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(height: 15.0),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                height: 60.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.grey[400],
-                                          offset: Offset(0.0, 2.0),
-                                          blurRadius: 6.0)
-                                    ]),
-                                child: TextField(
-                                  controller: username,
-                                  keyboardType: TextInputType.text,
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                  ),
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(top: 14.0),
-                                    prefixIcon: Icon(
-                                      Icons.person,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    hintText: 'Nhập tên tài khoản',
-                                    hintStyle: TextStyle(
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Email',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(height: 15.0),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                height: 60.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.grey[400],
-                                          offset: Offset(0.0, 2.0),
-                                          blurRadius: 6.0)
-                                    ]),
-                                child: TextField(
-                                  controller: email,
-                                  keyboardType: TextInputType.text,
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                  ),
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(top: 14.0),
-                                    prefixIcon: Icon(
-                                      Icons.email,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    hintText: 'Nhập email',
-                                    hintStyle: TextStyle(
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Mật khẩu',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(height: 15.0),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                height: 60.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.grey[400],
-                                          offset: Offset(0.0, 2.0),
-                                          blurRadius: 6.0)
-                                    ]),
-                                child: TextField(
-                                  controller: password,
-                                  obscureText: true,
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                  ),
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(top: 14.0),
-                                    prefixIcon: Icon(
-                                      Icons.lock,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    hintText: 'Nhập mật khẩu của bạn',
-                                    hintStyle: TextStyle(
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Nhập lại mật khẩu',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(height: 15.0),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                height: 60.0,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.grey[400],
-                                          offset: Offset(0.0, 2.0),
-                                          blurRadius: 6.0)
-                                    ]),
-                                child: TextField(
-                                  controller: repassword,
-                                  obscureText: true,
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                  ),
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(top: 14.0),
-                                    prefixIcon: Icon(
-                                      Icons.lock,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    hintText: 'Nhập lại mật khẩu của bạn',
-                                    hintStyle: TextStyle(
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 35.0),
-                          Container(
-                            padding: EdgeInsets.symmetric(vertical: 25.0),
-                            width: double.infinity,
-                            child: RaisedButton(
-                              elevation: 5.0,
-                              onPressed: () {
-                                signup();
-                              },
-                              padding: EdgeInsets.all(15.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              color: Colors.white,
-                              child: Text(
-                                'ĐĂNG KÍ',
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  letterSpacing: 1.5,
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Đăng kí',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30.0,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                '- HOẶC -',
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              SizedBox(height: 20.0),
-                              Text(
-                                'Đăng kí với',
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 30.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    height: 60.0,
-                                    width: 60.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
+                            SizedBox(height: 30.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Tên tài khoản',
+                                  style: TextStyle(
                                       color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 15.0),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 2),
-                                          blurRadius: 6.0,
-                                        ),
-                                      ],
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/images/facebook.jpg'),
+                                            color: Colors.grey[400],
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ]),
+                                  child: TextFormField(
+                                    validator: checkUsername,
+                                    controller: username,
+                                    keyboardType: TextInputType.text,
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.only(top: 14.0),
+                                      prefixIcon: Icon(
+                                        Icons.person,
+                                        color: Theme.of(context).primaryColor,
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    height: 60.0,
-                                    width: 60.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 2),
-                                          blurRadius: 6.0,
-                                        ),
-                                      ],
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/images/google.jpg'),
+                                      hintText: 'Nhập tên tài khoản',
+                                      hintStyle: TextStyle(
+                                        color: Colors.black87,
                                       ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 20.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Email',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 15.0),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey[400],
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ]),
+                                  child: TextFormField(
+                                    validator: checkEmail,
+                                    controller: email,
+                                    keyboardType: TextInputType.text,
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.only(top: 14.0),
+                                      prefixIcon: Icon(
+                                        Icons.email,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      hintText: 'Nhập email',
+                                      hintStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Mật khẩu',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 15.0),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey[400],
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ]),
+                                  child: TextFormField(
+                                    validator: checkPassword,
+                                    controller: password,
+                                    obscureText: true,
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.only(top: 14.0),
+                                      prefixIcon: Icon(
+                                        Icons.lock,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      hintText: 'Nhập mật khẩu của bạn',
+                                      hintStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Nhập lại mật khẩu',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 15.0),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey[400],
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ]),
+                                  child: TextFormField(
+                                    validator: checkRePassword,
+                                    controller: repassword,
+                                    obscureText: true,
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.only(top: 14.0),
+                                      prefixIcon: Icon(
+                                        Icons.lock,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      hintText: 'Nhập lại mật khẩu của bạn',
+                                      hintStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 35.0),
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 25.0),
+                              width: double.infinity,
+                              child: RaisedButton(
+                                elevation: 5.0,
+                                onPressed: () {
+                                  if(_formKey.currentState.validate()) {
+                                    signup();
+                                  }
+                                },
+                                padding: EdgeInsets.all(15.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                color: Colors.white,
+                                child: Text(
+                                  'ĐĂNG KÍ',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    letterSpacing: 1.5,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Column(
+                            //   children: <Widget>[
+                            //     Text(
+                            //       '- HOẶC -',
+                            //       style: TextStyle(
+                            //         color: Colors.black87,
+                            //         fontWeight: FontWeight.w400,
+                            //       ),
+                            //     ),
+                            //     SizedBox(height: 20.0),
+                            //     Text(
+                            //       'Đăng kí với',
+                            //       style: TextStyle(
+                            //         color: Colors.black87,
+                            //         fontWeight: FontWeight.w600,
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+                            // Padding(
+                            //   padding: EdgeInsets.symmetric(vertical: 30.0),
+                            //   child: Row(
+                            //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            //     children: [
+                            //       GestureDetector(
+                            //         onTap: () {},
+                            //         child: Container(
+                            //           height: 60.0,
+                            //           width: 60.0,
+                            //           decoration: BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color: Colors.white,
+                            //             boxShadow: [
+                            //               BoxShadow(
+                            //                 color: Colors.black26,
+                            //                 offset: Offset(0, 2),
+                            //                 blurRadius: 6.0,
+                            //               ),
+                            //             ],
+                            //             image: DecorationImage(
+                            //               image: AssetImage(
+                            //                   'assets/images/facebook.jpg'),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //       GestureDetector(
+                            //         onTap: () {},
+                            //         child: Container(
+                            //           height: 60.0,
+                            //           width: 60.0,
+                            //           decoration: BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color: Colors.white,
+                            //             boxShadow: [
+                            //               BoxShadow(
+                            //                 color: Colors.black26,
+                            //                 offset: Offset(0, 2),
+                            //                 blurRadius: 6.0,
+                            //               ),
+                            //             ],
+                            //             image: DecorationImage(
+                            //               image: AssetImage(
+                            //                   'assets/images/google.jpg'),
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

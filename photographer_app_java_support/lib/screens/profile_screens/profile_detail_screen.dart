@@ -45,6 +45,18 @@ class _DetailState extends State<Detail> {
     descriptionFocusNode.unfocus();
   }
 
+
+  String checkPhone(String phone) {
+    RegExp regExp = new RegExp('(84|0[3|5|7|8|9])+([0-9]{8,9})',
+        caseSensitive: false, multiLine: false);
+    if (phone.isEmpty) {
+      return 'Vui lòng nhập số điện thoại của bạn';
+    } else if (!regExp.hasMatch(phone)) {
+      return 'Số điện thoại phải theo định dạng của Việt Nam';
+    }
+    return null;
+  }
+
   String _checkEmpty(String value) {
     if (value.isEmpty) {
       return 'Không thể bỏ trống trường này!';
@@ -194,7 +206,7 @@ class _DetailState extends State<Detail> {
                               TextStyle(color: Colors.black87, fontSize: 12.0),
                         ),
                         TextFormField(
-                          validator: _checkEmpty,
+                          validator: checkPhone,
                           focusNode: phoneFocusNode,
                           controller: phoneController,
                           keyboardType: TextInputType.phone,

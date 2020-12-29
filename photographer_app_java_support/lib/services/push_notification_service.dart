@@ -36,34 +36,32 @@ class PushNotificationService {
   }
 
   Future init() async {
-   // _fcm.getToken().then((token) {
-   //   print(token);
-   //   httpClient.post(
-   //     "https://pbs-webapi.herokuapp.com/api/users/globalPtgId/devicetoken",
-   //     headers: {"Content-Type": "application/json; charset=UTF-8"},
-   //     body: token,
-   //   );
-   // });
+    prefs = await SharedPreferences.getInstance();
+    int ptgId = prefs.getInt('photographerId');
+
+    if(ptgId != null) {
+      _fcm.getToken().then((token) {
+        print('$ptgId _ $token');
+        httpClient.post(
+          "http://194.59.165.195:8080/pbs-webapi/api/users/$ptgId/devicetoken",
+          headers: {"Content-Type": "application/json; charset=UTF-8"},
+          body: token,
+        );
+      });
+    }
+
 
   final ref = referenceDatabase.reference();
 
 
-    _fcm.unsubscribeFromTopic("topic");
-    _fcm.subscribeToTopic("photographer-topic");
-    int unreadNoti = 0;
-    prefs = await SharedPreferences.getInstance();
-    if (prefs.getInt('unreadNoti') != null) {
-      unreadNoti = prefs.getInt('unreadNoti');
-    }
+    // _fcm.unsubscribeFromTopic("topic");
+    // _fcm.subscribeToTopic("photographer-topic");
 
     print("configure");
     _fcm.configure(
       onMessage: (Map<String, dynamic> msg) async {
         print("onMessage ne");
         print('onMessage: $msg');
-        unreadNoti = prefs.getInt('unreadNoti');
-        prefs.setInt('unreadNoti', unreadNoti + 1);
-        print('say hi!');
         ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
 
         BotToast.showSimpleNotification(
@@ -79,7 +77,6 @@ class PushNotificationService {
           hideCloseButton: false,
 
         );
-        print('say hello!');
 
         // BotToast.showCustomNotification(toastBuilder: (widget) {
         //   return Container(
@@ -101,14 +98,12 @@ class PushNotificationService {
 
       onLaunch: (Map<String, dynamic> msg) async {
         print('onLaunch: $msg');
-        prefs.setInt('unreadNoti', unreadNoti + 1);
         _seralizeAndNavigate(msg);
         String refName = 'Notification$globalPtgId';
         ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
       },
       onResume: (Map<String, dynamic> msg) async {
         print('onResume: $msg');
-        prefs.setInt('unreadNoti', unreadNoti + 1);
 
         _seralizeAndNavigate(msg);
         String refName = 'Notification$globalPtgId';

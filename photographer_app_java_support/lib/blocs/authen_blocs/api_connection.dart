@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:photographer_app_java_support/blocs/authen_blocs/user_login_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/blocs/register_blocs/user_register_model.dart';
+import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/widgets/shared/base_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,7 +28,9 @@ Future<Token> getToken(UserLogin userLogin) async {
 
     if (data['role'].toString().toUpperCase() == 'ROLE_PHOTOGRAPHER') {
       prefs.setInt('photographerId', data['id']);
+      globalPtgId = data['id'];
       prefs.setString('photographerToken', data['accessToken']);
+      globalPtgToken = data['accessToken'];
       return Token.fromJson(json.decode(response.body));
     } else {
       throw Exception('Tài khoản này không hợp lệ');

@@ -46,7 +46,7 @@ class _NavScreenState extends State<NavScreen> {
 
   PushNotificationService notificationService = PushNotificationService();
 
-  DatabaseReference _notifiRef;
+  DatabaseReference _notificationRef;
 
   // Stream<int> get onCurrentChanged => _currentStreamController.stream;
 
@@ -75,7 +75,7 @@ class _NavScreenState extends State<NavScreen> {
   }
 
   _fromFirebase() {
-    _notifiRef.once().then((DataSnapshot snapshot) {
+    _notificationRef.once().then((DataSnapshot snapshot) {
       var keys = snapshot.value.keys;
       var data = snapshot.value as Map;
       print(data.length);
@@ -90,7 +90,7 @@ class _NavScreenState extends State<NavScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _notifiRef = FirebaseDatabase.instance
+    _notificationRef = FirebaseDatabase.instance
         .reference()
         .child('Notification_$globalPtgId');
     _pageOptions = [
@@ -138,7 +138,7 @@ class _NavScreenState extends State<NavScreen> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
             child: StreamBuilder(
-                stream: _notifiRef.onValue,
+                stream: _notificationRef.onValue,
                 builder: (context, snapshot) {
 
                   return GNav(
@@ -211,7 +211,7 @@ class _NavScreenState extends State<NavScreen> {
                         } else {
                           unreadNoti = 0;
                           _setPreference(0);
-                          _notifiRef.remove();
+                          _notificationRef.remove();
                         }
                       });
                 }),
