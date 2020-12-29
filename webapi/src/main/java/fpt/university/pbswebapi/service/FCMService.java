@@ -28,4 +28,22 @@ public class FCMService {
         }
         return response;
     }
+
+    public String pushNotification(NotiRequest notiRequest, Long bookingId) {
+        Message message = Message.builder()
+                .setToken(notiRequest.getToken())
+                .setNotification(Notification.builder().setTitle(notiRequest.getTitle())
+                        .setBody(notiRequest.getBody()).build())
+                .putData("view", "booking_history")
+                .putData("click_action", "FLUTTER_NOTIFICATION_CLICK")
+                .putData("bookingId", bookingId.toString())
+                .build();
+        String response = null;
+        try {
+            response = FirebaseMessaging.getInstance().send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
 }

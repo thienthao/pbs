@@ -1,7 +1,6 @@
 package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.entity.Booking;
-import fpt.university.pbswebapi.entity.EBookingStatus;
 import fpt.university.pbswebapi.entity.ENotificationType;
 import fpt.university.pbswebapi.entity.Notification;
 import fpt.university.pbswebapi.repository.NotificationRepository;
@@ -67,5 +66,9 @@ public class NotificationService {
         notification.setReceiverId(booking.getPhotographer().getId());
         notification.setIsRead(false);
         notificationRepository.save(notification);
+    }
+
+    public void setIsReadTrue(Long id) {
+        notificationRepository.setIsRead(id);
     }
 }
