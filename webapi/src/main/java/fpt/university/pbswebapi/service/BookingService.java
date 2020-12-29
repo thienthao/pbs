@@ -32,13 +32,15 @@ public class BookingService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final FCMService fcmService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.fcmService = fcmService;
+        this.notificationService = notificationService;
     }
 
     public Booking checkDistance(Booking booking) {
@@ -70,7 +72,10 @@ public class BookingService {
         notiRequest.setTitle("Yêu cầu đặt hẹn mới");
         notiRequest.setBody("Bạn nhận được yêu cầu đặt hẹn từ " + user.getFullname());
         notiRequest.setToken(result.getPhotographer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "photographer-topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        notificationService.requestPhotographerNotification(booking);
+
         return result;
     }
 
@@ -88,7 +93,10 @@ public class BookingService {
         notiRequest.setTitle("Đặt hẹn thành công");
         notiRequest.setBody(user.getFullname() + " đã chấp nhận yêu cầu từ bạn.");
         notiRequest.setToken(result.getPhotographer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        notificationService.createAcceptResultNotification(booking);
+
         return result;
     }
 
@@ -109,7 +117,9 @@ public class BookingService {
         notiRequest.setTitle("Rất tiếc, đặt hẹn thất bại");
         notiRequest.setBody(user.getFullname() + " đã không thể chấp nhận yêu cầu từ bạn.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        notificationService.createRejectResultNotification(booking);
         return result;
     }
 
@@ -132,7 +142,7 @@ public class BookingService {
         notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
         notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
         notiRequest.setToken(result.getPhotographer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "photographer-topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
         return result;
     }
 
@@ -155,7 +165,7 @@ public class BookingService {
         notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
         notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
         return result;
     }
 
@@ -173,7 +183,10 @@ public class BookingService {
         notiRequest.setTitle("Thông báo");
         notiRequest.setBody(savedBooking.getPhotographer().getFullname() + " đang chỉnh sửa ảnh cho bạn.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        notificationService.changeBookingStatusNotification(booking);
+
         return result;
     }
 
@@ -190,7 +203,7 @@ public class BookingService {
         notiRequest.setTitle("Thông báo");
         notiRequest.setBody(savedBooking.getCustomer().getFullname() + " thông báo chưa nhận được hình.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
         return result;
     }
 
@@ -211,7 +224,9 @@ public class BookingService {
         notiRequest.setTitle("Đơn chụp hình thành công");
         notiRequest.setBody("Đơn chụp hình với " + savedBooking.getPhotographer().getFullname() + " đã hoàn tất.");
         notiRequest.setToken(result.getCustomer().getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId(), "topic");
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        notificationService.changeBookingStatusNotification(booking);
 
         return result;
     }

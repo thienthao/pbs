@@ -341,7 +341,7 @@ public class PhotographerService {
             }
 
             //score
-            float score = (float) (rating + price + distance);
+            float score = (float) (rating + price + distance) * 100;
             result.put(photographers.get(i).getId(), score);
         }
         result = sortByValue(result);
