@@ -279,7 +279,7 @@ class BookingRepository {
     }
     resBody["timeLocationDetails"] = timeLocationDetailsResbody;
     String str = json.encode(resBody);
-    print(resBody);
+    print(str);
     final response = await httpClient.post(BaseApi.BOOKING_URL,
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
