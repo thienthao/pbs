@@ -8,7 +8,6 @@ import fpt.university.pbswebapi.helper.weather.*;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CommentRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,10 +67,11 @@ public class BookingService {
         booking.setCreatedAt(new Date());
         Booking result = bookingRepository.save(booking);
         User user = userRepository.findById(booking.getCustomer().getId()).get();
+        User photographer = userRepository.findById(booking.getPhotographer().getId()).get();
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Yêu cầu đặt hẹn mới");
         notiRequest.setBody("Bạn nhận được yêu cầu đặt hẹn từ " + user.getFullname());
-        notiRequest.setToken(result.getPhotographer().getDeviceToken());
+        notiRequest.setToken(photographer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
         notificationService.requestPhotographerNotification(booking);
@@ -88,11 +88,12 @@ public class BookingService {
         savedBooking.setBookingStatus(EBookingStatus.ONGOING);
         Booking result = bookingRepository.save(savedBooking);
         User user = userRepository.findById(booking.getPhotographer().getId()).get();
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Đặt hẹn thành công");
         notiRequest.setBody(user.getFullname() + " đã chấp nhận yêu cầu từ bạn.");
-        notiRequest.setToken(result.getPhotographer().getDeviceToken());
+        notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
         notificationService.createAcceptResultNotification(booking);
@@ -112,11 +113,12 @@ public class BookingService {
         Booking result = bookingRepository.save(savedBooking);
 
         User user = userRepository.findById(booking.getPhotographer().getId()).get();
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Rất tiếc, đặt hẹn thất bại");
         notiRequest.setBody(user.getFullname() + " đã không thể chấp nhận yêu cầu từ bạn.");
-        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
         notificationService.createRejectResultNotification(booking);
@@ -137,11 +139,12 @@ public class BookingService {
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
         User user = userRepository.findById(booking.getCustomer().getId()).get();
+        User photographer = userRepository.findById(booking.getPhotographer().getId()).get();
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
         notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
-        notiRequest.setToken(result.getPhotographer().getDeviceToken());
+        notiRequest.setToken(photographer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
         return result;
     }
@@ -160,11 +163,13 @@ public class BookingService {
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
         User user = userRepository.findById(booking.getPhotographer().getId()).get();
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
+
 
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
         notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
-        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
         return result;
     }
@@ -179,10 +184,12 @@ public class BookingService {
         savedBooking.setBookingStatus(EBookingStatus.EDITING);
         Booking result = bookingRepository.save(savedBooking);
 
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
+
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Thông báo");
         notiRequest.setBody(savedBooking.getPhotographer().getFullname() + " đang chỉnh sửa ảnh cho bạn.");
-        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
         notificationService.changeBookingStatusNotification(booking);
@@ -220,10 +227,12 @@ public class BookingService {
         savedBooking.setRating(booking.getRating());
         Booking result = bookingRepository.save(savedBooking);
 
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
+
         NotiRequest notiRequest = new NotiRequest();
         notiRequest.setTitle("Đơn chụp hình thành công");
         notiRequest.setBody("Đơn chụp hình với " + savedBooking.getPhotographer().getFullname() + " đã hoàn tất.");
-        notiRequest.setToken(result.getCustomer().getDeviceToken());
+        notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
         notificationService.changeBookingStatusNotification(booking);

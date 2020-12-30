@@ -3,7 +3,6 @@ package fpt.university.pbswebapi.controller;
 import fpt.university.pbswebapi.entity.ERole;
 import fpt.university.pbswebapi.entity.Role;
 import fpt.university.pbswebapi.entity.User;
-import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.payload.own.request.LoginRequest;
 import fpt.university.pbswebapi.payload.own.request.SignupRequest;
 import fpt.university.pbswebapi.payload.own.response.JwtResponse;
@@ -22,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -102,6 +99,8 @@ public class AuthController {
         }
 
         user.setRole(role);
+        user.setIsBlocked(false);
+        user.setIsDeleted(false);
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));

@@ -257,4 +257,67 @@ public class AlbumService {
     public int isLike(Long albumId, Long userId) {
         return customRepository.isLike(albumId, userId);
     }
+
+    public Album editAlbum(Album album) {
+        Album saved = albumRepository.findById(album.getId()).get();
+        saved.setName(album.getName());
+        saved.setDescription(album.getDescription());
+        albumRepository.save(saved);
+        return saved;
+    }
+
+    public Album addImage(Long albumId, MultipartFile file) {
+        Album album = albumRepository.findById(albumId).get();
+        Image image = upImage(file, album.getId(), album.getPhotographer().getId());
+        album.getImages().add(image);
+        album = albumRepository.save(album);
+        return album;
+    }
+
+    private Image upImage(MultipartFile file, Long albumId, Long ptgId) {
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+
+        Image image = new Image();
+        image.setCreatedAt(new Date());
+        image = imageRepository.save(image);
+        // format file name and path
+        String path = String.format("%s/%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), ptgId, albumId);
+        String filename = String.format("%s-%s", image.getId(), "image");
+        try {
+            fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+            String fullpath = String.format("%s/%s", path, filename);
+            image.setImageLink("http://194.59.165.195:8080/pbs-webapi/api/albums/" + ptgId + "/" + albumId + "/images/" + image.getId());
+            image = imageRepository.save(image);
+        } catch (Exception e) {
+            imageRepository.delete(image);
+            throw new IllegalStateException(e);
+        }
+        return image;
+    }
+
+    private void removeImageS3(Long imageId, Long ptgId, Long albumId) {
+        String path = String.format("%s/%s/%s",
+                BucketName.PROFILE_IMAGE.getBucketName(),
+                ptgId,
+                albumId);
+        fileStore.remove(path, imageId + "-image");
+    }
+
+    public Album removeImage(Long albumId, Long imageId) {
+        Album album = albumRepository.findById(albumId).get();
+        List<Image> images = album.getImages();
+        for (Image image : images) {
+            if (image.getId() == imageId) {
+                images.remove(image);
+                removeImageS3(image.getId(), album.getPhotographer().getId(), album.getId());
+            }
+        }
+        return albumRepository.save(album);
+    }
 }
+
+// neu image da co trong album va trong database -> ko lam gi het
+// neu image chua co trong database -> add image vao database va add hinh len s3
+// neu da co trong database ma khong co trong album khi up len -> xoa trong album va xoa trong s3

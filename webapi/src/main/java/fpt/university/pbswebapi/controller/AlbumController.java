@@ -13,9 +13,6 @@ import fpt.university.pbswebapi.repository.ImageRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.AlbumService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -157,6 +154,21 @@ public class AlbumController {
         } else {
             throw new BadRequestException("submit fail");
         }
+    }
+
+    @PutMapping("/{albumId}")
+    public ResponseEntity<?> editAlbum(@RequestParam Album album) {
+        return new ResponseEntity<>(albumService.editAlbum(album), HttpStatus.OK);
+    }
+
+    @PutMapping("/{albumId}/images")
+    public ResponseEntity<?> addImage(@PathVariable("albumId") Long albumId, @RequestParam("file") MultipartFile file) {
+        return new ResponseEntity<>(albumService.addImage(albumId, file), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{albumId}/images/{imageId}")
+    public ResponseEntity<?> removeImage(@PathVariable("albumId") Long albumId, @PathVariable("imageId") Long imageId) {
+        return new ResponseEntity<>(albumService.removeImage(albumId, imageId), HttpStatus.OK);
     }
 
     @PostMapping(value = "/{ptgId}/{albumId}/images",
