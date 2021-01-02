@@ -1,10 +1,13 @@
 package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.bucket.BucketName;
+import fpt.university.pbswebapi.dto.AlbumDto;
 import fpt.university.pbswebapi.entity.Album;
+import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.entity.Image;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.AlbumRepository;
+import fpt.university.pbswebapi.repository.CategoryRepository;
 import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +27,17 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
     private final FileStore fileStore;
     private final ImageRepository imageRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
     private CustomRepository customRepository;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository, FileStore fileStore, ImageRepository imageRepository) {
+    public AlbumService(AlbumRepository albumRepository, FileStore fileStore, ImageRepository imageRepository, CategoryRepository categoryRepository) {
         this.albumRepository = albumRepository;
         this.fileStore = fileStore;
         this.imageRepository = imageRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public List<Album> findAllSortByLike() {
@@ -258,10 +263,12 @@ public class AlbumService {
         return customRepository.isLike(albumId, userId);
     }
 
-    public Album editAlbum(Album album) {
-        Album saved = albumRepository.findById(album.getId()).get();
-        saved.setName(album.getName());
-        saved.setDescription(album.getDescription());
+    public Album editAlbum(AlbumDto albumdto) {
+        Album saved = albumRepository.findById(albumdto.getId()).get();
+        saved.setName(albumdto.getName());
+        saved.setDescription(albumdto.getDescription());
+        Category category = categoryRepository.findById(albumdto.getCategoryId()).get();
+        saved.setCategory(category);
         albumRepository.save(saved);
         return saved;
     }
@@ -308,12 +315,14 @@ public class AlbumService {
     public Album removeImage(Long albumId, Long imageId) {
         Album album = albumRepository.findById(albumId).get();
         List<Image> images = album.getImages();
-        for (Image image : images) {
-            if (image.getId() == imageId) {
-                images.remove(image);
-                removeImageS3(image.getId(), album.getPhotographer().getId(), album.getId());
+        for (int i = 0; i < images.size(); i++) {
+            long id = images.get(i).getId();
+            if(id == imageId) {
+                removeImageS3(images.get(i).getId(), album.getPhotographer().getId(), album.getId());
+                images.remove(i);
             }
         }
+        album.setImages(images);
         return albumRepository.save(album);
     }
 }

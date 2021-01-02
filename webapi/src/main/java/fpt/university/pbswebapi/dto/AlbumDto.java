@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AlbumDto {
+    private Long id;
     private String name;
     private String description;
     private Long ptgId;
+    private Long categoryId;
 }

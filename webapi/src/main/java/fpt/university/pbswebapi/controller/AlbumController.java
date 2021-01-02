@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.dto.AlbumDto;
 import fpt.university.pbswebapi.dto.AlbumDto2;
 import fpt.university.pbswebapi.entity.Album;
+import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.entity.Image;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
+import fpt.university.pbswebapi.repository.CategoryRepository;
 import fpt.university.pbswebapi.repository.ImageRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.AlbumService;
@@ -28,6 +30,9 @@ public class AlbumController {
     private AlbumService albumService;
     private UserRepository photographerRepository;
     private ImageRepository imageRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -157,8 +162,8 @@ public class AlbumController {
     }
 
     @PutMapping("/{albumId}")
-    public ResponseEntity<?> editAlbum(@RequestParam Album album) {
-        return new ResponseEntity<>(albumService.editAlbum(album), HttpStatus.OK);
+    public ResponseEntity<?> editAlbum(@RequestBody AlbumDto albumdto) {
+        return new ResponseEntity<>(albumService.editAlbum(albumdto), HttpStatus.OK);
     }
 
     @PutMapping("/{albumId}/images")
@@ -238,6 +243,8 @@ public class AlbumController {
             album.setName(albumDto.getName());
             album.setPhotographer(photographer.get());
             album.setDescription(albumDto.getDescription());
+            Category category = categoryRepository.findById(albumDto.getCategoryId()).get();
+            album.setCategory(category);
             return album;
         } else {
             return null;

@@ -8,13 +8,12 @@ import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.payload.own.response.MessageResponse;
 import fpt.university.pbswebapi.repository.*;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
-import fpt.university.pbswebapi.service.BookingService;
-import fpt.university.pbswebapi.service.ThreadService;
-import fpt.university.pbswebapi.service.UserService;
-import fpt.university.pbswebapi.service.VariableService;
+import fpt.university.pbswebapi.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,24 +43,22 @@ public class AdminController {
     private UserService userService;
     private ThreadService threadService;
     private BookingService bookingService;
-
-    @Autowired
+    private CancellationService cancellationService;
     private VariableService variableService;
-
-    @Autowired
     private BookingRepository bookingRepository;
-
-    @Autowired
     private CommentRepository commentRepository;
 
-    @Autowired
-    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService) {
+    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.categoryRepository = categoryRepository;
         this.returningTypeRepository = returningTypeRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.threadService = threadService;
         this.bookingService = bookingService;
+        this.cancellationService = cancellationService;
+        this.variableService = variableService;
+        this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     @GetMapping("/login")
@@ -267,5 +264,23 @@ public class AdminController {
             model.addAttribute("errorMessage", errorMessage);
             return new RedirectView("/admin/threads");
         }
+    }
+
+    @GetMapping("/cancellations")
+    public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end,Model model) {
+        model.addAttribute("page", cancellationService.getAll(pageable, start, end));
+        return "admin-refactor/cancellation-list";
+    }
+
+    @GetMapping("/cancellations/{id}")
+    public String showCancellationDetail(Model model, @PathVariable Long id) {
+        model.addAttribute("cancellation", cancellationService.findById(id));
+        return "admin-refactor/cancellation-detail";
+    }
+
+    @GetMapping("/userss")
+    public String showUserList(@PageableDefault(size = 10) Pageable pageable,Model model) {
+        model.addAttribute("page", userRepository.findAll(pageable));
+        return "admin-refactor/user-list";
     }
 }

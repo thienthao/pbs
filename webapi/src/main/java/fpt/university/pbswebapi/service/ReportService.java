@@ -5,6 +5,7 @@ import fpt.university.pbswebapi.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,6 +23,7 @@ public class ReportService {
     }
 
     public Report save(Report report) {
+        report.setCreatedAt(new Date());
         return reportRepository.save(report);
     }
 }

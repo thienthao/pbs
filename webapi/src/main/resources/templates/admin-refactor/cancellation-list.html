@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancellation List</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <a th:href="@{/admin/cancellations(page=${page.number},size=2)}">show 2 entry</a>
+        <a th:href="@{/admin/cancellations(page=${page.number},size=5)}">show 5 entry</a>
+        <a th:href="@{/admin/cancellations(page=${page.number},size=10)}">show 10 entry</a>
+        <a>show all</a>
+    </div>
+    <form method="get" th:action="@{/admin/cancellations}" th:onsubmit="return submitForm()">
+        <input type="date" th:name="start" id="start">
+        <input type="date" th:name="end" id="end">
+        <button>Click</button>
+    </form>
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Khach hang</th>
+                    <th>Thoi gian hen</th>
+                    <th>Thoi gian huy</th>
+                    <th>Tho chup</th>
+                    <th>Trang thai</th>
+                    <th>Tac vu</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="obj: ${page.content}">
+                    <td th:text="${obj.id}"></td>
+                    <td th:text="${obj.booking.customer.fullname}"></td>
+                    <td th:text="${#dates.format(obj.booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">08:00 25/12/2020</td>
+                    <td th:text="${#dates.format(obj.createdAt, 'HH:mm dd-MM-yyyy')}">08:00 25/12/2020</td>
+                    <td th:text="${obj.booking.photographer.fullname}"></td>
+                    <td th:text="${obj.booking.bookingStatus}"></td>
+                    <td><a th:href="@{/admin/cancellations/{id}(id = ${obj.id})}">Chi tiet</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination-div">
+    <span th:if="${page.hasPrevious()}">
+        <a th:href="@{/admin/cancellations(page=${page.number-1},size=${page.size})}">Previous</a>
+    </span>
+        <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+            <span th:if="${page.number == i}" class="selected">[[${i}+1]]</span>
+            <span th:unless="${page.number == i}">
+             <a th:href="@{/admin/cancellations(page=${i},size=${page.size})}">[[${i}+1]]</a>
+        </span>
+        </th:block>
+        <span th:if="${page.hasNext()}">
+        <a th:href="@{/admin/cancellations(page=${page.number+1},size=${page.size})}">Next</a>
+    </span>
+    </div>
+
+<script th:inline="javascript">
+
+    function submitForm() {
+        let startStr = document.getElementById("start").value;
+        let endStr = document.getElementById("end").value;
+        let start =new Date(startStr);
+        let end = new Date(endStr);
+        console.log("co vo ma");
+        if(start.getTime() > end.getTime()) {
+            alert("End phai sau Start");
+            return false;
+        }
+        return true;
+    }
+</script>
+</body>
+</html>

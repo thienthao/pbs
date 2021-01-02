@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cancellation Detail</title>
+</head>
+<body>
+    <div>
+        <p th:text="${cancellation.owner.fullname}"></p>
+        <br/>
+        <p th:text="${cancellation.reason}"></p>
+        <br/>
+        <p th:text="${cancellation.booking.customer.fullname}"></p>
+        <br/>
+        <p th:text="${cancellation.booking.photographer.fullname}"></p>
+        <br/>
+        <p th:text="${#dates.format(cancellation.booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">08:00 25/12/2020</p>
+        <br/>
+        <p th:text="${#dates.format(cancellation.createdAt, 'HH:mm dd-MM-yyyy')}">08:00 25/12/2020</p>
+        <br/>
+        <p th:text="${cancellation.booking.bookingStatus}"></p>
+        <button type="button">Chi tiet don hen</button>
+        <br/>
+        <button type="button">Chap thuan</button>
+        <br/>
+        <button type="button">Gui mail canh bao</button>
+    </div>
+</body>
+</html>
