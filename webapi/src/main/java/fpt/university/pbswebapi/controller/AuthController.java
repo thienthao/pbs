@@ -11,6 +11,7 @@ import fpt.university.pbswebapi.repository.RoleRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.security.jwt.JwtUtils;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
+import fpt.university.pbswebapi.service.PhotographerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,9 @@ public class AuthController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    PhotographerService photographerService;
 
     @Autowired
     RoleRepository roleRepository;
@@ -101,7 +105,11 @@ public class AuthController {
         user.setRole(role);
         user.setIsBlocked(false);
         user.setIsDeleted(false);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        if(saved.getRole().getRole() == ERole.ROLE_PHOTOGRAPHER) {
+            photographerService.createWorkingDay(saved.getId());
+        }
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
