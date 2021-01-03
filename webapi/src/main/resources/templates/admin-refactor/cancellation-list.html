@@ -70,7 +70,6 @@
         let endStr = document.getElementById("end").value;
         let start =new Date(startStr);
         let end = new Date(endStr);
-        console.log("co vo ma");
         if(start.getTime() > end.getTime()) {
             alert("End phai sau Start");
             return false;

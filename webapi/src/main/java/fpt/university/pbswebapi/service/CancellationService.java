@@ -1,26 +1,43 @@
 package fpt.university.pbswebapi.service;
 
-import fpt.university.pbswebapi.entity.CancellationRequest;
+import fpt.university.pbswebapi.dto.NotiRequest;
+import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CancellationRepository;
+import fpt.university.pbswebapi.repository.NotificationRepository;
+import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.mail.*;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 @Service
 public class CancellationService {
 
     private final CancellationRepository cancellationRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
+    private final FCMService fcmService;
+    private final BookingRepository bookingRepository;
 
     @Autowired
-    public CancellationService(CancellationRepository cancellationRepository) {
+    public CancellationService(CancellationRepository cancellationRepository, UserRepository userRepository, NotificationRepository notificationRepository, FCMService fcmService, BookingRepository bookingRepository) {
         this.cancellationRepository = cancellationRepository;
+        this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
+        this.fcmService = fcmService;
+        this.bookingRepository = bookingRepository;
     }
 
     private Page<CancellationRequest> getAll(Pageable pageable) {
@@ -49,5 +66,141 @@ public class CancellationService {
 
     public Object findById(Long id) {
         return cancellationRepository.findById(id).get();
+    }
+
+    private void noti(CancellationRequest cancellationRequest) {
+        User customer = userRepository.findById(cancellationRequest.getBooking().getCustomer().getId()).get();
+        User photographer = userRepository.findById(cancellationRequest.getBooking().getPhotographer().getId()).get();
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notiRequest.setBody("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notiRequest.setToken(customer.getDeviceToken());
+        fcmService.pushNotification(notiRequest, cancellationRequest.getBooking().getId());
+
+        NotiRequest notiRequest1 = new NotiRequest();
+        notiRequest1.setTitle("Thông báo, cuộc hẹn với " + customer.getFullname() + " đã bị hủy");
+        notiRequest1.setBody("Thông báo, cuộc hẹn với " + customer.getFullname() + " đã bị hủy");
+        notiRequest1.setToken(photographer.getDeviceToken());
+        fcmService.pushNotification(notiRequest1, cancellationRequest.getBooking().getId());
+
+        Notification notification = new Notification();
+        notification.setReceiverId(customer.getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notification.setContent("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notification.setBookingId(cancellationRequest.getBooking().getId());
+        notificationRepository.save(notification);
+
+        Notification notification1 = new Notification();
+        notification1.setReceiverId(photographer.getId());
+        notification1.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification1.setTitle("Thông báo, cuộc hẹn với " + customer.getFullname() + " đã bị hủy");
+        notification1.setContent("Thông báo, cuộc hẹn với " + customer.getFullname() + " đã bị hủy");
+        notification1.setBookingId(cancellationRequest.getBooking().getId());
+        notificationRepository.save(notification1);
+    }
+
+    public void approve(Long id) {
+        CancellationRequest cancellationRequest = cancellationRepository.findById(id).get();
+        cancellationRequest.setIsSolve(true);
+        cancellationRequest.setApprovedAt(new Date());
+        cancellationRepository.save(cancellationRequest);
+        if(cancellationRequest.getOwner().getRole().getRole() == ERole.ROLE_CUSTOMER) {
+            Booking savedBooking = bookingRepository.findById(cancellationRequest.getBooking().getId()).get();
+            savedBooking.setBookingStatus(EBookingStatus.CANCELLED_CUSTOMER);
+            savedBooking.setUpdatedAt(new Date());
+            bookingRepository.save(savedBooking);
+            noti(cancellationRequest);
+        } else {
+            Booking savedBooking = bookingRepository.findById(cancellationRequest.getBooking().getId()).get();
+            savedBooking.setBookingStatus(EBookingStatus.CANCELLED_PHOTOGRAPHER);
+            savedBooking.setUpdatedAt(new Date());
+            bookingRepository.save(savedBooking);
+            noti(cancellationRequest);
+        }
+    }
+
+    public void warn(Long id) {
+        CancellationRequest cancellationRequest = cancellationRepository.findById(id).get();
+        if(cancellationRequest.getOwner().getRole().getRole() == ERole.ROLE_CUSTOMER) {
+            mailCustomer(cancellationRequest);
+            warnCustomer(cancellationRequest);
+        } else {
+            mailPhotographer(cancellationRequest);
+            warnPhotographer(cancellationRequest);
+        }
+    }
+
+    public void warnCustomer(CancellationRequest cancellationRequest) {
+        Notification notification = new Notification();
+        notification.setReceiverId(cancellationRequest.getBooking().getCustomer().getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle("Cảnh báo! Đơn hủy hẹn của bạn với "+  cancellationRequest.getBooking().getPhotographer().getFullname() + " là không hợp lý, nếu tiếp tục có những hành vi hủy hẹn tương tự có thể dẫn tới tài khoản bị vô hiệu hóa");
+        notification.setContent("Cảnh báo! Đơn hủy hẹn của bạn với "+  cancellationRequest.getBooking().getPhotographer().getFullname() + " là không hợp lý, nếu tiếp tục có những hành vi hủy hẹn tương tự có thể dẫn tới tài khoản bị vô hiệu hóa");
+        notification.setBookingId(cancellationRequest.getBooking().getId());
+        notificationRepository.save(notification);
+    }
+
+    public void warnPhotographer(CancellationRequest cancellationRequest) {
+        Notification notification = new Notification();
+        notification.setReceiverId(cancellationRequest.getBooking().getPhotographer().getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle("Cảnh báo! Đơn hủy hẹn của bạn với "+  cancellationRequest.getBooking().getCustomer().getFullname() + " là không hợp lý, nếu tiếp tục có những hành vi hủy hẹn tương tự có thể dẫn tới tài khoản bị vô hiệu hóa");
+        notification.setContent("Cảnh báo! Đơn hủy hẹn của bạn với "+  cancellationRequest.getBooking().getCustomer().getFullname() + " là không hợp lý, nếu tiếp tục có những hành vi hủy hẹn tương tự có thể dẫn tới tài khoản bị vô hiệu hóa");
+        notification.setBookingId(cancellationRequest.getBooking().getId());
+        notificationRepository.save(notification);
+    }
+
+    private void mailCustomer(CancellationRequest cancellationRequest) {
+        String recipient = cancellationRequest.getBooking().getCustomer().getEmail();
+        String sender = "tranthienthao2710@gmail.com";
+        String host = "localhost";
+
+        Properties properties = System.getProperties();
+        properties.setProperty("mail.smtp.host", host);
+
+        Session session = Session.getDefaultInstance(properties);
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(sender));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+            message.setSubject("PBS - Cảnh báo");
+            message.setText("Cảnh báo! Đơn hủy hẹn của bạn với "+  cancellationRequest.getBooking().getCustomer().getFullname() + " là không hợp lý, nếu tiếp tục có những hành vi hủy hẹn tương tự có thể dẫn tới tài khoản bị vô hiệu hóa");
+
+            Transport.send(message);
+
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void mailPhotographer(CancellationRequest cancellationRequest) {
+        String recipient = cancellationRequest.getBooking().getPhotographer().getEmail();
+        String sender = "tranthienthao2710@gmail.com";
+        String host = "localhost";
+
+        Properties properties = System.getProperties();
+        properties.setProperty("mail.smtp.host", host);
+
+        Session session = Session.getDefaultInstance(properties);
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(sender));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+            message.setSubject("PBS - Cảnh báo");
+            message.setText("Cảnh báo! Đơn hủy hẹn của bạn với "+  cancellationRequest.getBooking().getPhotographer().getFullname() + " là không hợp lý, nếu tiếp tục có những hành vi hủy hẹn tương tự có thể dẫn tới tài khoản bị vô hiệu hóa");
+
+            Transport.send(message);
+
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 }

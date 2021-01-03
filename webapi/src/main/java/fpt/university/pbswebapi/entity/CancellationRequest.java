@@ -29,6 +29,10 @@ public class CancellationRequest {
     @Column(name = "created_at")
     private Date createdAt;
 
+    @Temporal(value = TemporalType.TIMESTAMP)
+    @Column(name = "approved_at")
+    private Date approvedAt;
+
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private User owner;

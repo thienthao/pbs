@@ -5,9 +5,7 @@ import fpt.university.pbswebapi.dto.*;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.*;
 import fpt.university.pbswebapi.helper.weather.*;
-import fpt.university.pbswebapi.repository.BookingRepository;
-import fpt.university.pbswebapi.repository.CommentRepository;
-import fpt.university.pbswebapi.repository.UserRepository;
+import fpt.university.pbswebapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,14 +30,18 @@ public class BookingService {
     private final UserRepository userRepository;
     private final FCMService fcmService;
     private final NotificationService notificationService;
+    private final CancellationRepository cancellationRepository;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.fcmService = fcmService;
         this.notificationService = notificationService;
+        this.cancellationRepository = cancellationRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     public Booking checkDistance(Booking booking) {
@@ -80,11 +82,8 @@ public class BookingService {
     }
 
     public Booking accept(Booking booking) {
-        // if status not hop ly
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 1");
-//        }
+
         savedBooking.setBookingStatus(EBookingStatus.ONGOING);
         Booking result = bookingRepository.save(savedBooking);
         User user = userRepository.findById(booking.getPhotographer().getId()).get();
@@ -102,11 +101,7 @@ public class BookingService {
     }
 
     public Booking reject(Booking booking) {
-        // if status not hop ly
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 1");
-//        }
 
         savedBooking.setBookingStatus(EBookingStatus.REJECTED);
         savedBooking.setRejectedReason(booking.getRejectedReason());
@@ -125,13 +120,72 @@ public class BookingService {
         return result;
     }
 
-    public Booking cancelForCustomer(Booking booking) {
-        // if status not hop ly
-        // check co dung nguoi ko
+    public Booking submitCancellationForCustomer(Booking booking) {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
+
+        savedBooking.setUpdatedAt(new Date());
+        savedBooking.setBookingStatus(EBookingStatus.CANCELLING_CUSTOMER);
+        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
+        Booking result = bookingRepository.save(savedBooking);
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
+
+        CancellationRequest cancellationRequest = new CancellationRequest();
+        cancellationRequest.setBooking(result);
+        cancellationRequest.setOwner(customer);
+        cancellationRequest.setReason(booking.getCustomerCanceledReason());
+        cancellationRepository.save(cancellationRequest);
+
+        User photographer = userRepository.findById(booking.getPhotographer().getId()).get();
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Thông báo, " + customer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notiRequest.setBody("Thông báo, " + customer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notiRequest.setToken(photographer.getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        Notification notification = new Notification();
+        notification.setReceiverId(photographer.getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle(customer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setContent(customer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setBookingId(result.getId());
+        notificationRepository.save(notification);
+        return result;
+    }
+
+    public Booking submitCancellationForPhotographer(Booking booking) {
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
+
+        savedBooking.setUpdatedAt(new Date());
+        savedBooking.setBookingStatus(EBookingStatus.CANCELLING_PHOTOGRAPHER);
+        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
+        Booking result = bookingRepository.save(savedBooking);
+        User photographer = userRepository.findById(booking.getPhotographer().getId()).get();
+
+        CancellationRequest cancellationRequest = new CancellationRequest();
+        cancellationRequest.setBooking(result);
+        cancellationRequest.setOwner(photographer);
+        cancellationRequest.setReason(booking.getPhotographerCanceledReason());
+        cancellationRepository.save(cancellationRequest);
+
+        User customer = userRepository.findById(booking.getCustomer().getId()).get();
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Thông báo, " + photographer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notiRequest.setBody("Thông báo, " + photographer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notiRequest.setToken(customer.getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
+
+        Notification notification = new Notification();
+        notification.setReceiverId(customer.getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle(photographer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setContent(photographer.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setBookingId(result.getId());
+        notificationRepository.save(notification);
+        return result;
+    }
+
+    public Booking cancelForCustomer(Booking booking) {
+        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setUpdatedAt(new Date());
         savedBooking.setBookingStatus(EBookingStatus.CANCELED);

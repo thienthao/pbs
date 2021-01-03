@@ -5,7 +5,10 @@
     <title>Cancellation Detail</title>
 </head>
 <body>
-    <div>
+    <div th:if="${cancellation.isSolve == true}">
+        <p style="color: red;"> Đã solve</p>
+    </div>
+    <form method="post" th:action="@{/admin/cancellations/{id}(id = ${cancellation.id})}">
         <p th:text="${cancellation.owner.fullname}"></p>
         <br/>
         <p th:text="${cancellation.reason}"></p>
@@ -21,9 +24,11 @@
         <p th:text="${cancellation.booking.bookingStatus}"></p>
         <button type="button">Chi tiet don hen</button>
         <br/>
-        <button type="button">Chap thuan</button>
+        <button type="submit">Chap thuan</button>
         <br/>
+    </form>
+    <form method="post" th:action="@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}">
         <button type="button">Gui mail canh bao</button>
-    </div>
+    </form>
 </body>
 </html>

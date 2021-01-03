@@ -2,29 +2,19 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.CancelledBooking;
 import fpt.university.pbswebapi.dto.UserBookingInfo;
-import fpt.university.pbswebapi.dto.UserBookingInfoList;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DtoMapper;
-import fpt.university.pbswebapi.payload.own.response.MessageResponse;
 import fpt.university.pbswebapi.repository.*;
-import fpt.university.pbswebapi.security.services.UserDetailsImpl;
 import fpt.university.pbswebapi.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -282,5 +272,17 @@ public class AdminController {
     public String showUserList(@PageableDefault(size = 10) Pageable pageable,Model model) {
         model.addAttribute("page", userRepository.findAll(pageable));
         return "admin-refactor/user-list";
+    }
+
+    @PostMapping("/cancellations/{id}")
+    public String showCancellationDetail(@PathVariable Long id) {
+        cancellationService.approve(id);
+        return "redirect:/admin/cancellations/" + id;
+    }
+
+    @PostMapping("/cancellations-warn/{id}")
+    public String warnAndShowCancellationDetail(@PathVariable Long id) {
+        cancellationService.warn(id);
+        return "redirect:/admin/cancellations/" + id;
     }
 }
