@@ -9,7 +9,7 @@
         crossorigin="anonymous"></script>
 <script src="https://cdn.tiny.cloud/1/xiscx5rnb5bpcun87f48v884z4q30sska46zscxommfv9e3f/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
-<!--<script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/modal.js}"></script>-->
+<script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/modal.js}"></script>
 <script type="text/javascript"  th:src="@{/admin-refactor/langs/vi.js}"></script>
 
 
@@ -53,7 +53,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
-<script type="text/javascript">
+<script th:inline="javascript">
 
     moment.locale('vi', {
         months: 'Tháng 1_Tháng 2_Tháng 3_Tháng 4_Tháng 5_Tháng 6_Tháng 7_Tháng 8_Tháng 9_Tháng 10_Tháng 11_Tháng 12'.split('_'),
@@ -118,17 +118,24 @@
 
     $(function () {
 
-        var start = moment().subtract(29, 'days');
-        var end = moment();
+        // var start = moment().subtract(29, 'days');
+        // var end = moment();
+        var start = new Date([[${start}]]);
+        var end = new Date([[${end}]]);
 
         function cb(start, end) {
-            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            if(start.toString().localeCompare('Invalid date')) {
+                $('#reportrange span').html(formatDate(start) + ' - ' + formatDate(end));
+            } else {
+                $('#reportrange span').html('Tất cả');
+            }
         }
 
         $('#reportrange').daterangepicker({
-            startDate: start,
-            endDate: end,
+            startDate: isValidDate(start) ? start : moment(),
+            endDate: isValidDate(end) ? end : moment(),
             ranges: {
+                'Tất cả': ['', ''],
                 'Hôm nay': [moment(), moment()],
                 'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
                 '7 Ngày trước': [moment().subtract(6, 'days'), moment()],
@@ -140,6 +147,9 @@
         }, cb);
 
         cb(start, end);
+        if(!isValidDate(start)) {
+            $('#reportrange span').html('Tất cả');
+        }
         $(".applyBtn").text("Chọn");
         $(".cancelBtn").text("Hủy");
         $('*[data-range-key="Custom Range"]').text("Tùy chỉnh");
@@ -149,8 +159,18 @@
     $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
         var startDate = $('#reportrange').data('daterangepicker').startDate._d;
         var endDate = $('#reportrange').data('daterangepicker').endDate._d;
-        window.location=document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}`;
+        if(isValidDate(startDate)) {
+            let filter = [[${filter}]];
+            window.location=document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString();
+        } else {
+            let filter = [[${filter}]];
+            window.location=document.getElementById('cancellation-date').href + `&filter=` + filter.toString();
+        }
     });
+
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
 
     function formatDate(date) {
         var d = new Date(date),
@@ -168,4 +188,7 @@
 
     // $('input[name="dates"]').daterangepicker();
 </script>
+
+<script src="https://kit.fontawesome.com/1d0e1945ca.js" crossorigin="anonymous"></script>
+
 </html>

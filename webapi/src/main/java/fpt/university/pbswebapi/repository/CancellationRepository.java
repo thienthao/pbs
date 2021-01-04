@@ -13,6 +13,17 @@ public interface CancellationRepository extends JpaRepository<CancellationReques
 
     Page<CancellationRequest> findAllByIsSolveFalse(Pageable pageable);
 
+    Page<CancellationRequest> findAllByIsSolveTrue(Pageable pageable);
+
     @Query("from CancellationRequest c where c.isSolve = false and c.createdAt>=:start and c.createdAt<=:end")
+    Page<CancellationRequest> findAllByDateNotSolve(Date start, Date end, Pageable pageable);
+
+    @Query("from CancellationRequest c where c.isSolve = true and c.createdAt>=:start and c.createdAt<=:end")
+    Page<CancellationRequest> findAllByDateSolve(Date start, Date end, Pageable pageable);
+
+    @Query("from CancellationRequest c where c.createdAt>=:start and c.createdAt<=:end")
     Page<CancellationRequest> findAllByDate(Date start, Date end, Pageable pageable);
+
+    @Query("select count(*) from CancellationRequest c where c.booking.id=:bookingId")
+    Long countCancellation(Long bookingId);
 }

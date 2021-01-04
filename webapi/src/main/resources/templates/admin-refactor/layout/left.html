@@ -1,3 +1,5 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
 <div class="app-sidebar sidebar-shadow">
     <div class="app-header__logo">
         <div class="logo-src"></div>
@@ -36,12 +38,64 @@
             <ul class="vertical-nav-menu">
                 <li class="app-sidebar__heading">Quản lý người dùng</li>
                 <li>
-                    <a href="index.html" class="mm-active">
-                        <i class="metismenu-icon fa fa-tasks"></i>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-tasks"></i>
                         Đơn hủy hẹn
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-users"></i>
+                        Danh sách người dùng
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-table"></i>
+                        Danh sách đơn hẹn
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-star-half-alt"></i>
+                        Đánh giá khách hàng
+                    </a>
+                </li>
+                <li class="app-sidebar__heading">Hệ thống</li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-images"></i>
+                        Phương thức giao hàng
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-record-vinyl"></i>
+                        Thể loại
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-sort-numeric-up-alt"></i>
+                        Trọng số
+                    </a>
+                </li>
+                <li class="app-sidebar__heading">Diễn đàn</li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-pen"></i>
+                        Bài viết
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/cancellations}">
+                        <i class="metismenu-icon fas fa-bookmark"></i>
+                        Chủ đề
                     </a>
                 </li>
             </ul>
         </div>
     </div>
 </div>
+
+</html>

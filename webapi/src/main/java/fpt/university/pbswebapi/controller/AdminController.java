@@ -257,10 +257,11 @@ public class AdminController {
     }
 
     @GetMapping("/cancellations")
-    public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end,Model model) {
-        model.addAttribute("page", cancellationService.getAll(pageable, start, end));
+    public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+        model.addAttribute("page", cancellationService.getCancellations(pageable, start, end, filter));
         model.addAttribute("start", start);
         model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
         model.addAttribute("size", pageable.getPageSize());
         return "admin-refactor/cancellation-list";
     }
@@ -287,5 +288,14 @@ public class AdminController {
     public String warnAndShowCancellationDetail(@PathVariable Long id) {
         cancellationService.warn(id);
         return "redirect:/admin/cancellations/" + id;
+    }
+
+    @GetMapping("/bookings/{bookingId}")
+    public String showBookingDetail(@PathVariable Long bookingId, @RequestParam(value = "cancellationId", required = false) Long cancellationId, Model model) {
+        if(cancellationId != null) {
+            model.addAttribute("cancellation", cancellationService.findById(cancellationId));
+        }
+        model.addAttribute("booking", bookingRepository.findById(bookingId).get());
+        return "admin-refactor/booking-detail";
     }
 }

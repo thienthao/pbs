@@ -13,20 +13,30 @@
             <div class="main-card mb-3 card">
                 <div class="card-header">Yêu cầu hủy hẹn
                     <div class="btn-actions-pane-right">
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Lọc</button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${filter} == 'not_solve' ? disabled : ''" tabindex="-1" th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=not_solve)}">Chưa xử lý</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'solve' ? disabled : ''" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=solve)}">Đã xử lý</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'all' ? disabled : ''" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=all)}">Tất cả</a>
+                            </div>
+                        </div>
                         <div id="reportrange" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
                             <i class="fa fa-calendar"></i>&nbsp;
                             <span></span> <i class="fa fa-caret-down"></i>
                         </div>
                         <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
-                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
+                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size},filter=${filter})}">10 kết quả</a>
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                     class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" tabindex="-1" th:href="@{/admin/cancellations(page=${page.number},size=10,start=${start},end=${end})}">10 kết quả</a>
-                                <a class="dropdown-item" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=20,start=${start},end=${end})}">20 kết quả</a>
-                                <a class="dropdown-item" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=50,start=${start},end=${end})}">50 kết quả</a>
-                                <a class="dropdown-item" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=1000,start=${start},end=${end})}">Tất cả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" th:href="@{/admin/cancellations(page=${page.number},size=10,start=${start},end=${end},filter=${filter})}">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=20,start=${start},end=${end},filter=${filter})}">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=50,start=${start},end=${end},filter=${filter})}">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=1000,start=${start},end=${end},filter=${filter})}">Tất cả</a>
                             </div>
                         </div>
                     </div>
@@ -79,11 +89,11 @@
                     </div>
                 </td>
                 <td class="text-center">
-                    <div class="badge badge-warning" th:text="${obj.booking.bookingStatus}">Chờ xác nhận</div>
+                    <div class="badge badge-warning" th:text="${@thymeleafHelper.convertStatus(obj.booking.bookingStatus)}">Chờ xác nhận</div>
                 </td>
                 <td class="text-center">
-                    <button type="button" id="PopoverCustomT-1"
-                            class="btn btn-primary btn-sm">Chi tiết</button>
+                    <a type="button" id="PopoverCustomT-1"
+                            class="btn btn-primary btn-sm" th:href="@{/admin/cancellations/{id}(id=${obj.id})}">Chi tiết</a>
                 </td>
                 </tr>
                 </tbody>
@@ -92,12 +102,12 @@
             <div class="d-block text-center card-footer">
                 <nav aria-label="..." class="d-flex justify-content-center">
                     <ul class="pagination pagination-sm">
-                        <li th:if="${page.hasPrevious()}" class="page-item"><a th:href="@{/admin/cancellations(page=${page.number-1},size=${page.size})}">Previous</a></li>
+                        <li th:if="${page.hasPrevious()}" class="page-item"><a th:href="@{/admin/cancellations(page=${page.number-1},size=${page.size})}">Trước</a></li>
                         <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
                             <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
                             <li th:unless="${page.number == i}" class="page-item"><a th:href="@{/admin/cancellations(page=${i},size=${page.size})}">[[${i}+1]]</a></li>
                         </th:block>
-                        <li th:if="${page.hasNext()}" class="page-item"><a th:href="@{/admin/cancellations(page=${page.number+1},size=${page.size})}">Next</a></li>
+                        <li th:if="${page.hasNext()}" class="page-item"><a th:href="@{/admin/cancellations(page=${page.number+1},size=${page.size})}">Sau</a></li>
                     </ul>
                 </nav>
             </div>
