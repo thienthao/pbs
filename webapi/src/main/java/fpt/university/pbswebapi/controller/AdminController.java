@@ -259,6 +259,9 @@ public class AdminController {
     @GetMapping("/cancellations")
     public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end,Model model) {
         model.addAttribute("page", cancellationService.getAll(pageable, start, end));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("size", pageable.getPageSize());
         return "admin-refactor/cancellation-list";
     }
 

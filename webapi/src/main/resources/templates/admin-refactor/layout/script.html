@@ -1,0 +1,171 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.tiny.cloud/1/xiscx5rnb5bpcun87f48v884z4q30sska46zscxommfv9e3f/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
+<!--<script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/modal.js}"></script>-->
+<script type="text/javascript"  th:src="@{/admin-refactor/langs/vi.js}"></script>
+
+
+<script>
+    tinymce.init({
+        selector: 'textarea#editor',
+        menubar: false,
+        language: 'vi'
+    });
+</script>
+<script>
+    tinymce.init({
+        selector: "textarea#editor",
+        skin: "bootstrap",
+        plugins: "lists, link, image, media",
+        toolbar:
+            "h1 h2 bold italic strikethrough blockquote bullist numlist backcolor | link image media | removeformat help",
+        menubar: false,
+        setup: (editor) => {
+            // Apply the focus effect
+            editor.on("init", () => {
+                editor.getContainer().style.transition =
+                    "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out";
+            });
+            editor.on("focus", () => {
+                (editor.getContainer().style.boxShadow =
+                    "0 0 0 .2rem rgba(0, 123, 255, .25)"),
+                    (editor.getContainer().style.borderColor = "#80bdff");
+            });
+            editor.on("blur", () => {
+                (editor.getContainer().style.boxShadow = ""),
+                    (editor.getContainer().style.borderColor = "");
+            });
+        },
+    });
+</script>
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<!-- <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script> -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<script type="text/javascript">
+
+    moment.locale('vi', {
+        months: 'Tháng 1_Tháng 2_Tháng 3_Tháng 4_Tháng 5_Tháng 6_Tháng 7_Tháng 8_Tháng 9_Tháng 10_Tháng 11_Tháng 12'.split('_'),
+        monthsShort: 'T1._T2._T3_T4._T5_T6_T7._T8_T9._T10._T11._T12.'.split('_'),
+        monthsParseExact: true,
+        weekdays: 'Chủ nhật_Thứ 2_Thứ 3_Thứ 4 _Thứ 5_Thứ 6_Thứ 7'.split('_'),
+        weekdaysShort: 'CN._T2._T3._T4._T5._T6._T7.'.split('_'),
+        weekdaysMin: 'CN_T2_T3_T4_T5_T6_T7'.split('_'),
+        weekdaysParseExact: true,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar: {
+            sameDay: '[Ngày hôm nay] LT',
+            nextDay: '[Ngày mai] LT',
+            nextWeek: 'dddd [Tuần tới] LT',
+            lastDay: '[Hôm qua] LT',
+            lastWeek: 'dddd [Tuần trước] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'Lúc %s',
+            past: '%s',
+            s: 'Vài giây',
+            m: 'Vài phút',
+            mm: '%d phút',
+            h: 'Giờ',
+            hh: '%d giờ',
+            d: 'Ngày',
+            dd: 'Ngày %d',
+            M: 'Tháng',
+            MM: 'Tháng %d',
+            y: 'Năm',
+            yy: 'Năm %d'
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
+        ordinal: function (number) {
+            return number + (number === 1 ? 'er' : 'e');
+        },
+        meridiemParse: /PD|MD/,
+        isPM: function (input) {
+            return input.charAt(0) === 'M';
+        },
+        // In case the meridiem units are not separated around 12, then implement
+        // this function (look at locale/id.js for an example).
+        // meridiemHour : function (hour, meridiem) {
+        //     return /* 0-23 hour, given meridiem token and hour 1-12 */ ;
+        // },
+        meridiem: function (hours, minutes, isLower) {
+            return hours < 12 ? 'PD' : 'MD';
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4  // Used to determine first week of the year.
+        }
+    });
+
+    $(function () {
+
+        var start = moment().subtract(29, 'days');
+        var end = moment();
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        }
+
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+                'Hôm nay': [moment(), moment()],
+                'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '7 Ngày trước': [moment().subtract(6, 'days'), moment()],
+                '30 Ngày trước': [moment().subtract(29, 'days'), moment()],
+                'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+
+        }, cb);
+
+        cb(start, end);
+        $(".applyBtn").text("Chọn");
+        $(".cancelBtn").text("Hủy");
+        $('*[data-range-key="Custom Range"]').text("Tùy chỉnh");
+
+    });
+
+    $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+        var startDate = $('#reportrange').data('daterangepicker').startDate._d;
+        var endDate = $('#reportrange').data('daterangepicker').endDate._d;
+        window.location=document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}`;
+    });
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    // $('input[name="dates"]').daterangepicker();
+</script>
+</html>
