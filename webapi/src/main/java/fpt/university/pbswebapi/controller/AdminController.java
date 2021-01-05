@@ -300,17 +300,18 @@ public class AdminController {
     }
 
     @GetMapping("/v2/users")
-    public String showUserListV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, Model model) {
+    public String showUserListV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, Model model, @RequestParam(name = "role", defaultValue = "all") String role) {
 //        model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
 //        if(start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
 //            model.addAttribute("page", bookingService.findAllByUserIdAndStatus(userId, pageable, status));
 //        } else {
 //            model.addAttribute("page", bookingService.findAllByUserIdAndStatusBetweenDate(userId, pageable, status, start, end));
 //        }
-        model.addAttribute("user", userRepository.findAll(pageable));
+        model.addAttribute("page", userService.getUserList(pageable, start, end, role));
         model.addAttribute("size", pageable.getPageSize());
         model.addAttribute("start", start);
         model.addAttribute("end", end);
+        model.addAttribute("role", role);
         return "admin-refactor/user-list";
     }
 
