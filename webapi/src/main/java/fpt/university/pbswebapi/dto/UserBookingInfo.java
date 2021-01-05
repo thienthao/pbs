@@ -15,5 +15,7 @@ public class UserBookingInfo {
 
     private Integer numOfCancelled;
 
+    private Integer numOfDone;
+
     private Double cancellationRate;
 }

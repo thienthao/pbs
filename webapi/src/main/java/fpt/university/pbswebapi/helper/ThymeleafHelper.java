@@ -31,4 +31,17 @@ public class ThymeleafHelper {
                 return "TRẠNG THÁI";
         }
     }
+
+    public static String convertRole(String status) {
+        switch (status) {
+            case "ROLE_CUSTOMER":
+                return "Khách hàng";
+            case "ROLE_PHOTOGRAPHER":
+                return "Photographer";
+            case "ROLE_ADMIN":
+                return "Quản trị viên";
+            default:
+                return "Khách hàng";
+        }
+    }
 }

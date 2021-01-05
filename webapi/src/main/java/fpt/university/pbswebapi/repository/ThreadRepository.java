@@ -6,8 +6,19 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 public interface ThreadRepository extends JpaRepository<Thread, Long> {
+
+    List<Thread> findAllByIsDeletedFalse();
+
+    @Query("from threads t where t.owner.id=:userId and t.isDeleted=false")
+    List<Thread> findAllByUserId(long userId);
+
+    @Transactional
+    @Modifying
+    @Query("update threads t set t.isDeleted=true where t.id=:threadId")
+    void removeThread(long threadId);
 
     @Transactional
     @Modifying

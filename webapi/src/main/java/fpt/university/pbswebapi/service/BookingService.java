@@ -840,4 +840,33 @@ public class BookingService {
     public List<Booking> getAllPending() {
         return bookingRepository.findAllPendingStatus();
     }
+
+    public UserBookingInfo getBookingInfo(Long userId) {
+        User user = userRepository.findById(userId).get();
+        UserBookingInfo userBookingInfo = new UserBookingInfo();
+        int countUserBookings = bookingRepository.countBookingOfUser(userId);
+        int countUserDoneBookings = bookingRepository.countDoneBookingOfUser(userId);
+        userBookingInfo.setNumOfBooking(countUserBookings);
+        userBookingInfo.setNumOfDone(countUserDoneBookings);
+        if(user.getRole().getRole() == ERole.ROLE_CUSTOMER) {
+            int countCustomerCancelledBookings = bookingRepository.countCancelledBookingOfCustomer(userId);
+            double cancellationRate = 0.0;
+            if(countUserBookings > 0) {
+                cancellationRate = ((double) countCustomerCancelledBookings / (double) countUserBookings) * 100.0;
+                cancellationRate = NumberHelper.format(cancellationRate);
+            }
+            userBookingInfo.setNumOfCancelled(countCustomerCancelledBookings);
+            userBookingInfo.setCancellationRate(cancellationRate);
+        } else {
+            int countPhotographerCancelledBookings = bookingRepository.countCancelledBookingOfPhotographer(userId);
+            double cancellationRate = 0.0;
+            if(countUserBookings > 0) {
+                cancellationRate = ((double) countPhotographerCancelledBookings / (double) countUserBookings) * 100.0;
+                cancellationRate = NumberHelper.format(cancellationRate);
+            }
+            userBookingInfo.setNumOfCancelled(countPhotographerCancelledBookings);
+            userBookingInfo.setCancellationRate(cancellationRate);
+        }
+        return userBookingInfo;
+    }
 }

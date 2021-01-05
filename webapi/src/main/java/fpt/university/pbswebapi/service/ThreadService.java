@@ -25,7 +25,11 @@ public class ThreadService {
     }
 
     public List<Thread> all() {
-        return threadRepository.findAll();
+        return threadRepository.findAllByIsDeletedFalse();
+    }
+
+    public List<Thread> allByUserId(long userId) {
+        return threadRepository.findAllByUserId(userId);
     }
 
     public List<ThreadTopic> allTopics() {
@@ -50,5 +54,21 @@ public class ThreadService {
 
     public void unbanThread(long threadId) {
         threadRepository.unbanThread(threadId);
+    }
+
+    public Thread edit(Thread thread) {
+        Thread savedThread = threadRepository.findById(thread.getId()).get();
+        savedThread.setTitle(thread.getTitle());
+        savedThread.setContent(thread.getContent());
+        if(thread.getTopic() != null) {
+            ThreadTopic threadTopic = topicRepository.findById(thread.getTopic().getId()).get();
+            savedThread.setTopic(threadTopic);
+        }
+        return threadRepository.save(savedThread);
+    }
+
+    public String remove(long id) {
+        threadRepository.removeThread(id);
+        return "OK";
     }
 }

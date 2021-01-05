@@ -49,4 +49,14 @@ public class Thread {
 
     @Column(name = "is_ban")
     private Boolean isBan;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
+    @PrePersist
+    void prepersist() {
+        isBan = false;
+        createdAt = new Date();
+        isDeleted = false;
+    }
 }

@@ -40,6 +40,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.photographer.id = :userId or b.customer.id = :userId")
     List<Booking> findAllByUserId(Long userId);
 
+    @Query("FROM Booking b where b.photographer.id = :userId or b.customer.id = :userId")
+    Page<Booking> findAllByUserId(Long userId, Pageable pageable);
+
     @Query("FROM Booking b where b.photographer.id = :photographerId and b.bookingStatus='ONGOING' " +
             "or b.photographer.id = :photographerId and b.bookingStatus='EDITING'" +
             "order by b.startDate asc")
@@ -133,4 +136,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b " +
             "where b.bookingStatus='PENDING'")
     List<Booking> findAllPendingStatus();
+
+    @Query("select count(b) from Booking b where b.photographer.id=:userId and b.bookingStatus='DONE'" +
+            "or b.customer.id=:userId and b.bookingStatus='DONE'")
+    int countDoneBookingOfUser(long userId);
+
+    @Query("select count(b) from Booking b where b.photographer.id=:userId " +
+            "or b.customer.id=:userId")
+    int countBookingOfUser(long userId);
+
+    @Query("select count(b) from Booking b where b.customer.id=:userId and b.bookingStatus='CANCELLED_CUSTOMER'")
+    int countCancelledBookingOfCustomer(long userId);
+
+    @Query("select count(b) from Booking b where b.photographer.id=:userId and b.bookingStatus='CANCELLED_PHOTOGRAPHER'")
+    int countCancelledBookingOfPhotographer(long userId);
 }

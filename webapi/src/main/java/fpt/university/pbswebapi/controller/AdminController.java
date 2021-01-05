@@ -298,4 +298,12 @@ public class AdminController {
         model.addAttribute("booking", bookingRepository.findById(bookingId).get());
         return "admin-refactor/booking-detail";
     }
+
+    @GetMapping("/v2/users/{userId}")
+    public String showUserListV2(@PageableDefault(size = 10) Pageable pageable, @PathVariable Long userId, Model model) {
+        model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+        model.addAttribute("user", userRepository.findById(userId).get());
+        model.addAttribute("bookings", bookingRepository.findAllByUserId(userId, pageable));
+        return "admin-refactor/user-detail";
+    }
 }
