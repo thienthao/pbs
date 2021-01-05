@@ -869,4 +869,65 @@ public class BookingService {
         }
         return userBookingInfo;
     }
+
+    private Page<Booking> findAllByUserIdBetweenDate(Long userId, Pageable pageable,String start, String end) {
+        String fromStr = start + " 00:00";
+        String toStr = end + " 23:59";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime localFrom = LocalDateTime.parse(fromStr, formatter);
+        LocalDateTime localTo = LocalDateTime.parse(toStr, formatter);
+        Date from = DateHelper.convertToDateViaInstant(localFrom);
+        Date to = DateHelper.convertToDateViaInstant(localTo);
+        return bookingRepository.findAllByUserIdBetweenDate(userId, pageable, from, to);
+    }
+
+    private Page<Booking> findAllCancelledBookingByUserIdBetweenDate(Long userId, Pageable pageable,String start, String end) {
+        String fromStr = start + " 00:00";
+        String toStr = end + " 23:59";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime localFrom = LocalDateTime.parse(fromStr, formatter);
+        LocalDateTime localTo = LocalDateTime.parse(toStr, formatter);
+        Date from = DateHelper.convertToDateViaInstant(localFrom);
+        Date to = DateHelper.convertToDateViaInstant(localTo);
+        return bookingRepository.findAllCancelledBookingByUserIdBetweenDate(userId, pageable, from, to);
+    }
+
+    private Page<Booking> findAllByStatusAndUserIdBetweenDate(Long userId, Pageable pageable, String status, String start, String end) {
+        String fromStr = start + " 00:00";
+        String toStr = end + " 23:59";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime localFrom = LocalDateTime.parse(fromStr, formatter);
+        LocalDateTime localTo = LocalDateTime.parse(toStr, formatter);
+        Date from = DateHelper.convertToDateViaInstant(localFrom);
+        Date to = DateHelper.convertToDateViaInstant(localTo);
+        return bookingRepository.findAllByStatusAndUserIdBetweenDate(userId, pageable, status, from, to);
+    }
+
+    public Page<Booking> findAllByUserIdAndStatusBetweenDate(Long userId, Pageable pageable, String status, String start, String end) {
+        if(status == null) {
+            return findAllByUserIdBetweenDate(userId, pageable, start, end);
+        }
+        switch (status) {
+            case "ALL":
+                return findAllByUserIdBetweenDate(userId, pageable, start, end);
+            case "CANCELLED":
+                return findAllCancelledBookingByUserIdBetweenDate(userId, pageable, start, end);
+            default:
+                return findAllByStatusAndUserIdBetweenDate(userId, pageable, status, start, end);
+        }
+    }
+
+    public Page<Booking> findAllByUserIdAndStatus(Long userId, Pageable pageable, String status) {
+        if(status == null) {
+            return bookingRepository.findAllByUserId(userId, pageable);
+        }
+        switch (status) {
+            case "ALL":
+                return bookingRepository.findAllByUserId(userId, pageable);
+            case "CANCELLED":
+                return bookingRepository.findAllCancelledBookingByUserId(userId, pageable);
+            default:
+                return bookingRepository.findAllByStatusAndUserId(userId, pageable, status);
+        }
+    }
 }

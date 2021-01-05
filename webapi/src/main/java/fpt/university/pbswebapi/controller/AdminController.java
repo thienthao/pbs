@@ -299,11 +299,34 @@ public class AdminController {
         return "admin-refactor/booking-detail";
     }
 
+    @GetMapping("/v2/users")
+    public String showUserListV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, Model model) {
+//        model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+//        if(start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
+//            model.addAttribute("page", bookingService.findAllByUserIdAndStatus(userId, pageable, status));
+//        } else {
+//            model.addAttribute("page", bookingService.findAllByUserIdAndStatusBetweenDate(userId, pageable, status, start, end));
+//        }
+        model.addAttribute("user", userRepository.findAll(pageable));
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        return "admin-refactor/user-list";
+    }
+
     @GetMapping("/v2/users/{userId}")
-    public String showUserListV2(@PageableDefault(size = 10) Pageable pageable, @PathVariable Long userId, Model model) {
+    public String showUserDetailV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @PathVariable Long userId, Model model, @RequestParam(value = "status", defaultValue = "ALL") String status) {
         model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
         model.addAttribute("user", userRepository.findById(userId).get());
-        model.addAttribute("bookings", bookingRepository.findAllByUserId(userId, pageable));
+        if(start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
+            model.addAttribute("page", bookingService.findAllByUserIdAndStatus(userId, pageable, status));
+        } else {
+            model.addAttribute("page", bookingService.findAllByUserIdAndStatusBetweenDate(userId, pageable, status, start, end));
+        }
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("status", status);
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
         return "admin-refactor/user-detail";
     }
 }

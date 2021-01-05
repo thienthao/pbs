@@ -42,21 +42,32 @@
             <div class="main-card mb-3 card">
                 <div class="card-header"><div th:text="'Lịch hẹn của ' + ${user.fullname}">Lịch hẹn của Cao Tiến</div>
                     <div class="btn-actions-pane-right">
-                        <div id="reportrange" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                        <div id="reportrange-userdetail" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
                             <i class="fa fa-calendar"></i>&nbsp;
                             <span></span> <i class="fa fa-caret-down"></i>
                         </div>
                         <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
                         <div role="group" class="btn-group-sm btn-group">
+                            <a style="display: none;" id="userdetail-date" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number},size=${size})}">10 kết quả</a>
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                     class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Trạng thái</button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
-                                <button type="button" tabindex="-1" class="dropdown-item">Tất cả</button>
-                                <button type="button" tabindex="0" class="dropdown-item">Chờ xác nhận</button>
-                                <button type="button" tabindex="0" class="dropdown-item">Sắp diễn ra</button>
-                                <button type="button" tabindex="0" class="dropdown-item">Đã từ chối</button>
-                                <button type="button" tabindex="0" class="dropdown-item">Đã hoàn thành</button>
-                                <button type="button" tabindex="0" class="dropdown-item">Đã hủy</button>
+                                <a th:classappend="${status} == 'ALL' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=${size}, status=ALL)}" tabindex="-1" class="dropdown-item">Tất cả</a>
+                                <a th:classappend="${status} == 'PENDING' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'PENDING' ? page.number : 0},start=${start},end=${end},size=${size}, status=PENDING)}" tabindex="0" class="dropdown-item">Chờ xác nhận</a>
+                                <a th:classappend="${status} == 'ONGOING' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ONGOING' ? page.number : 0},start=${start},end=${end},size=${size}, status=ONGOING)}" tabindex="0" class="dropdown-item">Sắp diễn ra</a>
+                                <a th:classappend="${status} == 'CANCELLED' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'CANCELLED' ? page.number : 0},start=${start},end=${end},size=${size}, status=CANCELLED)}" tabindex="0" class="dropdown-item">Đã hủy</a>
+                                <a th:classappend="${status} == 'DONE' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'DONE' ? page.number : 0},start=${start},end=${end},size=${size}, status=DONE)}" tabindex="0" class="dropdown-item">Đã hoàn thành</a>
+                                <a th:classappend="${status} == 'REJECTED' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'REJECTED' ? page.number : 0},start=${start},end=${end},size=${size}, status=REJECTED)}" tabindex="0" class="dropdown-item">Đã từ chối</a>
+                            </div>
+                        </div>
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=10, status=${status})}">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=20, status=${status})}">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=50, status=${status})}">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=1000, status=${status})}">Tất cả</a>
                             </div>
                         </div>
                     </div>
@@ -74,7 +85,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="booking: ${bookings}">
+                        <tr th:each="booking: ${page.content}">
                             <td class="text-center text-muted" th:text="${booking.id}">#345</td>
                             <td>
                                 <div class="widget-content p-0">
@@ -110,7 +121,7 @@
                 <div class="badge badge-warning" th:text="${booking.bookingStatus}">Chờ xác nhận</div>
             </td>
             <td class="text-center">
-                <a th:href="@{/admin/bookings/{bookingId}(bookingId=${booking.id}}" id="PopoverCustomT-1" class="btn btn-primary btn-sm">Chi tiết</a>
+                <a th:href="@{/admin/bookings/{bookingId}(bookingId=${booking.id})}" id="PopoverCustomT-1" class="btn btn-primary btn-sm">Chi tiết</a>
             </td>
             </tr>
             </tbody>
@@ -119,11 +130,12 @@
         <div class="d-block text-center card-footer">
             <nav aria-label="..." class="d-flex justify-content-center">
                 <ul class="pagination pagination-sm">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">1</a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li th:if="${page.hasPrevious()}" class="page-item"><a th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number-1},size=${page.size},status=${status})}">Trước</a></li>
+                    <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                        <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
+                        <li th:unless="${page.number == i}" class="page-item"><a th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${i},size=${page.size},status=${status})}">[[${i}+1]]</a></li>
+                    </th:block>
+                    <li th:if="${page.hasNext()}" class="page-item"><a th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number+1},size=${page.size},status=${status})}">Sau</a></li>
                 </ul>
             </nav>
         </div>

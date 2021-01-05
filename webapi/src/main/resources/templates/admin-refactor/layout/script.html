@@ -47,11 +47,10 @@
     });
 </script>
 
-
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <!-- <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script> -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
 <script th:inline="javascript">
 
@@ -125,13 +124,13 @@
 
         function cb(start, end) {
             if(start.toString().localeCompare('Invalid date')) {
-                $('#reportrange span').html(formatDate(start) + ' - ' + formatDate(end));
+                $('#reportrange-cancellation span').html(formatDate(start) + ' - ' + formatDate(end));
             } else {
-                $('#reportrange span').html('Tất cả');
+                $('#reportrange-cancellation span').html('Tất cả');
             }
         }
 
-        $('#reportrange').daterangepicker({
+        $('#reportrange-cancellation').daterangepicker({
             startDate: isValidDate(start) ? start : moment(),
             endDate: isValidDate(end) ? end : moment(),
             ranges: {
@@ -148,7 +147,7 @@
 
         cb(start, end);
         if(!isValidDate(start)) {
-            $('#reportrange span').html('Tất cả');
+            $('#reportrange-cancellation span').html('Tất cả');
         }
         $(".applyBtn").text("Chọn");
         $(".cancelBtn").text("Hủy");
@@ -156,9 +155,9 @@
 
     });
 
-    $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
-        var startDate = $('#reportrange').data('daterangepicker').startDate._d;
-        var endDate = $('#reportrange').data('daterangepicker').endDate._d;
+    $('#reportrange-cancellation').on('apply.daterangepicker', function(ev, picker) {
+        var startDate = $('#reportrange-cancellation').data('daterangepicker').startDate._d;
+        var endDate = $('#reportrange-cancellation').data('daterangepicker').endDate._d;
         if(isValidDate(startDate)) {
             let filter = [[${filter}]];
             window.location=document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString();
@@ -189,6 +188,141 @@
     // $('input[name="dates"]').daterangepicker();
 </script>
 
+<script th:inline="javascript">
+
+    moment.locale('vi', {
+        months: 'Tháng 1_Tháng 2_Tháng 3_Tháng 4_Tháng 5_Tháng 6_Tháng 7_Tháng 8_Tháng 9_Tháng 10_Tháng 11_Tháng 12'.split('_'),
+        monthsShort: 'T1._T2._T3_T4._T5_T6_T7._T8_T9._T10._T11._T12.'.split('_'),
+        monthsParseExact: true,
+        weekdays: 'Chủ nhật_Thứ 2_Thứ 3_Thứ 4 _Thứ 5_Thứ 6_Thứ 7'.split('_'),
+        weekdaysShort: 'CN._T2._T3._T4._T5._T6._T7.'.split('_'),
+        weekdaysMin: 'CN_T2_T3_T4_T5_T6_T7'.split('_'),
+        weekdaysParseExact: true,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar: {
+            sameDay: '[Ngày hôm nay] LT',
+            nextDay: '[Ngày mai] LT',
+            nextWeek: 'dddd [Tuần tới] LT',
+            lastDay: '[Hôm qua] LT',
+            lastWeek: 'dddd [Tuần trước] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'Lúc %s',
+            past: '%s',
+            s: 'Vài giây',
+            m: 'Vài phút',
+            mm: '%d phút',
+            h: 'Giờ',
+            hh: '%d giờ',
+            d: 'Ngày',
+            dd: 'Ngày %d',
+            M: 'Tháng',
+            MM: 'Tháng %d',
+            y: 'Năm',
+            yy: 'Năm %d'
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
+        ordinal: function (number) {
+            return number + (number === 1 ? 'er' : 'e');
+        },
+        meridiemParse: /PD|MD/,
+        isPM: function (input) {
+            return input.charAt(0) === 'M';
+        },
+        // In case the meridiem units are not separated around 12, then implement
+        // this function (look at locale/id.js for an example).
+        // meridiemHour : function (hour, meridiem) {
+        //     return /* 0-23 hour, given meridiem token and hour 1-12 */ ;
+        // },
+        meridiem: function (hours, minutes, isLower) {
+            return hours < 12 ? 'PD' : 'MD';
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4  // Used to determine first week of the year.
+        }
+    });
+
+    $(function () {
+
+        // var start = moment().subtract(29, 'days');
+        // var end = moment();
+        var start = new Date([[${start}]]);
+        var end = new Date([[${end}]]);
+
+        function cb(start, end) {
+            if(start.toString().localeCompare('Invalid date')) {
+                $('#reportrange-userdetail span').html(formatDate(start) + ' - ' + formatDate(end));
+            } else {
+                $('#reportrange-userdetail span').html('Tất cả');
+            }
+        }
+
+        $('#reportrange-userdetail').daterangepicker({
+            startDate: isValidDate(start) ? start : moment(),
+            endDate: isValidDate(end) ? end : moment(),
+            ranges: {
+                'Tất cả': ['', ''],
+                'Hôm nay': [moment(), moment()],
+                'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                '7 Ngày trước': [moment().subtract(6, 'days'), moment()],
+                '30 Ngày trước': [moment().subtract(29, 'days'), moment()],
+                'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+
+        }, cb);
+
+        cb(start, end);
+        if(!isValidDate(start)) {
+            $('#reportrange-userdetail span').html('Tất cả');
+        }
+        $(".applyBtn").text("Chọn");
+        $(".cancelBtn").text("Hủy");
+        $('*[data-range-key="Custom Range"]').text("Tùy chỉnh");
+
+    });
+
+    $('#reportrange-userdetail').on('apply.daterangepicker', function(ev, picker) {
+        var startDate = $('#reportrange-userdetail').data('daterangepicker').startDate._d;
+        var endDate = $('#reportrange-userdetail').data('daterangepicker').endDate._d;
+        if(isValidDate(startDate)) {
+            let status = [[${status}]];
+            window.location=document.getElementById('userdetail-date').href + `&page=0&start=${formatDate(startDate)}&end=${formatDate(endDate)}&status=` + status.toString();
+        } else {
+            let status = [[${status}]];
+            window.location=document.getElementById('userdetail-date').href + `&page=0&status=` + status.toString();
+        }
+    });
+
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    // $('input[name="dates"]').daterangepicker();
+</script>
 <script src="https://kit.fontawesome.com/1d0e1945ca.js" crossorigin="anonymous"></script>
 
 </html>

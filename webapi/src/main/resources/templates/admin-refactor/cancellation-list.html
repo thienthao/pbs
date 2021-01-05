@@ -6,8 +6,7 @@
     <meta charset="UTF-8">
     <title>Cancellation List</title>
 </head>
-<body>
-<div layout:fragment="content">
+<body layout:fragment="content">
     <div class="row">
         <div class="col-md-12">
             <div class="main-card mb-3 card">
@@ -23,7 +22,7 @@
                                 <a class="dropdown-item" th:classappend="${filter} == 'all' ? disabled : ''" tabindex="0" th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=all)}">Tất cả</a>
                             </div>
                         </div>
-                        <div id="reportrange" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                        <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
                             <i class="fa fa-calendar"></i>&nbsp;
                             <span></span> <i class="fa fa-caret-down"></i>
                         </div>
@@ -113,7 +112,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 </body>
 </html>

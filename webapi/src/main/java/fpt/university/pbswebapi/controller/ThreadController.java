@@ -48,7 +48,7 @@ public class ThreadController {
     }
 
     @DeleteMapping("/threads/{id}")
-    public ResponseEntity<?> editThread(@PathVariable Long id) {
+    public ResponseEntity<?> removeThread(@PathVariable Long id) {
         return new ResponseEntity<>(threadService.remove(id), HttpStatus.OK);
     }
 

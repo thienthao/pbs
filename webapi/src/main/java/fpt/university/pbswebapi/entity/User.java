@@ -90,6 +90,13 @@ public class User {
         this.email = email;
     }
 
+    @PrePersist
+    void prepersist(){
+        createdAt = new Date();
+        isBlocked = false;
+        isDeleted = false;
+    }
+
     @Override
     public String toString() {
         return "User{" +
