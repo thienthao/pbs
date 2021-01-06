@@ -78,15 +78,15 @@ class _LoadingLineState extends State<LoadingLine> {
     ];
     listInt.shuffle();
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 800),
       transitionBuilder: (Widget child, Animation<double> animation) {
         return FadeTransition(child: child, opacity: animation);
       },
       child: Shimmer.fromColors(
         key: ValueKey<int>(listInt.length),
         period: Duration(milliseconds: 2000),
-        baseColor: Colors.grey[300],
-        highlightColor: Colors.grey[500],
+        baseColor: Colors.grey[200],
+        highlightColor: Colors.grey[100],
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 5, 12, 0),
           child: Wrap(

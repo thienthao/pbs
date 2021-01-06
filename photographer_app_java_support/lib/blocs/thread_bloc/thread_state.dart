@@ -1,6 +1,7 @@
-import 'package:photographer_app_java_support/models/thread_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+
+import 'package:photographer_app_java_support/models/thread_model.dart';
 
 abstract class ThreadState extends Equatable {
   const ThreadState();
@@ -30,8 +31,18 @@ class ThreadPost extends ThreadState {
 
 class ThreadSuccess extends ThreadState {}
 
-class ThreadError extends ThreadState {}
+class ThreadError extends ThreadState {
+  final String error;
+  ThreadError({
+    this.error,
+  });
+}
 
 class CommentSuccess extends ThreadState {}
 
-class CommentFailure extends ThreadState {}
+class CommentFailure extends ThreadState {
+  final String error;
+  CommentFailure({
+    this.error,
+  });
+}

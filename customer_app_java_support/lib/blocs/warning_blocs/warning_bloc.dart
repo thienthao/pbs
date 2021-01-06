@@ -37,8 +37,8 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
           .checkValidWorkingTimeOfPhotographer(time, ptgId);
       yield WarningStateCheckOutOfWorkingTimeSuccess(
           isOutOfWorkingTime: isOutOfWorkingTime);
-    } catch (_) {
-      yield WarningStateFailure();
+    } catch (error) {
+      yield WarningStateFailure(error: error.toString());
     }
   }
 
@@ -49,8 +49,8 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
       final notices =
           await this.warningRepository.getTimeWarning(dateTime, ptgId);
       yield WarningStateGetTimeWarningSuccess(notices: notices);
-    } catch (_) {
-      yield WarningStateFailure();
+    } catch (error) {
+      yield WarningStateFailure(error: error.toString());
     }
   }
 
@@ -60,8 +60,8 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
     try {
       final notices = await this.warningRepository.getLocationWarning(booking);
       yield WarningStateGetLocationWarningSuccess(notices: notices);
-    } catch (_) {
-      yield WarningStateFailure();
+    } catch (error) {
+      yield WarningStateFailure(error: error.toString());
     }
   }
 
@@ -72,8 +72,8 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
       final notice =
           await this.warningRepository.getWeatherWarning(dateTime, latLng);
       yield WarningStateGetWeatherWarningSuccess(notice: notice);
-    } catch (_) {
-      yield WarningStateFailure();
+    } catch (error) {
+      yield WarningStateFailure(error: error.toString());
     }
   }
 }

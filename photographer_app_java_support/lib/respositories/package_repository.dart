@@ -19,13 +19,9 @@ class PackageRepository {
   Future<List<PackageBlocModel>> getPackagesByPhotographerId(int id) async {
     print('packages of photographer');
     final response = await this.httpClient.get(
-          BaseApi.PACKAGE_URL +
-              '/photographer/$globalPtgId/split?page=0&size=10' ,
-              headers: {
-                HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
-              }
-        );
-  
+        BaseApi.PACKAGE_URL + '/photographer/$globalPtgId/split?page=0&size=10',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
+
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['package'] as List;
@@ -48,6 +44,8 @@ class PackageRepository {
       }).toList();
 
       return packages;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -97,6 +95,8 @@ class PackageRepository {
     if (response.statusCode == 200) {
       print('create package success: $result');
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Create a Package');
     }
@@ -149,6 +149,8 @@ class PackageRepository {
     if (response.statusCode == 200) {
       print('create package success: $result');
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Update a Package');
     }
@@ -178,6 +180,8 @@ class PackageRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       print(json.decode(response.body).toString());
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;

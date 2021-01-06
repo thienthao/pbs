@@ -34,4 +34,9 @@ class WarningStateGetLocationWarningSuccess extends WarningState {
       'WarningStateWarningStateGetLocationWarningSuccessGetWarningSuccess { warning: $notices }';
 }
 
-class WarningStateFailure extends WarningState {}
+class WarningStateFailure extends WarningState {
+  final String error;
+  WarningStateFailure({
+    this.error,
+  });
+}

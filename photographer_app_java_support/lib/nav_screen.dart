@@ -1,19 +1,19 @@
-import 'dart:async';
-
 import 'package:badges/badges.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
+import 'package:photographer_app_java_support/blocs/notification_blocs/notifications.dart';
 import 'package:photographer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:photographer_app_java_support/globals.dart';
+import 'package:photographer_app_java_support/locator.dart';
 import 'package:photographer_app_java_support/respositories/calendar_repository.dart';
+import 'package:photographer_app_java_support/respositories/notification_repository.dart';
 import 'package:photographer_app_java_support/respositories/package_repository.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
-import 'package:photographer_app_java_support/screens/forum_screen/forum_screen.dart';
+import 'package:photographer_app_java_support/screens/event_screens/event_screen.dart';
 import 'package:photographer_app_java_support/screens/history_screens/history_screen.dart';
 import 'package:photographer_app_java_support/screens/home_screen.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/profile_screen.dart';
@@ -40,52 +40,23 @@ class _NavScreenState extends State<NavScreen> {
       PhotographerRepository(httpClient: http.Client());
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
+  NotificationRepository _notificationRepository =
+      NotificationRepository(httpClient: http.Client());
   List _pageOptions = [];
-
-  int unreadNoti = 0;
 
   PushNotificationService notificationService = PushNotificationService();
 
   DatabaseReference _notificationRef;
 
-  // Stream<int> get onCurrentChanged => _currentStreamController.stream;
+  final PushNotificationService _pushNotificationService =
+      locator<PushNotificationService>();
 
   SharedPreferences prefs;
-
-  Stream<int> get notificationNow async* {
-    prefs = await SharedPreferences.getInstance();
-    yield prefs.getInt('unreadNoti');
-  }
-
-  _getPreference() async {
-    prefs = await SharedPreferences.getInstance();
-    if (prefs.getInt('unreadNoti') != null) {
-      unreadNoti = prefs.getInt('unreadNoti');
-    }
-    globalPtgId = prefs.getInt('photographerId');
-    print(globalPtgId);
-    globalPtgToken = prefs.getString('photographerToken');
-    setState(() {});
-  }
-
-  _setPreference(int number) async {
-    prefs = await SharedPreferences.getInstance();
-    prefs.setInt('unreadNoti', number);
-    setState(() {});
-  }
-
-  _fromFirebase() {
-    _notificationRef.once().then((DataSnapshot snapshot) {
-      var keys = snapshot.value.keys;
-      var data = snapshot.value as Map;
-      print(data.length);
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _getPreference();
+    _pushNotificationService.init();
   }
 
   @override
@@ -108,10 +79,19 @@ class _NavScreenState extends State<NavScreen> {
         ],
         child: HomeScreen(),
       ),
-      ForumPage(),
       BlocProvider(
         create: (context) => PackageBloc(packageRepository: _packageRepository),
         child: ListService(),
+      ),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => NotificationBloc(
+                notificationRepository: _notificationRepository)
+              ..add(NotificationEventInitial()),
+          ),
+        ],
+        child: EventScreen(),
       ),
       BlocProvider(
         create: (context) => BookingBloc(bookingRepository: _bookingRepository)
@@ -140,7 +120,6 @@ class _NavScreenState extends State<NavScreen> {
             child: StreamBuilder(
                 stream: _notificationRef.onValue,
                 builder: (context, snapshot) {
-
                   return GNav(
                       gap: 2,
                       activeColor: Colors.white,
@@ -156,17 +135,12 @@ class _NavScreenState extends State<NavScreen> {
                           text: '',
                         ),
                         GButton(
-                          icon: Icons.style,
-                          iconColor: Colors.grey[600],
-                          text: '',
-                        ),
-                        GButton(
                           icon: Icons.camera_alt_rounded,
                           iconColor: Colors.grey[600],
                           text: '',
                         ),
                         GButton(
-                          icon: Icons.library_books,
+                          icon: Icons.notifications,
                           iconColor: Colors.grey[600],
                           text: '',
                           leading: _selectedTab == 2
@@ -185,14 +159,19 @@ class _NavScreenState extends State<NavScreen> {
                                                     color: Colors.white),
                                               ),
                                               child: Icon(
-                                                Icons.library_books,
+                                                Icons.notifications,
                                                 color: Colors.grey[600],
                                               ))
                                           : null
                                       : null,
                         ),
                         GButton(
-                          icon: Icons.account_circle_sharp,
+                          icon: Icons.library_books,
+                          iconColor: Colors.grey[600],
+                          text: '',
+                        ),
+                        GButton(
+                          icon: Icons.widgets_rounded,
                           iconColor: Colors.grey[600],
                           text: '',
                         ),
@@ -209,8 +188,6 @@ class _NavScreenState extends State<NavScreen> {
                         // }
                         if (_selectedTab != 3) {
                         } else {
-                          unreadNoti = 0;
-                          _setPreference(0);
                           _notificationRef.remove();
                         }
                       });

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,24 +15,9 @@ class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
   final NavigationService _navigationService = locator<NavigationService>();
   final referenceDatabase = FirebaseDatabase.instance;
-
   final http.Client httpClient = http.Client();
-  bool onUpdate;
   SharedPreferences prefs;
-  Stream<int> get notificationNow async* {
-    prefs = await SharedPreferences.getInstance();
-    yield prefs.getInt('unreadNoti');
-  }
 
-
-  final StreamController<int> _notificationCounter = StreamController<int>();
-  Stream<int> get notificationCounter => _notificationCounter.stream;
-
-  PushNotificationService() {
-    notificationNow.listen((number) {
-      _notificationCounter.add(number);
-    });
-  }
 
   Future init() async {
     prefs = await SharedPreferences.getInstance();
@@ -99,14 +83,12 @@ class PushNotificationService {
       onLaunch: (Map<String, dynamic> msg) async {
         print('onLaunch: $msg');
         _seralizeAndNavigate(msg);
-        String refName = 'Notification$globalPtgId';
         ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
       },
       onResume: (Map<String, dynamic> msg) async {
         print('onResume: $msg');
 
         _seralizeAndNavigate(msg);
-        String refName = 'Notification$globalPtgId';
         ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
 
       },

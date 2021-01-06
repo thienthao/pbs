@@ -29,8 +29,8 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
       final notices =
           await this.warningRepository.getTimeWarning(dateTime, ptgId);
       yield WarningStateGetTimeWarningSuccess(notices: notices);
-    } catch (_) {
-      yield WarningStateFailure();
+    } catch (e) {
+      yield WarningStateFailure(error: e.toString());
     }
   }
 
@@ -40,8 +40,8 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
     try {
       final notices = await this.warningRepository.getLocationWarning(booking);
       yield WarningStateGetLocationWarningSuccess(notices: notices);
-    } catch (_) {
-      yield WarningStateFailure();
+    } catch (e) {
+      yield WarningStateFailure(error: e.toString());
     }
   }
 }

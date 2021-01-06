@@ -43,8 +43,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       final photographers =
           await this.photographerRepository.getListPhotographerByRating();
       yield PhotographerStateSuccess(photographers: photographers);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (e) {
+      yield PhotographerStateFailure(error: e.toString());
     }
   }
 
@@ -54,8 +54,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       await this.photographerRepository.updateAvatar(avatar);
       // yield PhotograherStateOnChangedAvatarSuccess(
       //     isSuccess: changeAvatarSuccess);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (e) {
+      yield PhotographerStateFailure(error: e.toString());
     }
   }
 
@@ -64,8 +64,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
     try {
       await this.photographerRepository.updateCover(cover);
       // yield PhotograherStateOnChangedCoverSuccess(isSuccess: changeAvatarCover);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (e) {
+      yield PhotographerStateFailure(error: e.toString());
     }
   }
 
@@ -77,8 +77,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           await this.photographerRepository.updateProfile(photographer,locations);
       yield PhotographerStateUpdatedProfileSuccess(
           isSuccess: updateProfileSuccess);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (e) {
+      yield PhotographerStateFailure(error: e.toString());
     }
   }
 
@@ -88,8 +88,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           await this.photographerRepository.getPhotographerbyId(id);
       print('it goes here!');
       yield PhotographerIDStateSuccess(photographer: photographer);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (e) {
+      yield PhotographerStateFailure(error: e.toString());
     }
   }
 
@@ -99,8 +99,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           await this.photographerRepository.getPhotographerLocations(id);
       print('it goes here!');
       yield PhotographerStateGetLocationsSuccess(locations: locations);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (e) {
+      yield PhotographerStateFailure(error: e.toString());
     }
   }
 }

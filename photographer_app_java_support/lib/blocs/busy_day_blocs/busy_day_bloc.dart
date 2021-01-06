@@ -34,8 +34,8 @@ class BusyDayBloc extends Bloc<BusyDayEvent, BusyDayState> {
       final listBusyDays =
           await this.calendarRepository.getPhotographerBusyDaysSpecific(ptgId);
       yield BusyDayStateFetchSuccess(listBusyDays: listBusyDays);
-    } catch (_) {
-      yield BusyDayStateFailure();
+    } catch (e) {
+      yield BusyDayStateFailure(error: e.toString());
     }
   }
 
@@ -46,8 +46,8 @@ class BusyDayBloc extends Bloc<BusyDayEvent, BusyDayState> {
       final isCreatedSuccess =
           await this.calendarRepository.addBusyDay(ptgId, busyDayBlocModel);
       yield BusyDayStateCreatedSuccess(isCreatedSuccess: isCreatedSuccess);
-    } catch (_) {
-      yield BusyDayStateFailure();
+    } catch (e) {
+      yield BusyDayStateFailure(error: e.toString());
     }
   }
 
@@ -58,8 +58,8 @@ class BusyDayBloc extends Bloc<BusyDayEvent, BusyDayState> {
       final isUpdatedSuccess =
           await this.calendarRepository.updateBusyDay(ptgId, busyDayBlocModel);
       yield BusyDayStateUpdatedSuccess(isUpdateSuccess: isUpdatedSuccess);
-    } catch (_) {
-      yield BusyDayStateFailure();
+    } catch (e) {
+      yield BusyDayStateFailure(error: e.toString());
     }
   }
 
@@ -70,8 +70,8 @@ class BusyDayBloc extends Bloc<BusyDayEvent, BusyDayState> {
       final isDeletedSuccess =
           await this.calendarRepository.deleteBusyDay(ptgId, busyDayId);
       yield BusyDayStateDeletedSuccess(isDeletedSuccess: isDeletedSuccess);
-    } catch (_) {
-      yield BusyDayStateFailure();
+    } catch (e) {
+      yield BusyDayStateFailure(error: e.toString());
     }
   }
 }

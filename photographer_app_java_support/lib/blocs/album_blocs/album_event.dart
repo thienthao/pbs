@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:photographer_app_java_support/models/album_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +26,23 @@ class AlbumEventCreateAlbum extends AlbumEvent {
 class AlbumEventFetchByPhotographerId extends AlbumEvent {
   final int id;
   AlbumEventFetchByPhotographerId({@required this.id});
+}
+
+class AlbumEventUpdateInfo extends AlbumEvent {
+  final AlbumBlocModel album;
+  AlbumEventUpdateInfo({this.album});
+}
+
+class AlbumEventAddAnImageForAnAlbum extends AlbumEvent {
+  final int albumId;
+  final File image;
+  AlbumEventAddAnImageForAnAlbum({this.albumId, this.image});
+}
+
+class AlbumEventDeleteAnImageOfAnAlbum extends AlbumEvent {
+  final int albumId;
+  final int imageId;
+  AlbumEventDeleteAnImageOfAnAlbum({this.albumId, this.imageId});
 }
 
 class AlbumEventLoadSuccess extends AlbumEvent {

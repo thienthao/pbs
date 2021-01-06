@@ -38,6 +38,8 @@ class CalendarRepository {
       CalendarModel photographerCalendar =
           CalendarModel(busyDays: busyDaysTemp, bookedDays: bookedDaysTemp);
       return photographerCalendar;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Photographer Calendar');
     }
@@ -61,6 +63,8 @@ class CalendarRepository {
       }).toList();
 
       return listWorkingDays;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Photographer Calendar');
     }
@@ -97,6 +101,8 @@ class CalendarRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at Update Photographer info');
     }
@@ -122,6 +128,8 @@ class CalendarRepository {
       }).toList();
 
       return listBusyDays;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Photographer Calendar');
     }
@@ -151,6 +159,8 @@ class CalendarRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at Add Photographer info');
     }
@@ -184,6 +194,8 @@ class CalendarRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at Update Photographer info');
     }
@@ -204,6 +216,8 @@ class CalendarRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at Delete Photographer info');
     }

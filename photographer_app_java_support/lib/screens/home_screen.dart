@@ -4,6 +4,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:photographer_app_java_support/blocs/busy_day_blocs/busy_days.dart';
 import 'package:photographer_app_java_support/blocs/calendar_blocs/calendars.dart';
@@ -295,7 +298,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 )
               : Expanded(
-                  child: BlocBuilder<BookingBloc, BookingState>(
+                  child: BlocConsumer<BookingBloc, BookingState>(
+                    listener: (context, state) {
+                      if (state is BookingStateFailure) {
+                        String error =
+                            state.error.replaceAll('Exception: ', '');
+                        if (error.toUpperCase() == 'UNAUTHORIZED') {
+                          _showUnauthorizedDialog();
+                        }
+                      }
+                    },
                     builder: (context, bookingState) {
                       if (bookingState is BookingStateSuccess) {
                         if (bookingState.bookings.isEmpty) {
@@ -369,5 +381,38 @@ class _HomeScreenState extends State<HomeScreen> {
   changeFilter(String filter) {
     filterType = filter;
     setState(() {});
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

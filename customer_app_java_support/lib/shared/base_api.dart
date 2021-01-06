@@ -14,6 +14,10 @@ class BaseApi {
 
   static const String BOOKING_URL = BASE_URL + 'bookings';
 
+  static const String NOTIFICATION_URL = BASE_URL + 'notifications';
+
+  static const String REPORT_URL = BASE_URL + 'reports';
+
   static const String THREAD_URL = BASE_URL + 'threads';
 
   static const String THREAD_TOPIC_URL = BASE_URL + 'thread-topics';

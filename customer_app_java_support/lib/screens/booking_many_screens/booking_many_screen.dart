@@ -1,5 +1,7 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/blocs/report_blocs/reports.dart';
 import 'package:customer_app_java_support/blocs/warning_blocs/warning_bloc.dart';
 import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
@@ -8,6 +10,8 @@ import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/comment_repository.dart';
+import 'package:customer_app_java_support/respositories/report_repository.dart';
 import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail.dart';
 import 'package:customer_app_java_support/screens/booking_many_screens/booking_many_detail_edit.dart';
@@ -54,6 +58,10 @@ class _BookingManyState extends State<BookingMany> {
       BookingRepository(httpClient: http.Client());
   WarningRepository _warningRepository =
       WarningRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
+  ReportRepository _reportRepository =
+      ReportRepository(httpClient: http.Client());
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   String timeReturnResult = 'Hãy chọn thời gian nhận';
   String endDate = '';
@@ -350,7 +358,6 @@ class _BookingManyState extends State<BookingMany> {
                                     }
                                   }
                                   if (notDuplicate) {
-
                                     listTimeAndLocation.add(model);
                                     if (DateTime.parse(model.start)
                                             .add(Duration(days: 1))
@@ -935,6 +942,12 @@ class _BookingManyState extends State<BookingMany> {
                               BlocProvider(
                                   create: (context) => BookingBloc(
                                       bookingRepository: _bookingRepository)),
+                              BlocProvider(
+                                  create: (context) => CommentBloc(
+                                      commentRepository: _commentRepository)),
+                              BlocProvider(
+                                  create: (context) => ReportBloc(
+                                      reportRepository: _reportRepository)),
                             ],
                             child: BookingDetailScreen(
                               bookingId: bookingId,

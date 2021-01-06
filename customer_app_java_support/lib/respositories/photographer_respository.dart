@@ -43,8 +43,9 @@ class PhotographerRepository {
               : photographer['ratingCount'],
         );
       }).toList();
-      print(photographers);
       return photographers;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -73,6 +74,8 @@ class PhotographerRepository {
         );
       }).toList();
       return photographers;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -101,6 +104,8 @@ class PhotographerRepository {
         );
       }).toList();
       return photographers;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -128,6 +133,8 @@ class PhotographerRepository {
         );
       }).toList();
       return photographers;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -182,6 +189,8 @@ class PhotographerRepository {
           SearchModel(packages: packages, photographers: photographers);
 
       return searchModel;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -205,6 +214,8 @@ class PhotographerRepository {
         albums: [],
       );
       return photographer;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting photographer');
     }

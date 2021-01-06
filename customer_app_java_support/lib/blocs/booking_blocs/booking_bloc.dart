@@ -26,11 +26,13 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     } else if (bookingEvent is BookingEventDetailFetch) {
       yield* _mapBookingDetailLoadedToState(bookingEvent.id);
     } else if (bookingEvent is BookingEventCreate) {
-      yield* _mapBookingCreatedtoState(bookingEvent.booking, bookingEvent.cusId);
+      yield* _mapBookingCreatedtoState(
+          bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventEdit) {
       yield* _mapBookingEditedtoState(bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventCancel) {
-      yield* _mapBookingCanceledtoState(bookingEvent.booking, bookingEvent.cusId);
+      yield* _mapBookingCanceledtoState(
+          bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventGetBookingOnDate) {
       yield* _mapGetBookingByDayToState(bookingEvent.ptgId, bookingEvent.date);
     } else if (bookingEvent is BookingEventFetchInfinite &&
@@ -49,8 +51,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       final bookings =
           await this.bookingRepository.getListBookingByCustomerId(cusId);
       yield BookingStateSuccess(bookings: bookings);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 
@@ -59,8 +61,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final booking = await this.bookingRepository.getBookingDetailById(id);
       yield BookingDetailStateSuccess(booking: booking);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 
@@ -68,10 +70,11 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       BookingBlocModel booking, int cusId) async* {
     yield BookingStateLoading();
     try {
-      final bookingId = await this.bookingRepository.createBooking(booking, cusId);
+      final bookingId =
+          await this.bookingRepository.createBooking(booking, cusId);
       yield BookingStateCreatedSuccess(bookingId: bookingId);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 
@@ -79,21 +82,23 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       BookingBlocModel booking, int cusId) async* {
     yield BookingStateLoading();
     try {
-      final isSuccess = await this.bookingRepository.editBooking(booking, cusId);
+      final isSuccess =
+          await this.bookingRepository.editBooking(booking, cusId);
       yield BookingStateEditedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 
   Stream<BookingState> _mapBookingCanceledtoState(
-      BookingBlocModel booking,  int cusId) async* {
+      BookingBlocModel booking, int cusId) async* {
     yield BookingStateLoading();
     try {
-      final isSuccess = await this.bookingRepository.cancelBooking(booking, cusId);
+      final isSuccess =
+          await this.bookingRepository.cancelBooking(booking, cusId);
       yield BookingStateCanceledSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 
@@ -104,8 +109,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       final listBookings =
           await this.bookingRepository.getBookingsByDate(ptgId, date);
       yield BookingStateGetBookingByDateSuccess(listBookings: listBookings);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 
@@ -135,8 +140,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               hasReachedEnd: false);
         }
       }
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
     }
   }
 }

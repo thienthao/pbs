@@ -61,8 +61,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       final bookings =
           await this.bookingRepository.getListBookingByPhotographerId();
       yield BookingStateSuccess(bookings: bookings);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -71,8 +71,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final bookings = await this.bookingRepository.getListBookingByDate(date);
       yield BookingStateFetchedByDateSuccess(bookings: bookings);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -101,8 +101,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               hasReachedEnd: false);
         }
       }
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -112,8 +112,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       final bookings =
           await this.bookingRepository.getListPendingBookingByPhotographerId();
       yield BookingStateSuccess(bookings: bookings);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -122,8 +122,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final booking = await this.bookingRepository.getBookingDetailById(id);
       yield BookingDetailStateSuccess(booking: booking);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -133,8 +133,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.createBooking(booking);
       yield BookingStateCreatedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -144,8 +144,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.acceptBooking(booking);
       yield BookingStateAcceptedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -155,8 +155,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.moveToEditBooking(booking);
       yield BookingStateMovedToEditSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -166,8 +166,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.moveToDoneBooking(booking);
       yield BookingStateMovedToDoneSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -177,8 +177,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.rejectBooking(booking);
       yield BookingStateRejectedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 
@@ -188,8 +188,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     try {
       final isSuccess = await this.bookingRepository.cancelBooking(booking);
       yield BookingStateCanceledSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield BookingStateFailure();
+    } catch (e) {
+      yield BookingStateFailure(error: e.toString());
     }
   }
 }

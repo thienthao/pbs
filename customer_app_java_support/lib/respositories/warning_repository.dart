@@ -27,6 +27,8 @@ class WarningRepository {
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       return data;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Time Warning');
     }
@@ -45,6 +47,8 @@ class WarningRepository {
         return e.toString();
       }).toList();
       return noticeString;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Time Warning');
     }
@@ -110,6 +114,8 @@ class WarningRepository {
         return notice.toString();
       }).toList();
       return notices;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Create a Booking');
     }
@@ -133,6 +139,8 @@ class WarningRepository {
           windSpeed: data['windSpeed']);
       print(weatherNotice.noti);
       return weatherNotice;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception();
     }

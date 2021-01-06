@@ -153,10 +153,28 @@ class _AlbumListState extends State<AlbumList> {
                                           pageBuilder: (BuildContext context,
                                               Animation<double> animation,
                                               Animation<double> secAnimation) {
-                                            return UpdateAlbum(
-                                              album: albumState.albums[index],
+                                            return MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      AlbumBloc(
+                                                          albumRepository:
+                                                              _albumRepository),
+                                                ),
+                                                BlocProvider(
+                                                  create: (context) => CategoryBloc(
+                                                      categoryRepository:
+                                                          _categoryRepository)
+                                                    ..add(CategoryEventFetch()),
+                                                )
+                                              ],
+                                              child: UpdateAlbum(
+                                                album: albumState.albums[index],
+                                              ),
                                             );
-                                          })),
+                                          })).then((value) {
+                                    _loadAlbums();
+                                  }),
                                   child: Hero(
                                     tag: albumState.albums[index],
                                     child: Container(

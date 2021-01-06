@@ -1,3 +1,5 @@
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/package_blocs/packages.dart';
@@ -157,6 +159,10 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
       return false;
     }
     return true;
+  }
+
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
   }
 
   _editBooking() async {
@@ -814,6 +820,14 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                       if (state is PackageStateLoading) {
                         return CircularProgressIndicator();
                       }
+
+                      if (state is PackageStateFailure) {
+                        String error =
+                            state.error.replaceAll('Exception: ', '');
+                        if (error.toUpperCase() == 'UNAUTHORIZED') {
+                          _showUnauthorizedDialog();
+                        }
+                      }
                     },
                     child: Text(''),
                   ),
@@ -843,7 +857,13 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
 
                       if (state is WarningStateFailure) {
                         Navigator.pop(context);
-                        _showBookingFailDialog();
+                        String error =
+                            state.error.replaceAll('Exception: ', '');
+                        if (error.toUpperCase() == 'UNAUTHORIZED') {
+                          _showUnauthorizedDialog();
+                        } else {
+                          _showBookingFailDialog();
+                        }
                       }
                     },
                     child: RaisedButton(
@@ -879,8 +899,14 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
 
                 if (bookingState is BookingStateFailure) {
                   Navigator.pop(context);
-                  _showBookingFailDialog();
-                  popUp(context, 'Cập nhật cuộc hẹn', 'Cập nhật thất bại!');
+                  String error =
+                      bookingState.error.replaceAll('Exception: ', '');
+                  if (error.toUpperCase() == 'UNAUTHORIZED') {
+                    _showUnauthorizedDialog();
+                  } else {
+                    _showBookingFailDialog();
+                    popUp(context, 'Cập nhật cuộc hẹn', 'Cập nhật thất bại!');
+                  }
                 }
               },
             ),
@@ -1012,6 +1038,38 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
               onlyOkButton: true,
               onOkButtonPressed: () {
                 Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(

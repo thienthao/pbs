@@ -37,6 +37,8 @@ class PhotographerRepository {
         );
       }).toList();
       return photographers;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -65,6 +67,8 @@ class PhotographerRepository {
         albums: [],
       );
       return photographer;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting photographer');
     }
@@ -103,6 +107,8 @@ class PhotographerRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at Update Photographer info');
     }
@@ -128,6 +134,8 @@ class PhotographerRepository {
     if (response.statusCode == 200) {
       print("Avatar Uploaded!");
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at update avatar!');
     }
@@ -153,6 +161,8 @@ class PhotographerRepository {
     if (response.statusCode == 200) {
       print("Cover Uploaded!");
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at create album!');
     }
@@ -173,6 +183,8 @@ class PhotographerRepository {
             longitude: location['longitude']);
       }).toList();
       return locations;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception();
     }

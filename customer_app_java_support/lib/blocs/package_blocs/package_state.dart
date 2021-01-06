@@ -1,6 +1,7 @@
-import 'package:customer_app_java_support/models/package_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:customer_app_java_support/models/package_bloc_model.dart';
 
 abstract class PackageState extends Equatable {
   const PackageState();
@@ -22,4 +23,9 @@ class PackageStateSuccess extends PackageState {
   String toString() => 'PackageStateSuccess { Package: $packages }';
 }
 
-class PackageStateFailure extends PackageState {}
+class PackageStateFailure extends PackageState {
+  final String error;
+  PackageStateFailure({
+    this.error,
+  });
+}

@@ -27,8 +27,8 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
       final packages =
           await this.packageRepository.getPackagesByPhotographerId(id);
       yield PackageStateSuccess(packages: packages);
-    } catch (_) {
-      yield PackageStateFailure();
+    } catch (error) {
+      yield PackageStateFailure(error: error.toString());
     }
   }
 }

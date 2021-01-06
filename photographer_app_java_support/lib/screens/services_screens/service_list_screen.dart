@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authen_export.dart';
 import 'package:photographer_app_java_support/blocs/category_blocs/category_bloc.dart';
 import 'package:photographer_app_java_support/blocs/package_blocs/packages.dart';
 import 'package:photographer_app_java_support/globals.dart';
@@ -159,6 +160,13 @@ class _ListServiceState extends State<ListService> {
                 '${packageState.error.replaceAll('Exception: ', '')}',
                 'Gói dịch vụ hiện đang được sử dụng. Bạn không thể xóa!!!!');
             _loadPackages();
+          }
+          if (packageState is PackageStateFailure) {
+            String error = packageState.error.replaceAll('Exception: ', '');
+
+            if (error.toUpperCase() == 'UNAUTHORIZED') {
+              _showUnauthorizedDialog();
+            }
           }
         },
         builder: (context, packageState) {
@@ -502,6 +510,39 @@ class _ListServiceState extends State<ListService> {
               onlyOkButton: true,
               onOkButtonPressed: () {
                 Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
@@ -28,6 +30,7 @@ import 'package:customer_app_java_support/widgets/ptg_screen/service_show_ptg.da
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:http/http.dart' as http;
 
 class CustomerPhotographerDetail extends StatefulWidget {
@@ -61,6 +64,10 @@ class _CustomerPhotographerDetailState
     SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlaneIndicator(
@@ -71,7 +78,18 @@ class _CustomerPhotographerDetailState
             physics: BouncingScrollPhysics(),
             children: <Widget>[
               Center(
-                child: BlocBuilder<PhotographerBloc, PhotographerState>(
+                child: BlocConsumer<PhotographerBloc, PhotographerState>(
+                  listener: (context, photographerState) {
+                    if (photographerState is PhotographerStateFailure) {
+                      print(photographerState.error);
+                      String error =
+                          photographerState.error.replaceAll('Exception: ', '');
+
+                      if (error.toUpperCase() == 'UNAUTHORIZED') {
+                        _showUnauthorizedDialog();
+                      }
+                    }
+                  },
                   builder: (context, photographerState) {
                     if (photographerState is PhotographerIDStateSuccess) {
                       _photographer = photographerState.photographer;
@@ -636,5 +654,37 @@ class _CustomerPhotographerDetailState
         },
       );
     }
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

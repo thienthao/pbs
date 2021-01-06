@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
   final ThreadRepository repository;
-
   ThreadBloc({@required this.repository}) : super(ThreadEmpty());
 
   @override
@@ -17,8 +16,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       try {
         final List<Thread> threads = await repository.all();
         yield ThreadLoaded(threads: threads);
-      } catch (_) {
-        yield ThreadError();
+      } catch (e) {
+        yield ThreadError(error: e.toString());
       }
     }
 
@@ -32,8 +31,36 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
           yield ThreadError();
         }
       } catch (e) {
-        print(e.toString());
-        yield ThreadError();
+        yield ThreadError(error: e.toString());
+      }
+    }
+
+    if (event is EditThread) {
+      yield ThreadLoading();
+      try {
+        bool success = await repository.editThread(event.thread);
+
+        if (success) {
+          yield ThreadSuccess();
+        } else {
+          yield ThreadError();
+        }
+      } catch (e) {
+        yield ThreadError(error: e.toString());
+      }
+    }
+
+    if (event is DeleteThread) {
+      yield ThreadLoading();
+      try {
+        bool success = await repository.deleteThread(event.id);
+        if (success) {
+          yield ThreadSuccess();
+        } else {
+          yield ThreadError();
+        }
+      } catch (e) {
+        yield ThreadError(error: e.toString());
       }
     }
 
@@ -47,8 +74,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
           yield CommentFailure();
         }
       } catch (e) {
-        print(e.toString());
-        yield ThreadError();
+        yield ThreadError(error: e.toString());
       }
     }
   }

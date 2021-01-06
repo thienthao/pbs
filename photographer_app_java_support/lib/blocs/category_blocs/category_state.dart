@@ -1,6 +1,7 @@
-import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 
 abstract class CategoryState extends Equatable {
   const CategoryState();
@@ -22,4 +23,9 @@ class CategoryStateSuccess extends CategoryState {
   String toString() => 'CategorysLoadSuccess { album: $categories }';
 }
 
-class CategoryStateFailure extends CategoryState {}
+class CategoryStateFailure extends CategoryState {
+  final String error;
+  CategoryStateFailure({
+    this.error,
+  });
+}

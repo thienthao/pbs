@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:customer_app_java_support/blocs/authen_blocs/user_login_model.dart';
 import 'package:customer_app_java_support/blocs/register_blocs/user_register_model.dart';
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/shared/base_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,13 +25,17 @@ Future<Token> getToken(UserLogin userLogin) async {
   if (response.statusCode == 200) {
     final data = json.decode(response.body);
 
-    
     if (data['role'].toString().toUpperCase() == 'ROLE_CUSTOMER') {
       prefs.setInt('customerId', data['id']);
+      globalCusId = data['id'];
+      prefs.setString('customerToken', data['accessToken']);
+      globalCusToken = data['accessToken'];
       return Token.fromJson(json.decode(response.body));
     } else {
       throw Exception('Tài khoản này không hợp lệ');
     }
+  } else if (response.statusCode == 401) {
+    throw Exception('Tài khoản của bạn đã bị khóa');
   } else {
     print(json.decode(response.body).toString());
     final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;

@@ -37,6 +37,8 @@ class CommentRepository {
       }).toList();
 
       return comments;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of comments');
     }
@@ -72,6 +74,8 @@ class CommentRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at cancel a booking');
     }
@@ -97,6 +101,8 @@ class CommentRepository {
       }).toList();
 
       return comments;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of comments');
     }

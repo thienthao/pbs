@@ -1,6 +1,7 @@
-import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 
 abstract class BookingState extends Equatable {
   const BookingState();
@@ -103,4 +104,9 @@ class BookingStateInfiniteFetchedSuccess extends BookingState {
   }
 }
 
-class BookingStateFailure extends BookingState {}
+class BookingStateFailure extends BookingState {
+  final String error;
+  BookingStateFailure({
+    this.error,
+  });
+}

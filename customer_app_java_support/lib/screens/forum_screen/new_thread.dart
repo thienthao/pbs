@@ -154,9 +154,10 @@ class _NewThreadState extends State<NewThread> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
-              child: TextField(
+              child: TextFormField(
                 controller: threadContent,
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 style: TextStyle(
                   color: Colors.black87,
                 ),

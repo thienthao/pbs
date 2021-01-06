@@ -66,6 +66,8 @@ class AlbumRepository {
       }).toList();
 
       return albums;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of albums');
     }
@@ -115,6 +117,8 @@ class AlbumRepository {
       }).toList();
 
       return albums;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of albums');
     }
@@ -167,6 +171,8 @@ class AlbumRepository {
         );
       }).toList();
       return albums;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of albums');
     }
@@ -194,6 +200,8 @@ class AlbumRepository {
     bool isLike = false;
     if (response.statusCode == 200) {
       isLike = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at like album');
     }
@@ -209,8 +217,10 @@ class AlbumRepository {
     bool isUnlike = false;
     if (response.statusCode == 200) {
       isUnlike = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
-      throw Exception('Error getting album like');
+      throw Exception('Error at unlike album');
     }
     print('isUnlike: $isUnlike');
     return isUnlike;

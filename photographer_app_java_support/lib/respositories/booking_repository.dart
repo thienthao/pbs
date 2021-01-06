@@ -55,6 +55,8 @@ class BookingRepository {
       }).toList();
       print('Tất cả các bookings $bookings');
       return bookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -120,6 +122,8 @@ class BookingRepository {
             isMultiday: isMultiDay);
       }).toList();
       return bookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -161,6 +165,8 @@ class BookingRepository {
       }
 
       return bookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -298,6 +304,8 @@ class BookingRepository {
       }).toList();
       print('Tất cả các bookings $bookings');
       return bookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -414,6 +422,8 @@ class BookingRepository {
           returningLink: data['returningLink']);
 
       return booking;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -463,6 +473,8 @@ class BookingRepository {
     if (response.statusCode == 200) {
       print('cancel $result');
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Create a Booking');
     }
@@ -500,6 +512,8 @@ class BookingRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at accept a booking');
     }
@@ -537,6 +551,8 @@ class BookingRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at accept a booking');
     }
@@ -576,6 +592,8 @@ class BookingRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at accept a booking');
     }
@@ -615,6 +633,8 @@ class BookingRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at reject a booking');
     }
@@ -638,17 +658,26 @@ class BookingRepository {
     String str = json.encode(resBody);
     print(str);
 
-    final response =
-        await httpClient.put(BaseApi.BOOKING_URL + '/cancel/photographer',
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
-            },
-            body: str);
-    print(BaseApi.BOOKING_URL + '/cancel/photographer');
+    final response = await httpClient.put(
+        BaseApi.BOOKING_URL + '/cancellation-submit/photographer',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+        },
+        body: str);
+
+    // final response =
+    //     await httpClient.put(BaseApi.BOOKING_URL + '/cancel/photographer',
+    //         headers: {
+    //           'Content-Type': 'application/json; charset=UTF-8',
+    //           HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+    //         },
+    //         body: str);
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at cancel a booking');
     }

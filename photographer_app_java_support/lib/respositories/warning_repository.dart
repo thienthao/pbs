@@ -28,6 +28,8 @@ class WarningRepository {
         return e.toString();
       }).toList();
       return noticeString;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Time Warning');
     }
@@ -93,6 +95,8 @@ class WarningRepository {
         return notice.toString();
       }).toList();
       return notices;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Create a Booking');
     }

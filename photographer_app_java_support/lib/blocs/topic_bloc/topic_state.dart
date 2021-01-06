@@ -1,6 +1,7 @@
-import 'package:photographer_app_java_support/models/thread_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+
+import 'package:photographer_app_java_support/models/thread_model.dart';
 
 abstract class TopicState extends Equatable {
   const TopicState();
@@ -22,4 +23,9 @@ class TopicLoaded extends TopicState {
   List<Object> get props => [topics];
 }
 
-class TopicError extends TopicState {}
+class TopicError extends TopicState {
+  final String error;
+  TopicError({
+    this.error,
+  });
+}
