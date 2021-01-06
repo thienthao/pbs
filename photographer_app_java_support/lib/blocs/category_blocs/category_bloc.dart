@@ -33,7 +33,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       final categories = await this.categoryRepository.getListCategory();
       yield CategoryStateSuccess(categories: categories);
     } catch (_) {
-      yield CategoryStateFailure();
+      yield CategoryStateFailure(error: _.toString());
     }
   }
 }

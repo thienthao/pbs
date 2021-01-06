@@ -29,8 +29,8 @@ class WorkingDayBloc extends Bloc<WorkingDayEvent, WorkingDayState> {
       final listWorkingDays =
           await this.calendarRepository.getPhotographerWorkingDay(ptgId);
       yield WorkingDayStateFetchSuccess(listWorkingDays: listWorkingDays);
-    } catch (_) {
-      yield WorkingDayStateFailure();
+    } catch (e) {
+      yield WorkingDayStateFailure(error: e.toString());
     }
   }
 
@@ -42,8 +42,8 @@ class WorkingDayBloc extends Bloc<WorkingDayEvent, WorkingDayState> {
           .calendarRepository
           .updateWorkingDay(ptgId, listWorkingDays);
       yield WorkingDayStateUpdateSuccess(isUpdateSuccess: isUpdatedSuccess);
-    } catch (_) {
-      yield WorkingDayStateFailure();
+    } catch (e) {
+      yield WorkingDayStateFailure(error: e.toString());
     }
   }
 }

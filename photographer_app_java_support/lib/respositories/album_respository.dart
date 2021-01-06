@@ -63,6 +63,8 @@ class AlbumRepository {
       }).toList();
 
       return albums;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of albums');
     }
@@ -114,6 +116,8 @@ class AlbumRepository {
         );
       }).toList();
       return albums;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }
@@ -152,18 +156,84 @@ class AlbumRepository {
     }
 
     String albumDto =
-        '{"name":"${album.name}","description":"${album.description}","ptgId":${album.photographer.id}}';
+        '{"id":"${album.id}","name":"${album.name}","description":"${album.description}","ptgId":$globalPtgId,"location":"${album.location}","categoryId":${album.category.id}}';
     request.fields['stringAlbumDto'] = albumDto;
 
     final response = await request.send();
 
     bool result = false;
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       print("Uploaded!");
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at create album!');
     }
     return result;
+  }
+
+  Future<bool> updateAlbumInfo(AlbumBlocModel album) async {
+    String albumDto =
+        '{"id":"${album.id}","name":"${album.name}","description":"${album.description}","ptgId":$globalPtgId,"location":"${album.location}","categoryId":${album.category.id}}';
+    print(albumDto);
+    final response =
+        await this.httpClient.put(BaseApi.ALBUM_URL + '/${album.id}',
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'
+            },
+            body: albumDto);
+    bool isUpdated = false;
+    if (response.statusCode == 200) {
+      isUpdated = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error at update album info');
+    }
+    return isUpdated;
+  }
+
+  Future<bool> addImageForAlbum(int albumId, File image) async {
+    var request = http.MultipartRequest(
+        "PUT", Uri.parse(BaseApi.ALBUM_URL + '/$albumId/images'));
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'});
+    {
+      request.files.add(http.MultipartFile(
+          'file',
+          File(image.path).readAsBytes().asStream(),
+          File(image.path).lengthSync(),
+          filename: image.path.split("/").last,
+          contentType: new MediaType('image', 'jpeg')));
+    }
+
+    final response = await request.send();
+    bool result = false;
+    if (response.statusCode == 201) {
+      print("Uploaded!");
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error at add image for album!');
+    }
+    return result;
+  }
+
+  Future<bool> removeImage(int albumId, int imageId) async {
+    final response = await this.httpClient.delete(
+        BaseApi.ALBUM_URL + '/$albumId/images/$imageId',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'});
+    bool isDeleted = false;
+    if (response.statusCode == 200) {
+      isDeleted = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error at delete image of album $albumId');
+    }
+    return isDeleted;
   }
 }

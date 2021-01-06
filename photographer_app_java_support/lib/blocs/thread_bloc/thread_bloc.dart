@@ -17,8 +17,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       try {
         final List<Thread> threads = await repository.all();
         yield ThreadLoaded(threads: threads);
-      } catch (_) {
-        yield ThreadError();
+      } catch (e) {
+        yield ThreadError(error: e.toString());
       }
     }
 
@@ -34,6 +34,35 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       } catch (e) {
         print(e.toString());
         yield ThreadError();
+      }
+    }
+
+    if (event is EditThread) {
+      yield ThreadLoading();
+      try {
+        bool success = await repository.editThread(event.thread);
+
+        if (success) {
+          yield ThreadSuccess();
+        } else {
+          yield ThreadError();
+        }
+      } catch (e) {
+        yield ThreadError(error: e.toString());
+      }
+    }
+
+    if (event is DeleteThread) {
+      yield ThreadLoading();
+      try {
+        bool success = await repository.deleteThread(event.id);
+        if (success) {
+          yield ThreadSuccess();
+        } else {
+          yield ThreadError();
+        }
+      } catch (e) {
+        yield ThreadError(error: e.toString());
       }
     }
 

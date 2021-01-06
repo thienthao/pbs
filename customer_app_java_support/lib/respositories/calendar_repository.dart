@@ -18,12 +18,9 @@ class CalendarRepository {
   }) : assert(httpClient != null);
 
   Future<CalendarModel> getBusyDaysOfPhotographer(int id) async {
-    final response = await this
-        .httpClient
-        .get(BaseApi.PHOTOGRAPHER_URL + '/$id/calendar/for-customer', headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          globalCusToken
-    });
+    final response = await this.httpClient.get(
+        BaseApi.PHOTOGRAPHER_URL + '/$id/calendar/for-customer',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final listBusyDays = data['busyDays'] as List;
@@ -40,6 +37,8 @@ class CalendarRepository {
       CalendarModel photographerCalendar =
           CalendarModel(busyDays: busyDaysTemp, bookedDays: bookedDaysTemp);
       return photographerCalendar;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Photographer Calendar');
     }
@@ -63,6 +62,8 @@ class CalendarRepository {
       }).toList();
 
       return listWorkingDays;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Photographer Calendar');
     }

@@ -33,6 +33,8 @@ class CustomerRepository {
         fullname: data['fullname'],
       );
       return customer;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting photographer');
     }
@@ -57,6 +59,8 @@ class CustomerRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at Update Photographer info');
     }
@@ -82,6 +86,8 @@ class CustomerRepository {
     if (response.statusCode == 200) {
       print("Avatar Uploaded!");
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at update avatar!');
     }

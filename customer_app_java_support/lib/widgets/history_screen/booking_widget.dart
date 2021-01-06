@@ -1,8 +1,10 @@
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comment_bloc.dart';
+import 'package:customer_app_java_support/blocs/report_blocs/report_bloc.dart';
 import 'package:customer_app_java_support/models/booking_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/comment_repository.dart';
+import 'package:customer_app_java_support/respositories/report_repository.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +32,8 @@ class _BookingWidgetState extends State<BookingWidget> {
       BookingRepository(httpClient: http.Client());
   CommentRepository _commentRepository =
       CommentRepository(httpClient: http.Client());
-
+  ReportRepository _reportRepository =
+      ReportRepository(httpClient: http.Client());
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -52,6 +55,15 @@ class _BookingWidgetState extends State<BookingWidget> {
     } else if (status.toUpperCase().trim() == 'CANCELED') {
       text = 'Đã hủy';
       color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'CANCELLING_CUSTOMER') {
+      text = 'Chờ hủy';
+      color = Colors.blueGrey;
+    } else if (status.toUpperCase().trim() == 'CANCELLED_CUSTOMER') {
+      text = 'Đã hủy';
+      color = Colors.black54;
+    } else {
+      text = 'Không xác định';
+      color = Colors.black26;
     }
     return Text(
       text,
@@ -114,6 +126,9 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 BlocProvider(
                                     create: (context) => CommentBloc(
                                         commentRepository: _commentRepository)),
+                                BlocProvider(
+                                    create: (context) => ReportBloc(
+                                        reportRepository: _reportRepository)),
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,

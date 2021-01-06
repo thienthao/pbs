@@ -1,6 +1,6 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
 import 'package:photographer_app_java_support/models/calendar_model.dart';
 
 abstract class CalendarState extends Equatable {
@@ -24,4 +24,9 @@ class CalendarStatePhotographerDaysSuccess extends CalendarState {
       'CalendarStatePhotographerDaysSuccess { days: $photographerDays }';
 }
 
-class CalendarStateFailure extends CalendarState {}
+class CalendarStateFailure extends CalendarState {
+  final String error;
+  CalendarStateFailure({
+    this.error,
+  });
+}

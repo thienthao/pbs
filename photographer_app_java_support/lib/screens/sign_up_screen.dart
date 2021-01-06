@@ -1,13 +1,12 @@
-import 'package:photographer_app_java_support/blocs/register_blocs/register_bloc.dart';
-import 'package:photographer_app_java_support/blocs/register_blocs/register_event.dart';
-import 'package:photographer_app_java_support/blocs/register_blocs/register_state.dart';
-import 'package:photographer_app_java_support/blocs/register_blocs/user_register_model.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
+import 'package:photographer_app_java_support/blocs/register_blocs/register_bloc.dart';
+import 'package:photographer_app_java_support/blocs/register_blocs/register_event.dart';
+import 'package:photographer_app_java_support/blocs/register_blocs/register_state.dart';
+import 'package:photographer_app_java_support/blocs/register_blocs/user_register_model.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -89,7 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             isDismissible: false,
             duration: Duration(seconds: 2),
             titleText: Text(
-              "Đăng nhập thất bại",
+              "Đăng ký thất bại!",
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18.0,
@@ -97,7 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   fontFamily: "Quicksand"),
             ),
             messageText: Text(
-              "dang nhap that bai",
+              "Đăng ký không thành công!",
               style: TextStyle(
                   fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
             ),
@@ -122,7 +121,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   fontFamily: "Quicksand"),
             ),
             messageText: Text(
-              "Đăng ký thanh cong",
+              "Đăng ký thành công",
               style: TextStyle(
                   fontSize: 16.0, color: Colors.white, fontFamily: "Quicksand"),
             ),

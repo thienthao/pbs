@@ -26,7 +26,7 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       yield CalendarStatePhotographerDaysSuccess(
           photographerDays: photographerDays);
     } catch (_) {
-      yield CalendarStateFailure();
+      yield CalendarStateFailure(error: _.toString());
     }
   }
 }

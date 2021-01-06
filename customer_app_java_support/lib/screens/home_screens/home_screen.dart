@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:customer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/category_blocs/categories.dart';
 import 'package:customer_app_java_support/blocs/photographer_alg_blocs/photographers_alg.dart';
 import 'package:customer_app_java_support/blocs/photographer_blocs/photographers.dart';
@@ -9,6 +11,7 @@ import 'package:customer_app_java_support/screens/home_screens/search_ptg_servic
 import 'package:customer_app_java_support/shared/home_screen_album_carousel_loading.dart';
 import 'package:customer_app_java_support/shared/home_screen_category_loading.dart';
 import 'package:customer_app_java_support/shared/home_screen_ptg_carousel_loading.dart';
+import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:customer_app_java_support/widgets/home_screen/album_bloc_carousel.dart';
 import 'package:customer_app_java_support/widgets/home_screen/icon_carousel.dart';
 import 'package:customer_app_java_support/widgets/home_screen/photograph_carousel.dart';
@@ -17,6 +20,7 @@ import 'package:customer_app_java_support/widgets/home_screen/sliver_items.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
@@ -32,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String city = '';
   LatLng selectedLatlng = LatLng(0.0, 0.0);
   int selectedCategory = 1;
+
   @override
   void dispose() {
     super.dispose();
@@ -64,6 +69,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   _loadPhotographers(int _categoryId, LatLng _latLng, String _city) async {
     BlocProvider.of<PhotographerBloc>(context).add(PhotographerEventFetch(
         categoryId: _categoryId, latLng: _latLng, city: _city));
+  }
+
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
   }
 
   _filteredByCategoryId(_categoryId, _latLng, _city) async {
@@ -234,7 +243,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 SizedBox(height: 20.0),
                 Center(
-                  child: BlocBuilder<PhotographerBloc, PhotographerState>(
+                  child: BlocConsumer<PhotographerBloc, PhotographerState>(
+                    listener: (context, state) {
+                      if (state is PhotographerStateFailure) {
+                        String error =
+                            state.error.replaceAll('Exception: ', '');
+
+                        if (error.toUpperCase() == 'UNAUTHORIZED') {
+                          _showUnauthorizedDialog();
+                        }
+                      }
+                    },
                     builder: (context, photographerState) {
                       if (photographerState is PhotographerStateSuccess) {
                         if (photographerState.photographers.length == 0) {
@@ -341,5 +360,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

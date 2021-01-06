@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
 import 'package:photographer_app_java_support/models/busy_day_bloc_model.dart';
 
 abstract class BusyDayState extends Equatable {
@@ -61,4 +62,10 @@ class BusyDayStateDeletedSuccess extends BusyDayState {
       'BusyDayStateDeletedSuccess { update working day: $isDeletedSuccess }';
 }
 
-class BusyDayStateFailure extends BusyDayState {}
+class BusyDayStateFailure extends BusyDayState {
+  final String error;
+  BusyDayStateFailure({
+    this.error,
+  });
+  
+}

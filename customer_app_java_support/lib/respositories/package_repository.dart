@@ -44,6 +44,8 @@ class PackageRepository {
       }).toList();
 
       return packages;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of photographers');
     }

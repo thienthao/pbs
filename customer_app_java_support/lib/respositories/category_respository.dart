@@ -17,11 +17,8 @@ class CategoryRepository {
   }) : assert(httpClient != null);
 
   Future<List<CategoryBlocModel>> getListCategory() async {
-    final response =
-        await this.httpClient.get(BaseApi.CATEGORY_URL , headers: {
-      HttpHeaders.authorizationHeader: 'Bearer ' +
-          globalCusToken
-    });
+    final response = await this.httpClient.get(BaseApi.CATEGORY_URL,
+        headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as List;
 
@@ -33,6 +30,8 @@ class CategoryRepository {
         );
       }).toList();
       return categories;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of categories');
     }

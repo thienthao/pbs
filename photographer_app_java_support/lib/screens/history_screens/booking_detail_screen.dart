@@ -4,13 +4,19 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:intl/intl.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authen_export.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:photographer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:photographer_app_java_support/blocs/report_blocs/report_bloc.dart';
+import 'package:photographer_app_java_support/blocs/report_blocs/reports.dart';
 import 'package:photographer_app_java_support/constant/chat_name.dart';
 import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
+import 'package:photographer_app_java_support/models/report_bloc_model.dart';
+import 'package:photographer_app_java_support/models/report_template_model.dart';
 import 'package:photographer_app_java_support/models/time_and_location_bloc_model.dart';
 import 'package:photographer_app_java_support/models/weather_bloc_model.dart';
 import 'package:photographer_app_java_support/screens/chat_screens/chat_screen.dart';
@@ -33,6 +39,7 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  ReportTemplateModel reportRadio = reports.last;
   getChatRoomId(String a, String b) {
     if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
       return "$b\_$a";
@@ -57,7 +64,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => ChatPage(
-              avatar: bookingObj.customer.avatar,
+                  avatar: bookingObj.customer.avatar,
                   chatRoomId: chatRoomId,
                 )));
   }
@@ -69,6 +76,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   final TextEditingController _reasonTextController = TextEditingController();
+  final TextEditingController _reportTextController = TextEditingController();
   final TextEditingController _returningLinkController =
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -76,6 +84,81 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   Completer<void> _completer;
 
   BookingBlocModel bookingObj;
+
+  Future<void> _reportDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext aContext) {
+        return StatefulBuilder(
+          builder:
+              (BuildContext context, void Function(void Function()) setState) {
+            return AlertDialog(
+              title: Text('Báo cáo',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Column(
+                      children: reports.asMap().entries.map((MapEntry map) {
+                        return Row(
+                          children: [
+                            Radio(
+                                activeColor: Color(0xFFF77474),
+                                value: reports[map.key],
+                                groupValue: reportRadio,
+                                onChanged: (value) {
+                                  setState(() {
+                                    reportRadio = value;
+                                  });
+                                }),
+                            Text(reports[map.key].title,
+                                style: TextStyle(fontSize: 14)),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                    Form(
+                      child: Container(
+                        padding: EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0)),
+                        child: TextFormField(
+                          validator: null,
+                          controller: _reportTextController,
+                          cursorColor: Color(0xFFF77474),
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 6,
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Chi tiết'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Hủy bỏ'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                FlatButton(
+                  child: Text('Xác nhận'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _postReport();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   Future<void> _cancelDialog() async {
     return showDialog<void>(
@@ -277,6 +360,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         );
       },
     );
+  }
+
+  _postReport() async {
+    ReportBlocModel report = ReportBlocModel(
+      reason: _reportTextController.text,
+      title: reportRadio.title,
+      reportedId: bookingObj.customer.id,
+      reporterId: globalPtgId,
+      createdAt: DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.now()),
+    );
+    BlocProvider.of<ReportBloc>(context).add(ReportEventPost(report: report));
   }
 
   _loadBookingDetail() async {
@@ -1777,189 +1871,108 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               color: Colors.black,
               fontWeight: FontWeight.w600,
             )),
+        actions: [
+          PopupMenuButton<int>(
+            icon: Icon(
+              Icons.sort,
+              color: Colors.black87,
+            ),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 1,
+                child: FlatButton.icon(
+                    onPressed: () {
+                      _reportDialog();
+                    },
+                    icon: Icon(Icons.outlined_flag_rounded),
+                    label: Text('Báo cáo')),
+              ),
+            ],
+          ),
+        ],
       ),
       backgroundColor: Colors.grey[50],
       body: StreamBuilder(
-        stream: _notificationRef.onValue,
-        builder: (context, snapshot) {
-          if (snapshot.data != null && snapshot.data.snapshot.value != null) {
-            _loadBookingDetail();
-          }
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              Center(
-                child: BlocBuilder<BookingBloc, BookingState>(
-                  builder: (context, bookingState) {
-                    if (bookingState is BookingDetailStateSuccess) {
-                      bookingObj = bookingState.booking;
-                      if (bookingState.booking == null) {
-                        return Text(
-                          'Không lấy được dữ liệu của cuộc hẹn',
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 17.0,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        );
-                      } else {
-                        return RefreshIndicator(
-                          onRefresh: () {
-                            _loadBookingDetail();
-                            return _completer.future;
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 10,
-                              ),
+          stream: _notificationRef.onValue,
+          builder: (context, snapshot) {
+            if (snapshot.data != null && snapshot.data.snapshot.value != null) {
+              _loadBookingDetail();
+            }
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                Center(
+                  child: BlocConsumer<BookingBloc, BookingState>(
+                    listener: (context, state) {
+                      if (state is BookingStateFailure) {
+                        String error =
+                            state.error.replaceAll('Exception: ', '');
+                        if (error.toUpperCase() == 'UNAUTHORIZED') {
+                          _showUnauthorizedDialog();
+                        }
+                      }
+                    },
+                    builder: (context, bookingState) {
+                      if (bookingState is BookingDetailStateSuccess) {
+                        bookingObj = bookingState.booking;
+                        if (bookingState.booking == null) {
+                          return Text(
+                            'Không lấy được dữ liệu của cuộc hẹn',
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 17.0,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          );
+                        } else {
+                          return RefreshIndicator(
+                            onRefresh: () {
+                              _loadBookingDetail();
+                              return _completer.future;
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 10,
+                                ),
 
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Text(
-                                  'Trạng thái, thời gian & địa điểm',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    wordSpacing: -1,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              ///////////////////////////////////info
-
-                              bookingState.booking.isMultiday
-                                  ? _buildTimeAndLocationInfoMultiDay(
-                                      bookingState.booking)
-                                  : _buildTimeAndLocationInfoSingleDay(
-                                      bookingState.booking),
-                              SizedBox(
-                                height: 20,
-                              ),
-///////////////////////////////////////////////////////////////////////// Photographer
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Text(
-                                  'Thông tin khách hàng',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    wordSpacing: -1,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.grey[300],
-                                        offset: Offset(-1.0, 2.0),
-                                        blurRadius: 6.0)
-                                  ],
-                                ),
-                                padding: EdgeInsets.all(10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          10.0, 10.0, 10.0, 0.0),
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                CircleAvatar(
-                                                  backgroundImage: NetworkImage(
-                                                    bookingState
-                                                        .booking.customer.avatar,
-                                                  ),
-                                                  radius: 30,
-                                                ),
-                                                SizedBox(
-                                                  width: 15,
-                                                ),
-                                                Text(
-                                                    bookingState
-                                                        .booking.customer.fullname,
-                                                    style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 14.0)),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                IconButton(
-                                                  icon: Icon(
-                                                      Icons.phone_android_outlined),
-                                                  onPressed: () => launch(
-                                                      'tel://${bookingState.booking.customer.phone}'),
-                                                ),
-                                                IconButton(
-                                                  icon:
-                                                      Icon(Icons.comment_outlined),
-                                                  onPressed: () {
-                                                    // ignore: unrelated_type_equality_checks
-                                                    if (ChatMethods()
-                                                            .checkChatRoomExist(
-                                                                '${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}') ==
-                                                        true) {
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  ChatPage(
-                                                                    avatar: bookingObj.customer.avatar,
-                                                                    chatRoomId:
-                                                                        "${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}",
-                                                                  )));
-                                                    } else {
-                                                      sendMessage(
-                                                          '${bookingState.booking.customer.fullname}');
-                                                    }
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Trạng thái, thời gian & địa điểm',
+                                    style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                      wordSpacing: -1,
+                                      color: Colors.black,
                                     ),
-                                    SizedBox(
-                                      height: 10.0,
-                                    )
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-///////////////////////////////////////////////////////////////////////// Service Package
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Text(
-                                  'Thông tin gói dịch vụ',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    wordSpacing: -1,
-                                    color: Colors.black,
                                   ),
                                 ),
-                              ),
-                              Container(
+                                ///////////////////////////////////info
+
+                                bookingState.booking.isMultiday
+                                    ? _buildTimeAndLocationInfoMultiDay(
+                                        bookingState.booking)
+                                    : _buildTimeAndLocationInfoSingleDay(
+                                        bookingState.booking),
+                                SizedBox(
+                                  height: 20,
+                                ),
+///////////////////////////////////////////////////////////////////////// Photographer
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Thông tin khách hàng',
+                                    style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                      wordSpacing: -1,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                Container(
                                   margin: EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
@@ -1972,211 +1985,410 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                     ],
                                   ),
                                   padding: EdgeInsets.all(10),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Padding(
-                                      padding: EdgeInsets.zero,
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            RichText(
-                                              text: TextSpan(
-                                                text: '',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontFamily: 'Quicksand',
-                                                    fontSize: 14.0),
-                                                children: <TextSpan>[
-                                                  TextSpan(
-                                                      text: 'Tên gói:  ',
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            10.0, 10.0, 10.0, 0.0),
+                                        child: Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  CircleAvatar(
+                                                    backgroundImage:
+                                                        NetworkImage(
+                                                      bookingState.booking
+                                                          .customer.avatar,
+                                                    ),
+                                                    radius: 30,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 15,
+                                                  ),
+                                                  Text(
+                                                      bookingState.booking
+                                                          .customer.fullname,
                                                       style: TextStyle(
-                                                          color: Colors.black,
                                                           fontWeight:
-                                                              FontWeight.bold)),
-                                                  TextSpan(
-                                                      text: bookingState
-                                                          .booking.serviceName,
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.normal)),
+                                                              FontWeight.bold,
+                                                          fontSize: 14.0)),
                                                 ],
                                               ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            RichText(
-                                              text: TextSpan(
-                                                text: '',
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontFamily: 'Quicksand',
-                                                    fontSize: 14.0),
-                                                children: <TextSpan>[
-                                                  TextSpan(
-                                                      text: 'Mô tả:  ',
-                                                      style: TextStyle(
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  TextSpan(
-                                                      text: bookingState.booking
-                                                          .packageDescription,
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.normal)),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  IconButton(
+                                                    icon: Icon(Icons
+                                                        .phone_android_outlined),
+                                                    onPressed: () => launch(
+                                                        'tel://${bookingState.booking.customer.phone}'),
+                                                  ),
+                                                  IconButton(
+                                                    icon: Icon(
+                                                        Icons.comment_outlined),
+                                                    onPressed: () {
+                                                      // ignore: unrelated_type_equality_checks
+                                                      if (ChatMethods()
+                                                              .checkChatRoomExist(
+                                                                  '${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}') ==
+                                                          true) {
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        ChatPage(
+                                                                          avatar: bookingObj
+                                                                              .customer
+                                                                              .avatar,
+                                                                          chatRoomId:
+                                                                              "${bookingState.booking.customer.fullname}_${bookingState.booking.photographer.fullname}",
+                                                                        )));
+                                                      } else {
+                                                        sendMessage(
+                                                            '${bookingState.booking.customer.fullname}');
+                                                      }
+                                                    },
+                                                  ),
                                                 ],
                                               ),
-                                            ),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              'Bao gồm các dịch vụ:',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black),
-                                            ),
-                                            SizedBox(
-                                              height: 5.0,
-                                            ),
-                                            Column(
-                                              children: bookingState
-                                                  .booking.services
-                                                  .asMap()
-                                                  .entries
-                                                  .map((MapEntry mapEntry) {
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                    vertical: 5.0,
-                                                  ),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.done,
-                                                        color: Color(0xFFF77474),
-                                                        size: 20,
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Flexible(
-                                                        child: Text(
-                                                          bookingState
-                                                                  .booking.services[
-                                                              mapEntry.key],
-                                                          style: TextStyle(
-                                                              fontSize: 14),
-                                                          overflow:
-                                                              TextOverflow.ellipsis,
-                                                          maxLines: 5,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              }).toList(),
-                                            ),
-                                            Divider(
-                                              height: 40.0,
-                                              indent: 20.0,
-                                              endIndent: 20.0,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  'Tổng cộng:',
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 18.0,
-                                                      fontWeight: FontWeight.w400),
-                                                ),
-                                                Text(
-                                                  '${oCcy.format(bookingState.booking.price)} đồng',
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 18.0,
-                                                      fontWeight: FontWeight.bold),
-                                                ),
-                                              ],
-                                            ),
-                                          ]),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10.0,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+///////////////////////////////////////////////////////////////////////// Service Package
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    'Thông tin gói dịch vụ',
+                                    style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                      wordSpacing: -1,
+                                      color: Colors.black,
                                     ),
-                                  )),
-                              SizedBox(height: 20.0),
-                              formatBottomComponentBasedOnStatus(
-                                  bookingState.booking.status),
-                              SizedBox(height: 30.0),
-                            ],
+                                  ),
+                                ),
+                                Container(
+                                    margin: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey[300],
+                                            offset: Offset(-1.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ],
+                                    ),
+                                    padding: EdgeInsets.all(10),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Padding(
+                                        padding: EdgeInsets.zero,
+                                        child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              RichText(
+                                                text: TextSpan(
+                                                  text: '',
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontFamily: 'Quicksand',
+                                                      fontSize: 14.0),
+                                                  children: <TextSpan>[
+                                                    TextSpan(
+                                                        text: 'Tên gói:  ',
+                                                        style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    TextSpan(
+                                                        text: bookingState
+                                                            .booking
+                                                            .serviceName,
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .normal)),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              RichText(
+                                                text: TextSpan(
+                                                  text: '',
+                                                  style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontFamily: 'Quicksand',
+                                                      fontSize: 14.0),
+                                                  children: <TextSpan>[
+                                                    TextSpan(
+                                                        text: 'Mô tả:  ',
+                                                        style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    TextSpan(
+                                                        text: bookingState
+                                                            .booking
+                                                            .packageDescription,
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .normal)),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Text(
+                                                'Bao gồm các dịch vụ:',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black),
+                                              ),
+                                              SizedBox(
+                                                height: 5.0,
+                                              ),
+                                              Column(
+                                                children: bookingState
+                                                    .booking.services
+                                                    .asMap()
+                                                    .entries
+                                                    .map((MapEntry mapEntry) {
+                                                  return Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      vertical: 5.0,
+                                                    ),
+                                                    child: Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.done,
+                                                          color:
+                                                              Color(0xFFF77474),
+                                                          size: 20,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Flexible(
+                                                          child: Text(
+                                                            bookingState.booking
+                                                                    .services[
+                                                                mapEntry.key],
+                                                            style: TextStyle(
+                                                                fontSize: 14),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            maxLines: 5,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                              Divider(
+                                                height: 40.0,
+                                                indent: 20.0,
+                                                endIndent: 20.0,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Tổng cộng:',
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                  Text(
+                                                    '${oCcy.format(bookingState.booking.price)} đồng',
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ),
+                                            ]),
+                                      ),
+                                    )),
+                                SizedBox(height: 20.0),
+                                formatBottomComponentBasedOnStatus(
+                                    bookingState.booking.status),
+                                SizedBox(height: 30.0),
+                              ],
+                            ),
+                          );
+                        }
+                      }
+                      if (bookingState is BookingStateCanceledSuccess) {
+                        if (widget.onCheckIfEdited != null) {
+                          widget.onCheckIfEdited(true);
+                        }
+                        _loadBookingDetail();
+                      }
+                      if (bookingState is BookingStateAcceptedSuccess) {
+                        if (widget.onCheckIfEdited != null) {
+                          widget.onCheckIfEdited(true);
+                        }
+                        _loadBookingDetail();
+                      }
+
+                      if (bookingState is BookingStateRejectedSuccess) {
+                        if (widget.onCheckIfEdited != null) {
+                          widget.onCheckIfEdited(true);
+                        }
+                        _loadBookingDetail();
+                      }
+
+                      if (bookingState is BookingStateCanceledSuccess) {
+                        if (widget.onCheckIfEdited != null) {
+                          widget.onCheckIfEdited(true);
+                        }
+                        _loadBookingDetail();
+                      }
+
+                      if (bookingState is BookingStateMovedToEditSuccess) {
+                        if (widget.onCheckIfEdited != null) {
+                          widget.onCheckIfEdited(true);
+                        }
+                        _loadBookingDetail();
+                      }
+
+                      if (bookingState is BookingStateMovedToDoneSuccess) {
+                        if (widget.onCheckIfEdited != null) {
+                          widget.onCheckIfEdited(true);
+                        }
+                        _loadBookingDetail();
+                      }
+
+                      if (bookingState is BookingStateLoading) {
+                        return BookingDetailLoading();
+                      }
+
+                      if (bookingState is BookingStateFailure) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height * 0.85,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Đã xảy ra lỗi khi tải dữ liệu',
+                                  style: TextStyle(
+                                      color: Colors.red[300], fontSize: 16),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    _loadBookingDetail();
+                                  },
+                                  child: Text(
+                                    'Ấn để thử lại',
+                                    style: TextStyle(
+                                        color: Colors.red[300], fontSize: 16),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         );
                       }
-                    }
-                    if (bookingState is BookingStateCanceledSuccess) {
-                      if (widget.onCheckIfEdited != null) {
-                        widget.onCheckIfEdited(true);
-                      }
-                      _loadBookingDetail();
-                    }
-                    if (bookingState is BookingStateAcceptedSuccess) {
-                      if (widget.onCheckIfEdited != null) {
-                        widget.onCheckIfEdited(true);
-                      }
-                      _loadBookingDetail();
-                    }
-
-                    if (bookingState is BookingStateRejectedSuccess) {
-                      if (widget.onCheckIfEdited != null) {
-                        widget.onCheckIfEdited(true);
-                      }
-                      _loadBookingDetail();
-                    }
-
-                    if (bookingState is BookingStateCanceledSuccess) {
-                      if (widget.onCheckIfEdited != null) {
-                        widget.onCheckIfEdited(true);
-                      }
-                      _loadBookingDetail();
-                    }
-
-                    if (bookingState is BookingStateMovedToEditSuccess) {
-                      if (widget.onCheckIfEdited != null) {
-                        widget.onCheckIfEdited(true);
-                      }
-                      _loadBookingDetail();
-                    }
-
-                    if (bookingState is BookingStateMovedToDoneSuccess) {
-                      if (widget.onCheckIfEdited != null) {
-                        widget.onCheckIfEdited(true);
-                      }
-                      _loadBookingDetail();
-                    }
-
-                    if (bookingState is BookingStateLoading) {
-                      return BookingDetailLoading();
-                    }
-
-                    if (bookingState is BookingStateFailure) {
-                      return Text(
-                        'Đã xảy ra lỗi khi tải dữ liệu',
-                        style: TextStyle(color: Colors.red[300], fontSize: 16),
-                      );
-                    }
-                    return Text('');
-                  },
+                      return Text('');
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
-        }
-      ),
+                BlocListener<ReportBloc, ReportState>(
+                  listener: (context, state) {
+                    if (state is ReportStatePostedSuccess) {
+                      if (state.isPosted) {
+                        popUp(context, 'Báo cáo', 'Gửi báo cáo thành công!');
+                      }
+                    }
+                    if (state is ReportStateFailure) {
+                      String error = state.error.replaceAll('Exception: ', '');
+                      if (error.toUpperCase() == 'UNAUTHORIZED') {
+                        _showUnauthorizedDialog();
+                      } else {
+                        popUp(context, 'Báo cáo', 'Gửi báo cáo thất bại!');
+                      }
+                    }
+                  },
+                  child: SizedBox(),
+                )
+              ],
+            );
+          }),
     );
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

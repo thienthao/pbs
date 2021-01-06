@@ -8,6 +8,7 @@ import 'package:customer_app_java_support/blocs/authen_blocs/login_page.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/splash.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_repository.dart';
 import 'package:customer_app_java_support/globals.dart' as globals;
+import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/nav_screen.dart';
 import 'package:customer_app_java_support/respositories/thread_api_client.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'blocs/bloc_observer.dart';
 import 'router.dart' as router;
@@ -59,8 +61,16 @@ class _AppState extends State<App> {
       locator<PushNotificationService>();
   //end thao
 
+  SharedPreferences prefs;
+  void getPreference() async {
+    prefs = await SharedPreferences.getInstance();
+    globalCusId = prefs.getInt('customerId');
+    globalCusToken = prefs.getString('customerToken');
+  }
+
   @override
   void initState() {
+    getPreference();
     _pushNotificationService.init();
     super.initState();
     globals.selectedTabGlobal = 0;

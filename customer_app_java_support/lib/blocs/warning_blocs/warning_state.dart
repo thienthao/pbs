@@ -1,6 +1,7 @@
-import 'package:customer_app_java_support/models/weather_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:customer_app_java_support/models/weather_bloc_model.dart';
 
 abstract class WarningState extends Equatable {
   const WarningState();
@@ -72,4 +73,9 @@ class WarningStateGetWeatherWarningSuccess extends WarningState {
 //       'WarningStateGetWeatherWarningSuccess { warning: $notices }';
 // }
 
-class WarningStateFailure extends WarningState {}
+class WarningStateFailure extends WarningState {
+  final String error;
+  WarningStateFailure({
+    this.error,
+  });
+}

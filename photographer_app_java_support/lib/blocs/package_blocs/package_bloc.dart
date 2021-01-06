@@ -35,8 +35,8 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
       final packages =
           await this.packageRepository.getPackagesByPhotographerId(id);
       yield PackageStateSuccess(packages: packages);
-    } catch (_) {
-      yield PackageStateFailure();
+    } catch (e) {
+      yield PackageStateFailure(error: e.toString());
     }
   }
 
@@ -46,8 +46,8 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
     try {
       final isSuccess = await this.packageRepository.createPackage(package);
       yield PackageStateCreatedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield PackageStateFailure();
+    } catch (e) {
+      yield PackageStateFailure(error: e.toString());
     }
   }
 
@@ -57,8 +57,8 @@ class PackageBloc extends Bloc<PackageEvent, PackageState> {
     try {
       final isSuccess = await this.packageRepository.updatePackage(package);
       yield PackageStateUpdatedSuccess(isSuccess: isSuccess);
-    } catch (_) {
-      yield PackageStateFailure();
+    } catch (e) {
+      yield PackageStateFailure(error: e.toString());
     }
   }
 

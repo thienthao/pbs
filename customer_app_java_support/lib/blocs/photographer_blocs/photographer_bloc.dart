@@ -49,8 +49,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           .photographerRepository
           .getListPhotographerByRating(categoryId, latLng, city);
       yield PhotographerStateSuccess(photographers: photographers);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (error) {
+      yield PhotographerStateFailure(error: error.toString());
     }
   }
 
@@ -59,8 +59,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       final photographer =
           await this.photographerRepository.getPhotographerbyId(id);
       yield PhotographerIDStateSuccess(photographer: photographer);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (error) {
+      yield PhotographerStateFailure(error: error.toString());
     }
   }
 
@@ -88,8 +88,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
               hasReachedEnd: false);
         }
       }
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (error) {
+      yield PhotographerStateFailure(error: error.toString());
     }
   }
 
@@ -102,8 +102,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           .findPhotographerAndPackages(search, 0, 15);
       yield PhotographerStateSearchSuccess(
           searchModel: searchModel, hasReachedEnd: false);
-    } catch (_) {
-      yield PhotographerStateFailure();
+    } catch (error) {
+      yield PhotographerStateFailure(error: error.toString());
     }
   }
 }

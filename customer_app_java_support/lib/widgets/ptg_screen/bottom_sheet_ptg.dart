@@ -1,5 +1,9 @@
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
+import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
+import 'package:customer_app_java_support/blocs/report_blocs/reports.dart';
 import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
 import 'package:customer_app_java_support/blocs/working_day_blocs/working_days.dart';
 import 'package:customer_app_java_support/globals.dart';
@@ -10,6 +14,8 @@ import 'package:customer_app_java_support/models/time_and_location_bloc_model.da
 import 'package:customer_app_java_support/models/weather_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/calendar_repository.dart';
+import 'package:customer_app_java_support/respositories/comment_repository.dart';
+import 'package:customer_app_java_support/respositories/report_repository.dart';
 import 'package:customer_app_java_support/respositories/warning_repository.dart';
 import 'package:customer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 import 'package:customer_app_java_support/screens/ptg_screens/date_picker_screen.dart';
@@ -60,6 +66,10 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
       BookingRepository(httpClient: http.Client());
   WarningRepository _warningRepository =
       WarningRepository(httpClient: http.Client());
+  CommentRepository _commentRepository =
+      CommentRepository(httpClient: http.Client());
+  ReportRepository _reportRepository =
+      ReportRepository(httpClient: http.Client());
   double cuLat = 0;
   double cuLong = 0;
   List<ReturnTypeModel> returnedTypes = ReturnTypeModel.getReturnTypes();
@@ -113,6 +123,10 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
     });
   }
 
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+  }
+
   getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -152,8 +166,15 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
 
           if (bookingState is BookingStateFailure) {
             Navigator.pop(context);
-            _showBookingFailDialog();
-            popUp(context, 'Đặt hẹn', 'Gửi yêu cầu thất bại');
+
+            String error = bookingState.error.replaceAll('Exception: ', '');
+
+            if (error.toUpperCase() == 'UNAUTHORIZED') {
+              _showUnauthorizedDialog();
+            } else {
+              _showBookingFailDialog();
+              popUp(context, 'Đặt hẹn', 'Gửi yêu cầu thất bại');
+            }
           }
         },
         child: Column(
@@ -546,7 +567,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
 
                 if (state is WarningStateFailure) {
                   Navigator.pop(context);
-                  _showBookingFailDialog();
+                  String error = state.error.replaceAll('Exception: ', '');
+                  if (error.toUpperCase() == 'UNAUTHORIZED') {
+                    _showUnauthorizedDialog();
+                  } else {
+                    _showBookingFailDialog();
+                  }
                 }
               },
               child: RaisedButton(
@@ -736,6 +762,12 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                               BlocProvider(
                                   create: (context) => BookingBloc(
                                       bookingRepository: _bookingRepository)),
+                              BlocProvider(
+                                  create: (context) => CommentBloc(
+                                      commentRepository: _commentRepository)),
+                              BlocProvider(
+                                  create: (context) => ReportBloc(
+                                      reportRepository: _reportRepository)),
                             ],
                             child: BookingDetailScreen(
                               bookingId: bookingId,
@@ -812,6 +844,38 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
               onlyOkButton: true,
               onOkButtonPressed: () {
                 Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(

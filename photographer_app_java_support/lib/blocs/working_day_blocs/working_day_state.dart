@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
 import 'package:photographer_app_java_support/models/working_date_bloc_model.dart';
 
 abstract class WorkingDayState extends Equatable {
@@ -35,4 +36,9 @@ class WorkingDayStateUpdateSuccess extends WorkingDayState {
       'WorkingDayStateUpdateSuccess { update working day: $isUpdateSuccess }';
 }
 
-class WorkingDayStateFailure extends WorkingDayState {}
+class WorkingDayStateFailure extends WorkingDayState {
+  final String error;
+  WorkingDayStateFailure({
+    this.error,
+  });
+}

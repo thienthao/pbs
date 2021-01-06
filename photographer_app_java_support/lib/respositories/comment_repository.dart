@@ -37,6 +37,8 @@ class CommentRepository {
       }).toList();
 
       return comments;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of comments');
     }
@@ -61,6 +63,8 @@ class CommentRepository {
       }).toList();
 
       return comments;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of comments');
     }

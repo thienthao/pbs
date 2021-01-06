@@ -13,6 +13,12 @@ class FetchThreads extends ThreadEvent {
   List<Object> get props => [];
 }
 
+class FetchThreadsOfUser extends ThreadEvent {
+  FetchThreadsOfUser();
+  @override
+  List<Object> get props => [];
+}
+
 class PostThread extends ThreadEvent {
   final Thread thread;
 
@@ -20,6 +26,20 @@ class PostThread extends ThreadEvent {
 
   @override
   List<Object> get props => [thread];
+}
+
+class EditThread extends ThreadEvent {
+  final Thread thread;
+  EditThread({@required this.thread});
+  @override
+  List<Object> get props => [thread];
+}
+
+class DeleteThread extends ThreadEvent {
+  final int id;
+  DeleteThread({@required this.id});
+  @override
+  List<Object> get props => [id];
 }
 
 class PostComment extends ThreadEvent {

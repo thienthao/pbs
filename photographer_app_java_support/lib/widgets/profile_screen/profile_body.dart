@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:photographer_app_java_support/blocs/authen_blocs/authen_export.dart';
 import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
@@ -27,6 +28,10 @@ class _BodyState extends State<Body> {
   _loadProfile() async {
     BlocProvider.of<PhotographerBloc>(context)
         .add(PhotographerbyIdEventFetch(id: globalPtgId));
+  }
+
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
   }
 
   @override
@@ -95,7 +100,9 @@ class _BodyState extends State<Body> {
                     ProfileMenuItem(
                       iconSrc: "assets/icons/logout.svg",
                       title: "Đăng xuất",
-                      press: () {},
+                      press: () {
+                        _logOut();
+                      },
                     ),
                   ],
                 ),

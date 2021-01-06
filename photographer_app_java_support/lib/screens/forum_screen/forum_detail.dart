@@ -1,12 +1,18 @@
-import 'package:intl/intl.dart';
-import 'package:photographer_app_java_support/blocs/thread_bloc/thread_bloc.dart';
-import 'package:photographer_app_java_support/models/thread_model.dart';
-import 'package:photographer_app_java_support/respositories/thread_repository.dart';
-import 'package:photographer_app_java_support/screens/forum_screen/reply_screen.dart';
-import 'package:photographer_app_java_support/screens/forum_screen/reply_to_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
+import 'package:intl/intl.dart';
+import 'package:photographer_app_java_support/blocs/thread_bloc/thread_bloc.dart';
+import 'package:photographer_app_java_support/blocs/thread_bloc/thread_event.dart';
+import 'package:photographer_app_java_support/blocs/thread_bloc/thread_state.dart';
+import 'package:photographer_app_java_support/globals.dart';
+import 'package:photographer_app_java_support/models/thread_model.dart';
+import 'package:photographer_app_java_support/respositories/thread_repository.dart';
+import 'package:photographer_app_java_support/screens/forum_screen/edit_thread.dart';
+import 'package:photographer_app_java_support/screens/forum_screen/reply_screen.dart';
+import 'package:photographer_app_java_support/widgets/shared/scale_navigator.dart';
+import 'package:photographer_app_java_support/widgets/shared/slide_navigator.dart';
 
 class ForumDetail extends StatefulWidget {
   final Thread thread;
@@ -20,6 +26,11 @@ class ForumDetail extends StatefulWidget {
 }
 
 class _ForumDetailState extends State<ForumDetail> {
+  _deletePost() {
+    BlocProvider.of<ThreadBloc>(context)
+        .add(DeleteThread(id: widget.thread.id));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +74,7 @@ class _ForumDetailState extends State<ForumDetail> {
             Padding(
               padding: EdgeInsets.only(top: 10.0),
               child: Card(
-                elevation: 0.0,
+                elevation: 1.0,
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
@@ -119,41 +130,75 @@ class _ForumDetailState extends State<ForumDetail> {
                       ),
                       SizedBox(height: 15.0),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            'TRÍCH',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
                           SizedBox(width: 5.0),
-                          Text(
-                            '·',
-                            style:
-                                TextStyle(fontSize: 11.0, color: Colors.grey),
-                          ),
-                          SizedBox(width: 5.0),
-                          PopupMenuButton<int>(
-                            child: Text(
-                              'ĐIỀU HÀNH',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 1,
-                                child: Text("Chỉnh sửa bài viết"),
-                              ),
-                              PopupMenuItem(
-                                value: 2,
-                                child: Text("Xóa bài viết"),
-                              ),
-                            ],
+                          widget.thread.owner.id == globalPtgId
+                              ? PopupMenuButton<int>(
+                                  child: Text(
+                                    'ĐIỀU HÀNH',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      value: 1,
+                                      child: FlatButton(
+                                        child: Text("Chỉnh sửa bài viết"),
+                                        onPressed: () {
+                                          slideNavigator(
+                                              context,
+                                              MultiBlocProvider(
+                                                providers: [
+                                                  BlocProvider(
+                                                    create: (context) =>
+                                                        ThreadBloc(
+                                                            repository: widget
+                                                                .threadRepository),
+                                                  ),
+                                                ],
+                                                child: EditThreadScreen(
+                                                  thread: widget.thread,
+                                                  isEdited: (bool isEdited) {
+                                                    if (isEdited) {
+                                                      widget.isPosted(true);
+                                                    }
+                                                  },
+                                                ),
+                                              ));
+                                        },
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 2,
+                                      child: FlatButton(
+                                          onPressed: () {
+                                            _showConfirmAlert();
+                                          },
+                                          child: Text("Xóa bài viết")),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox(),
+                          BlocListener<ThreadBloc, ThreadState>(
+                            listener: (context, state) {
+                              if (state is ThreadSuccess) {
+                                Navigator.pop(context);
+                                widget.isPosted(true);
+                                _showSuccessAlert();
+                              }
+                              if (state is ThreadLoading) {
+                                _showLoadingAlert();
+                              }
+                              if (state is ThreadError) {
+                                Navigator.pop(context);
+                                _showFailDialog();
+                              }
+                            },
+                            child: SizedBox(width: 10.0),
                           ),
                         ],
                       ),
@@ -169,16 +214,16 @@ class _ForumDetailState extends State<ForumDetail> {
               itemBuilder: (context, index) {
                 ThreadComment comment = widget.thread.comments[index];
                 return Padding(
-                  padding: EdgeInsets.only(top: 10.0),
+                  padding: EdgeInsets.only(top: 8.0),
                   child: Card(
-                    elevation: 0.0,
+                    elevation: 1.0,
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: 5.0),
+                          SizedBox(height: 2.0),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 5.0),
                             child: Row(
@@ -210,31 +255,31 @@ class _ForumDetailState extends State<ForumDetail> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 20.0),
+                          SizedBox(height: 15.0),
                           Text(
                             comment.comment,
                             style: TextStyle(
                               fontSize: 16.0,
                             ),
                           ),
-                          SizedBox(height: 15.0),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ReplyTo()),
-                              );
-                            },
-                            child: Text(
-                              'TRÍCH',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
+                          SizedBox(height: 10.0),
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     Navigator.push(
+                          //       context,
+                          //       MaterialPageRoute(
+                          //           builder: (context) => ReplyTo()),
+                          //     );
+                          //   },
+                          //   child: Text(
+                          //     'TRÍCH',
+                          //     style: TextStyle(
+                          //       fontSize: 14.0,
+                          //       fontWeight: FontWeight.bold,
+                          //       color: Colors.grey,
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -246,6 +291,133 @@ class _ForumDetailState extends State<ForumDetail> {
         ),
       ),
     );
+  }
+
+  Future<void> _showConfirmAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/question.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Xác nhận',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Bạn có chắc là muốn xóa bài viết này hay không?',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onOkButtonPressed: () {
+                _deletePost();
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
+              buttonCancelText: Text(
+                'Hủy bỏ',
+                style: TextStyle(color: Colors.black87),
+              ),
+            ));
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Xoá bài viết thành công',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onOkButtonPressed: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              onlyOkButton: true,
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }
 

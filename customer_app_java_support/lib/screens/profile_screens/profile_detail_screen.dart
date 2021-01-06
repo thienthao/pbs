@@ -36,6 +36,17 @@ class _DetailState extends State<Detail> {
     phoneFocusNode.unfocus();
   }
 
+  String checkPhone(String phone) {
+    RegExp regExp = new RegExp('(84|0[3|5|7|8|9])+([0-9]{8,9})',
+        caseSensitive: false, multiLine: false);
+    if (phone.isEmpty) {
+      return 'Vui lòng nhập số điện thoại của bạn';
+    } else if (!regExp.hasMatch(phone)) {
+      return 'Số điện thoại phải theo định dạng của Việt Nam';
+    }
+    return null;
+  }
+
   _updateProfile() async {
     _unFocus();
     CustomerBlocModel customerBlocModel = CustomerBlocModel(
@@ -48,7 +59,6 @@ class _DetailState extends State<Detail> {
     BlocProvider.of<CustomerBloc>(context)
         .add(CustomerEventUpdateProfile(customer: customerBlocModel));
   }
-
 
   @override
   void initState() {
@@ -195,7 +205,7 @@ class _DetailState extends State<Detail> {
                           TextFormField(
                             focusNode: phoneFocusNode,
                             controller: phoneController,
-                            validator: _checkEmpty,
+                            validator: checkPhone,
                             keyboardType: TextInputType.phone,
                             style: TextStyle(
                               color: Colors.black87,

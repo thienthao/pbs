@@ -1,7 +1,8 @@
-import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
-import 'package:customer_app_java_support/models/search_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/models/search_bloc_model.dart';
 
 abstract class PhotographerState extends Equatable {
   const PhotographerState();
@@ -91,4 +92,9 @@ class PhotographerIDStateSuccess extends PhotographerState {
       'PhotographersLoadSuccess { photographers: $photographer }';
 }
 
-class PhotographerStateFailure extends PhotographerState {}
+class PhotographerStateFailure extends PhotographerState {
+  final String error;
+  PhotographerStateFailure({
+    this.error,
+  });
+}

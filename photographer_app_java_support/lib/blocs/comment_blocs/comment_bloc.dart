@@ -30,8 +30,8 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
       final comments =
           await this.commentRepository.getCommentByPhotographerId(id);
       yield CommentStateSuccess(comments: comments);
-    } catch (_) {
-      yield CommentStateFailure();
+    } catch (e) {
+      yield CommentStateFailure(error: e.toString());
     }
   }
 
@@ -39,8 +39,8 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     try {
       final comments = await this.commentRepository.getCommentByBookingId(id);
       yield CommentStateSuccess(comments: comments);
-    } catch (_) {
-      yield CommentStateFailure();
+    } catch (e) {
+      yield CommentStateFailure(error: e.toString());
     }
   }
 }

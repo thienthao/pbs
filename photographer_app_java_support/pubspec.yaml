@@ -66,6 +66,7 @@ dependencies:
   giffy_dialog: ^1.7.0
   cached_network_image: ^2.4.1
   weather_icons: ^2.0.2
+  photo_view: ^0.10.3
   flutter:
     sdk: flutter
 

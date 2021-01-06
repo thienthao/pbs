@@ -29,6 +29,13 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
       yield* _mapAlbumsLoadedToState();
     } else if (albumEvent is AlbumEventRefresh) {
       yield* _mapAlbumsLoadedToState();
+    } else if (albumEvent is AlbumEventUpdateInfo) {
+      yield* _mapUpdateAlbumInfoLoadedToState(albumEvent.album);
+    } else if (albumEvent is AlbumEventDeleteAnImageOfAnAlbum) {
+      yield* _mapRemoveAnImageLoadedToState(
+          albumEvent.albumId, albumEvent.imageId);
+    } else if (albumEvent is AlbumEventAddAnImageForAnAlbum) {
+      yield* _mapAddImageLoadedToState(albumEvent.albumId, albumEvent.image);
     }
   }
 
@@ -36,8 +43,8 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
     try {
       final albums = await this.albumRepository.getListAlbum();
       yield AlbumStateSuccess(albums: albums);
-    } catch (_) {
-      yield AlbumStateFailure();
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
     }
   }
 
@@ -49,8 +56,8 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
           await this.albumRepository.createAlbum(album, thumbnail, images);
 
       yield AlbumStateCreatedSuccess(isSuccess: albumCreatedSuccess);
-    } catch (_) {
-      yield AlbumStateFailure();
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
     }
   }
 
@@ -58,8 +65,39 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
     try {
       final albums = await this.albumRepository.getAlbumOfPhotographer(id);
       yield AlbumStateSuccess(albums: albums);
-    } catch (_) {
-      yield AlbumStateFailure();
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
+    }
+  }
+
+  Stream<AlbumState> _mapUpdateAlbumInfoLoadedToState(
+      AlbumBlocModel album) async* {
+    try {
+      final isSuccess = await this.albumRepository.updateAlbumInfo(album);
+      yield AlbumStateUpdatedSuccess(isSuccess: isSuccess);
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
+    }
+  }
+
+  Stream<AlbumState> _mapAddImageLoadedToState(int albumId, File image) async* {
+    try {
+      final isSuccess =
+          await this.albumRepository.addImageForAlbum(albumId, image);
+      yield AlbumStateRemoveImageSuccess(isSuccess: isSuccess);
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
+    }
+  }
+
+  Stream<AlbumState> _mapRemoveAnImageLoadedToState(
+      int albumId, int imageId) async* {
+    try {
+      final isSuccess =
+          await this.albumRepository.removeImage(albumId, imageId);
+      yield AlbumStateRemoveImageSuccess(isSuccess: isSuccess);
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
     }
   }
 }

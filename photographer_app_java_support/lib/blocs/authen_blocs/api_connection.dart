@@ -35,6 +35,8 @@ Future<Token> getToken(UserLogin userLogin) async {
     } else {
       throw Exception('Tài khoản này không hợp lệ');
     }
+  } else if (response.statusCode == 401) {
+    throw Exception('Tài khoản của bạn đã bị khóa');
   } else {
     print(json.decode(response.body).toString());
     final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;

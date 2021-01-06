@@ -64,19 +64,21 @@ class _DropMenuState extends State<DropMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300.0,
-      child: DropdownButtonHideUnderline(
-        child: ButtonTheme(
-          alignedDropdown: true,
-          child: DropdownButton(
-            value: selectedStatus,
-            items: dropDownMenuItems,
-            onChanged: onChangeDropdownItem,
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              color: Colors.pink,
-              size: 20.0,
+    return Center(
+      child: Container(
+        width: 300.0,
+        child: DropdownButtonHideUnderline(
+          child: ButtonTheme(
+            alignedDropdown: true,
+            child: DropdownButton(
+              value: selectedStatus,
+              items: dropDownMenuItems,
+              onChanged: onChangeDropdownItem,
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.pink,
+                size: 20.0,
+              ),
             ),
           ),
         ),

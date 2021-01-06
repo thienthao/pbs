@@ -1,3 +1,5 @@
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/warning_blocs/warnings.dart';
@@ -59,6 +61,10 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
   _loadWorkingDateOfPtg() async {
     BlocProvider.of<WorkingDayBloc>(context)
         .add(WorkingDayEventFetch(ptgId: widget.ptgId));
+  }
+
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
   }
 
   void getTime() {
@@ -346,7 +352,17 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                         ),
                       ),
                       SizedBox(height: 10.0),
-                      BlocBuilder<BookingBloc, BookingState>(
+                      BlocConsumer<BookingBloc, BookingState>(
+                        listener: (context, state) {
+                          if (state is BookingStateFailure) {
+                            String error =
+                                state.error.replaceAll('Exception: ', '');
+
+                            if (error.toUpperCase() == 'UNAUTHORIZED') {
+                              _showUnauthorizedDialog();
+                            }
+                          }
+                        },
                         builder: (context, state) {
                           if (state is BookingStateLoading) {
                             return Padding(
@@ -356,7 +372,7 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                           }
 
                           if (state is BookingStateFailure) {
-                            return Text('fail!!');
+                            return SizedBox();
                           }
                           if (state is BookingStateGetBookingByDateSuccess) {
                             final tempListBooking = List<BookingBlocModel>();
@@ -459,6 +475,12 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
                           }
                           if (state is WarningStateFailure) {
                             Navigator.pop(context);
+                            String error =
+                                state.error.replaceAll('Exception: ', '');
+
+                            if (error.toUpperCase() == 'UNAUTHORIZED') {
+                              _showUnauthorizedDialog();
+                            }
                           }
                         },
                         child: RaisedButton(
@@ -625,6 +647,38 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
               onlyOkButton: true,
               onOkButtonPressed: () {
                 Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(

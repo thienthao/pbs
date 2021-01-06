@@ -76,6 +76,8 @@ class BookingRepository {
         );
       }).toList();
       return bookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception();
     }
@@ -142,6 +144,8 @@ class BookingRepository {
         );
       }).toList();
       return bookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -167,7 +171,6 @@ class BookingRepository {
           phone: tempCustomer['phone'],
           fullname: tempCustomer['fullname'],
           avatar: tempCustomer['avatar']);
-    
 
       final tempPackage = data['servicePackage'] as Map;
       PackageBlocModel package = PackageBlocModel(
@@ -226,6 +229,8 @@ class BookingRepository {
           returningLink: data['returningLink']);
 
       return booking;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting list of bookings');
     }
@@ -291,6 +296,8 @@ class BookingRepository {
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       result = data['id'];
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Create a Booking');
     }
@@ -358,6 +365,8 @@ class BookingRepository {
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error Create a Booking');
     }
@@ -386,17 +395,27 @@ class BookingRepository {
 
     String str = json.encode(resBody);
 
-    final response =
-        await httpClient.put(BaseApi.BOOKING_URL + '/cancel/customer',
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
-            },
-            body: str);
+    // final response =
+    //     await httpClient.put(BaseApi.BOOKING_URL + '/cancel/customer',
+    //         headers: {
+    //           'Content-Type': 'application/json; charset=UTF-8',
+    //           HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
+    //         },
+    //         body: str);
+
+    final response = await httpClient.put(
+        BaseApi.BOOKING_URL + '/cancellation-submit/customer',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
+        },
+        body: str);
 
     bool result = false;
     if (response.statusCode == 200) {
       result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error at cancel a booking');
     }
@@ -428,6 +447,8 @@ class BookingRepository {
       }
 
       return listBookings;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
     } else {
       throw Exception('Error getting Photographer Calendar');
     }

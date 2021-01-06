@@ -1,12 +1,19 @@
+import 'package:badges/badges.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
+import 'package:customer_app_java_support/blocs/notification_blocs/notifications.dart';
 import 'package:customer_app_java_support/globals.dart' as globals;
 import 'package:customer_app_java_support/globals.dart';
+import 'package:customer_app_java_support/locator.dart';
 import 'package:customer_app_java_support/plane_indicator.dart';
 import 'package:customer_app_java_support/respositories/booking_repository.dart';
 import 'package:customer_app_java_support/respositories/customer_repository.dart';
+import 'package:customer_app_java_support/respositories/notification_repository.dart';
+import 'package:customer_app_java_support/screens/event_screens/event_screen.dart';
 import 'package:customer_app_java_support/screens/forum_screen/forum_screen.dart';
 import 'package:customer_app_java_support/screens/profile_screens/profile_screen.dart';
+import 'package:customer_app_java_support/services/push_notification_service.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,23 +38,26 @@ class NavScreen extends StatefulWidget {
 }
 
 class _NavScreenState extends State<NavScreen> {
+  int _selectedTab = 0;
   AlbumRepository _albumRepository = AlbumRepository(httpClient: http.Client());
   PhotographerRepository _photographerRepository =
       PhotographerRepository(httpClient: http.Client());
   CategoryRepository _categoryRepository =
       CategoryRepository(httpClient: http.Client());
-
+  NotificationRepository _notificationRepository =
+      NotificationRepository(httpClient: http.Client());
   BookingRepository _bookingRepository =
       BookingRepository(httpClient: http.Client());
   CustomerRepository _customerRepository =
       CustomerRepository(httpClient: http.Client());
   List _pageOptions = [];
   SharedPreferences prefs;
+  DatabaseReference _notificationRef;
+  final PushNotificationService _pushNotificationService =
+      locator<PushNotificationService>();
 
   void getPreference() async {
     prefs = await SharedPreferences.getInstance();
-    print('TOKEN: ${prefs.getString('customerToken')}');
-    print('CUS ID: ${prefs.getInt('customerId')}');
     globalCusId = prefs.getInt('customerId');
     globalCusToken = prefs.getString('customerToken');
   }
@@ -55,6 +65,7 @@ class _NavScreenState extends State<NavScreen> {
   @override
   void initState() {
     super.initState();
+    _pushNotificationService.init();
     globals.selectedTabGlobal = 0;
     getPreference();
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -62,6 +73,9 @@ class _NavScreenState extends State<NavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _notificationRef = FirebaseDatabase.instance
+        .reference()
+        .child('Notification_$globalCusId');
     _pageOptions = [
       MultiBlocProvider(
         providers: [
@@ -92,6 +106,16 @@ class _NavScreenState extends State<NavScreen> {
       MultiBlocProvider(
         providers: [
           BlocProvider(
+            create: (context) => NotificationBloc(
+                notificationRepository: _notificationRepository)
+              ..add(NotificationEventInitial()),
+          ),
+        ],
+        child: EventScreen(),
+      ),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
             create: (context) =>
                 BookingBloc(bookingRepository: _bookingRepository),
           ),
@@ -118,7 +142,7 @@ class _NavScreenState extends State<NavScreen> {
         scaffoldBackgroundColor: Color(0xFFF3F5F7),
       ),
       home: Scaffold(
-        body: _pageOptions[globals.selectedTabGlobal],
+        body: _pageOptions[_selectedTab],
         bottomNavigationBar: Container(
           decoration: BoxDecoration(color: Colors.white, boxShadow: [
             BoxShadow(
@@ -129,43 +153,80 @@ class _NavScreenState extends State<NavScreen> {
           child: SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-              child: GNav(
-                  gap: 2,
-                  activeColor: Colors.white,
-                  iconSize: 24,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                  duration: Duration(seconds: 1),
-                  tabBackgroundColor: Color(0xFFF88F8F),
-                  tabs: [
-                    GButton(
-                      icon: Icons.home,
-                      iconColor: Colors.grey[600],
-                      text: 'Trang chủ',
-                    ),
-                    GButton(
-                      icon: Icons.style,
-                      iconColor: Colors.grey[600],
-                      text: 'Diễn đàn',
-                    ),
-                    GButton(
-                      icon: Icons.library_books,
-                      iconColor: Colors.grey[600],
-                      text: 'Lịch sử',
-                      onPressed: () {
-                        // Navigator.pop(context);
-                      },
-                    ),
-                    GButton(
-                      icon: Icons.account_circle_sharp,
-                      iconColor: Colors.grey[600],
-                      text: 'Profile',
-                    ),
-                  ],
-                  selectedIndex: globals.selectedTabGlobal,
-                  onTabChange: (index) {
-                    setState(() {
-                      globals.selectedTabGlobal = index;
-                    });
+              child: StreamBuilder(
+                  stream: _notificationRef.onValue,
+                  builder: (context, snapshot) {
+                    return GNav(
+                        gap: 2,
+                        activeColor: Colors.white,
+                        iconSize: 24,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                        duration: Duration(seconds: 1),
+                        tabBackgroundColor: Color(0xFFF88F8F),
+                        tabs: [
+                          GButton(
+                            icon: Icons.home,
+                            iconColor: Colors.grey[600],
+                            text: '',
+                          ),
+                          GButton(
+                            icon: Icons.style,
+                            iconColor: Colors.grey[600],
+                            text: '',
+                          ),
+                          GButton(
+                            icon: Icons.notifications,
+                            iconColor: Colors.grey[600],
+                            text: '',
+                            leading: _selectedTab == 2
+                                ? null
+                                : snapshot.data == null
+                                    ? null
+                                    : snapshot.data.snapshot.value != null
+                                        ? snapshot.data.snapshot.value.length !=
+                                                0
+                                            ? Badge(
+                                                badgeContent: Text(
+                                                  snapshot.data.snapshot
+                                                              .value !=
+                                                          null
+                                                      ? '${snapshot.data.snapshot.value.length}'
+                                                      : '0',
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                                child: Icon(
+                                                  Icons.notifications,
+                                                  color: Colors.grey[600],
+                                                ))
+                                            : null
+                                        : null,
+                          ),
+                          GButton(
+                            icon: Icons.library_books,
+                            iconColor: Colors.grey[600],
+                            text: '',
+                            onPressed: () {
+                              // Navigator.pop(context);
+                            },
+                          ),
+                          GButton(
+                            icon: Icons.account_circle_sharp,
+                            iconColor: Colors.grey[600],
+                            text: '',
+                          ),
+                        ],
+                        selectedIndex: _selectedTab,
+                        onTabChange: (index) {
+                          setState(() {
+                            _selectedTab = index;
+                          });
+                          if (_selectedTab != 3) {
+                          } else {
+                            _notificationRef.remove();
+                          }
+                        });
                   }),
             ),
           ),

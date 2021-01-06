@@ -1,7 +1,9 @@
-
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_bloc.dart';
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_event.dart';
 import 'package:customer_app_java_support/blocs/thread_bloc/thread_state.dart';
+import 'package:customer_app_java_support/blocs/thread_of_user_blocs/thread_of_user_bloc.dart';
 import 'package:customer_app_java_support/blocs/topic_bloc/topic_bloc.dart';
 import 'package:customer_app_java_support/blocs/topic_bloc/topic_event.dart';
 import 'package:customer_app_java_support/blocs/topic_bloc/topic_state.dart';
@@ -16,6 +18,7 @@ import 'package:customer_app_java_support/widgets/forum_screen/list_topic.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:http/http.dart' as http;
 
 class ForumPage extends StatefulWidget {
@@ -94,6 +97,10 @@ class _ForumPageState extends State<ForumPage>
               create: (context) => ThreadBloc(repository: threadRepository),
             ),
             BlocProvider(
+              create: (context) =>
+                  ThreadOfUserBloc(repository: threadRepository),
+            ),
+            BlocProvider(
               create: (context) => TopicBloc(repository: topicRepository),
             ),
           ],
@@ -116,6 +123,9 @@ class ForumBody extends StatefulWidget {
 class _ForumBodyState extends State<ForumBody> {
   bool isCreated = false;
   bool isCommentPosted = false;
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +166,8 @@ class _ForumBodyState extends State<ForumBody> {
           ).then((value) {
             if (isCreated) {
               BlocProvider.of<ThreadBloc>(context).add(FetchThreads());
+              BlocProvider.of<ThreadOfUserBloc>(context)
+                  .add(FetchThreadsOfUser());
             }
           });
         },
@@ -165,7 +177,15 @@ class _ForumBodyState extends State<ForumBody> {
         ),
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: BlocBuilder<ThreadBloc, ThreadState>(
+      body: BlocConsumer<ThreadBloc, ThreadState>(
+        listener: (context, state) {
+          if (state is ThreadError) {
+            String error = state.error.replaceAll('Exception: ', '');
+            if (error.toUpperCase() == 'UNAUTHORIZED') {
+              _showUnauthorizedDialog();
+            }
+          }
+        },
         builder: (context, state) {
           if (state is ThreadEmpty) {
             BlocProvider.of<ThreadBloc>(context).add(FetchThreads());
@@ -190,20 +210,28 @@ class _ForumBodyState extends State<ForumBody> {
                       return InkWell(
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => ForumDetail(
+                          MaterialPageRoute(builder: (_) {
+                            return BlocProvider(
+                              create: (context) => ThreadBloc(
+                                  repository: widget.threadRepository),
+                              child: ForumDetail(
                                 isPosted: (bool _isPosted) {
                                   if (_isPosted) {
                                     isCommentPosted = true;
                                   }
                                 },
                                 thread: thread,
-                                threadRepository: widget.threadRepository),
-                          ),
+                                threadRepository: widget.threadRepository,
+                              ),
+                            );
+                          }),
                         ).then((value) {
                           if (isCommentPosted) {
                             BlocProvider.of<ThreadBloc>(context)
                                 .add(FetchThreads());
+                            BlocProvider.of<ThreadOfUserBloc>(context)
+                                .add(FetchThreadsOfUser());
+                            isCommentPosted = false;
                           }
                         }),
                         child: listThread(state.threads[index]),
@@ -220,12 +248,30 @@ class _ForumBodyState extends State<ForumBody> {
                       return InkWell(
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => ForumDetail(
-                              thread: thread,
-                            ),
-                          ),
-                        ),
+                          MaterialPageRoute(builder: (_) {
+                            return BlocProvider(
+                              create: (context) => ThreadBloc(
+                                  repository: widget.threadRepository),
+                              child: ForumDetail(
+                                isPosted: (bool _isPosted) {
+                                  if (_isPosted) {
+                                    isCommentPosted = true;
+                                  }
+                                },
+                                thread: thread,
+                                threadRepository: widget.threadRepository,
+                              ),
+                            );
+                          }),
+                        ).then((value) {
+                          if (isCommentPosted) {
+                            BlocProvider.of<ThreadBloc>(context)
+                                .add(FetchThreads());
+                            BlocProvider.of<ThreadOfUserBloc>(context)
+                                .add(FetchThreadsOfUser());
+                            isCommentPosted = false;
+                          }
+                        }),
                         child: listThread(state.threads[index]),
                       );
                     },
@@ -260,9 +306,72 @@ class _ForumBodyState extends State<ForumBody> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Container(),
+                BlocConsumer<ThreadOfUserBloc, ThreadState>(
+                  listener: (context, state) {
+                    if (state is ThreadError) {
+                      String error = state.error.replaceAll('Exception: ', '');
+                      if (error.toUpperCase() == 'UNAUTHORIZED') {
+                        _showUnauthorizedDialog();
+                      }
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is ThreadEmpty) {
+                      BlocProvider.of<ThreadOfUserBloc>(context)
+                          .add(FetchThreadsOfUser());
+                    }
+                    if (state is ThreadError) {
+                      return Center(
+                        child: Text('Đã có lỗi xảy ra trong lúc tải dữ liệu'),
+                      );
+                    }
+
+                    if (state is ThreadLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state is ThreadLoaded) {
+                      return Container(
+                        child: ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          itemCount: state.threads.length,
+                          itemBuilder: (context, index) {
+                            Thread thread = state.threads[index];
+                            return InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) {
+                                  return BlocProvider(
+                                    create: (context) => ThreadBloc(
+                                        repository: widget.threadRepository),
+                                    child: ForumDetail(
+                                      isPosted: (bool _isPosted) {
+                                        if (_isPosted) {
+                                          isCommentPosted = true;
+                                        }
+                                      },
+                                      thread: thread,
+                                      threadRepository: widget.threadRepository,
+                                    ),
+                                  );
+                                }),
+                              ).then((value) {
+                                if (isCommentPosted) {
+                                  BlocProvider.of<ThreadBloc>(context)
+                                      .add(FetchThreads());
+                                  BlocProvider.of<ThreadOfUserBloc>(context)
+                                      .add(FetchThreadsOfUser());
+                                  isCommentPosted = false;
+                                }
+                              }),
+                              child: listThread(state.threads[index]),
+                            );
+                          },
+                        ),
+                      );
+                    }
+                    return SizedBox();
+                  },
                 ),
               ],
             );
@@ -273,5 +382,37 @@ class _ForumBodyState extends State<ForumBody> {
         },
       ),
     );
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
   }
 }

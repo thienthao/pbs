@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:photographer_app_java_support/blocs/comment_blocs/comment_bloc.dart';
+import 'package:photographer_app_java_support/blocs/report_blocs/reports.dart';
 import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/booking_repository.dart';
 import 'package:photographer_app_java_support/respositories/comment_repository.dart';
+import 'package:photographer_app_java_support/respositories/report_repository.dart';
 import 'package:photographer_app_java_support/screens/history_screens/booking_detail_screen.dart';
 
 class BookingWidget extends StatefulWidget {
@@ -32,6 +34,8 @@ class _BookingWidgetState extends State<BookingWidget> {
       BookingRepository(httpClient: http.Client());
   CommentRepository _commentRepository =
       CommentRepository(httpClient: http.Client());
+      ReportRepository _reportRepository =
+      ReportRepository(httpClient: http.Client());
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -114,6 +118,10 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 BlocProvider(
                                     create: (context) => CommentBloc(
                                         commentRepository: _commentRepository)),
+                                          BlocProvider(
+                                    create: (context) => ReportBloc(
+                                        reportRepository: _reportRepository),
+                                  ),
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,

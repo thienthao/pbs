@@ -57,9 +57,6 @@ class _IconCarouselState extends State<IconCarousel> {
               itemCount: widget.blocCategories.length,
               itemBuilder: (BuildContext context, int index) {
                 CategoryBlocModel category = widget.blocCategories[index];
-                print(
-                  category.iconLink,
-                );
                 return Column(
                   children: [
                     GestureDetector(

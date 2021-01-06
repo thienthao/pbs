@@ -9,6 +9,7 @@ import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/album_respository.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
+import 'package:photographer_app_java_support/screens/forum_screen/forum_screen.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/profile_album_screen.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/profile_detail_screen.dart';
 import 'package:photographer_app_java_support/widgets/profile_screen/profile_body_info.dart';
@@ -16,6 +17,7 @@ import 'package:photographer_app_java_support/widgets/profile_screen/profile_bod
 import 'package:photographer_app_java_support/widgets/profile_screen/profile_body_menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:photographer_app_java_support/widgets/shared/slide_navigator.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -87,6 +89,13 @@ class _ProfileState extends State<Profile> {
                                       albumRepository: _albumRepository),
                                   child: AlbumList())),
                         );
+                      },
+                    ),
+                    ProfileMenuItem(
+                      iconSrc: "assets/icons/style.svg",
+                      title: "Diễn đàn",
+                      press: () {
+                        slideNavigator(context, ForumPage());
                       },
                     ),
                     BlocProvider(

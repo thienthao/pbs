@@ -8,7 +8,6 @@ import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:photographer_app_java_support/blocs/category_blocs/categories.dart';
 import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/album_bloc_model.dart';
-import 'package:photographer_app_java_support/models/category.dart';
 import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 
@@ -99,6 +98,7 @@ class _AddAlbumState extends State<AddAlbum> {
     _album = AlbumBlocModel(
         name: nameController.text,
         description: descriptionController.text,
+        category: selectedCategory,
         photographer: Photographer(id: globalPtgId));
     print(_album.name);
     print(_images[0].path.split('/').last);
@@ -209,35 +209,35 @@ class _AddAlbumState extends State<AddAlbum> {
               ],
             ),
             SizedBox(height: 30.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Địa điểm: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                TextField(
-                  controller: locationController,
-                  enableSuggestions: true,
-                  autocorrect: true,
-                  keyboardType: TextInputType.text,
-                  style: TextStyle(
-                    color: Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(Icons.location_on),
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText: 'Ví dụ: Hà Nội',
-                    hintStyle: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: <Widget>[
+            //     Text(
+            //       'Địa điểm: *',
+            //       style: TextStyle(color: Colors.black87, fontSize: 12.0),
+            //     ),
+            //     TextField(
+            //       controller: locationController,
+            //       enableSuggestions: true,
+            //       autocorrect: true,
+            //       keyboardType: TextInputType.text,
+            //       style: TextStyle(
+            //         color: Colors.black87,
+            //       ),
+            //       decoration: InputDecoration(
+            //         border: InputBorder.none,
+            //         icon: Icon(Icons.location_on),
+            //         contentPadding: EdgeInsets.all(8.0),
+            //         hintText: 'Ví dụ: Hà Nội',
+            //         hintStyle: TextStyle(
+            //           fontSize: 15.0,
+            //           color: Colors.grey,
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // SizedBox(height: 30.0),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -280,6 +280,7 @@ class _AddAlbumState extends State<AddAlbum> {
                           listCategory.add(category);
                         }
                       }
+
 
                       categoryDropDownMenuItems =
                           buildCategoryDropdownMenuItems(listCategory);
@@ -334,6 +335,7 @@ class _AddAlbumState extends State<AddAlbum> {
                     runSpacing: 7,
                     children: List.generate(_images.length, (index) {
                       return Hero(
+                        
                         tag: _images[index],
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10.0),
@@ -356,23 +358,6 @@ class _AddAlbumState extends State<AddAlbum> {
     );
   }
 
-  categoryChips() {
-    return Wrap(
-      spacing: 6.0,
-      runSpacing: 6.0,
-      children: List<Widget>.generate(categorys.length, (int index) {
-        Category location = categorys[index];
-        return Chip(
-          label: Text(location.name),
-          onDeleted: () {
-            setState(() {
-              categorys.removeAt(index);
-            });
-          },
-        );
-      }),
-    );
-  }
 
   Future<void> _showSuccessAlert() async {
     return showDialog<void>(

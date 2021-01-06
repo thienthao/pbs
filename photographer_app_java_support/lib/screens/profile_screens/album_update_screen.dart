@@ -1,9 +1,15 @@
 import 'dart:io';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
+import 'package:photographer_app_java_support/blocs/category_blocs/categories.dart';
 import 'package:photographer_app_java_support/models/album_bloc_model.dart';
 import 'package:photographer_app_java_support/models/category.dart';
+import 'package:photographer_app_java_support/models/category_bloc_model.dart';
+import 'package:photographer_app_java_support/screens/profile_screens/photo_view_screen.dart';
 import 'package:photographer_app_java_support/widgets/profile_screen/bottom_sheet_category.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
+import 'package:photographer_app_java_support/widgets/shared/scale_navigator.dart';
 
 class UpdateAlbum extends StatefulWidget {
   final AlbumBlocModel album;
@@ -14,6 +20,87 @@ class UpdateAlbum extends StatefulWidget {
 }
 
 class _UpdateAlbumState extends State<UpdateAlbum> {
+  List<CategoryBlocModel> listCategory = List<CategoryBlocModel>();
+  List<DropdownMenuItem<CategoryBlocModel>> categoryDropDownMenuItems;
+  CategoryBlocModel selectedCategory;
+
+  List<DropdownMenuItem<CategoryBlocModel>> buildCategoryDropdownMenuItems(
+      List categories) {
+    List<DropdownMenuItem<CategoryBlocModel>> items = List();
+    for (CategoryBlocModel category in categories) {
+      items.add(
+        DropdownMenuItem(
+          value: category,
+          child: Text(category.category),
+        ),
+      );
+    }
+    return items;
+  }
+
+  onChangeCategoryDropdownItem(CategoryBlocModel newSelectedCategory) {
+    setState(() {
+      selectedCategory = newSelectedCategory;
+    });
+  }
+
+  Widget _buildCategoryComboBox() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+      width: MediaQuery.of(context).size.width * 0.99,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey[300],
+              offset: Offset(-1.0, 2.0),
+              blurRadius: 6.0)
+        ],
+      ),
+      padding: EdgeInsets.all(10),
+      child: DropdownButtonHideUnderline(
+        child: ButtonTheme(
+          alignedDropdown: true,
+          child: DropdownButton(
+            value: selectedCategory,
+            items: categoryDropDownMenuItems,
+            onChanged: onChangeCategoryDropdownItem,
+            icon: Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.pink,
+              size: 20.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  _addImageForAlbum(File image) async {
+    BlocProvider.of<AlbumBloc>(context).add(
+        AlbumEventAddAnImageForAnAlbum(albumId: widget.album.id, image: image));
+  }
+
+  _removeImageOfAnAlbum(int imageId) async {
+    BlocProvider.of<AlbumBloc>(context).add(AlbumEventDeleteAnImageOfAnAlbum(
+        albumId: widget.album.id, imageId: imageId));
+  }
+
+  _updateAlbumInfo() async {
+    print(widget.album.id);
+    AlbumBlocModel albumBlocModel = AlbumBlocModel(
+      id: widget.album.id,
+      description: descriptionController.text,
+      location: locationController.text,
+      name: nameController.text,
+      category: selectedCategory,
+    );
+
+    BlocProvider.of<AlbumBloc>(context)
+        .add(AlbumEventUpdateInfo(album: albumBlocModel));
+  }
+
   List<File> _images = [];
 
   Future getImage() async {
@@ -24,6 +111,7 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
     setState(() {
       if (image != null) {
         _images.add(image);
+        _addImageForAlbum(image);
       }
     });
   }
@@ -64,7 +152,7 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
               Icons.done,
               color: Colors.blue,
             ),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => _updateAlbumInfo(),
           ),
         ],
         title: Text('Chi tiết Album'),
@@ -131,35 +219,35 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
               ],
             ),
             SizedBox(height: 30.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Địa điểm: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                TextField(
-                  controller: locationController,
-                  enableSuggestions: true,
-                  autocorrect: true,
-                  keyboardType: TextInputType.text,
-                  style: TextStyle(
-                    color: Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(Icons.location_on),
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText: 'Ví dụ: Hà Nội',
-                    hintStyle: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: <Widget>[
+            //     Text(
+            //       'Địa điểm: *',
+            //       style: TextStyle(color: Colors.black87, fontSize: 12.0),
+            //     ),
+            //     TextField(
+            //       controller: locationController,
+            //       enableSuggestions: true,
+            //       autocorrect: true,
+            //       keyboardType: TextInputType.text,
+            //       style: TextStyle(
+            //         color: Colors.black87,
+            //       ),
+            //       decoration: InputDecoration(
+            //         border: InputBorder.none,
+            //         icon: Icon(Icons.location_on),
+            //         contentPadding: EdgeInsets.all(8.0),
+            //         hintText: 'Ví dụ: Hà Nội',
+            //         hintStyle: TextStyle(
+            //           fontSize: 15.0,
+            //           color: Colors.grey,
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // SizedBox(height: 30.0),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -195,19 +283,32 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
                   style: TextStyle(color: Colors.black87, fontSize: 12.0),
                 ),
                 SizedBox(height: 5.0),
-                SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () => onPressedButton(),
-                      ),
-                      categoryChips(),
-                    ],
-                  ),
+                BlocListener<CategoryBloc, CategoryState>(
+                  listener: (context, state) {
+                    if (state is CategoryStateSuccess) {
+                      for (CategoryBlocModel category in state.categories) {
+                        if (!(category.id == 1)) {
+                          listCategory.add(category);
+                        }
+                      }
+                      for (var item in state.categories) {
+                        if (item.id == widget.album.category.id) {
+                          selectedCategory = item;
+                        }
+                      }
+
+                      categoryDropDownMenuItems =
+                          buildCategoryDropdownMenuItems(listCategory);
+
+                      setState(() {});
+                    }
+                    if (state is CategoryStateLoading) {
+                      return CircularProgressIndicator();
+                    }
+                  },
+                  child: SizedBox(),
                 ),
+                _buildCategoryComboBox()
               ],
             ),
             SizedBox(height: 30.0),
@@ -281,15 +382,62 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
                           (index) {
                             return Hero(
                               tag: widget.album.images[index],
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10.0),
-                                child: Image(
-                                  image: NetworkImage(
-                                      widget.album.images[index].imageLink),
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
+                              child: Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        return scaleNavigator(
+                                            context,
+                                            PhotoViewScreen(
+                                              imageUrl: widget.album
+                                                  .images[index].imageLink,
+                                            ));
+                                      },
+                                      child: Image(
+                                        image: NetworkImage(widget
+                                            .album.images[index].imageLink),
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  BlocListener<AlbumBloc, AlbumState>(
+                                    listener: (context, state) {
+                                      if (state
+                                          is AlbumStateRemoveImageSuccess) {}
+                                    },
+                                    child: Positioned(
+                                      right: 5,
+                                      top: 5,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          // print(widget.album.images[index].id);
+                                          print(widget.album.id);
+                                          _removeImageOfAnAlbum(
+                                              widget.album.images[index].id);
+                                          widget.album.images.removeAt(index);
+                                          setState(() {});
+                                        },
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(50.0),
+                                          child: Container(
+                                            color: Colors.black54,
+                                            height: 30,
+                                            width: 30,
+                                            child: Icon(
+                                              Icons.close_rounded,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
                             );
                           },
