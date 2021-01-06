@@ -2,12 +2,14 @@ package fpt.university.pbswebapi.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.zxing.WriterException;
 import fpt.university.pbswebapi.dto.AlbumJson;
 import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.dto.PackageJson;
 import fpt.university.pbswebapi.entity.Album;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.helper.DtoMapper;
+import fpt.university.pbswebapi.helper.QRCodeHelper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
 import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.repository.ServicePackageRepository;
@@ -39,6 +41,17 @@ public class TestController {
         this.albumRepository = albumRepository;
         this.fcmService = fcmService;
         this.customRepository = customRepository;
+    }
+
+    @GetMapping("/qrcode")
+    public void QRCode() {
+        try {
+            QRCodeHelper.generateQRCodeImage("This is my first QR Code", 350, 350, "D:/MyQRCode.png");
+        } catch (WriterException e) {
+            System.out.println("Could not generate QR Code, WriterException :: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Could not generate QR Code, IOException :: " + e.getMessage());
+        }
     }
 
     @GetMapping("/users/byrating")

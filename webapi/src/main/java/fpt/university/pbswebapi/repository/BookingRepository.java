@@ -5,8 +5,10 @@ import fpt.university.pbswebapi.entity.EBookingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.transaction.Transactional;
 import java.awt.print.Book;
 import java.util.Date;
 import java.util.List;
@@ -177,4 +179,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select count(b) from Booking b where b.photographer.id=:userId and b.bookingStatus='CANCELLED_PHOTOGRAPHER'")
     int countCancelledBookingOfPhotographer(long userId);
+
+    @Transactional
+    @Modifying
+    @Query("update Booking b set b.isCheckin=true where b.id=:bookingId")
+    void checkin(Long bookingId);
 }

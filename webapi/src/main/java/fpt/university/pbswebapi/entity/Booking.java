@@ -91,6 +91,18 @@ public class Booking {
     @JoinColumn(name = "booking_id", referencedColumnName = "id")
     private List<TimeLocationDetail> timeLocationDetails;
 
+    @Column(name = "is_checkin")
+    private Boolean isCheckin;
+
+    @Column(name = "qr_checkin_code")
+    private String qrCheckinCode;
+
+    @PrePersist
+    void prepersist() {
+        isCheckin = false;
+        createdAt = new Date();
+    }
+
     public Booking(Long id, User customer, User photographer, ServicePackage servicePackage) {
         this.id = id;
         this.customer = customer;
