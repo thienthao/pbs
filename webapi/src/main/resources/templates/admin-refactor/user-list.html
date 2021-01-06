@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="/admin-refactor/admin-layout">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>User List</title>
 </head>
-<body layout:fragment="content">
+<body>
+<div th:fragment="content">
 <div class="row">
     <div class="col-md-12">
         <div class="main-card mb-3 card">
@@ -84,17 +83,43 @@
             <div class="d-block text-center card-footer">
                 <nav aria-label="..." class="d-flex justify-content-center">
                     <ul class="pagination pagination-sm">
-                        <li th:if="${page.hasPrevious()}" class="page-item"><a th:href="@{/admin/v2/users(page=${page.number-1},size=${page.size})}">Trước</a></li>
+                        <li th:if="${page.hasPrevious()}" class="page-item"><a id="user-list-a-paging-previous">Trước</a></li>
                         <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
                             <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
-                            <li th:unless="${page.number == i}" class="page-item"><a th:href="@{/admin/v2/users(page=${i},size=${page.size})}">[[${i}+1]]</a></li>
+                            <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)" class="user-list-a-paging-num">[[${i}+1]]</a></li>
                         </th:block>
-                        <li th:if="${page.hasNext()}" class="page-item"><a th:href="@{/admin/v2/users(page=${page.number+1},size=${page.size})}">Sau</a></li>
+                        <li th:if="${page.hasNext()}" class="page-item"><a id="user-list-a-paging-next">Sau</a></li>
                     </ul>
                 </nav>
             </div>
         </div>
     </div>
+</div>
+    <script th:inline="javascript">
+        // th:href="@{/admin/v2/users(page=${i},size=${page.size})}"
+
+        function toPage(atag) {
+            let page = atag.text;
+            page = page - 1;
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: [[${page.size}]], page: page}));
+        }
+
+        $(document).ready(()=>{
+            $('#user-list-a-paging-previous').click(() => {
+                $('#admin-content').load('/admin/v2/users?'  + $.param({size: [[${page.size}]], page: [[${page.number - 1}]]}));
+            });
+
+            // $('.numm').click(() => {
+            //     alert($(this).text());
+            //     $('#admin-content').load('/admin/v2/users?'  + $.param({size: [[${page.size}]], page: 1}));
+            // });
+
+            $('#user-list-a-paging-next').click(() => {
+                alert(jQuery(this).text());
+                $('#admin-content').load('/admin/v2/users?' + $.param({size: [[${page.size}]], page: [[${page.number + 1}]]}));
+            });
+        });
+    </script>
 </div>
 </body>
 </html>

@@ -58,7 +58,7 @@ public class AdminController {
 
     @RequestMapping({"/dashboard", "/"})
     public String dashboard(Model model) {
-        return "admin-rework/index";
+        return "admin-refactor/admin-layout";
     }
 
     @RequestMapping("/users/add")
@@ -263,7 +263,7 @@ public class AdminController {
         model.addAttribute("end", end);
         model.addAttribute("filter", filter);
         model.addAttribute("size", pageable.getPageSize());
-        return "admin-refactor/cancellation-list";
+        return "/admin-refactor/cancellation-list :: content";
     }
 
     @GetMapping("/cancellations/{id}")
@@ -312,7 +312,7 @@ public class AdminController {
         model.addAttribute("start", start);
         model.addAttribute("end", end);
         model.addAttribute("role", role);
-        return "admin-refactor/user-list";
+        return "admin-refactor/user-list :: content";
     }
 
     @GetMapping("/v2/users/{userId}")
@@ -329,5 +329,21 @@ public class AdminController {
         model.addAttribute("start", start);
         model.addAttribute("end", end);
         return "admin-refactor/user-detail";
+    }
+
+
+    @RequestMapping("/content")
+    public String loadContent() {
+        return "/admin-refactor/index";
+    }
+
+    @RequestMapping("/content1")
+    public String getContent1() {
+        return "/admin-refactor/content :: content1";
+    }
+
+    @RequestMapping("/content2")
+    public String getContent2() {
+        return "/admin-refactor/content :: content2";
     }
 }
