@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmail(String email);
 
     Optional<User> findByUsernameAndIsBlockedFalse(String username);
+
+    @Query("select u from User u where u.role.role = 'ROLE_CUSTOMER'")
+    Page<User> getCustomer(Pageable pageable);
+
+    @Query("select u from User u where u.role.role = 'ROLE_CUSTOMER' and u.createdAt>=:from and u.createdAt<=:to")
+    Page<User> getCustomerByDate(Pageable pageable, Date from, Date to);
+
+    @Query("select u from User u where u.role.role = 'ROLE_PHOTOGRAPHER'")
+    Page<User> getPhotographer(Pageable pageable);
+
+    @Query("select u from User u where u.role.role = 'ROLE_PHOTOGRAPHER' and u.createdAt>=:from and u.createdAt<=:to")
+    Page<User> getPhotographerByDate(Pageable pageable, Date from, Date to);
+
+    @Query("select u from User u where u.role.role <> 'ROLE_ADMIN'")
+    Page<User> getPhotographerAndCustomer(Pageable pageable);
+
+    @Query("select u from User u where u.role.role <> 'ROLE_ADMIN' and u.createdAt>=:from and u.createdAt<=:to")
+    Page<User> getPhotographerAndCustomerByDate(Pageable pageable, Date from, Date to);
 
     @Query("select u from User u where u.isBlocked =:isBlocked and u.username=':username'")
     Optional<User> findByusername(String username, int isBlocked);

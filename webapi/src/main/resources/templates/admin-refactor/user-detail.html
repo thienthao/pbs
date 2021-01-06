@@ -1,0 +1,146 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="/admin-refactor/admin-layout">
+<div layout:fragment="content">
+    <div class="row d-flex">
+        <div class="col-lg-3 col-xlg-4 col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="m-t-30 text-center"> <img th:src="${user.avatar}" class="img-circle" alt="Ảnh đại diện"
+                                                          width="150">
+                        <h4 class="card-title m-t-10 mt-2" th:text="${user.fullname}">Cao Tiến</h4>
+                        <h6 class="card-subtitle" th:text="${@thymeleafHelper.convertRole(user.role.role)}">Photographer</h6>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <p class="d-inline p-2 font-weight-bold ml-2">Số đơn hẹn:</p>
+                    <p class="d-inline p-2" th:text="${bookingInfo.numOfBooking}">12</p>
+                </div>
+                <div>
+                    <p class="d-inline p-2 font-weight-bold ml-2">Hoàn thành:</p>
+                    <p class="d-inline p-2" th:text="${bookingInfo.numOfDone}">10</p>
+                </div>
+                <div>
+                    <p class="d-inline p-2 font-weight-bold ml-2">Hủy:</p>
+                    <p class="d-inline p-2" th:text="${bookingInfo.numOfCancelled}">2</p>
+                </div>
+                <div>
+                    <p class="d-inline p-2 font-weight-bold ml-2">Tỉ lệ hủy hẹn:</p>
+                    <p class="d-inline p-2" th:text="${bookingInfo.cancellationRate} + '%'">15%</p>
+                </div>
+                <div>
+                    <hr>
+                </div>
+                <div class="card-body"> <small class="text-muted">Email </small>
+                    <h6 th:text="${user.email}">caotien@gmail.com</h6> <small class="text-muted p-t-30 db">Số điện thoại</small>
+                    <h6 th:text="${user.phone}">0903917982</h6>
+                </div>
+            </div>
+        </div>
+        <div class="flex-fill">
+            <div class="main-card mb-3 card">
+                <div class="card-header"><div th:text="'Lịch hẹn của ' + ${user.fullname}">Lịch hẹn của Cao Tiến</div>
+                    <div class="btn-actions-pane-right">
+                        <div id="reportrange-userdetail" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                            <i class="fa fa-calendar"></i>&nbsp;
+                            <span></span> <i class="fa fa-caret-down"></i>
+                        </div>
+                        <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
+                        <div role="group" class="btn-group-sm btn-group">
+                            <a style="display: none;" id="userdetail-date" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number},size=${size})}">10 kết quả</a>
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Trạng thái</button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
+                                <a th:classappend="${status} == 'ALL' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=${size}, status=ALL)}" tabindex="-1" class="dropdown-item">Tất cả</a>
+                                <a th:classappend="${status} == 'PENDING' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'PENDING' ? page.number : 0},start=${start},end=${end},size=${size}, status=PENDING)}" tabindex="0" class="dropdown-item">Chờ xác nhận</a>
+                                <a th:classappend="${status} == 'ONGOING' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ONGOING' ? page.number : 0},start=${start},end=${end},size=${size}, status=ONGOING)}" tabindex="0" class="dropdown-item">Sắp diễn ra</a>
+                                <a th:classappend="${status} == 'CANCELLED' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'CANCELLED' ? page.number : 0},start=${start},end=${end},size=${size}, status=CANCELLED)}" tabindex="0" class="dropdown-item">Đã hủy</a>
+                                <a th:classappend="${status} == 'DONE' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'DONE' ? page.number : 0},start=${start},end=${end},size=${size}, status=DONE)}" tabindex="0" class="dropdown-item">Đã hoàn thành</a>
+                                <a th:classappend="${status} == 'REJECTED' ? disabled : ''" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'REJECTED' ? page.number : 0},start=${start},end=${end},size=${size}, status=REJECTED)}" tabindex="0" class="dropdown-item">Đã từ chối</a>
+                            </div>
+                        </div>
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=10, status=${status})}">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=20, status=${status})}">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=50, status=${status})}">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${status == 'ALL' ? page.number : 0},start=${start},end=${end},size=1000, status=${status})}">Tất cả</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th>Khách hàng</th>
+                            <th class="text-center">Thời gian hẹn</th>
+                            <th class="text-center">Thợ chụp</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Tác vụ</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="booking: ${page.content}">
+                            <td class="text-center text-muted" th:text="${booking.id}">#345</td>
+                            <td>
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left mr-3">
+                                            <div class="widget-content-left">
+                                                <img width="40" class="rounded-circle" th:src="${booking.customer.avatar}"
+                                                     alt="">
+                                            </div>
+                                        </div>
+                                        <div class="widget-content-left flex2">
+                                            <div class="widget-heading" th:text="${booking.customer.fullname}">Uyển Nhi</div>
+                                        </div>
+                                    </div>
+                                </div>
+                </td>
+                <td class="text-center" th:text="${#dates.format(booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
+                <td>
+                    <div class="widget-content p-0">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left mr-3">
+                                <div class="widget-content-left">
+                                    <img width="40" class="rounded-circle" th:src="${booking.photographer.avatar}" alt="">
+                                </div>
+                            </div>
+                            <div class="widget-content-left flex2">
+                                <div class="widget-heading" th:text="${booking.photographer.fullname}">Cao Tiến</div>
+                            </div>
+                        </div>
+                    </div>
+            </td>
+            <td class="text-center">
+                <div class="badge badge-warning" th:text="${booking.bookingStatus}">Chờ xác nhận</div>
+            </td>
+            <td class="text-center">
+                <a th:href="@{/admin/bookings/{bookingId}(bookingId=${booking.id})}" id="PopoverCustomT-1" class="btn btn-primary btn-sm">Chi tiết</a>
+            </td>
+            </tr>
+            </tbody>
+            </table>
+        </div>
+        <div class="d-block text-center card-footer">
+            <nav aria-label="..." class="d-flex justify-content-center">
+                <ul class="pagination pagination-sm">
+                    <li th:if="${page.hasPrevious()}" class="page-item"><a th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number-1},size=${page.size},status=${status})}">Trước</a></li>
+                    <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                        <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
+                        <li th:unless="${page.number == i}" class="page-item"><a th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${i},size=${page.size},status=${status})}">[[${i}+1]]</a></li>
+                    </th:block>
+                    <li th:if="${page.hasNext()}" class="page-item"><a th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number+1},size=${page.size},status=${status})}">Sau</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</html>

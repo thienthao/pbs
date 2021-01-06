@@ -2,30 +2,19 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.dto.CancelledBooking;
 import fpt.university.pbswebapi.dto.UserBookingInfo;
-import fpt.university.pbswebapi.dto.UserBookingInfoList;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DtoMapper;
-import fpt.university.pbswebapi.payload.own.response.MessageResponse;
 import fpt.university.pbswebapi.repository.*;
-import fpt.university.pbswebapi.security.services.UserDetailsImpl;
-import fpt.university.pbswebapi.service.BookingService;
-import fpt.university.pbswebapi.service.ThreadService;
-import fpt.university.pbswebapi.service.UserService;
-import fpt.university.pbswebapi.service.VariableService;
+import fpt.university.pbswebapi.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,24 +33,22 @@ public class AdminController {
     private UserService userService;
     private ThreadService threadService;
     private BookingService bookingService;
-
-    @Autowired
+    private CancellationService cancellationService;
     private VariableService variableService;
-
-    @Autowired
     private BookingRepository bookingRepository;
-
-    @Autowired
     private CommentRepository commentRepository;
 
-    @Autowired
-    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService) {
+    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.categoryRepository = categoryRepository;
         this.returningTypeRepository = returningTypeRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.threadService = threadService;
         this.bookingService = bookingService;
+        this.cancellationService = cancellationService;
+        this.variableService = variableService;
+        this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     @GetMapping("/login")
@@ -267,5 +254,80 @@ public class AdminController {
             model.addAttribute("errorMessage", errorMessage);
             return new RedirectView("/admin/threads");
         }
+    }
+
+    @GetMapping("/cancellations")
+    public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+        model.addAttribute("page", cancellationService.getCancellations(pageable, start, end, filter));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "admin-refactor/cancellation-list";
+    }
+
+    @GetMapping("/cancellations/{id}")
+    public String showCancellationDetail(Model model, @PathVariable Long id) {
+        model.addAttribute("cancellation", cancellationService.findById(id));
+        return "admin-refactor/cancellation-detail";
+    }
+
+    @GetMapping("/userss")
+    public String showUserList(@PageableDefault(size = 10) Pageable pageable,Model model) {
+        model.addAttribute("page", userRepository.findAll(pageable));
+        return "admin-refactor/user-list";
+    }
+
+    @PostMapping("/cancellations/{id}")
+    public String showCancellationDetail(@PathVariable Long id) {
+        cancellationService.approve(id);
+        return "redirect:/admin/cancellations/" + id;
+    }
+
+    @PostMapping("/cancellations-warn/{id}")
+    public String warnAndShowCancellationDetail(@PathVariable Long id) {
+        cancellationService.warn(id);
+        return "redirect:/admin/cancellations/" + id;
+    }
+
+    @GetMapping("/bookings/{bookingId}")
+    public String showBookingDetail(@PathVariable Long bookingId, @RequestParam(value = "cancellationId", required = false) Long cancellationId, Model model) {
+        if(cancellationId != null) {
+            model.addAttribute("cancellation", cancellationService.findById(cancellationId));
+        }
+        model.addAttribute("booking", bookingRepository.findById(bookingId).get());
+        return "admin-refactor/booking-detail";
+    }
+
+    @GetMapping("/v2/users")
+    public String showUserListV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, Model model, @RequestParam(name = "role", defaultValue = "all") String role) {
+//        model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+//        if(start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
+//            model.addAttribute("page", bookingService.findAllByUserIdAndStatus(userId, pageable, status));
+//        } else {
+//            model.addAttribute("page", bookingService.findAllByUserIdAndStatusBetweenDate(userId, pageable, status, start, end));
+//        }
+        model.addAttribute("page", userService.getUserList(pageable, start, end, role));
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("role", role);
+        return "admin-refactor/user-list";
+    }
+
+    @GetMapping("/v2/users/{userId}")
+    public String showUserDetailV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @PathVariable Long userId, Model model, @RequestParam(value = "status", defaultValue = "ALL") String status) {
+        model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+        model.addAttribute("user", userRepository.findById(userId).get());
+        if(start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
+            model.addAttribute("page", bookingService.findAllByUserIdAndStatus(userId, pageable, status));
+        } else {
+            model.addAttribute("page", bookingService.findAllByUserIdAndStatusBetweenDate(userId, pageable, status, start, end));
+        }
+        model.addAttribute("size", pageable.getPageSize());
+        model.addAttribute("status", status);
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        return "admin-refactor/user-detail";
     }
 }

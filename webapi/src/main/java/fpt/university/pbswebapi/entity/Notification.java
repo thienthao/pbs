@@ -43,4 +43,10 @@ public class Notification {
     @Column(name = "booking_id")
     private Long bookingId;
 
+    @PrePersist
+    void prepersist() {
+        createdAt = new Date();
+        isRead = false;
+    }
+
 }

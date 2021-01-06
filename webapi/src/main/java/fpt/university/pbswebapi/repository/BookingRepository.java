@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.awt.print.Book;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,35 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("FROM Booking b where b.photographer.id = :userId or b.customer.id = :userId")
     List<Booking> findAllByUserId(Long userId);
+
+    @Query("FROM Booking b where b.photographer.id = :userId and concat(b.bookingStatus, '') like 'CANCEL%' " +
+            "or b.customer.id = :userId and concat(b.bookingStatus, '') like 'CANCEL%'")
+    Page<Booking> findAllCancelledBookingByUserId(Long userId, Pageable pageable);
+
+    @Query("FROM Booking b where b.photographer.id = :userId and concat(b.bookingStatus, '') like :status% " +
+            "or b.customer.id = :userId and concat(b.bookingStatus, '') like :status%")
+    Page<Booking> findAllByStatusAndUserId(Long userId, Pageable pageable, String status);
+
+    @Query("FROM Booking b where b.photographer.id = :userId or b.customer.id = :userId")
+    Page<Booking> findAllByUserId(Long userId, Pageable pageable);
+
+    @Query("select distinct b FROM Booking b " +
+            "inner join b.timeLocationDetails tld " +
+            "where b.photographer.id = :userId and concat(b.bookingStatus, '') like :status% and tld.start>=:start and tld.start<=:end " +
+            "or b.customer.id = :userId and concat(b.bookingStatus, '') like :status% and tld.start>=:start and tld.start<=:end")
+    Page<Booking> findAllByStatusAndUserIdBetweenDate(Long userId, Pageable pageable, String status, Date start, Date end);
+
+    @Query("select distinct b FROM Booking b " +
+            "inner join b.timeLocationDetails tld " +
+            "where b.photographer.id = :userId and tld.start>=:start and tld.start<=:end " +
+            "or b.customer.id = :userId and tld.start>=:start and tld.start<=:end")
+    Page<Booking> findAllByUserIdBetweenDate(Long userId, Pageable pageable, Date start, Date end);
+
+    @Query("select distinct b FROM Booking b " +
+            "inner join b.timeLocationDetails tld " +
+            "where b.photographer.id = :userId and tld.start>=:start and tld.start<=:end and concat(b.bookingStatus, '') like 'CANCEL%' " +
+            "or b.customer.id = :userId and tld.start>=:start and tld.start<=:end and concat(b.bookingStatus, '') like 'CANCEL%'")
+    Page<Booking> findAllCancelledBookingByUserIdBetweenDate(Long userId, Pageable pageable, Date start, Date end);
 
     @Query("FROM Booking b where b.photographer.id = :photographerId and b.bookingStatus='ONGOING' " +
             "or b.photographer.id = :photographerId and b.bookingStatus='EDITING'" +
@@ -133,4 +163,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b " +
             "where b.bookingStatus='PENDING'")
     List<Booking> findAllPendingStatus();
+
+    @Query("select count(b) from Booking b where b.photographer.id=:userId and b.bookingStatus='DONE'" +
+            "or b.customer.id=:userId and b.bookingStatus='DONE'")
+    int countDoneBookingOfUser(long userId);
+
+    @Query("select count(b) from Booking b where b.photographer.id=:userId " +
+            "or b.customer.id=:userId")
+    int countBookingOfUser(long userId);
+
+    @Query("select count(b) from Booking b where b.customer.id=:userId and b.bookingStatus='CANCELLED_CUSTOMER'")
+    int countCancelledBookingOfCustomer(long userId);
+
+    @Query("select count(b) from Booking b where b.photographer.id=:userId and b.bookingStatus='CANCELLED_PHOTOGRAPHER'")
+    int countCancelledBookingOfPhotographer(long userId);
 }

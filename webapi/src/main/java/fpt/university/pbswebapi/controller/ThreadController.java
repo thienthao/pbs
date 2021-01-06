@@ -27,6 +27,11 @@ public class ThreadController {
         return new ResponseEntity<>(threadService.all(), HttpStatus.OK);
     }
 
+    @GetMapping("/threads/user/{userId}")
+    public ResponseEntity<?> allByUserId(@PathVariable("userId") long userId) {
+        return new ResponseEntity<>(threadService.allByUserId(userId), HttpStatus.OK);
+    }
+
     @GetMapping("/thread-topics")
     public ResponseEntity<?> allTopics() {
         return new ResponseEntity<>(threadService.allTopics(), HttpStatus.OK);
@@ -35,6 +40,16 @@ public class ThreadController {
     @PostMapping("/threads")
     public ResponseEntity<?> createThread(@RequestBody Thread thread) {
         return new ResponseEntity<>(threadService.save(thread), HttpStatus.OK);
+    }
+
+    @PutMapping("/threads")
+    public ResponseEntity<?> editThread(@RequestBody Thread thread) {
+        return new ResponseEntity<>(threadService.edit(thread), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/threads/{id}")
+    public ResponseEntity<?> removeThread(@PathVariable Long id) {
+        return new ResponseEntity<>(threadService.remove(id), HttpStatus.OK);
     }
 
     @GetMapping("/threads/comments/json")

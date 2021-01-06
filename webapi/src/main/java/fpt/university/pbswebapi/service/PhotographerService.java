@@ -25,6 +25,7 @@ import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -732,6 +733,25 @@ public class PhotographerService {
             } catch (Exception e) {
                 System.out.println(e);
             }
+        }
+        return results;
+    }
+
+    public List<DayOfWeek> createWorkingDay(long ptgId) {
+        List<DayOfWeek> results = new ArrayList<>();
+        for(int i = 1; i <= 7; i++) {
+            DayOfWeek dayOfWeek = new DayOfWeek();
+            dayOfWeek.setDay(i);
+            dayOfWeek.setWorkingDay(true);
+            LocalDateTime localStartTime = LocalDateTime.of(2020, Month.NOVEMBER, 1, 8, 00, 00);
+            Date startTime = DateHelper.convertToDateViaInstant(localStartTime);
+            LocalDateTime localEndTime = LocalDateTime.of(2020, Month.NOVEMBER, 1, 19, 00, 00);
+            Date endTime = DateHelper.convertToDateViaInstant(localEndTime);
+            dayOfWeek.setStartTime(startTime);
+            dayOfWeek.setEndTime(endTime);
+            User photographer = phtrRepo.findById(ptgId).get();
+            dayOfWeek.setPhotographer(photographer);
+            results.add(workingDayRepository.save(dayOfWeek));
         }
         return results;
     }

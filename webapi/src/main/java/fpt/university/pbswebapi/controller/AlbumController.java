@@ -4,18 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fpt.university.pbswebapi.dto.AlbumDto;
 import fpt.university.pbswebapi.dto.AlbumDto2;
 import fpt.university.pbswebapi.entity.Album;
+import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.entity.Image;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.AlbumRepository;
+import fpt.university.pbswebapi.repository.CategoryRepository;
 import fpt.university.pbswebapi.repository.ImageRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
 import fpt.university.pbswebapi.service.AlbumService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +30,9 @@ public class AlbumController {
     private AlbumService albumService;
     private UserRepository photographerRepository;
     private ImageRepository imageRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -159,6 +161,21 @@ public class AlbumController {
         }
     }
 
+    @PutMapping("/{albumId}")
+    public ResponseEntity<?> editAlbum(@RequestBody AlbumDto albumdto) {
+        return new ResponseEntity<>(albumService.editAlbum(albumdto), HttpStatus.OK);
+    }
+
+    @PutMapping("/{albumId}/images")
+    public ResponseEntity<?> addImage(@PathVariable("albumId") Long albumId, @RequestParam("file") MultipartFile file) {
+        return new ResponseEntity<>(albumService.addImage(albumId, file), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{albumId}/images/{imageId}")
+    public ResponseEntity<?> removeImage(@PathVariable("albumId") Long albumId, @PathVariable("imageId") Long imageId) {
+        return new ResponseEntity<>(albumService.removeImage(albumId, imageId), HttpStatus.OK);
+    }
+
     @PostMapping(value = "/{ptgId}/{albumId}/images",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadImages(@PathVariable("ptgId") String ptgId,
@@ -226,6 +243,8 @@ public class AlbumController {
             album.setName(albumDto.getName());
             album.setPhotographer(photographer.get());
             album.setDescription(albumDto.getDescription());
+            Category category = categoryRepository.findById(albumDto.getCategoryId()).get();
+            album.setCategory(category);
             return album;
         } else {
             return null;

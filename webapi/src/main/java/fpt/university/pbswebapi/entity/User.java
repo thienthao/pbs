@@ -89,4 +89,20 @@ public class User {
         this.password = password;
         this.email = email;
     }
+
+    @PrePersist
+    void prepersist(){
+        createdAt = new Date();
+        isBlocked = false;
+        isDeleted = false;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", fullname='" + fullname + '\'' +
+                ", deviceToken='" + deviceToken + '\'' +
+                '}';
+    }
 }

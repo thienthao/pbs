@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="/admin-refactor/admin-layout">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-header">Danh sách người dùng
+                <div class="btn-actions-pane-right">
+                    <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                        <a style="display: none;" id="user-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
+                        <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Tài khoản</button>
+                        <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" th:classappend="${role} == 'customer' ? disabled : ''" tabindex="-1" th:href="@{/admin/v2/users(page=${page.number},size=${size},start=${start},end=${end},role=customer)}">Khách hàng</a>
+                            <a class="dropdown-item" th:classappend="${role} == 'photographer' ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=${size},start=${start},end=${end},role=photographer)}">Photographer</a>
+                            <a class="dropdown-item" th:classappend="${role} == 'all' ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=${size},start=${start},end=${end},role=all)}">Tất cả</a>
+                        </div>
+                    </div>
+                    <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                        <i class="fa fa-calendar"></i>&nbsp;
+                        <span></span> <i class="fa fa-caret-down"></i>
+                    </div>
+                    <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
+                    <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                        <a style="display: none;" id="cancellation-date" th:href="@{/admin/v2/users(page=${page.number},size=${size},role=${role})}">10 kết quả</a>
+                        <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
+                        <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" th:href="@{/admin/v2/users(page=${page.number},size=10,start=${start},end=${end},role=${role})}">10 kết quả</a>
+                            <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=20,start=${start},end=${end},role=${role})}">20 kết quả</a>
+                            <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=50,start=${start},end=${end},role=${role})}">50 kết quả</a>
+                            <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=1000,start=${start},end=${end},role=${role})}">Tất cả</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>Tên</th>
+                        <th class="text-center">Tài khoản</th>
+                        <th class="text-center">Email</th>
+                        <th class="text-center">Tham gia</th>
+                        <th class="text-center">Tác vụ</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="obj: ${page.content}">
+                        <td class="text-center text-muted" th:text="${obj.id}">#345</td>
+                        <td>
+                            <div class="widget-content p-0">
+                                <div class="widget-content-wrapper">
+                                    <div class="widget-content-left mr-3">
+                                        <div class="widget-content-left">
+                                            <img width="40" class="rounded-circle"
+                                                 th:src="${obj.avatar}" alt="">
+                                        </div>
+                                    </div>
+                                    <div class="widget-content-left flex2">
+                                        <div class="widget-heading" th:text="${obj.fullname}">Uyển Nhi</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center" th:text="${@thymeleafHelper.convertRole(obj.role.role)}">08:00 12/20/2020</td>
+                        <td class="text-center" th:text="${obj.email}">08:00 12/20/2020</td>
+                        <td class="text-center" th:text="${#dates.format(obj.createdAt, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
+                        <td class="text-center">
+                            <a type="button" id="PopoverCustomT-1"
+                               class="btn btn-primary btn-sm" th:href="@{/admin/v2/users/{userId}(userId=${obj.id})}">Chi tiết</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-block text-center card-footer">
+                <nav aria-label="..." class="d-flex justify-content-center">
+                    <ul class="pagination pagination-sm">
+                        <li th:if="${page.hasPrevious()}" class="page-item"><a th:href="@{/admin/v2/users(page=${page.number-1},size=${page.size})}">Trước</a></li>
+                        <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                            <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
+                            <li th:unless="${page.number == i}" class="page-item"><a th:href="@{/admin/v2/users(page=${i},size=${page.size})}">[[${i}+1]]</a></li>
+                        </th:block>
+                        <li th:if="${page.hasNext()}" class="page-item"><a th:href="@{/admin/v2/users(page=${page.number+1},size=${page.size})}">Sau</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="/admin-refactor/admin-layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Detail</title>
+</head>
+<div layout:fragment="content">
+    <div class="row">
+        <div class="tab-content col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">Thông tin cơ bản</h5>
+                    <div>
+                        <form>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng:</label>
+                                    <a th:href="@{/admin/v2/users/{userId}(userId=${booking.customer.id})}" data-toggle="tooltip" title="Chi tiết" data-placement="top" th:text="${booking.customer.fullname}">Uyển Nhi</a></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
+                                                                                                      class="mr-sm-2">Thợ ảnh
+                                </label><a th:href="@{/admin/v2/users/{userId}(userId=${booking.photographer.id})}" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${booking.photographer.fullname}">
+                                    Cao Tiến
+                                </a></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
+                                                                                                      class="mr-sm-2">Trạng thái đơn hẹn</label>
+                                    <div class="badge badge-info" th:text="${@thymeleafHelper.convertStatus(booking.bookingStatus)}">Sắp diễn ra</div>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <a th:href="@{/admin/cancellations/{id}(id=${cancellation.id})}" th:if="${cancellation}" class="mt-2 btn btn-info" data-toggle="tooltip" data-placement="top" title="Đơn hẹn này có đơn hủy">Chi tiết đơn hủy</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">Chi tiết dịch vụ</h5>
+                    <div>
+                        <form>
+<!--                            <div class="form-inline">-->
+<!--                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng:</label><a th:href="@{/admin/v2/users/{userId}(userId=${booking.customer.id})}" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${booking.customer.fullname}">-->
+<!--                                    Uyển Nhi-->
+<!--                                </a></div>-->
+<!--                            </div>-->
+<!--                            <div class="divider"></div>-->
+<!--                            <div class="form-inline">-->
+<!--                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thợ ảnh-->
+<!--                                </label><a th:href="@{/admin/v2/users/{userId}(userId=${booking.photographer.id})}" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${booking.photographer.fullname}">-->
+<!--                                    Cao Tiến-->
+<!--                                </a></div>-->
+<!--                            </div>-->
+<!--                            <div class="divider"></div>-->
+                            <div class="form d-flex p-2 justify-content-lg-start">
+                                <div class="col-6 mb-2 mr-sm-2 mb-sm-0 position-relative form-group">
+                                    <label class="mr-sm-2">Gói dịch vụ</label>
+                                    <input type="text" class="form-control" readonly th:value="${booking.serviceName}">
+                                    <label class="mr-sm-2 mt-2">Giá dịch vụ</label>
+                                    <input type="text" class="form-control" readonly th:value="|${#numbers.formatDecimal(booking.price, 0, 'COMMA', 0, 'POINT')} VND|">
+                                    <label class="mr-sm-2 mt-2">Thời gian dự kiến</label>
+                                    <input type="text" class="form-control" readonly th:value="|${#numbers.formatDecimal(booking.timeAnticipate / 3600,0,0)} giờ|">
+                                    <label class="mr-sm-2 mt-2">Mô tả dịch vụ</label>
+                                    <input type="text" class="form-control" readonly th:value="${booking.servicePackage.description}">
+                                </div>
+                                <div class="mt-3 ml-2 col-6 scroll-area-sm">
+                                    <div class="scrollbar-container ps ps--active-y">
+                                        <ul class="rm-list-borders rm-list-borders-scroll list-group list-group-flush">
+                                            <li class="list-group-item" th:each="service: ${booking.bookingDetails}">
+                                                <div class="widget-content p-0">
+                                                    <div class="widget-content-wrapper">
+                                                        <div class="widget-content-left mr-3">
+                                                            <i class="fa fa-plus-circle"></i>
+                                                        </div>
+                                                        <div class="widget-content-left">
+                                                            <div class="widget-heading" th:text="${service.serviceName}">Miễn phí edit ảnh</div>
+                                                        </div>
+                                                        <div class="widget-content-right">
+                                                            <div class="font-size-xlg text-muted">
+                                                                <!-- <small class="opacity-5 pr-1">$</small>
+                                                                <span>129</span>
+                                                                <small class="text-danger pl-2">
+                                                                    <i class="fa fa-angle-down"></i>
+                                                                </small> -->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <div class="ps__rail-x" style="left: 0px; bottom: 0px;"><div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps__rail-y" style="top: 0px; height: 200px; right: 0px;"><div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 139px;"></div></div></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <h5 class="card-title">Chi tiết thời gian</h5>
+                    <div>
+                        <form>
+                            <div class="card-body">
+                                <div th:each="timeLocation: ${booking.timeLocationDetails}" class="vertical-timeline vertical-timeline--animate vertical-timeline--one-column">
+                                    <div class="vertical-timeline-item vertical-timeline-element">
+                                        <div> <span class="vertical-timeline-element-icon bounce-in"> <i
+                                                class="badge badge-dot badge-dot-xl badge-warning"> </i> </span>
+                                            <div class="vertical-timeline-element-content bounce-in">
+                                                <h4 class="timeline-title" th:text="${timeLocation.formattedAddress}">22 Nguyễn Huệ, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh</h4>
+                                                <span class="text-primary" th:text="${#dates.format(timeLocation.start, 'HH:mm')}">08:00</span>
+                                                <span class="vertical-timeline-element-date" th:text="${#dates.format(timeLocation.start, 'dd-MM-yyyy')}">05/01/2021</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vertical-timeline vertical-timeline--animate vertical-timeline--one-column">
+                                    <div class="vertical-timeline-item vertical-timeline-element">
+                                        <div> <span class="vertical-timeline-element-icon bounce-in"> <i
+                                                class="badge badge-dot badge-dot-xl badge-success"> </i> </span>
+                                            <div class="vertical-timeline-element-content bounce-in">
+                                                <h4 class="timeline-title">Trả ảnh</h4>
+                                                <span class="text-primary" th:text="${#dates.format(booking.editDeadline, 'HH:mm')}">20:00</span>
+                                                <span class="vertical-timeline-element-date" th:text="${#dates.format(booking.editDeadline, 'dd-MM-yyyy')}">08/01/2021</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

@@ -49,4 +49,12 @@ public class FileStore {
             throw new IllegalStateException("Failed to store file to s3", ex);
         }
     }
+
+    public void remove(String fullpath, String key) {
+        try {
+            s3.deleteObject(fullpath, key);
+        } catch (AmazonServiceException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

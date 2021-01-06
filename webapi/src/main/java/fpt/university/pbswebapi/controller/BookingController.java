@@ -306,9 +306,19 @@ public class BookingController {
         return new ResponseEntity<Booking>(bookingService.cancelForCustomer(booking), HttpStatus.OK);
     }
 
+    @PutMapping("/cancellation-submit/customer")
+    public ResponseEntity<Booking> submitCancellationForCustomer(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.submitCancellationForCustomer(booking), HttpStatus.OK);
+    }
+
     @PutMapping("/cancel/photographer")
     public ResponseEntity<Booking> cancelForPhotographer(@RequestBody Booking booking) {
         return new ResponseEntity<Booking>(bookingService.cancelForPhotographer(booking), HttpStatus.OK);
+    }
+
+    @PutMapping("/cancellation-submit/photographer")
+    public ResponseEntity<Booking> submitCancellationForPhotographer(@RequestBody Booking booking) {
+        return new ResponseEntity<Booking>(bookingService.submitCancellationForPhotographer(booking), HttpStatus.OK);
     }
 
     @PutMapping("/reject")
