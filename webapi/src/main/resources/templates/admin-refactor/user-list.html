@@ -16,9 +16,9 @@
                         <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                 class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Tài khoản</button>
                         <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" th:classappend="${role} == 'customer' ? disabled : ''" tabindex="-1" th:href="@{/admin/v2/users(page=${page.number},size=${size},start=${start},end=${end},role=customer)}">Khách hàng</a>
-                            <a class="dropdown-item" th:classappend="${role} == 'photographer' ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=${size},start=${start},end=${end},role=photographer)}">Photographer</a>
-                            <a class="dropdown-item" th:classappend="${role} == 'all' ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=${size},start=${start},end=${end},role=all)}">Tất cả</a>
+                            <a class="dropdown-item" th:classappend="${role} == 'customer' ? disabled : ''" tabindex="-1" onclick="filterRoleCustomer(this)">Khách hàng</a>
+                            <a class="dropdown-item" th:classappend="${role} == 'photographer' ? disabled : ''" tabindex="0" onclick="filterRolePhotographer(this)">Photographer</a>
+                            <a class="dropdown-item" th:classappend="${role} == 'all' ? disabled : ''" tabindex="0" onclick="filterRolePhotographerAndCustomer(this)">Tất cả</a>
                         </div>
                     </div>
                     <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
@@ -31,10 +31,10 @@
                         <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                 class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
                         <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" th:href="@{/admin/v2/users(page=${page.number},size=10,start=${start},end=${end},role=${role})}">10 kết quả</a>
-                            <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=20,start=${start},end=${end},role=${role})}">20 kết quả</a>
-                            <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=50,start=${start},end=${end},role=${role})}">50 kết quả</a>
-                            <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" th:href="@{/admin/v2/users(page=${page.number},size=1000,start=${start},end=${end},role=${role})}">Tất cả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" onclick="limitRecord10(this)">10 kết quả</a>
+                            <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" onclick="limitRecord20(this)">20 kết quả</a>
+                            <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" onclick="limitRecord50(this)">50 kết quả</a>
+                            <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" onclick="limitRecordAll(this)">Tất cả</a>
                         </div>
                     </div>
                 </div>
@@ -96,6 +96,35 @@
     </div>
 </div>
     <script th:inline="javascript">
+
+        function limitRecord10(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: 10, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: [[${role}]]}));
+        }
+
+        function limitRecord20(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: 20, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: [[${role}]]}));
+        }
+
+        function limitRecord50(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: 50, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: [[${role}]]}));
+        }
+
+        function limitRecordAll(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: 1000, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: [[${role}]]}));
+        }
+
+        function filterRoleCustomer(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: [[${page.size}]], page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: 'customer'}));
+        }
+
+        function filterRolePhotographer(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: [[${page.size}]], page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: 'photographer'}));
+        }
+
+        function filterRolePhotographerAndCustomer(atag) {
+            $('#admin-content').load('/admin/v2/users?'  + $.param({size: [[${page.size}]], page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: 'all'}));
+        }
+
         // th:href="@{/admin/v2/users(page=${i},size=${page.size})}"
 
         function toPage(atag) {
@@ -115,7 +144,6 @@
             // });
 
             $('#user-list-a-paging-next').click(() => {
-                alert(jQuery(this).text());
                 $('#admin-content').load('/admin/v2/users?' + $.param({size: [[${page.size}]], page: [[${page.number + 1}]]}));
             });
         });
