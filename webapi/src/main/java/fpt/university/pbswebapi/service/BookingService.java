@@ -81,7 +81,7 @@ public class BookingService {
         notiRequest.setToken(photographer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
-        notificationService.requestPhotographerNotification(booking);
+        notificationService.requestPhotographerNotification(result);
 
         return result;
     }
@@ -121,7 +121,7 @@ public class BookingService {
         notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
-        notificationService.createAcceptResultNotification(booking);
+        notificationService.createAcceptResultNotification(result);
 
         return result;
     }
@@ -142,7 +142,7 @@ public class BookingService {
         notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
-        notificationService.createRejectResultNotification(booking);
+        notificationService.createRejectResultNotification(result);
         return result;
     }
 
@@ -272,7 +272,7 @@ public class BookingService {
         notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
-        notificationService.changeBookingStatusNotification(booking);
+        notificationService.changeBookingStatusNotification(result);
 
         return result;
     }
@@ -315,7 +315,7 @@ public class BookingService {
         notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
-        notificationService.changeBookingStatusNotification(booking);
+        notificationService.changeBookingStatusNotification(result);
 
         return result;
     }

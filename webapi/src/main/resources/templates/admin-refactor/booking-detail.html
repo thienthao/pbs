@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="/admin-refactor/admin-layout">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Booking Detail</title>
 </head>
-<div layout:fragment="content">
+<div th:fragment="content">
     <div class="row">
         <div class="tab-content col-md-12">
             <div class="main-card mb-3 card">
@@ -34,7 +32,7 @@
                                 </div>
                             </div>
                             <div class="divider"></div>
-                            <a th:href="@{/admin/cancellations/{id}(id=${cancellation.id})}" th:if="${cancellation}" class="mt-2 btn btn-info" data-toggle="tooltip" data-placement="top" title="Đơn hẹn này có đơn hủy">Chi tiết đơn hủy</a>
+                            <a th:onclick="'toCancellationDetail(this,' + ${cancellation.id} +')'" th:if="${cancellation}" class="mt-2 btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="Đơn hẹn này có đơn hủy">Chi tiết đơn hủy</a>
                         </form>
                     </div>
                 </div>
@@ -137,5 +135,16 @@
             </div>
         </div>
     </div>
+    <script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
+    <script>
+
+        function toCancellationDetail(atag, id) {
+
+            const url = '/admin/cancellations/' + id;
+            $('#admin-content').load(url);
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+        }
+    </script>
 </div>
 </html>

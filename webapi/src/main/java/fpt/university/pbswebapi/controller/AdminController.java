@@ -269,13 +269,7 @@ public class AdminController {
     @GetMapping("/cancellations/{id}")
     public String showCancellationDetail(Model model, @PathVariable Long id) {
         model.addAttribute("cancellation", cancellationService.findById(id));
-        return "admin-refactor/cancellation-detail";
-    }
-
-    @GetMapping("/userss")
-    public String showUserList(@PageableDefault(size = 10) Pageable pageable,Model model) {
-        model.addAttribute("page", userRepository.findAll(pageable));
-        return "admin-refactor/user-list";
+        return "admin-refactor/cancellation-detail :: content";
     }
 
     @PostMapping("/cancellations/{id}")
@@ -296,7 +290,7 @@ public class AdminController {
             model.addAttribute("cancellation", cancellationService.findById(cancellationId));
         }
         model.addAttribute("booking", bookingRepository.findById(bookingId).get());
-        return "admin-refactor/booking-detail";
+        return "admin-refactor/booking-detail :: content";
     }
 
     @GetMapping("/v2/users")

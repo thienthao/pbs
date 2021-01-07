@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="/admin-refactor/admin-layout">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Cancellation Detail</title>
 </head>
 <body>
-<div layout:fragment="content">
+<div th:fragment="content">
     <div class="row">
         <div class="tab-content col-md-12">
             <div class="main-card mb-3 card">
@@ -42,7 +40,7 @@
                             </div>
                             <div class="divider"></div>
                             <div class="form-inline">
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><a class="mt-2 btn btn-primary" th:href="@{/admin/bookings/{bookingId}(bookingId=${cancellation.booking.id}, cancellationId=${cancellation.id})}">Chi tiết đơn hẹn</a>
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><a class="mt-2 btn btn-primary text-white" th:onclick="'toBookingDetail(' + ${cancellation.booking.id} +',' + ${cancellation.id} + ')'">Chi tiết đơn hẹn</a>
                                 </div>
                             </div>
                             <div class="divider"></div>
@@ -56,6 +54,19 @@
             </div>
         </div>
     </div>
+    <script th:inline="javascript">
+
+
+        function toBookingDetail(bookingId, cancellationId) {
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+            $('#admin-content').load('/admin/bookings/' + bookingId + '?'  + $.param({cancellationId: cancellationId}));
+        }
+
+        $(document).ready(()=>{
+            // th:href="@{/admin/bookings/{bookingId}(bookingId=${cancellation.booking.id}, cancellationId=${cancellation.id})}"
+        });
+    </script>
 </div>
 </body>
 </html>

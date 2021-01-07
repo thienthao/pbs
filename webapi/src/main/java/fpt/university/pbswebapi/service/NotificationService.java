@@ -21,7 +21,7 @@ public class NotificationService {
     }
 
     public List<Notification> findNotiWhereUserId(Long receiverId) {
-        return notificationRepository.getAllByReceiverIdAndIsReadFalse(receiverId);
+        return notificationRepository.getAllByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(receiverId);
     }
 
     public void createAcceptResultNotification(Booking booking) {

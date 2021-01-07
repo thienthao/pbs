@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> getAllByReceiverIdAndIsReadFalse(Long receiverId);
+    List<Notification> getAllByReceiverIdAndIsReadFalseOrderByCreatedAtDesc(Long receiverId);
 
     @Transactional
     @Modifying
