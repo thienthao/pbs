@@ -19,15 +19,14 @@
         <div th:replace="/admin-refactor/layout/left"></div>
         <div class="app-main__outer">
             <div class="app-main__inner">
-                <div layout:fragment="content">
+                <div id="admin-content">
 
                 </div>
             </div>
         </div>
     </div>
     <div th:replace="/admin-refactor/layout/footer"></div>
-
-    <div th:replace="/admin-refactor/layout/script"></div>
 </div>
+<div th:replace="/admin-refactor/layout/script"></div>
 </body>
 </html>

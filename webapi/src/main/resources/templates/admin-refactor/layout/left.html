@@ -38,13 +38,13 @@
             <ul class="vertical-nav-menu">
                 <li class="app-sidebar__heading">Quản lý người dùng</li>
                 <li>
-                    <a th:href="@{/admin/cancellations}">
+                    <a id="cancellation-list-a" style="cursor: pointer">
                         <i class="metismenu-icon fas fa-tasks"></i>
                         Đơn hủy hẹn
                     </a>
                 </li>
                 <li>
-                    <a th:href="@{/admin/v2/users}">
+                    <a id="user-list-a" style="cursor: pointer">
                         <i class="metismenu-icon fas fa-users"></i>
                         Danh sách người dùng
                     </a>
@@ -59,6 +59,12 @@
                     <a th:href="@{/admin/cancellations}">
                         <i class="metismenu-icon fas fa-star-half-alt"></i>
                         Đánh giá khách hàng
+                    </a>
+                </li>
+                <li>
+                    <a style="cursor: pointer">
+                        <i class="metismenu-icon fas fa-flag"></i>
+                        Người dùng báo cáo
                     </a>
                 </li>
                 <li class="app-sidebar__heading">Hệ thống</li>

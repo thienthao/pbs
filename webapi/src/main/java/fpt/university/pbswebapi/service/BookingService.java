@@ -1,8 +1,10 @@
 package fpt.university.pbswebapi.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.dto.*;
 import fpt.university.pbswebapi.entity.*;
+import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.helper.*;
 import fpt.university.pbswebapi.helper.weather.*;
 import fpt.university.pbswebapi.repository.*;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -32,9 +35,10 @@ public class BookingService {
     private final NotificationService notificationService;
     private final CancellationRepository cancellationRepository;
     private final NotificationRepository notificationRepository;
+    private final FileStore fileStore;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository, FileStore fileStore) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
@@ -42,6 +46,7 @@ public class BookingService {
         this.notificationService = notificationService;
         this.cancellationRepository = cancellationRepository;
         this.notificationRepository = notificationRepository;
+        this.fileStore = fileStore;
     }
 
     public Booking checkDistance(Booking booking) {
@@ -81,10 +86,31 @@ public class BookingService {
         return result;
     }
 
+    private String generateCheckinCode(Long bookingId) {
+        String result = "";
+        try {
+            InputStream qrCode = QRCodeHelper.generate("http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/" + bookingId);
+
+            Map<String, String> metadata = new HashMap<>();
+            metadata.put("Content-Type", "image/png");
+            metadata.put("Content-Length", String.valueOf(qrCode.available()));
+
+            String path = String.format("%s/bookings/%s", BucketName.PROFILE_IMAGE.getBucketName(), bookingId);
+            String filename = String.format("%s-%s", bookingId, "qrcode");
+            fileStore.save(path, filename, Optional.of(metadata), qrCode);
+            result = "http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/" + bookingId;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public Booking accept(Booking booking) {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setBookingStatus(EBookingStatus.ONGOING);
+        String checkinCode = generateCheckinCode(savedBooking.getId());
+        savedBooking.setQrCheckinCode(checkinCode);
         Booking result = bookingRepository.save(savedBooking);
         User user = userRepository.findById(booking.getPhotographer().getId()).get();
         User customer = userRepository.findById(booking.getCustomer().getId()).get();
@@ -929,5 +955,20 @@ public class BookingService {
             default:
                 return bookingRepository.findAllByStatusAndUserId(userId, pageable, status);
         }
+    }
+
+    public void checkin(Long bookingId) {
+        bookingRepository.checkin(bookingId);
+    }
+
+    public byte[] getQRCheckInCode(Long bookingId) {
+        String path = String.format("%s/bookings/%s",
+                BucketName.PROFILE_IMAGE.getBucketName(),
+                bookingId);
+        return fileStore.download(path, bookingId + "-qrcode");
+    }
+
+    public Boolean isCheckin(Long bookingId) {
+        return bookingRepository.findById(bookingId).get().getIsCheckin();
     }
 }

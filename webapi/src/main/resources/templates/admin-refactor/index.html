@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Index</title>
+</head>
+
+<body>
+<select id="selection">
+    <option>Content 1</option>
+    <option>Content 2</option>
+</select>
+
+<div id="replace_div">
+    Content goes here
+</div>
+
+<div>
+    this is not content
+</div>
+
+<!-- JQury from Google CDN -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        //call function when page is loaded
+        getContent();
+
+        //set on change listener
+        $('#selection').change(getContent);
+
+        function getContent() {
+
+            //create url to request fragment
+            var url = '/admin/';
+            if ($('#selection').val() === "Content 1") {
+                url = url + "content1";
+            } else {
+                url = url + "content2";
+            }
+
+            //load fragment and replace content
+            $('#replace_div').load(url);
+        }
+    })
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -344,6 +345,22 @@ public class BookingController {
     @PutMapping("/re-editing")
     public ResponseEntity<Booking> reEditing(@RequestBody Booking booking) {
         return new ResponseEntity<Booking>(bookingService.reEditing(booking), HttpStatus.OK);
+    }
+
+    @PutMapping("/checkin/{bookingId}")
+    public ResponseEntity<?> checkin(@PathVariable Long bookingId) {
+        bookingService.checkin(bookingId);
+        return new ResponseEntity<>("ok", HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/checkin/{bookingId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] getQRCheckInCode(@PathVariable Long bookingId) {
+        return bookingService.getQRCheckInCode(bookingId);
+    }
+
+    @GetMapping("/ischeckin/{bookingId}")
+    public ResponseEntity<?> isCheckin(@PathVariable Long bookingId) {
+        return new ResponseEntity<>(bookingService.isCheckin(bookingId), HttpStatus.OK);
     }
 
     private Long getCurrentUserId() {
