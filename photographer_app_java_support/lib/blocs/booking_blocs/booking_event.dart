@@ -61,6 +61,11 @@ class BookingEventCancel extends BookingEvent {
   BookingEventCancel({this.booking});
 }
 
+class BookingEventCheckIn extends BookingEvent {
+  final int bookingId;
+  BookingEventCheckIn({this.bookingId});
+}
+
 class BookingEventLoadSuccess extends BookingEvent {
   BookingEventLoadSuccess(List<BookingBlocModel> list);
 }

@@ -11,7 +11,6 @@ import 'package:photographer_app_java_support/models/thread_model.dart';
 import 'package:photographer_app_java_support/respositories/thread_repository.dart';
 import 'package:photographer_app_java_support/screens/forum_screen/edit_thread.dart';
 import 'package:photographer_app_java_support/screens/forum_screen/reply_screen.dart';
-import 'package:photographer_app_java_support/widgets/shared/scale_navigator.dart';
 import 'package:photographer_app_java_support/widgets/shared/slide_navigator.dart';
 
 class ForumDetail extends StatefulWidget {

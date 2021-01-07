@@ -67,6 +67,7 @@ dependencies:
   cached_network_image: ^2.4.1
   weather_icons: ^2.0.2
   photo_view: ^0.10.3
+  flutter_barcode_scanner: ^1.0.1
   flutter:
     sdk: flutter
 

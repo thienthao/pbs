@@ -226,6 +226,8 @@ class BookingRepository {
           packageDescription: data['servicePackage']['description'] ?? '',
           package: package ?? [],
           customer: customer,
+          isCheckin: data['isCheckin'] ?? false,
+          qrCheckinCode: data['qrCheckinCode'],
           returningLink: data['returningLink']);
 
       return booking;
@@ -453,4 +455,5 @@ class BookingRepository {
       throw Exception('Error getting Photographer Calendar');
     }
   }
+
 }

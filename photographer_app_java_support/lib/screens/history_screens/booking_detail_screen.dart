@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
@@ -39,6 +41,42 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
+  double cuLat = 0;
+  double cuLong = 0;
+  double destinationLat = 11.939346;
+  double destinationLong = 108.445173;
+
+  NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
+  final TextEditingController _reasonTextController = TextEditingController();
+  final TextEditingController _reportTextController = TextEditingController();
+  final TextEditingController _returningLinkController =
+      TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  DatabaseReference _notificationRef;
+  Completer<void> _completer;
+
+  BookingBlocModel bookingObj;
+
+  Future<void> scanQR() async {
+    String barcodeScanRes;
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          "#ff6666", "Huỷ", true, ScanMode.QR);
+      print(barcodeScanRes);
+    } on PlatformException {
+      barcodeScanRes = 'Không thể nhận diện.';
+    }
+    if (!mounted) return;
+    setState(() {
+      if (barcodeScanRes == bookingObj.qrCheckinCode) {
+        _checkIn(bookingObj.id);
+      } else {
+        _showFailAlert(
+            'Cảnh báo', 'Mã QR này không hợp lệ.\n Xin vui lòng thử lại.');
+      }
+    });
+  }
+
   ReportTemplateModel reportRadio = reports.last;
   getChatRoomId(String a, String b) {
     if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
@@ -68,22 +106,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   chatRoomId: chatRoomId,
                 )));
   }
-
-  double cuLat = 0;
-  double cuLong = 0;
-  double destinationLat = 11.939346;
-  double destinationLong = 108.445173;
-
-  NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
-  final TextEditingController _reasonTextController = TextEditingController();
-  final TextEditingController _reportTextController = TextEditingController();
-  final TextEditingController _returningLinkController =
-      TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  DatabaseReference _notificationRef;
-  Completer<void> _completer;
-
-  BookingBlocModel bookingObj;
 
   Future<void> _reportDialog() async {
     return showDialog<void>(
@@ -390,13 +412,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   _moveToEditBooking(BookingBlocModel _booking) async {
     Navigator.pop(context);
-    BookingBlocModel bookingTemp = BookingBlocModel(
-        id: _booking.id,
-        customer: CustomerBlocModel(id: _booking.customer.id),
-        package: _booking.package);
-    print('${bookingTemp.customer.id}');
-    BlocProvider.of<BookingBloc>(context)
-        .add(BookingEventMoveToEdit(booking: bookingTemp));
+    if (bookingObj.isCheckin) {
+      BookingBlocModel bookingTemp = BookingBlocModel(
+          id: _booking.id,
+          customer: CustomerBlocModel(id: _booking.customer.id),
+          package: _booking.package);
+      print('${bookingTemp.customer.id}');
+      BlocProvider.of<BookingBloc>(context)
+          .add(BookingEventMoveToEdit(booking: bookingTemp));
+    } else {
+      _showFailAlert('Cảnh báo',
+          'Vui lòng check in gặp mặt khách hàng trước khi chuyển sang trạng thái Hậu kì');
+    }
   }
 
   _moveToDoneBooking(BookingBlocModel _booking) async {
@@ -446,6 +473,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     print('${bookingTemp.customer.id}');
     BlocProvider.of<BookingBloc>(context)
         .add(BookingEventCancel(booking: bookingTemp));
+  }
+
+  _checkIn(int bookingId) async {
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventCheckIn(bookingId: bookingId));
   }
 
   getCurrentLocation() async {
@@ -888,6 +920,91 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             SizedBox(
               height: 20,
             ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Check-in gặp mặt với khách hàng',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  wordSpacing: -1,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey[300],
+                      offset: Offset(-1.0, 2.0),
+                      blurRadius: 6.0)
+                ],
+              ),
+              padding: EdgeInsets.all(20),
+              child: !bookingObj.isCheckin
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.done,
+                              color: Color(0xFFF77474),
+                              size: 20,
+                            ),
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              'Quét mã QR',
+                              style: TextStyle(
+                                  fontSize: 17.0, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: InkWell(
+                              onTap: () {
+                                scanQR();
+                              },
+                              child: Icon(
+                                Icons.qr_code_scanner_rounded,
+                                size: 30,
+                                color: Colors.lightBlueAccent,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Icon(
+                          Icons.done,
+                          color: Color(0xFFF77474),
+                          size: 20,
+                        ),
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        Text(
+                          'Đã check-in',
+                          style: TextStyle(
+                              fontSize: 17.0, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -1088,6 +1205,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     } else if (status.toUpperCase().trim() == 'CANCELED') {
       text = 'Đã hủy';
       color = Colors.black;
+    } else if (status.toUpperCase().trim() == 'CANCELLING_CUSTOMER') {
+      text = 'Chờ hủy - Khách hàng';
+      color = Colors.blueGrey;
+    } else if (status.toUpperCase().trim() == 'CANCELLED_CUSTOMER') {
+      text = 'Đã hủy - Khách hàng';
+      color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'CANCELLING_PHOTOGRAPHER') {
+      text = 'Chờ hủy';
+      color = Colors.blueGrey;
+    } else if (status.toUpperCase().trim() == 'CANCELLED_PHOTOGRAPHER') {
+      text = 'Đã hủy';
+      color = Colors.black54;
+    } else {
+      text = 'Không xác định';
+      color = Colors.black26;
     }
 
     return TextSpan(
@@ -1909,7 +2041,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             state.error.replaceAll('Exception: ', '');
                         if (error.toUpperCase() == 'UNAUTHORIZED') {
                           _showUnauthorizedDialog();
+                        } else {
+                          _showFailAlert('Thất bại',
+                              'Đã có lỗi xảy ra trong lúc gửi yêu cầu!');
                         }
+                      }
+
+                      if (state is BookingStateCheckInSuccess) {
+                        _loadBookingDetail();
                       }
                     },
                     builder: (context, bookingState) {
@@ -2376,6 +2515,39 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
               description: Text(
                 'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showFailAlert(String title, String content) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                title,
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                content,
                 textAlign: TextAlign.center,
                 style: TextStyle(),
               ),

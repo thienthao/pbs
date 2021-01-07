@@ -33,6 +33,8 @@ class BookingBlocModel extends Equatable {
   final String returningLink;
   final int timeAnticipate;
   final CustomerBlocModel customer;
+  final bool isCheckin;
+  final String qrCheckinCode;
 
   BookingBlocModel(
       {this.id,
@@ -62,7 +64,10 @@ class BookingBlocModel extends Equatable {
       this.listTimeAndLocations,
       this.returningLink,
       this.timeAnticipate,
-      this.customer});
+      this.customer,
+      this.isCheckin,
+      this.qrCheckinCode
+      });
 
   @override
   List<Object> get props {

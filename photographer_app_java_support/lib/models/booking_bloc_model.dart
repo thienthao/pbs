@@ -40,6 +40,8 @@ class BookingBlocModel extends Equatable {
   final List<WeatherBlocModel> listWeatherNoticeDetails;
   final String returningLink;
   final int timeAnticipate;
+   final bool isCheckin;
+  final String qrCheckinCode;
 
   BookingBlocModel(
       {this.id,
@@ -74,6 +76,8 @@ class BookingBlocModel extends Equatable {
       this.selfWarnDistance,
       this.returningLink,
       this.listWeatherNoticeDetails,
+      this.isCheckin,
+      this.qrCheckinCode,
       this.timeAnticipate});
 
   @override
