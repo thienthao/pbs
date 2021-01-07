@@ -54,6 +54,7 @@
             </div>
         </div>
     </div>
+    <script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
     <script th:inline="javascript">
 
 
@@ -62,10 +63,6 @@
             $('.arrow').remove();
             $('#admin-content').load('/admin/bookings/' + bookingId + '?'  + $.param({cancellationId: cancellationId}));
         }
-
-        $(document).ready(()=>{
-            // th:href="@{/admin/bookings/{bookingId}(bookingId=${cancellation.booking.id}, cancellationId=${cancellation.id})}"
-        });
     </script>
 </div>
 </body>

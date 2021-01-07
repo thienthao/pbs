@@ -74,7 +74,7 @@
                         <td class="text-center" th:text="${#dates.format(obj.createdAt, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
                         <td class="text-center">
                             <a type="button" id="PopoverCustomT-1"
-                               class="btn btn-primary btn-sm" th:href="@{/admin/v2/users/{userId}(userId=${obj.id})}">Chi tiết</a>
+                               class="btn btn-primary btn-sm text-white" th:onclick="'toUserDetail(' + ${obj.id} +')'">Chi tiết</a>
                         </td>
                     </tr>
                     </tbody>
@@ -96,6 +96,10 @@
     </div>
 </div>
     <script th:inline="javascript">
+
+        function toUserDetail(id) {
+            $('#admin-content').load('/admin/v2/users/' + id);
+        }
 
         function limitRecord10(atag) {
             $('#admin-content').load('/admin/v2/users?'  + $.param({size: 10, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], role: [[${role}]]}));

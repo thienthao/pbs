@@ -322,7 +322,7 @@ public class AdminController {
         model.addAttribute("status", status);
         model.addAttribute("start", start);
         model.addAttribute("end", end);
-        return "admin-refactor/user-detail";
+        return "admin-refactor/user-detail :: content";
     }
 
 
