@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-
-import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/models/notification_bloc_model.dart';
 
 abstract class NotificationState extends Equatable {

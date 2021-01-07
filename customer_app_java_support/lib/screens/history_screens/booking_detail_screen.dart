@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
@@ -127,6 +128,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       color = Colors.blueGrey;
     } else if (status.toUpperCase().trim() == 'CANCELLED_CUSTOMER') {
       text = 'Đã hủy';
+      color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'CANCELLING_PHOTOGRAPHER') {
+      text = 'Chờ hủy - Photographer';
+      color = Colors.blueGrey;
+    } else if (status.toUpperCase().trim() == 'CANCELLED_PHOTOGRAPHER') {
+      text = 'Đã hủy - Photographer';
       color = Colors.black54;
     } else {
       text = 'Không xác định';
@@ -849,6 +856,88 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             ),
             SizedBox(
               height: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Check-in gặp mặt với Photographer',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  wordSpacing: -1,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey[300],
+                      offset: Offset(-1.0, 2.0),
+                      blurRadius: 6.0)
+                ],
+              ),
+              padding: EdgeInsets.all(20),
+              child: !bookingObj.isCheckin
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.done,
+                              color: Color(0xFFF77474),
+                              size: 20,
+                            ),
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              'Hiện mã QR',
+                              style: TextStyle(
+                                  fontSize: 17.0, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: InkWell(
+                              onTap: () {
+                                _showQRCode();
+                              },
+                              child: Icon(
+                                Icons.qr_code_rounded,
+                                size: 30,
+                                color: Colors.lightBlueAccent,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Icon(
+                          Icons.done,
+                          color: Color(0xFFF77474),
+                          size: 20,
+                        ),
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        Text(
+                          'Đã check-in',
+                          style: TextStyle(
+                              fontSize: 17.0, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
             ),
             Center(
               child: Padding(
@@ -1592,6 +1681,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               _loadBookingDetail();
             }
             return ListView(
+              physics: BouncingScrollPhysics(),
               padding: EdgeInsets.zero,
               children: <Widget>[
                 Center(
@@ -2092,6 +2182,36 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             );
           }),
     );
+  }
+
+  Future<void> _showQRCode() async {
+    return showDialog<void>(
+        barrierDismissible: true,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.45,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.network(
+                  bookingObj.qrCheckinCode,
+                  headers: {
+                    HttpHeaders.authorizationHeader: 'Bearer $globalCusToken'
+                  },
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
   }
 
   Future<void> _showUnauthorizedDialog() async {

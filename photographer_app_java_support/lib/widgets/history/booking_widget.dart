@@ -34,7 +34,7 @@ class _BookingWidgetState extends State<BookingWidget> {
       BookingRepository(httpClient: http.Client());
   CommentRepository _commentRepository =
       CommentRepository(httpClient: http.Client());
-      ReportRepository _reportRepository =
+  ReportRepository _reportRepository =
       ReportRepository(httpClient: http.Client());
   Text statusFormat(String status) {
     String text = status;
@@ -57,6 +57,21 @@ class _BookingWidgetState extends State<BookingWidget> {
     } else if (status.toUpperCase().trim() == 'CANCELED') {
       text = 'Đã hủy';
       color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'CANCELLING_CUSTOMER') {
+      text = 'Chờ hủy - KH';
+      color = Colors.blueGrey;
+    } else if (status.toUpperCase().trim() == 'CANCELLED_CUSTOMER') {
+      text = 'Đã hủy - KH';
+      color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'CANCELLING_PHOTOGRAPHER') {
+      text = 'Chờ hủy';
+      color = Colors.blueGrey;
+    } else if (status.toUpperCase().trim() == 'CANCELLED_PHOTOGRAPHER') {
+      text = 'Đã hủy';
+      color = Colors.black54;
+    } else {
+      text = 'Không xác định';
+      color = Colors.black26;
     }
     return Text(
       text,
@@ -118,10 +133,10 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 BlocProvider(
                                     create: (context) => CommentBloc(
                                         commentRepository: _commentRepository)),
-                                          BlocProvider(
-                                    create: (context) => ReportBloc(
-                                        reportRepository: _reportRepository),
-                                  ),
+                                BlocProvider(
+                                  create: (context) => ReportBloc(
+                                      reportRepository: _reportRepository),
+                                ),
                               ],
                               child: BookingDetailScreen(
                                 bookingId: booking.id,

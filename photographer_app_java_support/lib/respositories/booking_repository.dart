@@ -419,6 +419,8 @@ class BookingRepository {
           listWeatherNoticeDetails: listWeatherNoticeDetails,
           timeAnticipate: data['timeAnticipate'],
           photographer: photographer,
+          isCheckin: data['isCheckin'] ?? false,
+          qrCheckinCode: data['qrCheckinCode'],
           returningLink: data['returningLink']);
 
       return booking;
@@ -673,6 +675,27 @@ class BookingRepository {
     //           HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
     //         },
     //         body: str);
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error at cancel a booking');
+    }
+
+    return result;
+  }
+
+  Future<bool> checkIn(int bookingId) async {
+    final response = await httpClient.put(
+      BaseApi.BOOKING_URL + '/checkin/$bookingId',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+      },
+    );
+
     bool result = false;
     if (response.statusCode == 200) {
       result = true;

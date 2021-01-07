@@ -11,7 +11,6 @@ import 'package:customer_app_java_support/screens/home_screens/search_ptg_servic
 import 'package:customer_app_java_support/shared/home_screen_album_carousel_loading.dart';
 import 'package:customer_app_java_support/shared/home_screen_category_loading.dart';
 import 'package:customer_app_java_support/shared/home_screen_ptg_carousel_loading.dart';
-import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:customer_app_java_support/widgets/home_screen/album_bloc_carousel.dart';
 import 'package:customer_app_java_support/widgets/home_screen/icon_carousel.dart';
 import 'package:customer_app_java_support/widgets/home_screen/photograph_carousel.dart';

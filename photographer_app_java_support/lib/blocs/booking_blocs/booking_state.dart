@@ -97,6 +97,16 @@ class BookingStateRejectedSuccess extends BookingState {
       'BookingStateCreatedSuccess { Booking Reject: $isSuccess }';
 }
 
+class BookingStateCheckInSuccess extends BookingState {
+  final bool isSuccess;
+  BookingStateCheckInSuccess({@required this.isSuccess});
+  @override
+  List<Object> get props => [isSuccess];
+  @override
+  String toString() =>
+      'BookingStateCheckInSuccess { Booking Check In: $isSuccess }';
+}
+
 class BookingStateSuccess extends BookingState {
   final List<BookingBlocModel> bookings;
   const BookingStateSuccess({@required this.bookings})
