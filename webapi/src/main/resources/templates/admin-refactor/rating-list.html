@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="main-card mb-3 card">
-                <div class="card-header">Yêu cầu hủy hẹn
+                <div class="card-header">Khách hàng đánh giá
                     <div class="btn-actions-pane-right">
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
                             <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
@@ -28,7 +28,7 @@
                         </div>
                         <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
-<!--                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size},filter=${filter})}">10 kết quả</a>-->
+                            <!--                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size},filter=${filter})}">10 kết quả</a>-->
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                     class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
@@ -46,10 +46,10 @@
                         <tr>
                             <th class="text-center">#</th>
                             <th>Khách hàng</th>
-                            <th class="text-center">Thời gian hẹn</th>
-                            <th class="text-center">Thời gian hủy</th>
+                            <th class="text-center">Đánh giá</th>
+                            <th class="text-center">Bình luận</th>
                             <th class="text-center">Thợ chụp</th>
-                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Thời gian</th>
                             <th class="text-center">Tác vụ</th>
                         </tr>
                         </thead>
@@ -62,63 +62,61 @@
                                         <div class="widget-content-left mr-3">
                                             <div class="widget-content-left">
                                                 <img width="40" class="rounded-circle"
-                                                     th:src="${obj.booking.customer.avatar}" alt="">
+                                                     th:src="${obj.user.avatar}" alt="">
                                             </div>
                                         </div>
                                         <div class="widget-content-left flex2">
-                                            <div class="widget-heading" th:text="${obj.booking.customer.fullname}">Uyển Nhi</div>
+                                            <div class="widget-heading" th:text="${obj.user.fullname}">Uyển Nhi</div>
                                         </div>
                                     </div>
                                 </div>
-                </td>
-                <td class="text-center" th:text="${#dates.format(obj.booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
-                <td class="text-center" th:text="${#dates.format(obj.createdAt, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
-                <td>
-                    <div class="widget-content p-0">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left mr-3">
-                                <div class="widget-content-left">
-                                    <img width="40" class="rounded-circle" th:src="${obj.booking.photographer.avatar}" alt="">
+                            </td>
+                            <td class="text-center" th:text="${obj.rating}">08:00 12/20/2020</td>
+                            <td class="text-center" th:text="${obj.comment}">08:00 12/20/2020</td>
+                            <td>
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left mr-3">
+                                            <div class="widget-content-left">
+                                                <img width="40" class="rounded-circle" th:src="${obj.booking.photographer.avatar}" alt="">
+                                            </div>
+                                        </div>
+                                        <div class="widget-content-left flex2">
+                                            <div class="widget-heading" th:text="${obj.booking.photographer.fullname}">Cao Tiến</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="widget-content-left flex2">
-                                <div class="widget-heading" th:text="${obj.booking.photographer.fullname}">Cao Tiến</div>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td class="text-center">
-                    <div class="badge badge-warning" th:text="${@thymeleafHelper.convertStatus(obj.booking.bookingStatus)}">Chờ xác nhận</div>
-                </td>
-                <td class="text-center">
-                    <a type="button" id="PopoverCustomT-1"
-                            class="btn btn-primary btn-sm text-white" th:onclick="'toCancellationDetail(this,' + ${obj.id} +')'">Chi tiết</a>
-                </td>
-                </tr>
-                </tbody>
-                </table>
-            </div>
-            <div class="d-block text-center card-footer">
-                <nav aria-label="..." class="d-flex justify-content-center">
-                    <ul class="pagination pagination-sm">
-                        <li th:if="${page.hasPrevious()}" class="page-item"><a id="cancellation-list-a-paging-previous">Trước</a></li>
-                        <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
-                            <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
-                            <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
-                        </th:block>
-                        <li th:if="${page.hasNext()}" class="page-item"><a id="cancellation-list-a-paging-next">Sau</a></li>
-                    </ul>
-                </nav>
+                            </td>
+                            <td class="text-center" th:text="${#dates.format(obj.commentedAt, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
+                            <td class="text-center">
+                                <a type="button" id="PopoverCustomT-1"
+                                   class="btn btn-primary btn-sm text-white" th:onclick="'toBookingDetail(' +${obj.booking.id} +')'">Đơn hẹn</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-block text-center card-footer">
+                    <nav aria-label="..." class="d-flex justify-content-center">
+                        <ul class="pagination pagination-sm">
+                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="cancellation-list-a-paging-previous">Trước</a></li>
+                            <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                                <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
+                                <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
+                            </th:block>
+                            <li th:if="${page.hasNext()}" class="page-item"><a id="cancellation-list-a-paging-next">Sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
-</div>
     <script th:inline="javascript">
 
-        function toCancellationDetail(atag, id) {
+        function toBookingDetail(bookingId) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            const url = '/admin/cancellations/' + id;
+            const url = '/admin/bookings/' + bookingId;
             $('#admin-content').load(url);
         }
 

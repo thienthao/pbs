@@ -26,7 +26,7 @@
 <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>-->
 
 <script src="https://cdn.tiny.cloud/1/xiscx5rnb5bpcun87f48v884z4q30sska46zscxommfv9e3f/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-<!--<script id="main-script" type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>-->
+<script id="main-script" type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
 <script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/modal.js}"></script>
 <script type="text/javascript"  th:src="@{/admin-refactor/langs/vi.js}"></script>
 
@@ -41,6 +41,14 @@
             $('#admin-content').load('/admin/v2/users');
         });
 
+        $('#report-list-a').click(() => {
+            $('#admin-content').load('/admin/reports');
+        });
+
+        $('#rating-list-a').click(() => {
+            $('#admin-content').load('/admin/ratings');
+        });
+
         //call function when page is loaded
         getContent();
 
@@ -49,7 +57,9 @@
 
         function getContent() {
             //create url to request fragment
-            var url = '/admin/cancellations';
+            var url = '/admin/ratings';
+            // var url = '/admin/reports';
+            // var url = '/admin/cancellations';
             // var url = '/admin/bookings/405?cancellationId=1';
 
             //load fragment and replace content

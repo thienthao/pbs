@@ -8,6 +8,7 @@ import fpt.university.pbswebapi.repository.*;
 import fpt.university.pbswebapi.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -36,9 +37,11 @@ public class AdminController {
     private CancellationService cancellationService;
     private VariableService variableService;
     private BookingRepository bookingRepository;
-    private CommentRepository commentRepository;
+    private RatingService ratingService;
+    private ReportService reportService;
 
-    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, CommentRepository commentRepository) {
+    @Autowired
+    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, RatingService ratingService, ReportService reportService) {
         this.categoryRepository = categoryRepository;
         this.returningTypeRepository = returningTypeRepository;
         this.userRepository = userRepository;
@@ -48,7 +51,8 @@ public class AdminController {
         this.cancellationService = cancellationService;
         this.variableService = variableService;
         this.bookingRepository = bookingRepository;
-        this.commentRepository = commentRepository;
+        this.ratingService = ratingService;
+        this.reportService = reportService;
     }
 
     @GetMapping("/login")
@@ -256,6 +260,16 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/ratings")
+    public String showRatingList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+        model.addAttribute("page", ratingService.getAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/rating-list :: content";
+    }
+
     @GetMapping("/cancellations")
     public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
         model.addAttribute("page", cancellationService.getCancellations(pageable, start, end, filter));
@@ -291,6 +305,22 @@ public class AdminController {
         }
         model.addAttribute("booking", bookingRepository.findById(bookingId).get());
         return "admin-refactor/booking-detail :: content";
+    }
+
+    @GetMapping("/reports")
+    public String showReportList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+        model.addAttribute("page", reportService.getAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "admin-refactor/report-list :: content";
+    }
+
+    @GetMapping("/reports/{id}")
+    public String showReportDetail(Model model, @PathVariable Long id) {
+        model.addAttribute("report",reportService.findById(id));
+        return "admin-refactor/report-detail :: content";
     }
 
     @GetMapping("/v2/users")

@@ -27,13 +27,24 @@ public class Report {
     @Column(name = "reason")
     private String reason;
 
-    @Column(name = "reporter_id")
-    private Long reporterId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "reporter_id", referencedColumnName = "id")
+    private User reporter;
 
-    @Column(name = "reported_id")
-    private Long reportedId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "booking_id", referencedColumnName = "id")
+    private Booking booking;
+
+    @Column(name = "is_solve")
+    private Boolean isSolve;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
+
+    @PrePersist
+    void prepersist() {
+        createdAt = new Date();
+        isSolve = false;
+    }
 }

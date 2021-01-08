@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Detail</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row">
+        <div class="tab-content col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <h5 class="card-title">Đơn báo cáo</h5>
+                        <div th:if="${report.isSolve == true}" class="badge badge-success">Đã giải quyết</div>
+                    </div>
+                    <div>
+                        <form method="post" th:action="@{/admin/reports/{id}(id = ${report.id})}">
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
+                                        class="mr-sm-2">Người báo cáo</label><input type="text" th:value="${report.reporter.fullname}" class="form-control" readonly></div>
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Lý do
+                                </label><input type="text" class="form-control" th:value="${report.title}" readonly></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng</label><input type="text" th:value="${report.booking.customer.fullname}" class="form-control" readonly></div>
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thợ ảnh
+                                </label><input type="text" class="form-control" th:value="${report.booking.photographer.fullname}" readonly></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thời gian
+                                </label><input type="text" class="form-control" th:value="${#dates.format(report.createdAt, 'HH:mm dd-MM-yyyy')}" readonly></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><a class="mt-2 btn btn-primary text-white" th:onclick="'toBookingDetail(' + ${report.booking.id} +')'">Chi tiết đơn hẹn</a>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <button class="mt-2 btn btn-primary" type="submit">Chấp thuận</button>
+                            <form method="post" th:action="@{/admin/cancellations-warn/{id}(id = ${report.id})}">
+                                <button type="button" class="mt-2 btn btn-primary" id="btn-mail">Gửi cảnh báo</button>
+                            </form>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+
+
+        function toBookingDetail(bookingId) {
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+            $('#admin-content').load('/admin/bookings/' + bookingId);
+        }
+    </script>
+</div>
+</body>
+</html>
