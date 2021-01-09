@@ -37,6 +37,12 @@ public class TimeLocationDetail {
     @Temporal(TemporalType.TIMESTAMP)
     private Date end;
 
+    @Column(name = "is_checkin")
+    private Boolean isCheckin;
+
+    @Column(name = "qr_checkin_code")
+    private String qrCheckinCode;
+
     @Override
     public String toString() {
         return "TimeLocationDetail{" +
@@ -47,5 +53,10 @@ public class TimeLocationDetail {
                 ", start=" + start +
                 ", end=" + end +
                 '}';
+    }
+
+    @PrePersist
+    void prepersist() {
+        isCheckin = false;
     }
 }

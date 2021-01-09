@@ -36,9 +36,10 @@ public class BookingService {
     private final CancellationRepository cancellationRepository;
     private final NotificationRepository notificationRepository;
     private final FileStore fileStore;
+    private final TimeLocationDetailRepository tldRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository, FileStore fileStore) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository, FileStore fileStore, TimeLocationDetailRepository tldRepository) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
@@ -47,6 +48,7 @@ public class BookingService {
         this.cancellationRepository = cancellationRepository;
         this.notificationRepository = notificationRepository;
         this.fileStore = fileStore;
+        this.tldRepository = tldRepository;
     }
 
     public Booking checkDistance(Booking booking) {
@@ -105,12 +107,33 @@ public class BookingService {
         return result;
     }
 
+    private List<TimeLocationDetail> generateCheckinCode(List<TimeLocationDetail> tlds, Long bookingId) {
+        try {
+            for (int i = 0; i < tlds.size(); i++) {
+                TimeLocationDetail tld = tlds.get(i);
+                InputStream qrCode = QRCodeHelper.generate("http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/" + bookingId + "/" + tld.getId());
+
+                Map<String, String> metadata = new HashMap<>();
+                metadata.put("Content-Type", "image/png");
+                metadata.put("Content-Length", String.valueOf(qrCode.available()));
+                String path = String.format("%s/bookings/%s/%s", BucketName.PROFILE_IMAGE.getBucketName(), bookingId, tld.getId());
+                String filename = String.format("%s-%s", tld.getId(), "qrcode");
+                fileStore.save(path, filename, Optional.of(metadata), qrCode);
+                tld.setQrCheckinCode("http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/" + bookingId + "/" + tld.getId());
+                tlds.set(i, tld);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tlds;
+    }
+
     public Booking accept(Booking booking) {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setBookingStatus(EBookingStatus.ONGOING);
-        String checkinCode = generateCheckinCode(savedBooking.getId());
-        savedBooking.setQrCheckinCode(checkinCode);
+        List<TimeLocationDetail> tlds = generateCheckinCode(savedBooking.getTimeLocationDetails(), savedBooking.getId());
+        savedBooking.setTimeLocationDetails(tlds);
         Booking result = bookingRepository.save(savedBooking);
         User user = userRepository.findById(booking.getPhotographer().getId()).get();
         User customer = userRepository.findById(booking.getCustomer().getId()).get();
@@ -957,15 +980,16 @@ public class BookingService {
         }
     }
 
-    public void checkin(Long bookingId) {
-        bookingRepository.checkin(bookingId);
+    public void checkin(Long tldId) {
+        tldRepository.checkin(tldId);
     }
 
-    public byte[] getQRCheckInCode(Long bookingId) {
-        String path = String.format("%s/bookings/%s",
+    public byte[] getQRCheckInCode(Long bookingId, Long tldId) {
+        String path = String.format("%s/bookings/%s/%s",
                 BucketName.PROFILE_IMAGE.getBucketName(),
-                bookingId);
-        return fileStore.download(path, bookingId + "-qrcode");
+                bookingId,
+                tldId);
+        return fileStore.download(path, tldId + "-qrcode");
     }
 
     public Boolean isCheckin(Long bookingId) {

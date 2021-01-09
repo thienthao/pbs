@@ -353,9 +353,15 @@ public class BookingController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @GetMapping(value = "/checkin/{bookingId}", produces = MediaType.IMAGE_PNG_VALUE)
-    public byte[] getQRCheckInCode(@PathVariable Long bookingId) {
-        return bookingService.getQRCheckInCode(bookingId);
+    @PutMapping("/checkin/{bookingId}/{tldId}")
+    public ResponseEntity<?> checkinOnDate(@PathVariable Long bookingId, @PathVariable Long tldId) {
+        bookingService.checkin(tldId);
+        return new ResponseEntity<>("ok", HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/checkin/{bookingId}/{tldId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public byte[] getQRCheckInCode(@PathVariable Long bookingId, @PathVariable Long tldId) {
+        return bookingService.getQRCheckInCode(bookingId, tldId);
     }
 
     @GetMapping("/ischeckin/{bookingId}")

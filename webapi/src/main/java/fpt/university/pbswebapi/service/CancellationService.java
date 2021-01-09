@@ -150,11 +150,11 @@ public class CancellationService {
         notificationRepository.save(notification1);
     }
 
-    public CancellationRequest approve(Long id) {
+    public void approve(Long id) {
         CancellationRequest cancellationRequest = cancellationRepository.findById(id).get();
         cancellationRequest.setIsSolve(true);
         cancellationRequest.setApprovedAt(new Date());
-        CancellationRequest result = cancellationRepository.save(cancellationRequest);
+        cancellationRepository.save(cancellationRequest);
         if(cancellationRequest.getOwner().getRole().getRole() == ERole.ROLE_CUSTOMER) {
             Booking savedBooking = bookingRepository.findById(cancellationRequest.getBooking().getId()).get();
             savedBooking.setBookingStatus(EBookingStatus.CANCELLED_CUSTOMER);
@@ -168,7 +168,6 @@ public class CancellationService {
             bookingRepository.save(savedBooking);
             noti(cancellationRequest);
         }
-        return result;
     }
 
     public void warn(Long id) {

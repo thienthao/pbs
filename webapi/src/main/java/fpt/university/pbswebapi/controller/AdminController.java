@@ -292,7 +292,7 @@ public class AdminController {
 
     @PostMapping("/cancellations/{id}")
     public String showCancellationDetailAfterApprove(Model model, @PathVariable Long id) {
-        model.addAttribute("cancellation", cancellationService.approve(id));
+        model.addAttribute("cancellation", cancellationService.findById(id));
         return "admin-refactor/cancellation-detail :: content";
     }
 
