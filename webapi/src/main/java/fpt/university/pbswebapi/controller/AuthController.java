@@ -4,6 +4,7 @@ import fpt.university.pbswebapi.dto.UserDto;
 import fpt.university.pbswebapi.entity.ERole;
 import fpt.university.pbswebapi.entity.Role;
 import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.exception.NotFoundException;
 import fpt.university.pbswebapi.payload.own.request.LoginRequest;
 import fpt.university.pbswebapi.payload.own.request.SignupRequest;
@@ -141,6 +142,8 @@ public class AuthController {
                 return ResponseEntity.badRequest().body("Change password failed!");
             }
             return ResponseEntity.ok(new MessageResponse("Change password successfully!"));
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {

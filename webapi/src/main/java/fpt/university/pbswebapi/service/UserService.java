@@ -2,6 +2,7 @@ package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.dto.UserDto;
 import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.exception.NotFoundException;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.repository.UserRepository;
@@ -61,7 +62,10 @@ public class UserService {
         if (existedUser == null) {
             throw new NotFoundException();
         }
-        existedUser.setPassword(encoder.encode(userDto.getPassword()));
+        if (!encoder.matches(userDto.getOldPassword(), existedUser.getPassword())) {
+            throw new BadRequestException("Tên đăng nhập hoặc mật khẩu không chính xác");
+        }
+        existedUser.setPassword(encoder.encode(userDto.getNewPassword()));
         return userRepository.save(existedUser);
     }
 
