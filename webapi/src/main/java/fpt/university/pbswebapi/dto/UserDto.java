@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -15,19 +14,15 @@ import javax.validation.constraints.Size;
 public class UserDto {
     private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$";
 
-    @NotNull
-    @Size(min = 8, max = 20)
+    @NotBlank(message = "Username cannot be empty.")
+    @Size(min = 8, max = 20, message = "Username is between [8-20] characters long.")
     private String username;
 
-    @NotNull
-    @NotBlank
-    @Size(min = 8)
-    @Pattern(regexp = PASSWORD_REGEX)
+    @NotBlank(message = "Old Password cannot be empty.")
+    @Pattern(regexp = PASSWORD_REGEX, message = "Old Password does not match.")
     private String oldPassword;
 
-    @NotNull
-    @NotBlank
-    @Size(min = 8)
-    @Pattern(regexp = PASSWORD_REGEX)
+    @NotBlank(message = "New Password cannot be empty.")
+    @Pattern(regexp = PASSWORD_REGEX, message = "New Password does not match.")
     private String newPassword;
 }
