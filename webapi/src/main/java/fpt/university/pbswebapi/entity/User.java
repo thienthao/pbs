@@ -84,6 +84,9 @@ public class User {
     @Column(name = "device_token")
     private String deviceToken;
 
+    @Column(name = "is_enabled")
+    private Boolean isEnabled;
+
     public User(String username, String email, String password, String phone, String fullname) {
         this.username = username;
         this.password = password;
@@ -97,6 +100,7 @@ public class User {
         createdAt = new Date();
         isBlocked = false;
         isDeleted = false;
+        isEnabled = false;
     }
 
     @Override

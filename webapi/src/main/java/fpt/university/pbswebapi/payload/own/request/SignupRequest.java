@@ -1,79 +1,38 @@
 package fpt.university.pbswebapi.payload.own.request;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.Set;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import javax.validation.constraints.*;
+
+import static fpt.university.pbswebapi.helper.StringUtils.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class SignupRequest {
-    @NotBlank
-    @Size(min = 3, max = 20)
+
+    @NotBlank(message = "Username cannot be empty.")
+    @Size(min = 8, max = 20, message = "Username is between [8-20] characters long.")
     private String username;
 
-    @NotBlank
-    @Size(max = 50)
-    @Email
-    @NotNull
+    @NotBlank(message = "Email cannot be empty.")
+    @Size(max = 50, message = "Email only allows maximum 50 characters length.")
+    @Email(regexp = EMAIL_REGEX, message = "Email does not match.")
     private String email;
 
     private String role;
 
-    @NotNull
+    @NotBlank(message = "Full name cannot be empty.")
+    @Pattern(regexp = FULL_NAME_REGEX, message = "Full name does not match.")
     private String fullname;
 
-    @NotNull
+    @NotBlank(message = "Phone number cannot be empty.")
+    @Pattern(regexp = PHONE_REGEX, message = "Phone number does not match.")
     private String phone;
 
-    @NotBlank
-    @Size(min = 6, max = 40)
+    @NotBlank(message = "Password cannot be empty.")
+    @Pattern(regexp = PASSWORD_REGEX, message = "New Password does not match.")
     private String password;
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getFullname() {
-        return fullname;
-    }
-
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
