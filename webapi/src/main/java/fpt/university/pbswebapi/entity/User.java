@@ -84,10 +84,12 @@ public class User {
     @Column(name = "device_token")
     private String deviceToken;
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password, String phone, String fullname) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.phone = phone;
+        this.fullname = fullname;
     }
 
     @PrePersist

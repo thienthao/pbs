@@ -971,4 +971,8 @@ public class BookingService {
     public Boolean isCheckin(Long bookingId) {
         return bookingRepository.findById(bookingId).get().getIsCheckin();
     }
+
+    public Page<Booking> findAll(Pageable pageable) {
+        return bookingRepository.findAll(pageable);
+    }
 }

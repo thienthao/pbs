@@ -166,6 +166,12 @@ public class AlbumController {
         return new ResponseEntity<>(albumService.editAlbum(albumdto), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{albumId}")
+    public ResponseEntity<?> deleteAlbum(@PathVariable Long albumId) {
+        albumService.deleteAlbum(albumId);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
+
     @PutMapping("/{albumId}/images")
     public ResponseEntity<?> addImage(@PathVariable("albumId") Long albumId, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(albumService.addImage(albumId, file), HttpStatus.OK);

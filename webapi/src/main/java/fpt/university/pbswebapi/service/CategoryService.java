@@ -6,6 +6,8 @@ import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +29,10 @@ public class CategoryService {
     public CategoryService(CategoryRepository categoryRepository, FileStore fileStore) {
         this.categoryRepository = categoryRepository;
         this.fileStore = fileStore;
+    }
+
+    public Page<Category> getAll(Pageable pageable) {
+        return categoryRepository.findAll(pageable);
     }
 
     public String uploadCategoryIcon(Long id, MultipartFile file) {

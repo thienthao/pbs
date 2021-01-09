@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking List</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-header">Phương thức trả ảnh
+                    <div class="btn-actions-pane-right">
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Lọc</button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${filter} == 'not_solve' ? disabled : ''" tabindex="-1" onclick="filterStatusNodeal(this)">Chưa xử lý</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'solve' ? disabled : ''" tabindex="0" onclick="filterStatusAlreadydeal(this)">Đã xử lý</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'all' ? disabled : ''" tabindex="0" onclick="filterStatusAll(this)">Tất cả</a>
+                            </div>
+                        </div>
+                        <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                            <i class="fa fa-calendar"></i>&nbsp;
+                            <span></span> <i class="fa fa-caret-down"></i>
+                        </div>
+                        <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <!--                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size},filter=${filter})}">10 kết quả</a>-->
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" onclick="limitRecord10(this)">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" onclick="limitRecord20(this)">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" onclick="limitRecord50(this)">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" onclick="limitRecordAll(this)">Tất cả</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                        <thead>
+                        <tr>
+                            <th class="text-center">#</th>
+                            <th class="text-center">Phương thức</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="obj: ${page.content}">
+                            <td class="text-center text-muted" th:text="${obj.id}">#345</td>
+                            <td class="text-center" th:text="${obj.type}">08:00 12/20/2020</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-block text-center card-footer">
+                    <nav aria-label="..." class="d-flex justify-content-center">
+                        <ul class="pagination pagination-sm">
+                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="cancellation-list-a-paging-previous">Trước</a></li>
+                            <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                                <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
+                                <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
+                            </th:block>
+                            <li th:if="${page.hasNext()}" class="page-item"><a id="cancellation-list-a-paging-next">Sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+
+        function toBookingDetail(id) {
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+            const url = '/admin/bookings/' + id;
+            $('#admin-content').load(url);
+        }
+
+        // th:href="@{/admin/cancellations/{id}(id=${obj.id})}"
+
+        // $(document).ready(() => {
+        //     $('#cancellation-list-a').click(() => {
+        //         $('#admin-content').load('/admin/cancellations');
+        //     });
+        // });
+
+        // th:href="@{/admin/cancellations(page=${page.number},size=10,start=${start},end=${end},filter=${filter})}"
+        function limitRecord10(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+        }
+
+        function limitRecord20(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+        }
+
+        function limitRecord50(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+        }
+
+        function limitRecordAll(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+        }
+
+        // th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=not_solve)}"
+        function filterStatusNodeal(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'not_solve'}));
+        }
+
+        function filterStatusAlreadydeal(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'solve'}));
+        }
+
+        function filterStatusAll(atag) {
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
+        }
+
+        function toPage(atag) {
+            let page = atag.text;
+            page = page - 1;
+            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+        }
+
+        $(document).ready(()=>{
+
+            $('#cancellation-list-a-paging-previous').click(() => {
+                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            });
+
+            $('#cancellation-list-a-paging-next').click(() => {
+                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            });
+        });
+    </script>
+    <script th:inline="javascript">
+
+        moment.locale('vi', {
+            months: 'Tháng 1_Tháng 2_Tháng 3_Tháng 4_Tháng 5_Tháng 6_Tháng 7_Tháng 8_Tháng 9_Tháng 10_Tháng 11_Tháng 12'.split('_'),
+            monthsShort: 'T1._T2._T3_T4._T5_T6_T7._T8_T9._T10._T11._T12.'.split('_'),
+            monthsParseExact: true,
+            weekdays: 'Chủ nhật_Thứ 2_Thứ 3_Thứ 4 _Thứ 5_Thứ 6_Thứ 7'.split('_'),
+            weekdaysShort: 'CN._T2._T3._T4._T5._T6._T7.'.split('_'),
+            weekdaysMin: 'CN_T2_T3_T4_T5_T6_T7'.split('_'),
+            weekdaysParseExact: true,
+            longDateFormat: {
+                LT: 'HH:mm',
+                LTS: 'HH:mm:ss',
+                L: 'DD/MM/YYYY',
+                LL: 'D MMMM YYYY',
+                LLL: 'D MMMM YYYY HH:mm',
+                LLLL: 'dddd D MMMM YYYY HH:mm'
+            },
+            calendar: {
+                sameDay: '[Ngày hôm nay] LT',
+                nextDay: '[Ngày mai] LT',
+                nextWeek: 'dddd [Tuần tới] LT',
+                lastDay: '[Hôm qua] LT',
+                lastWeek: 'dddd [Tuần trước] LT',
+                sameElse: 'L'
+            },
+            relativeTime: {
+                future: 'Lúc %s',
+                past: '%s',
+                s: 'Vài giây',
+                m: 'Vài phút',
+                mm: '%d phút',
+                h: 'Giờ',
+                hh: '%d giờ',
+                d: 'Ngày',
+                dd: 'Ngày %d',
+                M: 'Tháng',
+                MM: 'Tháng %d',
+                y: 'Năm',
+                yy: 'Năm %d'
+            },
+            dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
+            ordinal: function (number) {
+                return number + (number === 1 ? 'er' : 'e');
+            },
+            meridiemParse: /PD|MD/,
+            isPM: function (input) {
+                return input.charAt(0) === 'M';
+            },
+            // In case the meridiem units are not separated around 12, then implement
+            // this function (look at locale/id.js for an example).
+            // meridiemHour : function (hour, meridiem) {
+            //     return /* 0-23 hour, given meridiem token and hour 1-12 */ ;
+            // },
+            meridiem: function (hours, minutes, isLower) {
+                return hours < 12 ? 'PD' : 'MD';
+            },
+            week: {
+                dow: 1, // Monday is the first day of the week.
+                doy: 4  // Used to determine first week of the year.
+            }
+        });
+
+        $(function () {
+
+            // var start = moment().subtract(29, 'days');
+            // var end = moment();
+            var start = new Date([[${start}]]);
+            var end = new Date([[${end}]]);
+
+            function cb(start, end) {
+                if(start.toString().localeCompare('Invalid date')) {
+                    $('#reportrange-cancellation span').html(formatDate(start) + ' - ' + formatDate(end));
+                } else {
+                    $('#reportrange-cancellation span').html('Tất cả');
+                }
+            }
+
+            $('#reportrange-cancellation').daterangepicker({
+                startDate: isValidDate(start) ? start : moment(),
+                endDate: isValidDate(end) ? end : moment(),
+                ranges: {
+                    'Tất cả': ['', ''],
+                    'Hôm nay': [moment(), moment()],
+                    'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '7 Ngày trước': [moment().subtract(6, 'days'), moment()],
+                    '30 Ngày trước': [moment().subtract(29, 'days'), moment()],
+                    'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                    'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+
+            }, cb);
+
+            cb(start, end);
+            if(!isValidDate(start)) {
+                $('#reportrange-cancellation span').html('Tất cả');
+            }
+            $(".applyBtn").text("Chọn");
+            $(".cancelBtn").text("Hủy");
+            $('*[data-range-key="Custom Range"]').text("Tùy chỉnh");
+
+        });
+
+        $('#reportrange-cancellation').on('apply.daterangepicker', function(ev, picker) {
+            var startDate = $('#reportrange-cancellation').data('daterangepicker').startDate._d;
+            var endDate = $('#reportrange-cancellation').data('daterangepicker').endDate._d;
+            if(isValidDate(startDate)) {
+                let filter = [[${filter}]];
+                $('#admin-content').load(document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
+            } else {
+                let filter = [[${filter}]];
+                $('#admin-content').load(document.getElementById('cancellation-date').href + `&filter=` + filter.toString());
+            }
+        });
+
+        function isValidDate(d) {
+            return d instanceof Date && !isNaN(d);
+        }
+
+        function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2)
+                month = '0' + month;
+            if (day.length < 2)
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+        // $('input[name="dates"]').daterangepicker();
+    </script>
+</div>
+</body>
+</html>

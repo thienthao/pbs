@@ -39,9 +39,11 @@ public class AdminController {
     private BookingRepository bookingRepository;
     private RatingService ratingService;
     private ReportService reportService;
+    private CategoryService categoryService;
+    private ThreadTopicRepository threadTopicRepository;
 
     @Autowired
-    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, RatingService ratingService, ReportService reportService) {
+    public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, RatingService ratingService, ReportService reportService, CategoryService categoryService, ThreadTopicRepository threadTopicRepository) {
         this.categoryRepository = categoryRepository;
         this.returningTypeRepository = returningTypeRepository;
         this.userRepository = userRepository;
@@ -53,6 +55,8 @@ public class AdminController {
         this.bookingRepository = bookingRepository;
         this.ratingService = ratingService;
         this.reportService = reportService;
+        this.categoryService = categoryService;
+        this.threadTopicRepository = threadTopicRepository;
     }
 
     @GetMapping("/login")
@@ -88,18 +92,18 @@ public class AdminController {
             List<Booking> cancelledBookingtmp = bookingRepository.findCancelledBookingsOf(userId);
 
             int numOfCancelled = 0;
-            for(Booking booking : userBooking) {
-                if(booking.getBookingStatus() == EBookingStatus.CANCELED) {
+            for (Booking booking : userBooking) {
+                if (booking.getBookingStatus() == EBookingStatus.CANCELED) {
                     numOfCancelled += 1;
                 }
             }
 
             double cancellationRate = 0.0;
-            if(userBooking.size() > 0) {
+            if (userBooking.size() > 0) {
                 cancellationRate = ((double) numOfCancelled / (double) userBooking.size()) * 100;
             }
 
-            for(Booking cancelled : cancelledBookingtmp) {
+            for (Booking cancelled : cancelledBookingtmp) {
                 cancelledBooking.add(DtoMapper.toCancelledBooking(cancelled));
             }
             cancellationRate = Double.parseDouble(df.format(cancellationRate));
@@ -245,7 +249,7 @@ public class AdminController {
     }
 
     @GetMapping(value = {"/threads/{threadId}/unban"})
-    public RedirectView  unbanThread(
+    public RedirectView unbanThread(
             Model model, @PathVariable long threadId) {
         try {
             threadService.unbanThread(threadId);
@@ -261,7 +265,7 @@ public class AdminController {
     }
 
     @GetMapping("/ratings")
-    public String showRatingList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+    public String showRatingList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
         model.addAttribute("page", ratingService.getAll(pageable));
         model.addAttribute("start", start);
         model.addAttribute("end", end);
@@ -271,7 +275,7 @@ public class AdminController {
     }
 
     @GetMapping("/cancellations")
-    public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+    public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
         model.addAttribute("page", cancellationService.getCancellations(pageable, start, end, filter));
         model.addAttribute("start", start);
         model.addAttribute("end", end);
@@ -287,9 +291,11 @@ public class AdminController {
     }
 
     @PostMapping("/cancellations/{id}")
-    public String showCancellationDetail(@PathVariable Long id) {
-        cancellationService.approve(id);
-        return "redirect:/admin/cancellations/" + id;
+    public String showCancellationDetailAfterApprove(Model model, @PathVariable Long id) {
+//        cancellationService.approve(id);
+//        model.addAttribute("cancellation", cancellationService.findById(id));
+//        model.addAttribute("uri", "after-approve");
+        return "redirect:/admin/";
     }
 
     @PostMapping("/cancellations-warn/{id}")
@@ -300,7 +306,7 @@ public class AdminController {
 
     @GetMapping("/bookings/{bookingId}")
     public String showBookingDetail(@PathVariable Long bookingId, @RequestParam(value = "cancellationId", required = false) Long cancellationId, Model model) {
-        if(cancellationId != null) {
+        if (cancellationId != null) {
             model.addAttribute("cancellation", cancellationService.findById(cancellationId));
         }
         model.addAttribute("booking", bookingRepository.findById(bookingId).get());
@@ -308,7 +314,7 @@ public class AdminController {
     }
 
     @GetMapping("/reports")
-    public String showReportList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter,Model model) {
+    public String showReportList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
         model.addAttribute("page", reportService.getAll(pageable));
         model.addAttribute("start", start);
         model.addAttribute("end", end);
@@ -319,8 +325,18 @@ public class AdminController {
 
     @GetMapping("/reports/{id}")
     public String showReportDetail(Model model, @PathVariable Long id) {
-        model.addAttribute("report",reportService.findById(id));
+        model.addAttribute("report", reportService.findById(id));
         return "admin-refactor/report-detail :: content";
+    }
+
+    @GetMapping("/bookings")
+    public String showBookingList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        model.addAttribute("page", bookingService.findAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/booking-list :: content";
     }
 
     @GetMapping("/v2/users")
@@ -339,11 +355,41 @@ public class AdminController {
         return "admin-refactor/user-list :: content";
     }
 
+    @GetMapping("/categories")
+    public String showCategoryList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        model.addAttribute("page", categoryService.getAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/category-list :: content";
+    }
+
+    @GetMapping("/returning-types")
+    public String showReturningTypeList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        model.addAttribute("page", returningTypeRepository.findAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/returning-type-list :: content";
+    }
+
+    @GetMapping("/topics")
+    public String showTopicList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        model.addAttribute("page", threadTopicRepository.findAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/topic-list :: content";
+    }
+
     @GetMapping("/v2/users/{userId}")
     public String showUserDetailV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @PathVariable Long userId, Model model, @RequestParam(value = "status", defaultValue = "ALL") String status) {
         model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
         model.addAttribute("user", userRepository.findById(userId).get());
-        if(start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
+        if (start.equalsIgnoreCase("") || end.equalsIgnoreCase("")) {
             model.addAttribute("page", bookingService.findAllByUserIdAndStatus(userId, pageable, status));
         } else {
             model.addAttribute("page", bookingService.findAllByUserIdAndStatusBetweenDate(userId, pageable, status, start, end));
