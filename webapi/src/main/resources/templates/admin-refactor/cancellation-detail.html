@@ -15,7 +15,7 @@
                         <div th:if="${cancellation.isSolve == true}" class="badge badge-success">Đã chấp thuận</div>
                     </div>
                     <div>
-                        <form method="post" th:action="@{/admin/cancellations/{id}(id = ${cancellation.id})}">
+                        <form id="submit-form" th:action="@{/admin/cancellations/{id}(id = ${cancellation.id})}" method="post">
                             <div class="form-inline">
                                 <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
                                                                                                       class="mr-sm-2">Người hủy</label><input type="text" th:value="${cancellation.owner.fullname}" class="form-control" readonly></div>
@@ -55,6 +55,19 @@
         </div>
     </div>
     <script th:inline="javascript">
+
+
+        $('#submit-form').submit((e) => {
+            e.preventDefault();
+            const cancellationId = [[${cancellation.id}]]
+            $.ajax({
+                type:"post",
+                url: '/admin/cancellations/' + cancellationId,
+                success: function(result){
+                    $('#admin-content').load('/admin/cancellations/' + cancellationId);
+                }
+            });
+        });
 
 
         function toBookingDetail(bookingId, cancellationId) {

@@ -41,6 +41,10 @@ public class Album {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @JsonIgnore
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     @ManyToOne
     @JoinColumn(name = "photographer_id", referencedColumnName = "id")
     private User photographer;
@@ -75,5 +79,12 @@ public class Album {
         this.description = description;
         this.photographer = photographer;
         this.images = images;
+    }
+
+    @PrePersist
+    void prepersist() {
+        createdAt = new Date();
+        isActive = true;
+        isDeleted = false;
     }
 }

@@ -53,6 +53,10 @@ public class AlbumService {
         return albumRepository.save(album);
     }
 
+    public void deleteAlbum(Long albumId) {
+        albumRepository.delete(albumId);
+    }
+
     public String uploadAlbumThumbnail(String ptgId, String albumId, MultipartFile file) {
         // check if file empty
         if(file.isEmpty()) {

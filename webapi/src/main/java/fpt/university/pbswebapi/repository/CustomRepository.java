@@ -332,6 +332,7 @@ public class CustomRepository {
             transaction = session.beginTransaction();
             String sql = "select al.*, count(ca.album_id) as likecount from albums al " +
                     "left join customers_albums ca on ca.album_id = al.id " +
+                    "where al.is_deleted=false " +
                     "group by al.id " +
                     "order by (" +
                     "select count(*) from customers_albums where album_id=al.id" +
@@ -360,13 +361,15 @@ public class CustomRepository {
                     Long categoryId = Long.parseLong(a[9].toString());
                     album.setCategory(categoryRepository.findById(categoryId).get());
                 }
-                if(a[10] != null) {
-                    album.setLikes(Integer.parseInt(a[10].toString()));
+                if(a[10] != null)
+                    album.setIsDeleted((Boolean) a[10]);
+                if(a[11] != null) {
+                    album.setLikes(Integer.parseInt(a[11].toString()));
                 }
                 results.add(album);
             }
             transaction.commit();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -386,7 +389,7 @@ public class CustomRepository {
             transaction = session.beginTransaction();
             String sql = "select al.*, count(ca.album_id) as likecount from albums al " +
                     "left join customers_albums ca on ca.album_id = al.id " +
-                    "where al.category_id=" + category + " " +
+                    "where al.is_deleted=false and al.category_id=" + category + " " +
                     "group by al.id " +
                     "order by (" +
                     "select count(*) from customers_albums where album_id=al.id " +
@@ -415,8 +418,10 @@ public class CustomRepository {
                     Long categoryId = Long.parseLong(a[9].toString());
                     album.setCategory(categoryRepository.findById(categoryId).get());
                 }
-                if(a[10] != null) {
-                    album.setLikes(Integer.parseInt(a[10].toString()));
+                if(a[10] != null)
+                    album.setIsDeleted((Boolean) a[10]);
+                if(a[11] != null) {
+                    album.setLikes(Integer.parseInt(a[11].toString()));
                 }
                 results.add(album);
             }
@@ -441,7 +446,7 @@ public class CustomRepository {
             transaction = session.beginTransaction();
             String sql = "select al.*, count(ca.album_id) as likecount from albums al " +
                     "left join customers_albums ca on ca.album_id = al.id " +
-                    "where al.photographer_id=" + photographerId + " " +
+                    "where al.is_deleted=false and al.photographer_id=" + photographerId + " " +
                     "group by al.id " +
                     "order by (" +
                     "select count(*) from customers_albums where album_id=al.id" +
@@ -469,8 +474,10 @@ public class CustomRepository {
                     Long categoryId = Long.parseLong(a[9].toString());
                     album.setCategory(categoryRepository.findById(categoryId).get());
                 }
-                if(a[10] != null) {
-                    album.setLikes(Integer.parseInt(a[10].toString()));
+                if(a[10] != null)
+                    album.setIsDeleted((Boolean) a[10]);
+                if(a[11] != null) {
+                    album.setLikes(Integer.parseInt(a[11].toString()));
                 }
                 results.add(album);
             }
