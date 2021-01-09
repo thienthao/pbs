@@ -93,4 +93,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("update User user set user.isBlocked=false where user.id=:userId")
     void unblockUser(long userId);
+
+    User findByUsernameAndIsDeletedFalseAndIsBlockedFalse(String username);
 }
