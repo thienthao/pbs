@@ -292,10 +292,8 @@ public class AdminController {
 
     @PostMapping("/cancellations/{id}")
     public String showCancellationDetailAfterApprove(Model model, @PathVariable Long id) {
-//        cancellationService.approve(id);
-//        model.addAttribute("cancellation", cancellationService.findById(id));
-//        model.addAttribute("uri", "after-approve");
-        return "redirect:/admin/";
+        model.addAttribute("cancellation", cancellationService.approve(id));
+        return "admin-refactor/cancellation-detail :: content";
     }
 
     @PostMapping("/cancellations-warn/{id}")
