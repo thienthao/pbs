@@ -42,13 +42,14 @@ public class PhotographerService {
     private final ServicePackageRepository packageRepository;
     private final WorkingDayRepository workingDayRepository;
     private final CommentRepository commentRepository;
+    private final LinearlySorting linearlySorting;
     private final CustomRepository customRepository;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .build();
 
     @Autowired
-    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository, WorkingDayRepository workingDayRepository, CommentRepository commentRepository, CustomRepository customRepository) {
+    public PhotographerService(UserRepository phtrRepo, FileStore fileStore, BusyDayRepository busyDayRepository, BookingRepository bookingRepository, LocationRepository locationRepository, ServicePackageRepository packageRepository, WorkingDayRepository workingDayRepository, CommentRepository commentRepository, LinearlySorting linearlySorting, CustomRepository customRepository) {
         this.phtrRepo = phtrRepo;
         this.fileStore = fileStore;
         this.busyDayRepository = busyDayRepository;
@@ -57,6 +58,7 @@ public class PhotographerService {
         this.packageRepository = packageRepository;
         this.workingDayRepository = workingDayRepository;
         this.commentRepository = commentRepository;
+        this.linearlySorting = linearlySorting;
         this.customRepository = customRepository;
     }
 
@@ -267,6 +269,25 @@ public class PhotographerService {
         } else {
             return null;
         }
+    }
+
+    public List<User> sortByMultipleFactors(double lat, double lon, long category, String city) {
+        List<User> result;
+        if(category == 1) {
+            if(city.equalsIgnoreCase("")) {
+                result = customRepository.queryForMultipleFactorSorting(lat, lon);
+            } else {
+                result = customRepository.queryForMultipleFactorSortingWhereCity(lat, lon, city);
+            }
+        } else {
+            if(city.equalsIgnoreCase("")) {
+                result = customRepository.queryForMultipleFactorSortingWhereCategory(lat, lon, category);
+            } else {
+                result = customRepository.queryForMultipleFactorSortingWhereCategoryAndCity(lat, lon, category, city);
+            }
+        }
+        result = linearlySorting.sortLinearly(result, lat, lon);
+        return result;
     }
 
     public List<User> findPhotographersByFactors(double lat, double lon, long category, String city) {

@@ -115,9 +115,9 @@ public class PhotographerController {
     public ResponseEntity<Map<String, Object>> findPhotographersByFactors(@RequestParam(name = "lat", defaultValue = "10.7757") double lat,
                                                                           @RequestParam(name = "long", defaultValue = "106.7004") double lon,
                                                                           @RequestParam(name= "category", defaultValue = "1") long category,
-                                                                          @RequestParam(name = "city", defaultValue = "Thành phố Hồ Chí Minh") String city) {
+                                                                          @RequestParam(name = "city", defaultValue = "") String city) {
         try {
-            List<User> photographers = phtrService.findPhotographersByFactors(lat, lon, category, city);
+            List<User> photographers = phtrService.sortByMultipleFactors(lat, lon, category, city);
 
             Map<String, Object> response = new HashMap<>();
             response.put("users", photographers);
@@ -127,7 +127,7 @@ public class PhotographerController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

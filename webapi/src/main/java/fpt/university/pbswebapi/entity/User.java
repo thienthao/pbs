@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,7 +40,6 @@ public class User {
 
     private String email;
 
-    @Column(name = "rating_count")
     private Float ratingCount;
 
     @JsonIgnore
@@ -83,6 +83,14 @@ public class User {
 
     @Column(name = "device_token")
     private String deviceToken;
+
+    @Transient
+    @JsonSerialize
+    private Double averagePackagePrice;
+
+    @Transient
+    @JsonSerialize
+    private Double distance;
 
     public User(String username, String email, String password, String phone, String fullname) {
         this.username = username;
