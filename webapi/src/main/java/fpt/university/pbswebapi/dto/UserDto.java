@@ -8,11 +8,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import static fpt.university.pbswebapi.helper.StringUtils.PASSWORD_REGEX;
+
 @Getter
 @Setter
 @NoArgsConstructor
 public class UserDto {
-    private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$";
 
     @NotBlank(message = "Username cannot be empty.")
     @Size(min = 8, max = 20, message = "Username is between [8-20] characters long.")

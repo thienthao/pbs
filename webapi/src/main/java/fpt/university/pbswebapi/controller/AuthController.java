@@ -23,9 +23,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -90,7 +94,11 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest, Errors errors) {
+        Map<String, String> errorsMap = handleValidationError(errors);
+        if (errorsMap != null && !errorsMap.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorsMap);
+        }
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
@@ -123,6 +131,7 @@ public class AuthController {
         user.setRole(role);
         user.setIsBlocked(false);
         user.setIsDeleted(false);
+        user.setIsEnabled(false);
         User saved = userRepository.save(user);
 
         if (saved.getRole().getRole() == ERole.ROLE_PHOTOGRAPHER) {
@@ -133,7 +142,11 @@ public class AuthController {
     }
 
     @PutMapping(value = "/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody @Valid UserDto user) {
+    public ResponseEntity<?> changePassword(@RequestBody @Valid UserDto user, Errors errors) {
+        Map<String, String> errorsMap = handleValidationError(errors);
+        if (errorsMap != null && !errorsMap.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorsMap);
+        }
         try {
             User updatedUser = userService.changeUserPassword(user);
             if (updatedUser == null) {
@@ -147,5 +160,16 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    private Map<String, String> handleValidationError(Errors errors) {
+        if (errors.hasErrors()) {
+            Map<String, String> errorMap = new HashMap<>();
+            for (FieldError fe : errors.getFieldErrors()) {
+                errorMap.put(fe.getField(), fe.getDefaultMessage());
+            }
+            return errorMap;
+        }
+        return null;
     }
 }
