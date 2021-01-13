@@ -5,7 +5,9 @@ import fpt.university.pbswebapi.entity.ERole;
 import fpt.university.pbswebapi.entity.Role;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
+import fpt.university.pbswebapi.exception.InvalidTokenException;
 import fpt.university.pbswebapi.exception.NotFoundException;
+import fpt.university.pbswebapi.helper.StringUtils;
 import fpt.university.pbswebapi.payload.own.request.LoginRequest;
 import fpt.university.pbswebapi.payload.own.request.SignupRequest;
 import fpt.university.pbswebapi.payload.own.response.JwtResponse;
@@ -27,6 +29,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +69,24 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @GetMapping(value = "/register/verify")
+    public ResponseEntity<?> verifyUserAccount(@RequestParam String token) {
+        if (token == null && token.isBlank()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Mã xác nhận không được trống."));
+        }
+        try {
+            if (userService.verifyUserAccount(token)) {
+                return ResponseEntity.ok().body(new MessageResponse("Tài khoản đã được kích hoạt thành công."));
+            } else {
+                return ResponseEntity.badRequest().body(new MessageResponse("Tài khoản kích hoạt thất bại."));
+            }
+        } catch (InvalidTokenException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(e.getMessage()));
+        }
+    }
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = null;
@@ -94,7 +116,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest, Errors errors) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest,
+                                          Errors errors,
+                                          HttpServletRequest request) {
         Map<String, String> errorsMap = handleValidationError(errors);
         if (errorsMap != null && !errorsMap.isEmpty()) {
             return ResponseEntity.badRequest().body(errorsMap);
@@ -132,12 +156,17 @@ public class AuthController {
         user.setIsBlocked(false);
         user.setIsDeleted(false);
         user.setIsEnabled(false);
-        User saved = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        if (saved.getRole().getRole() == ERole.ROLE_PHOTOGRAPHER) {
-            photographerService.createWorkingDay(saved.getId());
+        if (savedUser.getRole().getRole() == ERole.ROLE_PHOTOGRAPHER) {
+            photographerService.createWorkingDay(savedUser.getId());
         }
 
+        try {
+            userService.sendRegistrationConfirmationEmail(savedUser, StringUtils.getBaseUrl(request));
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 

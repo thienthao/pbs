@@ -8,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -80,6 +81,10 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private List<Location> locations;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user")
+    private Set<VerificationToken> verificationToken;
 
     @Column(name = "device_token")
     private String deviceToken;
