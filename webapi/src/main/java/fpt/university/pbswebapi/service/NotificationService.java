@@ -3,6 +3,7 @@ package fpt.university.pbswebapi.service;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.ENotificationType;
 import fpt.university.pbswebapi.entity.Notification;
+import fpt.university.pbswebapi.helper.ThymeleafHelper;
 import fpt.university.pbswebapi.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class NotificationService {
 
     public void changeBookingStatusNotification(Booking booking) {
         Notification notification = new Notification();
-        notification.setTitle("Đơn hẹn với " + booking.getPhotographer().getFullname() + " đã chuyển sang trạng thái " + booking.getBookingStatus().toString());
+        notification.setTitle("Đơn hẹn với " + booking.getPhotographer().getFullname() + " đã chuyển sang trạng thái " + ThymeleafHelper.convertStatus(booking.getBookingStatus().toString()));
         notification.setNotificationType(ENotificationType.BOOKING_STATUS);
         notification.setBookingId(booking.getId());
         notification.setCreatedAt(new Date());
