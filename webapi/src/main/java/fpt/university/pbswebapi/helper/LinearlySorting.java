@@ -6,13 +6,7 @@ import fpt.university.pbswebapi.repository.VariableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-import javax.annotation.PostConstruct;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Collections.reverseOrder;
 
