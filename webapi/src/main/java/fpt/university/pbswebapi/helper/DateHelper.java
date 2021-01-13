@@ -6,13 +6,42 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DateHelper {
+
+    public static LocalTime getTimeFromLocalDateTime(LocalDateTime localDateTime) {
+        return localDateTime.toLocalTime();
+    }
+
+    private List<LocalTime> getHoursBetweenTwoTime(LocalTime from, LocalTime to) {
+        int hourFrom = from.getHour();
+        int hourTo = to.getHour();
+        List<LocalTime> results = new ArrayList<>();
+        results.add(LocalTime.of(hourFrom, 0));
+        while(hourFrom != hourTo) {
+            hourFrom += 1;
+            results.add(LocalTime.of(hourFrom, 0));
+        }
+        return results;
+    }
+
+    public static LocalDateTime convertToLocalDateTimeViaString(String datetime) {
+        DateTimeFormatter localDateTimeFormmater = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        return LocalDateTime.parse(datetime, localDateTimeFormmater);
+    }
+
+    public static Date convertToDateViaString(String datetime) {
+        DateTimeFormatter localDateTimeFormmater = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime localDateTime = LocalDateTime.parse(datetime, localDateTimeFormmater);
+        return DateHelper.convertToDateViaInstant(localDateTime);
+    }
 
     public static Date convertToDateViaInstant(LocalDate dateToConvert) {
         return java.util.Date.from(dateToConvert.atStartOfDay()

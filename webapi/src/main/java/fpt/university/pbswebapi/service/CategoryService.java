@@ -2,7 +2,6 @@ package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.entity.Category;
-import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.filesstore.FileStore;
 import fpt.university.pbswebapi.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;

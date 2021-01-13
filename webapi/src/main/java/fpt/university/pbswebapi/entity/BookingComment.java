@@ -34,4 +34,9 @@ public class BookingComment {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @PrePersist
+    void prepersist() {
+        commentedAt = new Date();
+    }
 }

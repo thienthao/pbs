@@ -1,6 +1,5 @@
 package fpt.university.pbswebapi.dto;
 
-import fpt.university.pbswebapi.entity.Location;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

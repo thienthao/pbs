@@ -25,7 +25,7 @@ public class ThreadService {
     }
 
     public List<Thread> all() {
-        return threadRepository.findAllByIsDeletedFalse();
+        return threadRepository.findAllByIsDeletedFalseAndIsBanFalse();
     }
 
     public List<Thread> allByUserId(long userId) {

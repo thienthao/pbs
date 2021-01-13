@@ -5,22 +5,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+import java.util.Map;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeatherNoti {
+public class WeatherInfoWithTime {
 
-    private String noti;
+    private String location;
 
-    private String outlook;
+    private Boolean overall;
 
-    private Double temperature;
-
-    private Double humidity;
-
-    private Double windSpeed;
-
-    private Boolean isSuitable;
+    private Map<Date, WeatherNoti> time;
 
 }

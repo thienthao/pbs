@@ -1,3 +1,25 @@
+xoa isactive o album
+xoa qrcode ischeckin o booking va date va comment va rating
+check cac bien isban isdelete isenable o cac ham get
+nhac frontend khi vao` thi get current location gui len thuat toan
+truong hop quen checkin
+cronjob cho booking
+frontend
+package co ho tro returning type hay k
+thong nhat double Double cho class diagram
+viet mo ta thuat toan 2
+code lai thuat toan 2
+
+
+
+
+
+
+
+
+
+
+
 - validate booking apis
 - exception handling booking apis
 // done- album

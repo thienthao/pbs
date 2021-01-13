@@ -14,8 +14,6 @@ public class AlbumDto2 {
 
     private String thumbnail;
 
-    private String location;
-
     private String description;
 
     private Integer likes;

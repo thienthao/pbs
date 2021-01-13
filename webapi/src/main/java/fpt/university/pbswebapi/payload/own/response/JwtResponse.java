@@ -1,7 +1,5 @@
 package fpt.university.pbswebapi.payload.own.response;
 
-import java.util.List;
-
 public class JwtResponse {
     private String token;
     private String type = "Bearer";

@@ -70,7 +70,6 @@ public class DtoMapper {
                 album.getId(),
                 album.getName(),
                 album.getThumbnail(),
-                album.getLocation(),
                 album.getDescription(),
                 album.getLikes()
         );
@@ -139,7 +138,6 @@ public class DtoMapper {
         return new Album(
                 albumJson.getName(),
                 albumJson.getThumbnail(),
-                albumJson.getLocation(),
                 albumJson.getDescription(),
                 photographer,
                 images

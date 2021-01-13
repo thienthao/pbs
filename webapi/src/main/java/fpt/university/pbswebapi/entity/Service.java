@@ -38,4 +38,9 @@ public class Service {
         this.name = name;
         this.description = description;
     }
+
+    @PrePersist
+    void prepersist() {
+        isActive = true;
+    }
 }

@@ -29,4 +29,9 @@ public class Variable {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @PreUpdate
+    void preupdate() {
+        updatedAt = new Date();
+    }
+
 }

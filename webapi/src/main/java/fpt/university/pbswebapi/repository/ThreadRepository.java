@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface ThreadRepository extends JpaRepository<Thread, Long> {
 
-    List<Thread> findAllByIsDeletedFalse();
+    List<Thread> findAllByIsDeletedFalseAndIsBanFalse();
 
-    @Query("from threads t where t.owner.id=:userId and t.isDeleted=false")
+    @Query("from threads t where t.owner.id=:userId and t.isDeleted=false and t.isBan=false")
     List<Thread> findAllByUserId(long userId);
 
     @Transactional

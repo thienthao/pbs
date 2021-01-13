@@ -3,8 +3,10 @@ package fpt.university.pbswebapi.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.*;
-import org.hibernate.annotations.BatchSize;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -72,10 +74,9 @@ public class Album {
     )
     private List<User> users;
 
-    public Album(String name, String thumbnail, String location, String description, User photographer, List<Image> images) {
+    public Album(String name, String thumbnail, String description, User photographer, List<Image> images) {
         this.name = name;
         this.thumbnail = thumbnail;
-        this.location = location;
         this.description = description;
         this.photographer = photographer;
         this.images = images;

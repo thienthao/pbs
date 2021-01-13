@@ -1,13 +1,18 @@
 package fpt.university.pbswebapi.helper;
 
-import fpt.university.pbswebapi.entity.Location;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.repository.CustomRepository;
-import fpt.university.pbswebapi.repository.LocationRepository;
+import fpt.university.pbswebapi.repository.VariableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+
+import javax.annotation.PostConstruct;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Collections.reverseOrder;
 
@@ -16,12 +21,16 @@ public class LinearlySorting {
 
     private CustomRepository customRepository;
 
-    private LocationRepository locationRepository;
+    private VariableRepository variableRepository;
+
+    private float priceWeight;
+    private float ratingWeight;
+    private float distanceWeight;
 
     @Autowired
-    public LinearlySorting(CustomRepository customRepository, LocationRepository locationRepository) {
+    public LinearlySorting(CustomRepository customRepository, VariableRepository variableRepository) {
         this.customRepository = customRepository;
-        this.locationRepository = locationRepository;
+        this.variableRepository = variableRepository;
     }
 
     public List<User> sortLinearly(List<User> unsorted, double lat, double lon) {
@@ -30,7 +39,27 @@ public class LinearlySorting {
         return new ArrayList<>(result.keySet());
     }
 
+    void getWeight() {
+        try {
+            priceWeight = variableRepository.findById(Long.parseLong("1")).get().getWeight();
+            ratingWeight = variableRepository.findById(Long.parseLong("2")).get().getWeight();
+            distanceWeight = variableRepository.findById(Long.parseLong("3")).get().getWeight();
+            if((priceWeight + ratingWeight + distanceWeight) != 1) {
+                setWeight();
+            }
+        } catch (Exception e) {
+            setWeight();
+        }
+    }
+
+    void setWeight() {
+        priceWeight = (float) 0.4;
+        ratingWeight = (float) 0.3;
+        distanceWeight = (float) 0.3;
+    }
+
     private Map<User, Float> toUserMap(List<User> unsorted, double lat, double lon) {
+        getWeight();
         Map<User, Float> result = new HashMap<>();
         float sumPrice =  customRepository.getSumPrice();
         float sumDistance = customRepository.getSumDistance(lat, lon);
@@ -48,7 +77,7 @@ public class LinearlySorting {
             float distanceRatio = (float) (photographer.getDistance() / sumDistance);
             float distance = (float) 1.0 - distanceRatio;
 
-            float score = (float) (((0.3) * rating) + ((0.4) * price) + ((0.3) * distance));
+            float score = (float) ((ratingWeight * rating) + (priceWeight * price) + (distanceWeight * distance));
 
             result.put(photographer, score);
         }

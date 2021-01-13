@@ -1,7 +1,5 @@
 package fpt.university.pbswebapi.dto;
 
-import fpt.university.pbswebapi.entity.Album;
-import fpt.university.pbswebapi.entity.ServicePackage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
