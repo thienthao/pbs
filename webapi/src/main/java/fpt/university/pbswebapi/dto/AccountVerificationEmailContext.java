@@ -11,7 +11,7 @@ public class AccountVerificationEmailContext extends AbstractEmailContext {
     public <T> void init(T context) {
         User user = (User) context;
         put("fullname", user.getFullname());
-        setSubject("Complete your registration");
+        setSubject("Hoàn tất thủ tục đăng ký tài khoản");
         setTo(user.getEmail());
     }
 
