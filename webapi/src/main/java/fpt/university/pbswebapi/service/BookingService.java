@@ -19,7 +19,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -591,140 +590,43 @@ public class BookingService {
         return results;
     }
 
-    private HttpResponse<String> getWeatherResponse(Double lat, Double lon, String date, String time) {
-        HttpResponse<String> response = null;
-        String apiKey1 = "LNwNBINAJLxv3FDkDpFKJ6Nen1cBRvpL";
-        String apiKey2 = "LNi5rDEQAC5YoagsDYJJckE2g2eLfUgp";
-        String apiKey3 = "nDVs44XgBuVQLHARVgHnB1JCmJQuRp8E";
+    public WeatherInfoWithTime getWeatherInfo(String datetime, Integer timeAnticipate, Double lat, Double lon) {
+//        // tinh time span
+        LocalDateTime localDateTime = DateHelper.convertToLocalDateTimeViaString(datetime);
+        LocalTime from = DateHelper.getTimeFromLocalDateTime(localDateTime);
+        int timeSpan = (int) Math.ceil(timeAnticipate / 3600);
+        LocalTime to = from.plusHours(timeSpan);
+
+        List<LocalTime> hours = DateHelper.getHoursBetweenTwoTime(from, to);
+//        // lay ten dia diem
+        WeatherInfoWithTime result = new WeatherInfoWithTime();
         try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_2)
-                    .build();
-            String url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                    "lat=" + lat + "&lon=" + lon + "&" +
-                    "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                    "start_time="+ date +"T09:00:00&apikey=" + apiKey1;
-            HttpRequest request = HttpRequest.newBuilder()
-                    .GET()
-                    .uri(URI.create(url))
-                    .build();
-
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if(response.statusCode() != 200) {
-                url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                        "lat=" + lat + "&lon=" + lon + "&" +
-                        "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                        "start_time="+ date +"T09:00:00&apikey=" + apiKey2;
-                request = HttpRequest.newBuilder()
-                        .GET()
-                        .uri(URI.create(url))
-                        .build();
-
-                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-                if (response.statusCode() != 200) {
-                    url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                            "lat=" + lat + "&lon=" + lon + "&" +
-                            "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                            "start_time="+ date +"T09:00:00&apikey=" + apiKey3;
-                    request = HttpRequest.newBuilder()
-                            .GET()
-                            .uri(URI.create(url))
-                            .build();
-
-                    response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            Map<LocalTime, WeatherNoti> time = new TreeMap<>();
+            LocalDate date = localDateTime.toLocalDate();
+            int suitable = 0;
+            int unsuitable = 0;
+            for (int i = 0; i < hours.size(); i++) {
+                LocalTime hour = hours.get(i);
+                HttpResponse<String> response = ClimaAPIHelper.getWeatherResponseAtTime(lat, lon, date.toString(), hour.toString());
+                WeatherNoti weatherNoti = ClimaAPIHelper.getWeatherNoti(response, date);
+                if(weatherNoti.getIsSuitable()) {
+                    suitable += 1;
+                } else {
+                    unsuitable += 1;
                 }
+                time.put(hour, weatherNoti);
             }
+            if(unsuitable >= suitable) {
+                result.setOverall(false);
+            } else {
+                result.setOverall(true);
+            }
+            result.setDate(date);
+            result.setTime(time);
         } catch (Exception e) {
-            System.out.println(e);
-            try {
-                HttpClient httpClient = HttpClient.newBuilder()
-                        .version(HttpClient.Version.HTTP_2)
-                        .build();
-                String url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                        "lat=" + lat + "&lon=" + lon + "&" +
-                        "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                        "start_time="+ date +"T09:00:00&apikey=" + apiKey3;
-                HttpRequest request = HttpRequest.newBuilder()
-                        .GET()
-                        .uri(URI.create(url))
-                        .build();
-
-                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            e.printStackTrace();
         }
-        return response;
-    }
-
-    private HttpResponse<String> getWeatherResponse(Double lat, Double lon, String date) {
-        HttpResponse<String> response = null;
-        String apiKey1 = "LNwNBINAJLxv3FDkDpFKJ6Nen1cBRvpL";
-        String apiKey2 = "LNi5rDEQAC5YoagsDYJJckE2g2eLfUgp";
-        String apiKey3 = "nDVs44XgBuVQLHARVgHnB1JCmJQuRp8E";
-        try {
-            HttpClient httpClient = HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_2)
-                    .build();
-            String url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                    "lat=" + lat + "&lon=" + lon + "&" +
-                    "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                    "start_time="+ date +"T09:00:00&apikey=" + apiKey1;
-            HttpRequest request = HttpRequest.newBuilder()
-                    .GET()
-                    .uri(URI.create(url))
-                    .build();
-
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if(response.statusCode() != 200) {
-                url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                        "lat=" + lat + "&lon=" + lon + "&" +
-                        "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                        "start_time="+ date +"T09:00:00&apikey=" + apiKey2;
-                request = HttpRequest.newBuilder()
-                        .GET()
-                        .uri(URI.create(url))
-                        .build();
-
-                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-                if (response.statusCode() != 200) {
-                    url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                            "lat=" + lat + "&lon=" + lon + "&" +
-                            "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                            "start_time="+ date +"T09:00:00&apikey=" + apiKey3;
-                    request = HttpRequest.newBuilder()
-                            .GET()
-                            .uri(URI.create(url))
-                            .build();
-
-                    response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            try {
-                HttpClient httpClient = HttpClient.newBuilder()
-                        .version(HttpClient.Version.HTTP_2)
-                        .build();
-                String url = "https://api.climacell.co/v3/weather/forecast/daily?" +
-                        "lat=" + lat + "&lon=" + lon + "&" +
-                        "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                        "start_time="+ date +"T09:00:00&apikey=" + apiKey3;
-                HttpRequest request = HttpRequest.newBuilder()
-                        .GET()
-                        .uri(URI.create(url))
-                        .build();
-
-                response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        return response;
+        return result;
     }
 
     public List<String> warnWeather(Booking booking) {
@@ -736,7 +638,7 @@ public class BookingService {
                 String humid = "";
                 String wind = "";
 
-                HttpResponse<String> response = getWeatherResponse(tld.getLat(), tld.getLon(), DateHelper.convertToLocalDateViaInstant(tld.getStart()).toString());
+                HttpResponse<String> response = ClimaAPIHelper.getWeatherResponse(tld.getLat(), tld.getLon(), DateHelper.convertToLocalDateViaInstant(tld.getStart()).toString());
                 ObjectMapper objectMapper = new ObjectMapper();
                 Clima[] climas = objectMapper.readValue(response.body(), Clima[].class);
                 for(int i = 0; i < climas.length; i++) {
@@ -775,7 +677,7 @@ public class BookingService {
                 String humid = "";
                 String wind = "";
 
-                HttpResponse<String> response = getWeatherResponse(tld.getLat(), tld.getLon(), DateHelper.convertToLocalDateViaInstant(tld.getStart()).toString());
+                HttpResponse<String> response = ClimaAPIHelper.getWeatherResponse(tld.getLat(), tld.getLon(), DateHelper.convertToLocalDateViaInstant(tld.getStart()).toString());
                 ObjectMapper objectMapper = new ObjectMapper();
                 Clima[] climas = objectMapper.readValue(response.body(), Clima[].class);
                 for(int i = 0; i < climas.length; i++) {
@@ -820,7 +722,7 @@ public class BookingService {
             String humid = "";
             String wind = "";
 
-            HttpResponse<String> response = getWeatherResponse(lat, lon, datetime);
+            HttpResponse<String> response = ClimaAPIHelper.getWeatherResponse(lat, lon, datetime);
             ObjectMapper objectMapper = new ObjectMapper();
             Clima[] climas = objectMapper.readValue(response.body(), Clima[].class);
             for(int i = 0; i < climas.length; i++) {
@@ -849,22 +751,6 @@ public class BookingService {
             System.out.println(e);
         }
 
-        return result;
-    }
-
-    public WeatherInfoWithTime getWeatherInfo(String datetime, Integer timeAnticipate, Double lat, Double lon) {
-//        // tinh time span
-        LocalDateTime localDateTime = DateHelper.convertToLocalDateTimeViaString(datetime);
-        LocalTime from = DateHelper.getTimeFromLocalDateTime(localDateTime);
-        int timeSpan = (int) Math.ceil(timeAnticipate / 3600);
-        LocalTime to = from.plusHours(timeSpan);
-//        // lay ten dia diem
-        WeatherInfoWithTime result = new WeatherInfoWithTime();
-        try {
-            HttpResponse<String> response = getWeatherResponse(lat, lon, datetime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return result;
     }
 

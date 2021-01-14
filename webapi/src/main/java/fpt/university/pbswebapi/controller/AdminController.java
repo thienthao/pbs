@@ -299,8 +299,8 @@ public class AdminController {
 
     @PostMapping("/cancellations-warn/{id}")
     public String warnAndShowCancellationDetail(@PathVariable Long id) {
-        cancellationService.warn(id);
-        return "redirect:/admin/cancellations/" + id;
+//        cancellationService.warn(id);
+        return "admin-refactor/cancellation-detail :: content";
     }
 
     @GetMapping("/bookings/{bookingId}")
@@ -397,6 +397,43 @@ public class AdminController {
         model.addAttribute("status", status);
         model.addAttribute("start", start);
         model.addAttribute("end", end);
+        return "admin-refactor/user-detail :: content";
+    }
+
+    @PostMapping("/v2/users/{userId}/block")
+    public String blockUserV2(@PathVariable Long userId, Model model) {
+        try {
+            userService.blockUser(userId);
+            model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+            model.addAttribute("user", userRepository.findById(userId).get());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return "admin-refactor/user-detail :: content";
+    }
+
+    @PostMapping("/v2/users/{userId}/unblock")
+    public String unblockUserV2(@PathVariable Long userId, Model model) {
+        try {
+            userService.unblockUser(userId);
+            model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+            model.addAttribute("user", userRepository.findById(userId).get());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return "admin-refactor/user-detail :: content";
+    }
+
+    @PostMapping("/v2/users/{userId}/enable")
+    public String enableUserV2(@PathVariable Long userId, Model model) {
+        //block
+        try {
+            userService.enable(userId);
+            model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));
+            model.addAttribute("user", userRepository.findById(userId).get());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
         return "admin-refactor/user-detail :: content";
     }
 

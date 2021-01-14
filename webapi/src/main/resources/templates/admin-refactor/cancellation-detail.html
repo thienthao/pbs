@@ -15,40 +15,42 @@
                         <div th:if="${cancellation.isSolve == true}" class="badge badge-success">Đã chấp thuận</div>
                     </div>
                     <div>
-                        <form id="submit-form" th:action="@{/admin/cancellations/{id}(id = ${cancellation.id})}" method="post">
-                            <div class="form-inline">
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
-                                                                                                      class="mr-sm-2">Người hủy</label><input type="text" th:value="${cancellation.owner.fullname}" class="form-control" readonly></div>
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Lý do hủy
-                                </label><input type="text" class="form-control" th:value="${cancellation.reason}" readonly></div>
+                        <div class="form-inline">
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
+                                                                                                  class="mr-sm-2">Người hủy</label><input type="text" th:value="${cancellation.owner.fullname}" class="form-control" readonly></div>
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Lý do hủy
+                            </label><input type="text" class="form-control" th:value="${cancellation.reason}" readonly></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="form-inline">
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng</label><input type="text" th:value="${cancellation.booking.customer.fullname}" class="form-control" readonly></div>
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thợ ảnh
+                            </label><input type="text" class="form-control" th:value="${cancellation.booking.photographer.fullname}" readonly></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="form-inline">
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thời gian hẹn</label><input type="text" th:value="${#dates.format(cancellation.booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}" class="form-control" readonly></div>
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thời gian hủy
+                            </label><input type="text" class="form-control" th:value="${#dates.format(cancellation.createdAt, 'HH:mm dd-MM-yyyy')}" readonly></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="form-inline">
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Trạng thái đơn hẹn</label><div class="badge badge-warning" th:text="${@thymeleafHelper.convertStatus(cancellation.booking.bookingStatus)}">Chờ xác nhận</div></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="form-inline">
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><a class="mt-2 btn btn-primary text-white" th:onclick="'toBookingDetail(' + ${cancellation.booking.id} +',' + ${cancellation.id} + ')'">Chi tiết đơn hẹn</a>
                             </div>
-                            <div class="divider"></div>
-                            <div class="form-inline">
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng</label><input type="text" th:value="${cancellation.booking.customer.fullname}" class="form-control" readonly></div>
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thợ ảnh
-                                </label><input type="text" class="form-control" th:value="${cancellation.booking.photographer.fullname}" readonly></div>
-                            </div>
-                            <div class="divider"></div>
-                            <div class="form-inline">
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thời gian hẹn</label><input type="text" th:value="${#dates.format(cancellation.booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}" class="form-control" readonly></div>
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thời gian hủy
-                                </label><input type="text" class="form-control" th:value="${#dates.format(cancellation.createdAt, 'HH:mm dd-MM-yyyy')}" readonly></div>
-                            </div>
-                            <div class="divider"></div>
-                            <div class="form-inline">
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Trạng thái đơn hẹn</label><div class="badge badge-warning" th:text="${@thymeleafHelper.convertStatus(cancellation.booking.bookingStatus)}">Chờ xác nhận</div></div>
-                            </div>
-                            <div class="divider"></div>
-                            <div class="form-inline">
-                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><a class="mt-2 btn btn-primary text-white" th:onclick="'toBookingDetail(' + ${cancellation.booking.id} +',' + ${cancellation.id} + ')'">Chi tiết đơn hẹn</a>
-                                </div>
-                            </div>
-                            <div class="divider"></div>
-                            <button class="mt-2 btn btn-primary" type="submit">Chấp thuận</button>
-                            <form method="post" th:action="@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}">
-                                <button type="button" class="mt-2 btn btn-primary" id="btn-mail">Gửi cảnh báo</button>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="form-inline">
+                            <form id="submit-form" th:action="@{/admin/cancellations/{id}(id = ${cancellation.id})}" method="post">
+                                <button class="mt-2 btn btn-primary" type="submit">Chấp thuận</button>
                             </form>
-                        </form>
+                            <form id="warn-form" class="ml-2" method="post" th:action="@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}">
+                                <button type="submit" class="mt-2 btn btn-primary" id="btn-mail">Gửi cảnh báo</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -56,8 +58,22 @@
     </div>
     <script th:inline="javascript">
 
+        //@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}
+
 
         $('#submit-form').submit((e) => {
+            e.preventDefault();
+            const cancellationId = [[${cancellation.id}]]
+            $.ajax({
+                type:"post",
+                url: '/admin/cancellations/' + cancellationId,
+                success: function(result){
+                    $('#admin-content').load('/admin/cancellations/' + cancellationId);
+                }
+            });
+        });
+
+        $('#warn-form').submit((e) => {
             e.preventDefault();
             const cancellationId = [[${cancellation.id}]]
             $.ajax({

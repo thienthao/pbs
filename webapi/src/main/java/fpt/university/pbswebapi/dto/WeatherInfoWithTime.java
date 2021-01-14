@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -14,10 +16,12 @@ import java.util.Map;
 @AllArgsConstructor
 public class WeatherInfoWithTime {
 
+    private LocalDate date;
+
     private String location;
 
     private Boolean overall;
 
-    private Map<Date, WeatherNoti> time;
+    private Map<LocalTime, WeatherNoti> time;
 
 }

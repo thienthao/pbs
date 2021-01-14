@@ -34,6 +34,25 @@
                     <h6 th:text="${user.email}">caotien@gmail.com</h6> <small class="text-muted p-t-30 db">Số điện thoại</small>
                     <h6 th:text="${user.phone}">0903917982</h6>
                 </div>
+                <div class="divider"></div>
+                <div class="card-body text-center">
+                    <h6 class="font-weight-bold">Trạng thái tài khoản</h6>
+                    <h6 class="badge badge-warning" th:if="${user.isBlocked==true}">Đã bị chặn</h6>
+                    <h6 class="badge badge-warning" th:if="${user.isEnabled==false}">Chưa kích hoạt</h6>
+                    <h6 class="badge badge-info" th:if="${user.isEnabled==true && user.isBlocked==false}">Bình thường</h6>
+                </div>
+                <div class="divider"></div>
+                <div class="text-center form-inline align-items-center justify-content-center">
+                    <form id="block-form" method="post" class="mb-2 text-center">
+                        <button th:if="${user.isBlocked==false}" class="btn btn-danger" type="submit">Chặn</button>
+                    </form>
+                    <form id="unblock-form" class="mb-2 text-center">
+                        <button th:if="${user.isBlocked==true}" class="btn btn-success" type="submit">Gỡ chặn</button>
+                    </form>
+                    <form id="enable-form" class="mb-2 text-center">
+                        <button th:if="${user.isEnabled==false}" class="btn btn-success" type="submit">Kích hoạt tài khoản</button>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="flex-fill">
@@ -142,6 +161,43 @@
 </div>
 
     <script th:inline="javascript">
+
+        $('#block-form').submit((e) => {
+            e.preventDefault();
+            const userId = [[${user.id}]]
+            $.ajax({
+                type:"post",
+                url: '/admin/v2/users/' + userId + '/block',
+                success: function(result){
+                    $('#admin-content').load('/admin/v2/users/' + userId);
+                }
+            });
+        });
+
+        $('#unblock-form').submit((e) => {
+            e.preventDefault();
+            const userId = [[${user.id}]]
+            $.ajax({
+                type:"post",
+                url: '/admin/v2/users/' + userId + '/unblock',
+                success: function(result){
+                    $('#admin-content').load('/admin/v2/users/' + userId);
+                }
+            });
+        });
+
+        $('#enable-form').submit((e) => {
+            e.preventDefault();
+            const userId = [[${user.id}]]
+            $.ajax({
+                type:"post",
+                url: '/admin/v2/users/' + userId + '/enable',
+                success: function(result){
+                    $('#admin-content').load('/admin/v2/users/' + userId);
+                }
+            });
+        });
+
         var userId = [[${user.id}]];
 
         function toBookingDetail(bookingId) {

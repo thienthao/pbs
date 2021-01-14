@@ -293,6 +293,11 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, lat, lon), HttpStatus.OK);
     }
 
+    @GetMapping("/test/weather-warning")
+    public ResponseEntity<?> testWeather(@RequestParam("datetime") String datetime, @RequestParam("timeAnticipate") int timeAnticipate, @RequestParam("lat") Double lat, @RequestParam("lon") Double lon) {
+        return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, timeAnticipate, lat, lon), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Booking> book(@RequestBody Booking booking) {
         // require status

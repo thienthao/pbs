@@ -20,14 +20,13 @@ public class DateHelper {
         return localDateTime.toLocalTime();
     }
 
-    private List<LocalTime> getHoursBetweenTwoTime(LocalTime from, LocalTime to) {
+    public static List<LocalTime> getHoursBetweenTwoTime(LocalTime from, LocalTime to) {
         int hourFrom = from.getHour();
         int hourTo = to.getHour();
         List<LocalTime> results = new ArrayList<>();
-        results.add(LocalTime.of(hourFrom, 0));
-        while(hourFrom != hourTo) {
-            hourFrom += 1;
+        while(hourFrom <= hourTo) {
             results.add(LocalTime.of(hourFrom, 0));
+            hourFrom += 1;
         }
         return results;
     }

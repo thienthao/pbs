@@ -10,6 +10,10 @@ import java.util.ArrayList;
 
 public class WeatherBayesian {
 
+    public WeatherBayesian() {
+        readTable();
+    }
+
     static ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
 
 
@@ -34,7 +38,6 @@ public class WeatherBayesian {
             isr.close();
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("File does not exist!");
         }
         return t;
     }
@@ -71,7 +74,6 @@ public class WeatherBayesian {
         int count3 = 0;
         int count4 = 0;
         for(int i = 0; i < data.size() ;i++) {
-            System.out.println(i);
             if(data.get(i).get(4).equalsIgnoreCase(shooting)) {
                 countCanShoot++;
             }
@@ -102,10 +104,20 @@ public class WeatherBayesian {
         }else {
             str = "Thời tiết không thuận lợi để chụp ảnh";
         }
-        System.out.println("Probability of photoshoot:"+d1);
-        System.out.println("No chance of photoshoot:"+d2);
-        System.out.println(str);
         return str;
+    }
+
+    public Boolean comparedV2(String outlook, String temp, String humidity, String windy) {
+        Boolean isSuitable = null;
+        double d1 = 0,d2 = 0;
+        d1 = moleculeIsShooting("Y", outlook, temp, humidity, windy)*1.0 / denominator(outlook, temp, humidity, windy);
+        d2 = moleculeIsShooting("N", outlook, temp, humidity, windy)*1.0 / denominator(outlook, temp, humidity, windy);
+        if(d1 > d2) {
+            isSuitable = true;
+        }else {
+            isSuitable = false;
+        }
+        return isSuitable;
     }
 
     public String comparedForDetail(String outlook, String temp, String humidity, String windy, String datetime) {
@@ -118,9 +130,6 @@ public class WeatherBayesian {
         }else {
             str = "Thời tiết ngày " + datetime + " không thuận lợi để chụp ảnh";
         }
-        System.out.println("Probability of photoshoot:"+d1);
-        System.out.println("No chance of photoshoot:"+d2);
-        System.out.println(str);
         return str;
     }
 }

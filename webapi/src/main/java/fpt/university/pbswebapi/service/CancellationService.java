@@ -176,10 +176,10 @@ public class CancellationService {
     public void warn(Long id) {
         CancellationRequest cancellationRequest = cancellationRepository.findById(id).get();
         if(cancellationRequest.getOwner().getRole().getRole() == ERole.ROLE_CUSTOMER) {
-            mailCustomer(cancellationRequest);
+//            mailCustomer(cancellationRequest);
             warnCustomer(cancellationRequest);
         } else {
-            mailPhotographer(cancellationRequest);
+//            mailPhotographer(cancellationRequest);
             warnPhotographer(cancellationRequest);
         }
     }

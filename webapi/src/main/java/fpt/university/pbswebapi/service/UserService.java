@@ -51,6 +51,10 @@ public class UserService {
         userRepository.unblockUser(userId);
     }
 
+    public void enable(Long userId) {
+        userRepository.enable(userId);
+    }
+
     public Page<User> getUserList(Pageable pageable, String start, String end, String role) {
         switch (role) {
             case "customer":
