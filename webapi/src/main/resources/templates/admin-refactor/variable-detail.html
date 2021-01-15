@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cập nhật trọng số</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row">
+        <div class="tab-content col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        <h5 class="card-title">Trọng số đánh giá</h5>
+                    </div>
+                    <div>
+                        <form method="post" id="variable-form">
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Giá trung bình dịch vụ
+                                </label><input id="price" input type="text" class="form-control" th:value="${{price.weight}}"></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khoảng cách thợ ảnh đến người dùng
+                                </label><input id="distance" type="text" class="form-control" th:value="${{distance.weight}}"></div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="form-inline">
+                                <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Đánh giá từ người dùng trước
+                                </label><input id="rating" type="text" class="form-control" th:value="${{rating.weight}}"></div>
+                            </div>
+                            <div class="divider"></div>
+                            <button class="mt-2 btn btn-primary" type="submit">Cập nhật</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        $('#variable-form').submit((e) => {
+            e.preventDefault();
+            const rating = parseFloat($("#rating").val());
+            const price = parseFloat($("#price").val());
+            const distance = parseFloat($("#distance").val());
+            if((rating + price + distance) != 1) {
+                alert("Tổng của 3 trọng số phải bằng 1")
+            } else {
+                $.ajax({
+                    type:"post",
+                    url: '/admin/variables/',
+                    data: {rating: rating, price: price, distance: distance},
+                    success: function(result){
+                        $('#admin-content').load('/admin/variables');
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

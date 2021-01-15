@@ -164,7 +164,7 @@
 
         $('#block-form').submit((e) => {
             e.preventDefault();
-            const userId = [[${user.id}]]
+            const userId = [[${user.id}]];
             $.ajax({
                 type:"post",
                 url: '/admin/v2/users/' + userId + '/block',
@@ -176,7 +176,7 @@
 
         $('#unblock-form').submit((e) => {
             e.preventDefault();
-            const userId = [[${user.id}]]
+            const userId = [[${user.id}]];
             $.ajax({
                 type:"post",
                 url: '/admin/v2/users/' + userId + '/unblock',
@@ -188,7 +188,7 @@
 
         $('#enable-form').submit((e) => {
             e.preventDefault();
-            const userId = [[${user.id}]]
+            const userId = [[${user.id}]];
             $.ajax({
                 type:"post",
                 url: '/admin/v2/users/' + userId + '/enable',

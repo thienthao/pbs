@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết bài viết</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="row">
+        <div class="tab-content col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body d-flex flex-row-reverse"><div class="media forum-item">
+                    <form id="ban-form" th:if="${thread.isBan == false}">
+                        <input class="btn btn-danger" type="submit" value="Chặn bài viết">
+                    </form>
+                    <form id="unban-form" th:if="${thread.isBan == true}">
+                        <input class="btn btn-success" type="submit" value="Gỡ chặn bài viết">
+                    </form>
+                </div>
+                </div>
+            </div>
+            <div class="main-card mb-3 card">
+                <div class="card-body"><div class="media forum-item"> <a href="javascript:void(0)" class="card-link"> <img th:src="${{thread.owner.avatar}}" class="rounded-circle" width="50" alt="Người đăng"> <small class="d-block text-center text-muted"></small> </a><div class="media-body ml-3"> <a type="button" th:onclick="'toUserDetail(' + ${thread.owner.id} +')'" class="text-secondary" th:text="${{thread.owner.fullname}}">Mokrani</a> <small class="text-muted ml-2"></small><h5 class="mt-1" th:text="${{thread.title}}">Realtime fetching data</h5><div class="mt-3 font-size-sm">
+                    <p th:text="${{thread.content}}"></p>
+                </div></div><div class="text-muted small text-center"><span th:text="${#dates.format(thread.createdAt, 'HH:mm dd-MM-yyyy')}"><i class="far fa-comment ml-2"></i> 3</span></div></div></div>
+            </div>
+            <div th:each="obj: ${thread.comments}" class="main-card mb-3 card">
+                <div class="card-body"><div class="media forum-item"> <a href="javascript:void(0)" class="card-link"> <img th:src="${{obj.owner.avatar}}" class="rounded-circle" width="50" alt="Người đăng"> <small class="d-block text-center text-muted"></small> </a><div class="media-body ml-3"> <a type="button" th:onclick="'toUserDetail(' + ${obj.owner.id} +')'" class="text-secondary" th:text="${{obj.owner.fullname}}">Mokrani</a> <small class="text-muted ml-2"></small><h5 class="mt-1"></h5><div class="mt-3 font-size-sm">
+                    <p th:text="${{obj.comment}}"></p>
+                </div></div><div class="text-muted small text-center"><span th:text="${#dates.format(obj.createdAt, 'HH:mm dd-MM-yyyy')}"><i class="far fa-comment ml-2"></i> 3</span></div></div></div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+
+        $('#ban-form').submit((e) => {
+            e.preventDefault();
+            const threadId = [[${thread.id}]];
+            $.ajax({
+                type:"post",
+                url: '/admin/v2/threads/' + threadId + '/ban',
+                success: function(result){
+                    $('#admin-content').load('/admin/v2/threads/' + threadId);
+                }
+            });
+        });
+
+        $('#unban-form').submit((e) => {
+            e.preventDefault();
+            const threadId = [[${thread.id}]];
+            $.ajax({
+                type:"post",
+                url: '/admin/v2/threads/' + threadId + '/unban',
+                success: function(result){
+                    $('#admin-content').load('/admin/v2/threads/' + threadId);
+                }
+            });
+        });
+
+        function toUserDetail(id) {
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+            const url = '/admin/v2/users/' + id;
+            $('#admin-content').load(url);
+        }
+    </script>
+</div>
+</body>
+</html>

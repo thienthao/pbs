@@ -274,6 +274,44 @@ public class AdminController {
         return "/admin-refactor/rating-list :: content";
     }
 
+    @GetMapping("/v2/threads")
+    public String showThreadList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        model.addAttribute("page", threadService.findAll(pageable, start, end, filter));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/thread-list :: content";
+    }
+
+    @GetMapping("/v2/threads/{id}")
+    public String showThreadDetail(Model model, @PathVariable Long id) {
+        model.addAttribute("thread", threadService.findById(id));
+        return "admin-refactor/thread-detail :: content";
+    }
+
+    @PostMapping("/v2/threads/{threadId}/unban")
+    public String unbanThreadV2(@PathVariable Long threadId, Model model) {
+        try {
+            threadService.unbanThread(threadId);
+            model.addAttribute("thread", threadService.findById(threadId));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return "admin-refactor/thread-detail :: content";
+    }
+
+    @PostMapping("/v2/threads/{threadId}/ban")
+    public String banThreadV2(@PathVariable Long threadId, Model model) {
+        try {
+            threadService.banThread(threadId);
+            model.addAttribute("thread", threadService.findById(threadId));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return "admin-refactor/thread-detail :: content";
+    }
+
     @GetMapping("/cancellations")
     public String showCancellationList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
         model.addAttribute("page", cancellationService.getCancellations(pageable, start, end, filter));
@@ -435,6 +473,20 @@ public class AdminController {
             logger.error(e.getMessage());
         }
         return "admin-refactor/user-detail :: content";
+    }
+
+    @GetMapping("/variables")
+    public String showVariableDetail(Model model) {
+        model.addAttribute("price", variableService.findById(Long.parseLong("1")));
+        model.addAttribute("rating", variableService.findById(Long.parseLong("2")));
+        model.addAttribute("distance", variableService.findById(Long.parseLong("3")));
+        return "admin-refactor/variable-detail :: content";
+    }
+
+    @PostMapping("/variables")
+    public String updateVariable(@RequestParam Float rating, @RequestParam Float price, @RequestParam Float distance) {
+        variableService.saveAll(rating, price, distance);
+        return "admin-refactor/variable-detail :: content";
     }
 
 

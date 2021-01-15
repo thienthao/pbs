@@ -44,4 +44,9 @@ public class ThreadComment {
     @JoinColumn(name = "thread_id", referencedColumnName = "id")
     @JsonBackReference
     private Thread thread;
+
+    @PrePersist
+    void prepersist() {
+        createdAt = new Date();
+    }
 }
