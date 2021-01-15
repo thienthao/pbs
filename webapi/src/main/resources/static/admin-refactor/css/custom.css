@@ -24,51 +24,58 @@ input[type="textarea"]:read-only { background-color: transparent; }
 
 textarea:read-only { background-color: transparent; }
 
-/* The Modal (background) */
-.mail-modal {
-  display: none; /*  Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 10; /* Sit on top */
-  right: 0;
-  bottom: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed *//* Black w/ opacity */
+.input-file-dummy, .input-file-btn {
+	cursor: pointer;
+}
+.input-file-dummy[readonly] {
+	background-color: white;
 }
 
-/* Modal Content/Box */
-.modal-content {
-  background-color: #fefefe;
-  padding: 10px;
-  border: 1px solid #888;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  margin-right: 30px;
-  width: 45%; /* Could be more or less, depending on screen size */
-  height: 75%;
-  overflow: auto;
-}
+/*!* The Modal (background) *!*/
+/*.mail-modal {*/
+/*  display: none; !*  Hidden by default *!*/
+/*  position: fixed; !* Stay in place *!*/
+/*  z-index: 10; !* Sit on top *!*/
+/*  right: 0;*/
+/*  bottom: 0;*/
+/*  width: 100%; !* Full width *!*/
+/*  height: 100%; !* Full height *!*/
+/*  overflow: auto; !* Enable scroll if needed *!!* Black w/ opacity *!*/
+/*}*/
 
-/* The Close Button */
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
+/*!*!* Modal Content/Box *!*!*/
+/*.modal-content {*/
+/*  background-color: #fefefe;*/
+/*  padding: 10px;*/
+/*  border: 1px solid #888;*/
+/*  position: absolute;*/
+/*  right: 0;*/
+/*  bottom: 0;*/
+/*  margin-right: 30px;*/
+/*  width: 45%; !* Could be more or less, depending on screen size *!*/
+/*  height: 75%;*/
+/*  overflow: auto;*/
+/*}*/
 
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
+/*!* The Close Button *!*/
+/*.close {*/
+/*  color: #aaa;*/
+/*  float: right;*/
+/*  font-size: 28px;*/
+/*  font-weight: bold;*/
+/*}*/
 
-.mail-header {
-    background-color: #f0f0f0;
-    width: 100%;
-    margin-left: -20px;
-    margin-right: -30px;
-    margin-top: -20px;
-}
+/*.close:hover,*/
+/*.close:focus {*/
+/*  color: black;*/
+/*  text-decoration: none;*/
+/*  cursor: pointer;*/
+/*}*/
+
+/*.mail-header {*/
+/*    background-color: #f0f0f0;*/
+/*    width: 100%;*/
+/*    margin-left: -20px;*/
+/*    margin-right: -30px;*/
+/*    margin-top: -20px;*/
+/*}*/

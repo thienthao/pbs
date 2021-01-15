@@ -28,5 +28,44 @@
     <div th:replace="/admin-refactor/layout/footer"></div>
 </div>
 <div th:replace="/admin-refactor/layout/script"></div>
+
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content was-validated">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thể loại mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="category-name" class="col-form-label">Thể loại:</label>
+                        <input type="text" class="form-control" id="category-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-form-label">Icon:</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control input-file-dummy" placeholder="Tập tin" aria-describedby="fileHelp" required>
+                        <div class="valid-feedback order-last">Tập tin hợp lệ</div>
+                        <div class="invalid-feedback order-last">Xin chọn tập tin</div>
+                        <label class="input-group-append mb-0">
+                        <span class="btn btn-info input-file-btn">
+                          Thư mục... <input type="file" hidden>
+                        </span>
+                        </label>
+                    </div>
+                    <small id="fileHelp" class="form-text text-muted">Chọn tập tin định dạng SVG</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary">Tạo</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
