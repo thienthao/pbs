@@ -13,8 +13,12 @@
             <div class="card-body">
                 <div class="card-title">Basic Examples</div>
                 <!-- Button trigger modal -->
-                <button type="button" class="btn mr-2 mb-2 btn-primary" data-toggle="modal" data-target="#categoryModal">
+                <button type="button" class="btn mr-2 mb-2 btn-primary" data-toggle="modal" data-target="#category-add-modal">
                     Tạo mới
+                </button>
+
+                <button type="button" class="btn mr-2 mb-2 btn-primary" data-toggle="modal" data-target="#category-edit-modal">
+                    Chỉnh sửa
                 </button>
             </div>
         </div>
@@ -59,6 +63,7 @@
                             <th class="text-center">#</th>
                             <th class="text-center">Thể loại</th>
                             <th class="text-center">Icon</th>
+                            <th class="text-center">Tác vụ</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -66,6 +71,12 @@
                             <td class="text-center text-muted" th:text="${obj.id}">#345</td>
                             <td class="text-center" th:text="${obj.category}">08:00 12/20/2020</td>
                             <td class="text-center"><img width="40" class="rounded-circle" th:src="${obj.iconLink}" alt=""></td>
+                            <td class="text-center">
+                                <button th:id="${{obj.id}}" th:if="${{obj.id != 1}}" type="button" class="btn mr-2 mb-2 btn-primary" th:data-category-id="${{obj.id}}" th:data-category-name="${{obj.category}}" data-toggle="modal" data-target="#category-edit-modal">
+                                    Chỉnh sửa
+                                </button>
+                                <i class="fas fa-ban fa-lg" th:if="${{obj.id == 1}}"></i>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -86,6 +97,68 @@
         </div>
     </div>
     <script th:inline="javascript">
+
+        //category-edit-form
+        $('#category-edit-form').submit((e) => {
+            e.preventDefault();
+            const categoryId = $("#edit-category-id").val()
+            const categoryName = $("#edit-category-name").val()
+            $.ajax({
+                type:"post",
+                url: '/admin/categories/' + categoryId,
+                data: {category: categoryName},
+                success: function(result){
+                    $('#admin-content').load('/admin/categories');
+                    $('#category-edit-modal').trigger('click');
+                }
+            });
+
+            if ($('#category-edit-file').get(0).files.length === 0) {
+                // do nothing
+            } else {
+                const reg = new RegExp("(.*?)\.(svg)$");
+                if(!(reg.test($('#category-edit-file').val().toLowerCase()))) {
+                    alert('Xin hãy chọn tập tin svg');
+                } else {
+                    const fd = new FormData();
+                    fd.append( "file", $('#category-edit-file')[0].files[0])
+
+                    $.ajax({
+                        type: "POST",
+                        url: '/api/categories/' + categoryId + '/upload',
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        cache: false,
+                        // beforeSend: function(xhr, settings) {
+                        //     xhr.setRequestHeader("Content-Type", "multipart/form-data;boundary=gc0p4Jq0M2Yt08jU534c0p");
+                        //     settings.data = {name: "file", file: file};
+                        // },
+                        success: function (result) {
+                            if ( result.reseponseInfo == "SUCCESS" ) {
+
+                            } else {
+
+                            }
+                        },
+                        error: function (result) {
+                            console.log(result.responseText);
+                        }
+                    });
+                }
+            }
+        });
+
+        $('#category-edit-modal').on('show.bs.modal', function(e) {
+
+            //get data-id attribute of the clicked element
+            const categoryId = $(e.relatedTarget).data('category-id');
+            const categoryName = $(e.relatedTarget).data('category-name');
+
+            //populate the textbox
+            $(e.currentTarget).find('#edit-category-name').val(categoryName);
+            $(e.currentTarget).find('#edit-category-id').val(categoryId);
+        });
 
         function openCategoryModal() {
             $('#category-form').appendTo("body").modal('show');

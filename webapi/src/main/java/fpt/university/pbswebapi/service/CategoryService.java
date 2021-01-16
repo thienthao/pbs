@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.apache.http.entity.ContentType.*;
 
@@ -76,5 +73,12 @@ public class CategoryService {
                 BucketName.PROFILE_IMAGE.getBucketName(),
                 id);
         return fileStore.download(path, id + "-category");
+    }
+
+    public Category update(Long id, String category) {
+        Category saved = categoryRepository.findById(id).get();
+        saved.setCategory(category);
+        saved.setUpdatedAt(new Date());
+        return categoryRepository.save(saved);
     }
 }

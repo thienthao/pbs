@@ -402,6 +402,17 @@ public class AdminController {
         return "/admin-refactor/category-list :: content";
     }
 
+    @PostMapping("/categories/{id}")
+    public String updateCategory(@PathVariable Long id, @RequestParam String category, @PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        categoryService.update(id, category);
+        model.addAttribute("page", categoryService.getAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/category-list :: content";
+    }
+
     @GetMapping("/returning-types")
     public String showReturningTypeList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
         model.addAttribute("page", returningTypeRepository.findAll(pageable));
