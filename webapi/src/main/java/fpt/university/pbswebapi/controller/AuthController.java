@@ -105,6 +105,26 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
+        User user = userRepository.findById(userDetails.getId()).get();
+
+        if(user.getIsBlocked() == true) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Tài khoản của bạn đã bị vô hiệu hóa"));
+        }
+
+        if(user.getIsEnabled() == false) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Tài khoản của bạn chưa được kích hoạt, xin hãy kích hoạt ở email"));
+        }
+
+        if(user.getIsDeleted() == true) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Tên đăng nhập hoặc mật khẩu không chính xác"));
+        }
+
         String role = userDetails.getAuthorities().toArray()[0].toString();
 
         return ResponseEntity.ok(new JwtResponse(

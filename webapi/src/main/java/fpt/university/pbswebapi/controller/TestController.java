@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,7 +95,8 @@ public class TestController {
 
     @GetMapping("/customer")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public String customerAccess() {
+    public String customerAccess(Principal principal) {
+        String username = principal.getName();
         return "Customer content";
     }
 

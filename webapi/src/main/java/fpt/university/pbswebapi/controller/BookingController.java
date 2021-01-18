@@ -6,6 +6,7 @@ import fpt.university.pbswebapi.dto.CommentDto;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
+import fpt.university.pbswebapi.payload.own.response.MessageResponse;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CustomRepository;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
@@ -21,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.*;
 
 @RestController
@@ -363,10 +365,20 @@ public class BookingController {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
-    @PutMapping("/checkin/{bookingId}/{tldId}")
-    public ResponseEntity<?> checkinOnDate(@PathVariable Long bookingId, @PathVariable Long tldId) {
-        bookingService.checkin(tldId);
+    @PutMapping("/checkin-all/{bookingId}")
+    public ResponseEntity<?> checkinAll(@PathVariable Long bookingId) {
+        bookingService.checkinAll(bookingId);
         return new ResponseEntity<>("ok", HttpStatus.OK);
+    }
+
+    @PutMapping("/checkin/{bookingId}/{tldId}")
+    public ResponseEntity<?> checkinOnDate(@PathVariable Long bookingId, @PathVariable Long tldId, Principal principal) {
+        // validate user
+        if(bookingService.isBookingOfUser(principal.getName(), bookingId)) {
+            bookingService.checkin(tldId);
+            return new ResponseEntity<>("ok", HttpStatus.OK);
+        }
+        return ResponseEntity.badRequest().body(new MessageResponse("Bạn không có quyền truy cập vào dữ liệu này"));
     }
 
     @GetMapping(value = "/checkin/{bookingId}/{tldId}", produces = MediaType.IMAGE_PNG_VALUE)

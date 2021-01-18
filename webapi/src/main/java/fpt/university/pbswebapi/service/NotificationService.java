@@ -4,6 +4,7 @@ import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.ENotificationType;
 import fpt.university.pbswebapi.entity.Notification;
 import fpt.university.pbswebapi.helper.ThymeleafHelper;
+import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,12 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(NotificationRepository notificationRepository, BookingRepository bookingRepository) {
         this.notificationRepository = notificationRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<Notification> findNotiWhereUserId(Long receiverId) {
@@ -71,5 +74,19 @@ public class NotificationService {
 
     public void setIsReadTrue(Long id) {
         notificationRepository.setIsRead(id);
+    }
+
+    public void createConfirmationNotification(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).get();
+
+        Notification notification = new Notification();
+        notification.setTitle(booking.getPhotographer().getFullname() + " đã gửi yêu cầu xác nhận gặp mặt");
+        notification.setContent("Có vẻ buổi chụp với " + booking.getPhotographer().getFullname() + " đã kết thúc, tuy nhiên Photographer đã quên check in, xin bạn hãy xác nhận thay Photographer");
+        notification.setNotificationType(ENotificationType.CONFIRMATION_REQUEST);
+        notification.setBookingId(booking.getId());
+        notification.setCreatedAt(new Date());
+        notification.setReceiverId(booking.getPhotographer().getId());
+        notification.setIsRead(false);
+        notificationRepository.save(notification);
     }
 }

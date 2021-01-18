@@ -22,6 +22,12 @@ public class NotificationController {
         return new ResponseEntity<>(notificationService.findNotiWhereUserId(receiverId), HttpStatus.OK);
     }
 
+    @PostMapping("/{bookingId}")
+    public ResponseEntity<?> sendCheckinConfirmation(@PathVariable("bookingId") Long bookingId) {
+        notificationService.createConfirmationNotification(bookingId);;
+        return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public void setIsReadTrue(@PathVariable("id") Long id) {
         notificationService.setIsReadTrue(id);

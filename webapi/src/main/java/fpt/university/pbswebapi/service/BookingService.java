@@ -969,6 +969,13 @@ public class BookingService {
         }
     }
 
+    public void checkinAll(long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).get();
+        for (TimeLocationDetail tld : booking.getTimeLocationDetails()) {
+            tldRepository.checkin(tld.getId());
+        }
+    }
+
     public void checkin(Long tldId) {
         tldRepository.checkin(tldId);
     }
@@ -987,5 +994,11 @@ public class BookingService {
 
     public Page<Booking> findAll(Pageable pageable) {
         return bookingRepository.findAll(pageable);
+    }
+
+    public boolean isBookingOfUser(String username, Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).get();
+        User user = userRepository.findByUsernameAndIsDeletedFalseAndIsBlockedFalse(username);
+        return user != null && (booking.getPhotographer().getId() == user.getId() || booking.getCustomer().getId() == user.getId());
     }
 }

@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.service;
 
 import fpt.university.pbswebapi.dto.AccountVerificationEmailContext;
+import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.dto.UserDto;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.entity.VerificationToken;
@@ -32,19 +33,29 @@ public class UserService {
 
     private final EmailService emailService;
 
+    private final FCMService fcmService;
+
     @Autowired
     public UserService(UserRepository userRepository,
                        PasswordEncoder encoder,
                        VerificationTokenService tokenService,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       FCMService fcmService) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.tokenService = tokenService;
         this.emailService = emailService;
+        this.fcmService = fcmService;
     }
 
     public void blockUser(long userId) {
         userRepository.blockUser(userId);
+        User user = userRepository.findById(userId).get();
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Thông báo");
+        notiRequest.setBody("Tài khoản của bạn đã bị vô hiệu hóa");
+        notiRequest.setToken(user.getDeviceToken());
+        fcmService.pushNotificationWithoutBooking(notiRequest);
     }
 
     public void unblockUser(long userId) {
