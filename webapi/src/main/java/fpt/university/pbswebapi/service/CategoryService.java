@@ -3,7 +3,9 @@ package fpt.university.pbswebapi.service;
 import fpt.university.pbswebapi.bucket.BucketName;
 import fpt.university.pbswebapi.entity.Category;
 import fpt.university.pbswebapi.filesstore.FileStore;
+import fpt.university.pbswebapi.repository.AlbumRepository;
 import fpt.university.pbswebapi.repository.CategoryRepository;
+import fpt.university.pbswebapi.repository.ServicePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +22,15 @@ public class CategoryService {
 
     private CategoryRepository categoryRepository;
     private FileStore fileStore;
+    private AlbumRepository albumRepository;
+    private ServicePackageRepository packageRepository;
 
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository, FileStore fileStore) {
+    public CategoryService(CategoryRepository categoryRepository, FileStore fileStore, AlbumRepository albumRepository, ServicePackageRepository packageRepository) {
         this.categoryRepository = categoryRepository;
         this.fileStore = fileStore;
+        this.albumRepository = albumRepository;
+        this.packageRepository = packageRepository;
     }
 
     public Page<Category> getAll(Pageable pageable) {
@@ -76,9 +82,22 @@ public class CategoryService {
     }
 
     public Category update(Long id, String category) {
-        Category saved = categoryRepository.findById(id).get();
-        saved.setCategory(category);
-        saved.setUpdatedAt(new Date());
-        return categoryRepository.save(saved);
+        if(id != 1) {
+            Category saved = categoryRepository.findById(id).get();
+            saved.setCategory(category);
+            saved.setUpdatedAt(new Date());
+            return categoryRepository.save(saved);
+        }
+        return null;
+    }
+
+    public boolean remove(Long categoryId) {
+        Long album = albumRepository.countAlbumByCategory(categoryId);
+        Long servicePackage = packageRepository.countPackageByCategory(categoryId);
+        if(album == 0 && servicePackage == 0) {
+//            categoryRepository.deleteById(categoryId);
+            return true;
+        }
+        return false;
     }
 }

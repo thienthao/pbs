@@ -74,7 +74,7 @@ public class BookingService {
 
     public Booking book(Booking booking) {
         booking.setCreatedAt(new Date());
-        Booking result = bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
         User user = userRepository.findById(booking.getCustomer().getId()).get();
         User photographer = userRepository.findById(booking.getPhotographer().getId()).get();
         NotiRequest notiRequest = new NotiRequest();
@@ -83,9 +83,9 @@ public class BookingService {
         notiRequest.setToken(photographer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
 
-        notificationService.requestPhotographerNotification(result);
+        notificationService.requestPhotographerNotification(saved, user.getFullname());
 
-        return result;
+        return saved;
     }
 
     private String generateCheckinCode(Long bookingId) {

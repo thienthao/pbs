@@ -24,4 +24,7 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     @Modifying
     @Query("update Album album set album.isDeleted=true where album.id=:albumId")
     void delete(long albumId);
+
+    @Query("select count(album) from Album album where album.category.id =:categoryId and album.isDeleted=false")
+    Long countAlbumByCategory(Long categoryId);
 }

@@ -2,6 +2,7 @@ package fpt.university.pbswebapi.controller;
 
 import fpt.university.pbswebapi.entity.Thread;
 import fpt.university.pbswebapi.entity.ThreadComment;
+import fpt.university.pbswebapi.entity.ThreadTopic;
 import fpt.university.pbswebapi.repository.ThreadCommentRepository;
 import fpt.university.pbswebapi.service.ThreadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,16 @@ public class ThreadController {
     @PostMapping("/threads")
     public ResponseEntity<?> createThread(@RequestBody Thread thread) {
         return new ResponseEntity<>(threadService.save(thread), HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/topics")
+    public ResponseEntity<?> addTopic(@RequestBody ThreadTopic topic) {
+        return new ResponseEntity<>(threadService.addTopic(topic), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/topics/{id}")
+    public ResponseEntity<?> removeTopic(@PathVariable Long id) {
+        return new ResponseEntity<>(threadService.removeTopic(id), HttpStatus.OK);
     }
 
     @PutMapping("/threads")

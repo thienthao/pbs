@@ -119,7 +119,7 @@
             $('.tooltip-inner').remove();
             $('.arrow').remove();
             const url = '/admin/cancellations/' + id;
-            $('#admin-content').load(url);
+            $(pathname + '#admin-content').load(url);
         }
 
         // th:href="@{/admin/cancellations/{id}(id=${obj.id})}"
@@ -132,48 +132,48 @@
 
         // th:href="@{/admin/cancellations(page=${page.number},size=10,start=${start},end=${end},filter=${filter})}"
         function limitRecord10(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecord20(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecord50(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecordAll(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         // th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=not_solve)}"
         function filterStatusNodeal(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'not_solve'}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'not_solve'}));
         }
 
         function filterStatusAlreadydeal(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'solve'}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'solve'}));
         }
 
         function filterStatusAll(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
         }
 
         function toPage(atag) {
             let page = atag.text;
             page = page - 1;
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/cancellations?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         $(document).ready(()=>{
 
             $('#cancellation-list-a-paging-previous').click(() => {
-                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+                $('#admin-content').load(pathname + '/admin/cancellations?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
             });
 
             $('#cancellation-list-a-paging-next').click(() => {
-                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+                $('#admin-content').load(pathname + '/admin/cancellations?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
             });
         });
     </script>
@@ -285,10 +285,10 @@
             var endDate = $('#reportrange-cancellation').data('daterangepicker').endDate._d;
             if(isValidDate(startDate)) {
                 let filter = [[${filter}]];
-                $('#admin-content').load(document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
+                $('#admin-content').load(pathname + document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
             } else {
                 let filter = [[${filter}]];
-                $('#admin-content').load(document.getElementById('cancellation-date').href + `&filter=` + filter.toString());
+                $('#admin-content').load(pathname + document.getElementById('cancellation-date').href + `&filter=` + filter.toString());
             }
         });
 

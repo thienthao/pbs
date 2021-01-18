@@ -77,4 +77,20 @@ public class ThreadService {
     public Page<Thread> findAll(Pageable pageable, String start, String end, String filter) {
         return threadRepository.findAllByIsDeletedFalse(pageable);
     }
+
+    public ThreadTopic updateTopic(Long id, String topic) {
+        ThreadTopic saved = topicRepository.findById(id).get();
+        saved.setTopic(topic);
+        return topicRepository.save(saved);
+    }
+
+    public ThreadTopic addTopic(ThreadTopic topic) {
+//        return topicRepository.save(topic);
+        return null;
+    }
+
+    public boolean removeTopic(Long id) {
+//        topicRepository.deleteById(id);
+        return true;
+    }
 }

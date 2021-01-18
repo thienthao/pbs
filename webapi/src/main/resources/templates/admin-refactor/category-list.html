@@ -8,51 +8,15 @@
 <body>
 <div th:fragment="content">
     <div class="row">
-
-        <div class="main-card mb-3 card">
-            <div class="card-body">
-                <div class="card-title">Basic Examples</div>
-                <!-- Button trigger modal -->
-                <button type="button" class="btn mr-2 mb-2 btn-primary" data-toggle="modal" data-target="#category-add-modal">
-                    Tạo mới
-                </button>
-
-                <button type="button" class="btn mr-2 mb-2 btn-primary" data-toggle="modal" data-target="#category-edit-modal">
-                    Chỉnh sửa
-                </button>
-            </div>
-        </div>
-
-
         <div class="col-md-12">
             <div class="main-card mb-3 card">
                 <div class="card-header">Thể loại
                     <div class="btn-actions-pane-right">
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
                             <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
-                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
-                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Lọc</button>
-                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" th:classappend="${filter} == 'not_solve' ? disabled : ''" tabindex="-1" onclick="filterStatusNodeal(this)">Chưa xử lý</a>
-                                <a class="dropdown-item" th:classappend="${filter} == 'solve' ? disabled : ''" tabindex="0" onclick="filterStatusAlreadydeal(this)">Đã xử lý</a>
-                                <a class="dropdown-item" th:classappend="${filter} == 'all' ? disabled : ''" tabindex="0" onclick="filterStatusAll(this)">Tất cả</a>
-                            </div>
-                        </div>
-                        <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
-                            <i class="fa fa-calendar"></i>&nbsp;
-                            <span></span> <i class="fa fa-caret-down"></i>
-                        </div>
-                        <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
-                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
-                            <!--                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size},filter=${filter})}">10 kết quả</a>-->
-                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
-                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
-                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" onclick="limitRecord10(this)">10 kết quả</a>
-                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" onclick="limitRecord20(this)">20 kết quả</a>
-                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" onclick="limitRecord50(this)">50 kết quả</a>
-                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" onclick="limitRecordAll(this)">Tất cả</a>
-                            </div>
+                            <button type="button" class="btn mr-2 mb-2 btn-outline-info mb-2 mr-2" data-toggle="modal" data-target="#category-add-modal">
+                                Tạo mới
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -72,31 +36,63 @@
                             <td class="text-center" th:text="${obj.category}">08:00 12/20/2020</td>
                             <td class="text-center"><img width="40" class="rounded-circle" th:src="${obj.iconLink}" alt=""></td>
                             <td class="text-center">
-                                <button th:id="${{obj.id}}" th:if="${{obj.id != 1}}" type="button" class="btn mr-2 mb-2 btn-primary" th:data-category-id="${{obj.id}}" th:data-category-name="${{obj.category}}" data-toggle="modal" data-target="#category-edit-modal">
-                                    Chỉnh sửa
-                                </button>
-                                <i class="fas fa-ban fa-lg" th:if="${{obj.id == 1}}"></i>
+                                <div class="d-flex flex-row align-items-center justify-content-center">
+                                    <button th:id="${{obj.id}}" type="button" class="btn btn-success btn-circle btn-md mr-1" th:data-category-id="${{obj.id}}" th:data-category-name="${{obj.category}}" data-toggle="modal" data-target="#category-edit-modal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button th:id="${{obj.id}}" th:if="${{obj.id != 1}}" type="button" class="btn btn-danger btn-circle btn-md" th:data-category-id="${{obj.id}}" data-toggle="modal" data-target="#category-remove-modal">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="d-block text-center card-footer">
-                    <nav aria-label="..." class="d-flex justify-content-center">
-                        <ul class="pagination pagination-sm">
-                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="cancellation-list-a-paging-previous">Trước</a></li>
-                            <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
-                                <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
-                                <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
-                            </th:block>
-                            <li th:if="${page.hasNext()}" class="page-item"><a id="cancellation-list-a-paging-next">Sau</a></li>
-                        </ul>
-                    </nav>
-                </div>
             </div>
         </div>
     </div>
     <script th:inline="javascript">
+
+        //category - add - form
+        $('#category-add-form').submit((e) => {
+            e.preventDefault();
+            const categoryName = $("#add-category-name").val();
+            const reg = new RegExp("(.*?)\.(svg)$");
+            if ($('#category-add-file').get(0).files.length === 0) {
+                alert("Xin hãy chọn tập tin");
+            } else if (!(reg.test($('#category-add-file').val().toLowerCase()))){
+                alert("Xin hãy chọn tập tin svg");
+            }
+            else {
+                $.ajax({
+                    type:"post",
+                    url: '/api/categories',
+                    data: JSON.stringify({"category": categoryName}),
+                    contentType:'application/json',
+                    success: function(result){
+                        const fd = new FormData();
+                        fd.append( "file", $('#category-add-file')[0].files[0])
+
+                        $.ajax({
+                            type: "POST",
+                            url: '/api/categories/' + result.id + '/upload',
+                            data: fd,
+                            contentType: false,
+                            processData: false,
+                            cache: false,
+                            success: function (result) {
+                                $('#admin-content').load('/admin/categories');
+                                $('#category-add-modal').trigger('click');
+                            },
+                            error: function (result) {
+                                console.log(result.responseText);
+                            }
+                        });
+                    }
+                });
+            }
+        });
 
         //category-edit-form
         $('#category-edit-form').submit((e) => {
@@ -130,10 +126,6 @@
                         contentType: false,
                         processData: false,
                         cache: false,
-                        // beforeSend: function(xhr, settings) {
-                        //     xhr.setRequestHeader("Content-Type", "multipart/form-data;boundary=gc0p4Jq0M2Yt08jU534c0p");
-                        //     settings.data = {name: "file", file: file};
-                        // },
                         success: function (result) {
                             if ( result.reseponseInfo == "SUCCESS" ) {
 
@@ -149,6 +141,36 @@
             }
         });
 
+        // remove category form
+        $('#category-remove-form').submit((e) => {
+            e.preventDefault();
+            const categoryId = $("#remove-category-id").val()
+            $.ajax({
+                type:"delete",
+                url: '/api/categories/' + categoryId,
+                success: function(result){
+                    if(result == true) {
+                        alert('Xóa thể loại thành công');
+                        $('#admin-content').load('/admin/categories');
+                        $('#category-remove-modal').trigger('click');
+                    } else {
+                        alert('Không thể xóa thể loại vì người dùng đang sử dụng');
+                        $('#category-remove-modal').trigger('click');
+                    }
+                }
+            });
+        });
+
+        $('#category-remove-modal').on('show.bs.modal', function(e) {
+
+            //get data-id attribute of the clicked element
+            const categoryId = $(e.relatedTarget).data('category-id');
+
+            //populate the textbox
+            $(e.currentTarget).find('#remove-category-id').val(categoryId);
+        });
+        // end remove category form
+
         $('#category-edit-modal').on('show.bs.modal', function(e) {
 
             //get data-id attribute of the clicked element
@@ -158,6 +180,11 @@
             //populate the textbox
             $(e.currentTarget).find('#edit-category-name').val(categoryName);
             $(e.currentTarget).find('#edit-category-id').val(categoryId);
+            if(categoryId == 1) {
+                $('#edit-category-name').prop('readonly', true);
+            } else {
+                $('#edit-category-name').prop('readonly', false);
+            }
         });
 
         function openCategoryModal() {

@@ -433,6 +433,17 @@ public class AdminController {
         return "/admin-refactor/topic-list :: content";
     }
 
+    @PostMapping("/topics/{id}")
+    public String updateTopic(@PathVariable Long id, @RequestParam String topic, @PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
+        threadService.updateTopic(id, topic);
+        model.addAttribute("page", threadTopicRepository.findAll(pageable));
+        model.addAttribute("start", start);
+        model.addAttribute("end", end);
+        model.addAttribute("filter", filter);
+        model.addAttribute("size", pageable.getPageSize());
+        return "/admin-refactor/topic-list :: content";
+    }
+
     @GetMapping("/v2/users/{userId}")
     public String showUserDetailV2(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @PathVariable Long userId, Model model, @RequestParam(value = "status", defaultValue = "ALL") String status) {
         model.addAttribute("bookingInfo", bookingService.getBookingInfo(userId));

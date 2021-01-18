@@ -85,7 +85,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(req-> req.getRequestURI().contains("images")).permitAll()
                 .requestMatchers(req-> req.getRequestURI().contains("download")).permitAll()
                 .requestMatchers(req-> req.getRequestURI().contains("upload")).permitAll()
-                .requestMatchers(req-> req.getRequestURI().contains("cover")).permitAll();
+                .requestMatchers(req-> req.getRequestURI().contains("cover")).permitAll()
+                .requestMatchers(req-> req.getRequestURI().contains("admin")).permitAll();
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()

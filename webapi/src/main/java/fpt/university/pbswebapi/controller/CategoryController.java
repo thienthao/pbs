@@ -31,7 +31,9 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Category category) {
-        return new ResponseEntity<>(categoryService.save(category), HttpStatus.OK);
+        Category saved = categoryRepository.findById(Long.parseLong("21")).get();
+        return new ResponseEntity<>(saved, HttpStatus.OK);
+//        return new ResponseEntity<>(categoryService.save(category), HttpStatus.OK);
     }
 
     @PostMapping("/{id}/upload")
@@ -43,6 +45,11 @@ public class CategoryController {
         } else {
             return new ResponseEntity<>("Fail", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> removeCategory(@PathVariable Long id) {
+        return new ResponseEntity<>(categoryService.remove(id), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/download")

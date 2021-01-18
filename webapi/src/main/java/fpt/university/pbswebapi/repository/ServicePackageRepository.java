@@ -20,4 +20,7 @@ public interface ServicePackageRepository extends JpaRepository<ServicePackage, 
 
 //    @Query("select count(pc) from ServicePackage pc inner join Booking b where pc.id=:packageId")
 //    long countPackageBeingUsed(long packageId);
+
+    @Query("select count(p) from ServicePackage p where p.category.id =:categoryId and p.isAvailable=true")
+    Long countPackageByCategory(Long categoryId);
 }

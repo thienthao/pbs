@@ -58,9 +58,9 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public void requestPhotographerNotification(Booking booking) {
+    public void requestPhotographerNotification(Booking booking, String customerFullname) {
         Notification notification = new Notification();
-        notification.setTitle(booking.getCustomer().getFullname() + " đã gửi yêu cầu cho bạn");
+        notification.setTitle(customerFullname + " đã gửi yêu cầu cho bạn");
         notification.setNotificationType(ENotificationType.BOOKING_STATUS);
         notification.setBookingId(booking.getId());
         notification.setCreatedAt(new Date());
