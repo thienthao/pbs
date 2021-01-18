@@ -69,6 +69,11 @@ public class AdminController {
         return "admin-refactor/admin-layout";
     }
 
+    @GetMapping("/dashboard-nav")
+    public String getDashboard() {
+        return "admin-refactor/dashboard :: content";
+    }
+
     @RequestMapping("/users/add")
     public String userAdd() {
         return "admin/user-add";

@@ -16,22 +16,20 @@ import org.springframework.web.multipart.MultipartFile;
 public class CategoryController {
 
     private CategoryService categoryService;
-    private CategoryRepository categoryRepository;
 
     @Autowired
-    public CategoryController(CategoryService categoryService, CategoryRepository categoryRepository) {
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.categoryRepository = categoryRepository;
     }
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        return new ResponseEntity<>(categoryRepository.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getAll(), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Category category) {
-        Category saved = categoryRepository.findById(Long.parseLong("21")).get();
+        Category saved = categoryService.findById(Long.parseLong("21"));
         return new ResponseEntity<>(saved, HttpStatus.OK);
 //        return new ResponseEntity<>(categoryService.save(category), HttpStatus.OK);
     }
@@ -57,12 +55,5 @@ public class CategoryController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("image/svg+xml"));
         return new ResponseEntity<byte[]>(categoryService.downloadIcon(id), headers, HttpStatus.OK);
-    }
-
-    @GetMapping("/fakeIcon")
-    public void fake(@RequestParam("file") MultipartFile file) {
-        for(Category category : categoryRepository.findAll()) {
-            categoryService.uploadCategoryIcon(category.getId(), file);
-        }
     }
 }

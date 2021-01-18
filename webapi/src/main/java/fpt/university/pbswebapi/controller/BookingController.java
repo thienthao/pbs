@@ -308,6 +308,9 @@ public class BookingController {
 
     @PutMapping("/cancel/customer")
     public ResponseEntity<Booking> cancelForCustomer(@RequestBody Booking booking) {
+        if (booking.getBookingStatus() != EBookingStatus.PENDING) {
+            return ResponseEntity.badRequest().build();
+        }
         return new ResponseEntity<Booking>(bookingService.cancelForCustomer(booking), HttpStatus.OK);
     }
 
@@ -318,6 +321,9 @@ public class BookingController {
 
     @PutMapping("/cancel/photographer")
     public ResponseEntity<Booking> cancelForPhotographer(@RequestBody Booking booking) {
+        if (booking.getBookingStatus() != EBookingStatus.PENDING) {
+            return ResponseEntity.badRequest().build();
+        }
         return new ResponseEntity<Booking>(bookingService.cancelForPhotographer(booking), HttpStatus.OK);
     }
 

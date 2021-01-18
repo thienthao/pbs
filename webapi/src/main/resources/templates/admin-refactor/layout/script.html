@@ -61,6 +61,10 @@
     });
     $(document).ready(function () {
 
+        $('#header-card').click(() => {
+            $('#admin-content').load(pathname + '/admin/dashboard-nav');
+        });
+
         $('#thread-list-a').click(() => {
             $('#admin-content').load(pathname + '/admin/v2/threads');
         });
@@ -108,7 +112,8 @@
         $('#selection').change(getContent);
 
         function getContent() {
-            const url = pathname + '/admin/returning-types';
+            const url = pathname + '/admin/dashboard-nav';
+            // const url = pathname + '/admin/returning-types';
             // const url = pathname + '/admin/topics';
             // var url = '/admin/categories';
             // var url = '/admin/v2/threads/1';

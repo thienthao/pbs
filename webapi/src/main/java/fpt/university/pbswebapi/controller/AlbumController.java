@@ -257,28 +257,6 @@ public class AlbumController {
         }
     }
 
-    @PostMapping(value = "/{ptgId}/{albumId}/fakeimages",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void fakeImages(@PathVariable("ptgId") String ptgId,
-                                          @PathVariable("albumId") String albumId,
-                                          @RequestParam("files") MultipartFile[] files) {
-        Album album = albumRepository.getOne(Long.parseLong(albumId));
-        int i = 0;
-        for (Image image : album.getImages()) {
-            albumService.fakeAlbumImage(ptgId, albumId, files[i], image);
-            i++;
-        }
-    }
-
-    @PostMapping("/fakethumbnail")
-    public void fakeThumbnail(@RequestParam("file") MultipartFile[] file) {
-        List<Album> albums= albumRepository.findAll();
-        int i = 0;
-        for(Album album : albums) {
-            albumService.uploadAlbumThumbnail(album.getPhotographer().getId().toString(), album.getId().toString(), file[i++]);
-        }
-    }
-
     @PostMapping("/like")
     public ResponseEntity<?> likeAlbum(@RequestParam("albumId") Long albumId, @RequestParam("userId") Long userId) {
         if (albumService.likeAlbum(albumId, userId) > 0) {

@@ -35,7 +35,7 @@ public class ThreadService {
     }
 
     public List<ThreadTopic> allTopics() {
-        return topicRepository.findAll();
+        return topicRepository.findAllByIsAvailableTrue();
     }
 
     public Thread findById(long id) {

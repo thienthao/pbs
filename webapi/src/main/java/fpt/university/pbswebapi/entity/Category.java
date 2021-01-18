@@ -34,4 +34,18 @@ public class Category {
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @Column(name = "is_available")
+    private Boolean isAvailable;
+
+    @PrePersist
+    void prepersist() {
+        isAvailable = true;
+        createdAt = new Date();
+    }
+
+    @PreUpdate
+    void preupdate() {
+        updatedAt = new Date();
+    }
 }

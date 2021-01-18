@@ -237,7 +237,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setUpdatedAt(new Date());
-        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        savedBooking.setBookingStatus(EBookingStatus.CANCELLED_CUSTOMER);
         savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
@@ -249,6 +249,15 @@ public class BookingService {
         notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
         notiRequest.setToken(photographer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
+
+        Notification notification = new Notification();
+        notification.setReceiverId(photographer.getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setContent(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setBookingId(result.getId());
+        notificationRepository.save(notification);
+
         return result;
     }
 
@@ -261,7 +270,7 @@ public class BookingService {
 //        }
 
         savedBooking.setUpdatedAt(new Date());
-        savedBooking.setBookingStatus(EBookingStatus.CANCELED);
+        savedBooking.setBookingStatus(EBookingStatus.CANCELLED_PHOTOGRAPHER);
         savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
@@ -274,6 +283,15 @@ public class BookingService {
         notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
         notiRequest.setToken(customer.getDeviceToken());
         fcmService.pushNotification(notiRequest, booking.getId());
+
+        Notification notification = new Notification();
+        notification.setReceiverId(customer.getId());
+        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification.setTitle(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setContent(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
+        notification.setBookingId(result.getId());
+        notificationRepository.save(notification);
+
         return result;
     }
 

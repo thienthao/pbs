@@ -21,9 +21,6 @@ public class ThreadTopic {
 
     private String topic;
 
-    @Column(name = "created_by")
-    private String createdBy;
-
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
@@ -31,5 +28,19 @@ public class ThreadTopic {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @Column(name = "is_available")
+    private Boolean isAvailable;
+
+    @PrePersist
+    void prepersist() {
+        isAvailable = true;
+        createdAt = new Date();
+    }
+
+    @PreUpdate
+    void preupdate() {
+        updatedAt = new Date();
+    }
 
 }

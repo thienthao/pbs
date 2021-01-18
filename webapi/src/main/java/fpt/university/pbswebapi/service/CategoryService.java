@@ -33,8 +33,16 @@ public class CategoryService {
         this.packageRepository = packageRepository;
     }
 
+    public List<Category> getAll() {
+        return categoryRepository.findAllByIsAvailableTrue();
+    }
+
     public Page<Category> getAll(Pageable pageable) {
         return categoryRepository.findAll(pageable);
+    }
+
+    public Category findById(Long id) {
+        return categoryRepository.findById(id).get();
     }
 
     public String uploadCategoryIcon(Long id, MultipartFile file) {
