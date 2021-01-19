@@ -222,7 +222,7 @@ class _NavScreenState extends State<NavScreen> {
                           setState(() {
                             _selectedTab = index;
                           });
-                          if (_selectedTab != 3) {
+                          if (_selectedTab != 2) {
                           } else {
                             _notificationRef.remove();
                           }

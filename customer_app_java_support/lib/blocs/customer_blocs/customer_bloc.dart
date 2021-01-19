@@ -26,6 +26,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       yield* _mapUpdatedProfileToState(customerEvent.customer);
     } else if (customerEvent is CustomerEventUpdateAvatar) {
       yield* _mapUpdateAvatarToState(customerEvent.cusId, customerEvent.image);
+    } else if (customerEvent is CustomerEventChangePassword) {
+      yield* _mapChangePassword(customerEvent.username,
+          customerEvent.oldPassword, customerEvent.newPassword);
     }
   }
 
@@ -34,7 +37,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       final customer = await this.customerRepository.getProfileById(id);
       yield CustomerStateFetchedProfileSuccess(customer: customer);
     } catch (_) {
-      yield CustomerStateFailure();
+      yield CustomerStateFailure(error: _.toString());
     }
   }
 
@@ -45,7 +48,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       final isSuccess = await this.customerRepository.updateProfile(customer);
       yield CustomerStateUpdatedProfileSuccess(isSuccess: isSuccess);
     } catch (_) {
-      yield CustomerStateFailure();
+      yield CustomerStateFailure(error: _.toString());
     }
   }
 
@@ -54,7 +57,20 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       final isSuccess = await this.customerRepository.updateAvatar(id, image);
       yield CustomerStateUpdatedAvatarSuccess(isSuccess: isSuccess);
     } catch (_) {
-      yield CustomerStateFailure();
+      yield CustomerStateFailure(error: _.toString());
+    }
+  }
+
+  Stream<CustomerState> _mapChangePassword(
+      String username, String oldPassword, String newPassword) async* {
+    yield CustomerStateLoading();
+    try {
+      final isSuccess = await this
+          .customerRepository
+          .changePassword(username, oldPassword, newPassword);
+      yield CustomerStateChangedPasswordSuccess(isSuccess: isSuccess);
+    } catch (error) {
+      yield CustomerStateChangePasswordFailure(error: error);
     }
   }
 }

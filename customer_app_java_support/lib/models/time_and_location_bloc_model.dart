@@ -7,6 +7,8 @@ class TimeAndLocationBlocModel extends Equatable {
   final String formattedAddress;
   final String start;
   final String end;
+  final bool isCheckin;
+  final String qrCheckinCode;
 
   TimeAndLocationBlocModel(
       {this.id,
@@ -14,7 +16,9 @@ class TimeAndLocationBlocModel extends Equatable {
       this.longitude,
       this.formattedAddress,
       this.start,
-      this.end});
+      this.end,
+      this.isCheckin,
+      this.qrCheckinCode});
 
   @override
   List<Object> get props => [];

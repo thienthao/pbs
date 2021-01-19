@@ -1,4 +1,4 @@
-import 'package:customer_app_java_support/constant/chat_name.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer_app_java_support/functions/glowRemoveScrollBehaviour.dart';
 import 'package:customer_app_java_support/services/chat_service.dart';
 import 'package:customer_app_java_support/widgets/chat_screen/flat_action_btn.dart';
@@ -6,14 +6,14 @@ import 'package:customer_app_java_support/widgets/chat_screen/flat_chat_message.
 import 'package:customer_app_java_support/widgets/chat_screen/flat_page_header.dart';
 import 'package:customer_app_java_support/widgets/chat_screen/flat_profile_image.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatPage extends StatefulWidget {
   static final String id = "ChatPage";
   final String chatRoomId;
   final String avatar;
+  final String myName;
 
-  const ChatPage({this.chatRoomId, this.avatar});
+  const ChatPage({this.chatRoomId, this.avatar, @required this.myName});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -37,7 +37,7 @@ class _ChatPageState extends State<ChatPage> {
                 itemBuilder: (context, index) {
                   return FlatChatMessage(
                     message: snapshot.data.documents[index].data()["message"],
-                    messageType: Constants.myName ==
+                    messageType: widget.myName ==
                             snapshot.data.documents[index].data()["sendBy"]
                         ? MessageType.sent
                         : MessageType.received,
@@ -51,7 +51,7 @@ class _ChatPageState extends State<ChatPage> {
   addMessage() {
     if (messageEditingController.text.isNotEmpty) {
       Map<String, dynamic> chatMessageMap = {
-        "sendBy": Constants.myName,
+        "sendBy": widget.myName,
         "message": messageEditingController.text,
         'time': DateTime.now().millisecondsSinceEpoch,
       };
@@ -98,12 +98,11 @@ class _ChatPageState extends State<ChatPage> {
               title: widget.chatRoomId
                   .toString()
                   .replaceAll("_", "")
-                  .replaceAll(Constants.myName, ""),
+                  .replaceAll(widget.myName, ""),
               suffixWidget: FlatProfileImage(
                 size: 35.0,
                 onlineIndicator: true,
-                imageUrl:
-                    widget.avatar,
+                imageUrl: widget.avatar,
                 onPressed: () {
                   print("Clicked Profile Image");
                 },

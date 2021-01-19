@@ -427,37 +427,49 @@ class _BookingManyState extends State<BookingMany> {
                               pageBuilder: (BuildContext context,
                                   Animation<double> animation,
                                   Animation<double> secAnimation) {
-                                return BookingManyDetailEdit(
-                                  ptgId: widget.photographer.id,
-                                  model: listTimeAndLocation[mapEntry.key],
-                                  onUpdateList:
-                                      (TimeAndLocationBlocModel model) {
-                                    if (listTimeAndLocation.length > 1) {
-                                      for (var item in listTimeAndLocation) {
-                                        if (DateFormat('dd/MM/yyyy').format(
-                                                DateTime.parse(model.start)) ==
-                                            DateFormat('dd/MM/yyyy').format(
-                                                DateTime.parse(item.start))) {
-                                          notDuplicate = false;
-                                          return;
+                                return MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) => WarningBloc(
+                                          warningRepository:
+                                              _warningRepository),
+                                    ),
+                                  ],
+                                  child: BookingManyDetailEdit(
+                                    ptgId: widget.photographer.id,
+                                    model: listTimeAndLocation[mapEntry.key],
+                                    onUpdateList:
+                                        (TimeAndLocationBlocModel model) {
+                                      if (listTimeAndLocation.length > 1) {
+                                        for (var item in listTimeAndLocation) {
+                                          if (DateFormat('dd/MM/yyyy').format(
+                                                  DateTime.parse(
+                                                      model.start)) ==
+                                              DateFormat('dd/MM/yyyy').format(
+                                                  DateTime.parse(item.start))) {
+                                            notDuplicate = false;
+                                            return;
+                                          }
                                         }
                                       }
-                                    }
 
-                                    if (notDuplicate) {
-                                      listTimeAndLocation[mapEntry.key] = model;
-                                      if (DateTime.parse(model.start)
-                                              .add(Duration(days: 1))
-                                              .isAfter(lastDate) ||
-                                          DateTime.parse(model.start)
-                                              .add(Duration(days: 1))
-                                              .isAtSameMomentAs(lastDate)) {
-                                        lastDate = DateTime.parse(model.start);
+                                      if (notDuplicate) {
+                                        listTimeAndLocation[mapEntry.key] =
+                                            model;
+                                        if (DateTime.parse(model.start)
+                                                .add(Duration(days: 1))
+                                                .isAfter(lastDate) ||
+                                            DateTime.parse(model.start)
+                                                .add(Duration(days: 1))
+                                                .isAtSameMomentAs(lastDate)) {
+                                          lastDate =
+                                              DateTime.parse(model.start);
+                                        }
                                       }
-                                    }
 
-                                    setState(() {});
-                                  },
+                                      setState(() {});
+                                    },
+                                  ),
                                 );
                               })).then((value) {
                         if (!notDuplicate) {

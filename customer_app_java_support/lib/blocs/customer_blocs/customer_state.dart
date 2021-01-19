@@ -1,6 +1,7 @@
-import 'package:customer_app_java_support/models/customer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:customer_app_java_support/models/customer_bloc_model.dart';
 
 abstract class CustomerState extends Equatable {
   const CustomerState();
@@ -33,4 +34,21 @@ class CustomerStateUpdatedProfileSuccess extends CustomerState {
   CustomerStateUpdatedProfileSuccess({this.isSuccess});
 }
 
-class CustomerStateFailure extends CustomerState {}
+class CustomerStateChangedPasswordSuccess extends CustomerState {
+  final bool isSuccess;
+  CustomerStateChangedPasswordSuccess({this.isSuccess});
+}
+
+class CustomerStateFailure extends CustomerState {
+  final String error;
+  CustomerStateFailure({
+    this.error,
+  });
+}
+
+class CustomerStateChangePasswordFailure extends CustomerState {
+  final dynamic error;
+  CustomerStateChangePasswordFailure({
+    this.error,
+  });
+}

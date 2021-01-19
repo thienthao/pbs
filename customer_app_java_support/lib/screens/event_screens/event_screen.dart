@@ -207,9 +207,9 @@ class _EventScreenState extends State<EventScreen> {
                     child: Text(
                       notification.createdAt == null
                           ? DateFormat('dd/MM/yyyy hh:mm a')
-                              .format(DateTime.now())
-                          : DateFormat('dd/MM/yyyy hh:mm a')
-                              .format(DateTime.parse(notification.createdAt)),
+                              .format(DateTime.now().toLocal())
+                          : DateFormat('dd/MM/yyyy hh:mm a').format(
+                              DateTime.parse(notification.createdAt).toLocal()),
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 11.0,

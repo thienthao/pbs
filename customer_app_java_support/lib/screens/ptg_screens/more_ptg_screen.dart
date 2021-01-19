@@ -263,24 +263,6 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
           icon: Icon(Icons.arrow_back_ios, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: <Widget>[
-          PopupMenuButton<int>(
-            icon: Icon(
-              Icons.sort,
-              color: Colors.black87,
-            ),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 1,
-                child: Text("Được đánh giá cao"),
-              ),
-              PopupMenuItem(
-                value: 2,
-                child: Text("Được đặt nhiều"),
-              ),
-            ],
-          ),
-        ],
         centerTitle: true,
         elevation: 2.0,
         backgroundColor: Color(0xFFF3F5F7),
@@ -311,7 +293,8 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
                     ),
                   );
                 } else {
-                  _hasReachedEnd = photographerState.hasReachedEnd;
+                  // _hasReachedEnd = photographerState.hasReachedEnd;
+                  _hasReachedEnd = true;
                   return RefreshIndicator(
                     onRefresh: () {
                       BlocProvider.of<PhotographerBloc>(context)

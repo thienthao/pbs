@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:customer_app_java_support/models/customer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:customer_app_java_support/models/customer_bloc_model.dart';
 
 abstract class CustomerEvent extends Equatable {
   const CustomerEvent();
@@ -26,4 +27,16 @@ class CustomerEventUpdateAvatar extends CustomerEvent {
 class CustomerEventUpdateProfile extends CustomerEvent {
   final CustomerBlocModel customer;
   CustomerEventUpdateProfile({this.customer});
+}
+
+class CustomerEventChangePassword extends CustomerEvent {
+  final String username;
+  final String oldPassword;
+  final String newPassword;
+
+  CustomerEventChangePassword({
+    this.username,
+    this.oldPassword,
+    this.newPassword,
+  });
 }

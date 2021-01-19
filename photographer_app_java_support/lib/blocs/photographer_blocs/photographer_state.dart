@@ -50,6 +50,16 @@ class PhotographerStateUpdatedLocationsSuccess extends PhotographerState {
   PhotographerStateUpdatedLocationsSuccess({this.isSuccess});
 }
 
+class PhotographerStateChangedPasswordSuccess extends PhotographerState {
+  final bool isSuccess;
+  PhotographerStateChangedPasswordSuccess({this.isSuccess});
+}
+
+class PhotographerStateRecoveryPasswordSuccess extends PhotographerState {
+  final bool isSuccess;
+  PhotographerStateRecoveryPasswordSuccess({this.isSuccess});
+}
+
 class PhotographerStateLocationUpdatedFail extends PhotographerState {}
 
 class PhotographerIDStateSuccess extends PhotographerState {
@@ -65,7 +75,7 @@ class PhotographerIDStateSuccess extends PhotographerState {
 }
 
 class PhotographerStateFailure extends PhotographerState {
-  final String error;
+  final dynamic error;
   PhotographerStateFailure({
     this.error,
   });

@@ -33,7 +33,7 @@ class _RatingScreenState extends State<RatingScreen>
   double sliderWidth = 340;
   double sliderHeight = 50;
   double _dragPercent = 0.0;
-  double rating = 0.0;
+  double rating = 1.0;
 
   _postComment() async {
     CommentBlocModel _comment = CommentBlocModel(
@@ -41,8 +41,7 @@ class _RatingScreenState extends State<RatingScreen>
         cusId: globalCusId,
         rating: rating,
         comment: _commentTextController.text,
-        createdAt:
-            DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.now()));
+        createdAt: DateFormat("yyyy-MM-dd'T'HH:mm").format(DateTime.now()));
     print('${_comment.bookingId} ${_comment.cusId} '
         ' ${_comment.rating} '
         ' ${_comment.comment} '
@@ -69,6 +68,12 @@ class _RatingScreenState extends State<RatingScreen>
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(5.0)),
                   child: TextFormField(
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Bạn không thể bỏ trống trường này.';
+                      }
+                      return null;
+                    },
                     controller: _commentTextController,
                     cursorColor: Color(0xFFF77474),
                     keyboardType: TextInputType.multiline,

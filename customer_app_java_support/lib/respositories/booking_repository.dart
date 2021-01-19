@@ -180,11 +180,11 @@ class BookingRepository {
         supportMultiDays: tempPackage['supportMultiDays'],
       );
 
-      final tempServices = data['servicePackage']['services'] as List;
-
+      final tempServices = data['bookingDetails'] as List;
+      print(tempServices.toString());
       final List<String> services = new List();
       for (final service in tempServices) {
-        services.add(service['name']);
+        services.add(service['serviceName']);
       }
 
       final tempTimeAndLocations = data['timeLocationDetails'] as List;
@@ -197,7 +197,9 @@ class BookingRepository {
             end: item['end'],
             formattedAddress: item['formattedAddress'],
             latitude: item['lat'],
-            longitude: item['lon']);
+            longitude: item['lon'],
+            isCheckin: item['isCheckin'] ?? false,
+            qrCheckinCode: item['qrCheckinCode'] ?? 'http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/525');
       }).toList();
 
       final booking = BookingBlocModel(
@@ -338,10 +340,11 @@ class BookingRepository {
 
     resBody["timeAnticipate"] = booking.package.timeAnticipate;
 
-    // for (var service in booking.package.serviceDtos) {
-    //   serviceResBody["serviceName"] = service.name;
-    //   bookingDetailResBody.add(serviceResBody);
-    // }
+    for (var service in booking.package.serviceDtos) {
+      var serviceResBody = {};
+      serviceResBody["serviceName"] = service.name;
+      bookingDetailResBody.add(serviceResBody);
+    }
     resBody["bookingDetails"] = bookingDetailResBody;
 
     for (var item in booking.listTimeAndLocations) {
@@ -455,5 +458,4 @@ class BookingRepository {
       throw Exception('Error getting Photographer Calendar');
     }
   }
-
 }

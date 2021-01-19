@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
+import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
 import 'package:photographer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:photographer_app_java_support/blocs/booking_blocs/bookings.dart';
@@ -21,7 +22,6 @@ import 'package:photographer_app_java_support/widgets/shared/loading_line.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'vacation_screens/list_vacation_screen.dart';
-import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -45,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadPendingBookings();
     _loadCalendar();
   }
+
+ 
 
   getPreference() async {
     prefs = await SharedPreferences.getInstance();

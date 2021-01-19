@@ -1,85 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
-import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
-import 'package:photographer_app_java_support/globals.dart';
-import 'package:photographer_app_java_support/models/location_bloc_model.dart';
-import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
-import 'package:photographer_app_java_support/widgets/profile_screen/mini_locations_list_edit.dart';
 
-class Detail extends StatefulWidget {
-  final Photographer photographer;
+import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 
-  const Detail({this.photographer});
-
+class ChangePasswordScreen extends StatefulWidget {
+  final String username;
+  ChangePasswordScreen({
+    this.username,
+  });
   @override
-  _DetailState createState() => _DetailState();
+  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
 }
 
-class _DetailState extends State<Detail> {
-  TextEditingController fullnameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  final fullNameFocusNode = FocusNode();
-  final emailFocusNode = FocusNode();
-  final phoneFocusNode = FocusNode();
-  final descriptionFocusNode = FocusNode();
-  List<LocationBlocModel> locations = List<LocationBlocModel>();
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  TextEditingController oldPasswordTxtController = TextEditingController();
+  TextEditingController newPasswordTxtController = TextEditingController();
+  TextEditingController reNewPasswordTxtController = TextEditingController();
+
+  final oldPasswordFocusNode = FocusNode();
+  final newPasswordFocusNode = FocusNode();
+  final reNewPasswordFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<PhotographerBloc>(context)
-        .add(PhotographerEventGetLocations(ptgId: widget.photographer.id));
-    fullnameController.text = widget.photographer.fullname;
-    emailController.text = widget.photographer.email;
-    phoneController.text = widget.photographer.phone;
-    descriptionController.text = widget.photographer.description;
   }
 
   _unFocus() {
-    fullNameFocusNode.unfocus();
-    emailFocusNode.unfocus();
-    phoneFocusNode.unfocus();
-    descriptionFocusNode.unfocus();
-  }
-
-  String checkName(String fullname) {
-    RegExp regExp = new RegExp(
-        '[^A-Za-zàáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẸẺẼÊỀẾỂỄỆĐÌÍĨỈỊÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỴỶỸÝ ]+',
-        caseSensitive: false,
-        multiLine: false);
-    if (fullname.isEmpty) {
-      return 'Vui lòng nhập tên của bạn.';
-    } else if (regExp.hasMatch(fullname)) {
-      return 'Chỉ có thể sử dụng chữ cái cho tên.';
-    }
-    return null;
-  }
-
-  String checkEmail(String email) {
-    RegExp regExp = new RegExp(
-        '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})\$');
-    if (email.isEmpty) {
-      return 'Vui lòng nhập email của bạn';
-    } else if (!regExp.hasMatch(email)) {
-      return 'Email phải theo định dạng, ví dụ: pbs@fpt.edu.vn';
-    }
-    return null;
-  }
-
-  String checkPhone(String phone) {
-    RegExp regExp = new RegExp('(84|0[3|5|7|8|9])+([0-9]{8,9})',
-        caseSensitive: false, multiLine: false);
-    if (phone.isEmpty) {
-      return 'Vui lòng nhập số điện thoại của bạn.';
-    } else if (!regExp.hasMatch(phone)) {
-      return 'Số điện thoại phải theo định dạng của Việt Nam.';
-    } else if (phone.length > 11) {
-      return 'Số điện thoại phải theo định dạng của Việt Nam.';
-    }
-    return null;
+    oldPasswordFocusNode.unfocus();
+    newPasswordFocusNode.unfocus();
+    reNewPasswordFocusNode.unfocus();
   }
 
   String _checkEmpty(String value) {
@@ -89,19 +40,33 @@ class _DetailState extends State<Detail> {
     return null;
   }
 
-  _updateProfile() async {
-    _unFocus();
-    Photographer _photographer = Photographer(
-        id: widget.photographer.id,
-        fullname: fullnameController.text,
-        email: emailController.text,
-        phone: phoneController.text,
-        description: descriptionController.text);
+  String checkPassword(String password) {
+    RegExp regExp = new RegExp(
+        '^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d@\$!%*#?&]{8,}\$');
+    if (password.isEmpty) {
+      return 'Vui lòng không để trống trường này.';
+    } else if (!regExp.hasMatch(password)) {
+      return 'Mật khẩu phải có tối thiểu 8 kí tự, 1 chữ cái, 1 số và 1 kí tự đặt biệt.';
+    }
+    return null;
+  }
 
-    print(_photographer.fullname);
-    BlocProvider.of<PhotographerBloc>(context).add(
-        PhotographerEventUpdateProfile(
-            photographer: _photographer, locations: locations));
+  String checkRePassword(String repassword) {
+    if (repassword.isEmpty) {
+      return 'Vui lòng không để trống trường này.';
+    } else if (repassword.trim().toUpperCase() !=
+        newPasswordTxtController.text.trim().toUpperCase()) {
+      return 'Mật khẩu không khớp.';
+    }
+    return null;
+  }
+
+  _changePassword() async {
+    _unFocus();
+    BlocProvider.of<CustomerBloc>(context).add(CustomerEventChangePassword(
+        username: widget.username,
+        oldPassword: oldPasswordTxtController.text,
+        newPassword: newPasswordTxtController.text));
   }
 
   @override
@@ -124,12 +89,12 @@ class _DetailState extends State<Detail> {
             ),
             onPressed: () {
               if (_formKey.currentState.validate()) {
-                _updateProfile();
+                _changePassword();
               }
             },
           ),
         ],
-        title: Text('Chỉnh sửa trang cá nhân'),
+        title: Text('Đổi mật khẩu'),
         centerTitle: true,
         elevation: 0.0,
       ),
@@ -141,21 +106,44 @@ class _DetailState extends State<Detail> {
             Padding(
               padding: EdgeInsets.all(10.0),
               child: Container(
-                  child: BlocListener<PhotographerBloc, PhotographerState>(
+                  child: BlocListener<CustomerBloc, CustomerState>(
                 listener: (context, state) {
-                  if (state is PhotographerStateUpdatedProfileSuccess) {
+                  if (state is CustomerStateChangedPasswordSuccess) {
                     Navigator.pop(context);
                     _showSuccessAlert();
-                    BlocProvider.of<PhotographerBloc>(context)
-                        .add(PhotographerEventGetLocations(ptgId: globalPtgId));
                   }
-                  if (state is PhotographerStateLoading) {
+                  if (state is CustomerStateLoading) {
                     _showLoadingAlert();
                   }
 
-                  if (state is PhotographerStateFailure) {
+                  if (state is CustomerStateChangePasswordFailure) {
+                    print(state.error);
                     Navigator.pop(context);
-                    _showFailDialog();
+                    String message = '';
+                    String oldPassword = '';
+                    String newPassword = '';
+                    var error = [];
+                    error = state.error
+                        .toString()
+                        .replaceAll("Exception: ", "")
+                        .replaceAll("{", "")
+                        .replaceAll("}", "")
+                        .split(',');
+
+                    message =
+                        '${error[2].toString().replaceAll("message:", "").trim()}';
+                    oldPassword =
+                        '${error[1].toString().replaceAll("oldPassword:", "").trim()}';
+                    newPassword =
+                        '${error[0].toString().replaceAll("newPassword:", "").trim()}';
+                    print(message.trim().length);
+
+                    if (oldPassword.trim().toUpperCase() ==
+                        'Old Password does not match.'.toUpperCase()) {
+                      oldPassword = 'Mật khẩu cũ của bạn không chính xác';
+                    }
+                    _showFailDialog(
+                        'Thất bại', message + oldPassword + newPassword);
                   }
                 },
                 child: Column(
@@ -166,114 +154,23 @@ class _DetailState extends State<Detail> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Họ tên: *',
-                          style:
-                              TextStyle(color: Colors.black87, fontSize: 12.0),
-                        ),
-                        TextFormField(
-                          validator: checkName,
-                          focusNode: fullNameFocusNode,
-                          controller: fullnameController,
-                          keyboardType: TextInputType.name,
-                          style: TextStyle(
-                            color: Colors.black87,
-                          ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            icon: Icon(Icons.account_circle),
-                            contentPadding: EdgeInsets.all(8.0),
-                            hintText: 'Ví dụ: Nguyễn Văn A',
-                            hintStyle: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Email: *',
-                          style:
-                              TextStyle(color: Colors.black87, fontSize: 12.0),
-                        ),
-                        TextFormField(
-                          validator: checkEmail,
-                          focusNode: emailFocusNode,
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          style: TextStyle(
-                            color: Colors.black87,
-                          ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            icon: Icon(Icons.mail),
-                            contentPadding: EdgeInsets.all(8.0),
-                            hintText: 'Ví dụ: abc@xzy.com',
-                            hintStyle: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Số điện thoại: *',
-                          style:
-                              TextStyle(color: Colors.black87, fontSize: 12.0),
-                        ),
-                        TextFormField(
-                          validator: checkPhone,
-                          focusNode: phoneFocusNode,
-                          controller: phoneController,
-                          keyboardType: TextInputType.phone,
-                          style: TextStyle(
-                            color: Colors.black87,
-                          ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            icon: Icon(Icons.phone),
-                            contentPadding: EdgeInsets.all(8.0),
-                            hintText: 'Ví dụ: 012345678',
-                            hintStyle: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Mô tả: *',
+                          'Mật khẩu cũ của bạn: *',
                           style:
                               TextStyle(color: Colors.black87, fontSize: 12.0),
                         ),
                         TextFormField(
                           validator: _checkEmpty,
-                          controller: descriptionController,
-                          focusNode: descriptionFocusNode,
-                          keyboardType: TextInputType.multiline,
-                          maxLines: null,
+                          focusNode: oldPasswordFocusNode,
+                          controller: oldPasswordTxtController,
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true,
                           style: TextStyle(
                             color: Colors.black87,
                           ),
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            icon: Icon(Icons.subject),
+                            icon: Icon(Icons.lock_open_rounded),
                             contentPadding: EdgeInsets.all(8.0),
-                            hintText: 'Ví dụ: Tôi là....',
                             hintStyle: TextStyle(
                               fontSize: 15.0,
                               color: Colors.grey,
@@ -285,30 +182,64 @@ class _DetailState extends State<Detail> {
                     SizedBox(height: 30.0),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         Text(
-                          'Địa điểm làm việc: *',
+                          'Mật khẩu mới: *',
                           style:
                               TextStyle(color: Colors.black87, fontSize: 12.0),
                         ),
-                        SizedBox(height: 5.0),
-                        BlocBuilder<PhotographerBloc, PhotographerState>(
-                          builder: (context, state) {
-                            if (state is PhotographerStateGetLocationsSuccess) {
-                              locations = state.locations;
-                              return MiniLocationsListEdit(
-                                listLocations: locations,
-                                onChangeParam: (List<LocationBlocModel> _list) {
-                                  locations = _list;
-                                },
-                              );
-                            }
-                            return SizedBox();
-                          },
+                        TextFormField(
+                          validator: checkPassword,
+                          focusNode: newPasswordFocusNode,
+                          controller: newPasswordTxtController,
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true,
+                          style: TextStyle(
+                            color: Colors.black87,
+                          ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(Icons.lock_outline_rounded),
+                            contentPadding: EdgeInsets.all(8.0),
+                            hintStyle: TextStyle(
+                              fontSize: 15.0,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 30.0),
                       ],
                     ),
+                    SizedBox(height: 30.0),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Nhập lại mật khẩu mới: *',
+                          style:
+                              TextStyle(color: Colors.black87, fontSize: 12.0),
+                        ),
+                        TextFormField(
+                          validator: checkRePassword,
+                          focusNode: reNewPasswordFocusNode,
+                          controller: reNewPasswordTxtController,
+                          obscureText: true,
+                          keyboardType: TextInputType.visiblePassword,
+                          style: TextStyle(
+                            color: Colors.black87,
+                          ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(Icons.lock_outline_rounded),
+                            contentPadding: EdgeInsets.all(8.0),
+                            hintStyle: TextStyle(
+                              fontSize: 15.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 30.0),
                   ],
                 ),
               )),
@@ -316,24 +247,6 @@ class _DetailState extends State<Detail> {
           ],
         ),
       ),
-    );
-  }
-
-  locationChips() {
-    return Wrap(
-      spacing: 6.0,
-      runSpacing: 6.0,
-      children: List<Widget>.generate(locations.length, (int index) {
-        LocationBlocModel location = locations[index];
-        return Chip(
-          label: Text(location.formattedAddress),
-          onDeleted: () {
-            setState(() {
-              locations.removeAt(index);
-            });
-          },
-        );
-      }),
     );
   }
 
@@ -385,13 +298,13 @@ class _DetailState extends State<Detail> {
                 style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
               ),
               description: Text(
-                'Đã cập nhật thành công!',
+                'Đổi mật khẩu thành công!',
                 textAlign: TextAlign.center,
                 style: TextStyle(),
               ),
               onlyOkButton: true,
               onOkButtonPressed: () {
-                Navigator.pop(context);
+                Navigator.popUntil(context, (route) => route.isFirst);
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
@@ -428,7 +341,7 @@ class _DetailState extends State<Detail> {
         });
   }
 
-  Future<void> _showFailDialog() async {
+  Future<void> _showFailDialog(String title, String content) async {
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -440,11 +353,11 @@ class _DetailState extends State<Detail> {
               ),
               entryAnimation: EntryAnimation.DEFAULT,
               title: Text(
-                'Thất bại',
+                title,
                 style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
               ),
               description: Text(
-                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                content,
                 textAlign: TextAlign.center,
                 style: TextStyle(),
               ),

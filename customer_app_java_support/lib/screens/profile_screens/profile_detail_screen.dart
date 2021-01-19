@@ -23,13 +23,6 @@ class _DetailState extends State<Detail> {
   final emailFocusNode = FocusNode();
   final phoneFocusNode = FocusNode();
 
-  String _checkEmpty(String value) {
-    if (value.isEmpty) {
-      return 'Không thể bỏ trống trường này!';
-    }
-    return null;
-  }
-
   _unFocus() {
     fullNameFocusNode.unfocus();
     emailFocusNode.unfocus();
@@ -40,9 +33,35 @@ class _DetailState extends State<Detail> {
     RegExp regExp = new RegExp('(84|0[3|5|7|8|9])+([0-9]{8,9})',
         caseSensitive: false, multiLine: false);
     if (phone.isEmpty) {
-      return 'Vui lòng nhập số điện thoại của bạn';
+      return 'Vui lòng nhập số điện thoại của bạn.';
     } else if (!regExp.hasMatch(phone)) {
-      return 'Số điện thoại phải theo định dạng của Việt Nam';
+      return 'Số điện thoại phải theo định dạng của Việt Nam.';
+    } else if (phone.length > 11) {
+      return 'Số điện thoại phải theo định dạng của Việt Nam.';
+    }
+    return null;
+  }
+
+  String checkEmail(String email) {
+    RegExp regExp = new RegExp(
+        '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})\$');
+    if (email.isEmpty) {
+      return 'Vui lòng nhập email của bạn';
+    } else if (!regExp.hasMatch(email)) {
+      return 'Email phải theo định dạng, ví dụ: pbs@fpt.edu.vn';
+    }
+    return null;
+  }
+
+  String checkName(String fullname) {
+    RegExp regExp = new RegExp(
+        '[^A-Za-zàáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẸẺẼÊỀẾỂỄỆĐÌÍĨỈỊÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỴỶỸÝ ]+',
+        caseSensitive: false,
+        multiLine: false);
+    if (fullname.isEmpty) {
+      return 'Vui lòng nhập tên của bạn.';
+    } else if (regExp.hasMatch(fullname)) {
+      return 'Chỉ có thể sử dụng chữ cái cho tên.';
     }
     return null;
   }
@@ -145,7 +164,7 @@ class _DetailState extends State<Detail> {
                           TextFormField(
                             focusNode: fullNameFocusNode,
                             controller: fullnameController,
-                            validator: _checkEmpty,
+                            validator: checkName,
                             keyboardType: TextInputType.text,
                             style: TextStyle(
                               color: Colors.black87,
@@ -175,7 +194,7 @@ class _DetailState extends State<Detail> {
                           TextFormField(
                             focusNode: emailFocusNode,
                             controller: emailController,
-                            validator: _checkEmpty,
+                            validator: checkEmail,
                             keyboardType: TextInputType.emailAddress,
                             style: TextStyle(
                               color: Colors.black87,

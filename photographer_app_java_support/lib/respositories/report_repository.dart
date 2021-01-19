@@ -16,13 +16,20 @@ class ReportRepository {
 
   Future<bool> postReport(ReportBlocModel report) async {
     var resBody = {};
+    var photographerResBody = {};
+    var bookingResBody = {};
 
     resBody["title"] = report.title;
+
     resBody["reason"] = report.reason;
-    resBody["reporterId"] = report.reporterId;
-    resBody["reportedId"] = report.reportedId;
+
+    photographerResBody["id"] = report.photographer.id ?? globalPtgId;
+    resBody["reporter"] = photographerResBody;
+
     resBody["createdAt"] = report.createdAt;
 
+    bookingResBody["id"] = report.booking.id;
+    resBody["booking"] = bookingResBody;
     String str = json.encode(resBody);
     print(str);
 
@@ -35,7 +42,7 @@ class ReportRepository {
     bool isPosted = false;
     if (response.statusCode == 200) {
       isPosted = true;
-    }else if (response.statusCode == 401) {
+    } else if (response.statusCode == 401) {
       throw Exception('Unauthorized');
     } else {
       throw Exception('Error at posting report!!');

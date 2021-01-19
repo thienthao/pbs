@@ -35,6 +35,9 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       yield* _mapPhotographerOnChangeCoverToState(photographerEvent.image);
     } else if (photographerEvent is PhotographerEventGetLocations) {
       yield* _mapGetPhotographerLocationsToState(photographerEvent.ptgId);
+    } else if (photographerEvent is PhotographerEventChangePassword) {
+      yield* _mapChangePassword(photographerEvent.username,
+          photographerEvent.oldPassword, photographerEvent.newPassword);
     }
   }
 
@@ -73,8 +76,9 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       Photographer photographer, List<LocationBlocModel> locations) async* {
     yield PhotographerStateLoading();
     try {
-      final updateProfileSuccess =
-          await this.photographerRepository.updateProfile(photographer,locations);
+      final updateProfileSuccess = await this
+          .photographerRepository
+          .updateProfile(photographer, locations);
       yield PhotographerStateUpdatedProfileSuccess(
           isSuccess: updateProfileSuccess);
     } catch (e) {
@@ -101,6 +105,18 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
       yield PhotographerStateGetLocationsSuccess(locations: locations);
     } catch (e) {
       yield PhotographerStateFailure(error: e.toString());
+    }
+  }
+
+  Stream<PhotographerState> _mapChangePassword(
+      String username, String oldPassword, String newPassword) async* {
+    try {
+      final isSuccess = await this
+          .photographerRepository
+          .changePassword(username, oldPassword, newPassword);
+      yield PhotographerStateChangedPasswordSuccess(isSuccess: isSuccess);
+    } catch (_) {
+      yield PhotographerStateFailure(error: _.toString());
     }
   }
 }

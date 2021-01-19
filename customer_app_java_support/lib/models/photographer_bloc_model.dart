@@ -16,6 +16,8 @@ class Photographer extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String password;
+  final double averagePackagePrice;
+  final double distance;
   final List<AlbumBlocModel> albums;
 
   Photographer(
@@ -33,6 +35,8 @@ class Photographer extends Equatable {
       this.createdAt,
       this.updatedAt,
       this.password,
+      this.averagePackagePrice,
+      this.distance,
       this.albums});
 
   @override

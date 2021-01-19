@@ -45,6 +45,12 @@ class AlbumEventDeleteAnImageOfAnAlbum extends AlbumEvent {
   AlbumEventDeleteAnImageOfAnAlbum({this.albumId, this.imageId});
 }
 
+
+class AlbumEventDeleteAlbum extends AlbumEvent {
+  final int albumId;
+  AlbumEventDeleteAlbum({this.albumId});
+}
+
 class AlbumEventLoadSuccess extends AlbumEvent {
   AlbumEventLoadSuccess(List<AlbumBlocModel> list);
 }

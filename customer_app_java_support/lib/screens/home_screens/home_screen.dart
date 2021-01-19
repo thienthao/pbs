@@ -19,6 +19,7 @@ import 'package:customer_app_java_support/widgets/home_screen/sliver_items.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -33,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       PhotographerRepository(httpClient: http.Client());
   String ptgServiceResult = '';
   String city = '';
-  LatLng selectedLatlng = LatLng(0.0, 0.0);
+  LatLng selectedLatlng = LatLng(10.762622, 106.660172);
   int selectedCategory = 1;
 
   @override
@@ -49,9 +50,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays([]);
     _completer = Completer<void>();
+    getCurrentLocation();
     _loadAlbums(1);
     _loadPhotographers(1, selectedLatlng, city);
     _loadPhotographerAlg();
+  }
+
+  getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      selectedLatlng = LatLng(position.latitude, position.longitude);
+    });
   }
 
   _loadPhotographerAlg() async {

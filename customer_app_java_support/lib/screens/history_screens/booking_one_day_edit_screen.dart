@@ -313,6 +313,30 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                             ],
                           ),
                         ),
+                        SizedBox(height: 10.0),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Thời gian chụp:',
+                              style: TextStyle(
+                                  fontSize: 17.0, fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(width: 10.0),
+                            Flexible(
+                              child: Text(
+                                // '${widget.blocPackages[mapEntry.key].name}  buổi',
+                                selectedPackage.timeAnticipate == null
+                                    ? '3 giờ'
+                                    : '${(selectedPackage.timeAnticipate / 3600).round().toString()} giờ',
+                                style: TextStyle(
+                                    color: Colors.black45,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ),
+                          ],
+                        ),
                         SizedBox(
                           height: 10,
                         ),

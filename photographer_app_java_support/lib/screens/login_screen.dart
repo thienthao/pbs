@@ -3,9 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
 import 'package:photographer_app_java_support/blocs/register_blocs/register_bloc.dart';
+import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
+import 'package:photographer_app_java_support/screens/forget_password_screen.dart';
 import 'package:photographer_app_java_support/screens/sign_up_screen.dart';
-
+import 'package:photographer_app_java_support/widgets/shared/slide_navigator.dart';
+import 'package:http/http.dart' as http;
 import '../blocs/authen_blocs/authen_export.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,6 +22,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  PhotographerRepository _photographerRepository =
+      PhotographerRepository(httpClient: http.Client());
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool remember = false;
@@ -191,48 +197,67 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ],
                             ),
+                            SizedBox(
+                              height: 10,
+                            ),
                             Container(
-                              alignment: Alignment.centerRight,
+                              alignment: Alignment.centerLeft,
                               child: FlatButton(
                                 onPressed: () {},
                                 padding: EdgeInsets.only(right: 0.0),
-                                child: Text(
-                                  'Quên mật khẩu?',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              height: 20.0,
-                              child: Row(
-                                children: <Widget>[
-                                  Theme(
-                                    data: ThemeData(
-                                        unselectedWidgetColor: Colors.white),
-                                    child: Checkbox(
-                                      value: remember,
-                                      checkColor: Colors.green,
-                                      activeColor: Colors.white,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          remember = value;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                  Text(
-                                    'Nhớ mật khẩu',
+                                child: FlatButton(
+                                  onPressed: () {
+                                    slideNavigator(
+                                        context,
+                                        MultiBlocProvider(
+                                          providers: [
+                                            BlocProvider(
+                                                create: (context) =>
+                                                    PhotographerBloc(
+                                                        photographerRepository:
+                                                            _photographerRepository))
+                                          ],
+                                          child: ForgetPasswordScreen(),
+                                        ));
+                                  },
+                                  child: Text(
+                                    'Quên mật khẩu?',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                     ),
-                                  )
-                                ],
+                                  ),
+                                ),
                               ),
                             ),
+                            // Container(
+                            //   height: 20.0,
+                            //   child: Row(
+                            //     children: <Widget>[
+                            //       Theme(
+                            //         data: ThemeData(
+                            //             unselectedWidgetColor: Colors.white),
+                            //         child: Checkbox(
+                            //           value: remember,
+                            //           checkColor: Colors.green,
+                            //           activeColor: Colors.white,
+                            //           onChanged: (value) {
+                            //             setState(() {
+                            //               remember = value;
+                            //             });
+                            //           },
+                            //         ),
+                            //       ),
+                            //       Text(
+                            //         'Nhớ mật khẩu',
+                            //         style: TextStyle(
+                            //           color: Colors.white,
+                            //           fontWeight: FontWeight.w600,
+                            //         ),
+                            //       )
+                            //     ],
+                            //   ),
+                            // ),
                             Container(
                               padding: EdgeInsets.symmetric(vertical: 25.0),
                               width: double.infinity,

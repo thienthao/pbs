@@ -10,6 +10,7 @@ import 'package:photographer_app_java_support/models/photographer_bloc_model.dar
 import 'package:photographer_app_java_support/respositories/album_respository.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
 import 'package:photographer_app_java_support/screens/forum_screen/forum_screen.dart';
+import 'package:photographer_app_java_support/screens/profile_screens/change_password_screen.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/profile_album_screen.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/profile_detail_screen.dart';
 import 'package:photographer_app_java_support/widgets/profile_screen/profile_body_info.dart';
@@ -78,6 +79,22 @@ class _ProfileState extends State<Profile> {
                       },
                     ),
                     ProfileMenuItem(
+                      iconSrc: "assets/icons/lock.svg",
+                      title: "Đổi mật khẩu",
+                      press: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                  create: (BuildContext context) =>
+                                      PhotographerBloc(
+                                          photographerRepository:
+                                              _photographerRepository),
+                                  child: ChangePasswordScreen(username: _photographer.username,))),
+                        ).then((value) => _loadProfile());
+                      },
+                    ),
+                    ProfileMenuItem(
                       iconSrc: "assets/icons/folder.svg",
                       title: "Album của tôi",
                       press: () {
@@ -115,6 +132,9 @@ class _ProfileState extends State<Profile> {
                         },
                       ),
                     ),
+                    SizedBox(
+                      height: 20,
+                    )
                   ],
                 ),
               ),

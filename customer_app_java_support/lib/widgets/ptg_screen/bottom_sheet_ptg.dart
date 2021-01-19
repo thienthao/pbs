@@ -449,7 +449,9 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                                   )));
                       setState(() {
                         if (pageResult != null) {
-                          locationResult = pageResult;
+                          if (pageResult.toString().trim().length != 0) {
+                            locationResult = pageResult;
+                          }
                         }
                       });
                     },

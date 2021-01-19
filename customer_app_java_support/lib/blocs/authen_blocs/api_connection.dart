@@ -56,6 +56,7 @@ Future<bool> register(UserRegister userRegister) async {
   } else {
     print(json.decode(response.body).toString());
     final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    
     throw Exception(data['message']);
   }
 }

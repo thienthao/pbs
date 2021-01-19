@@ -53,7 +53,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     } else if (bookingEvent is BookingEventRefresh) {
       yield* _mapBookingsLoadedToState();
     } else if (bookingEvent is BookingEventCheckIn) {
-      yield* _mapBookingCheckIntoState(bookingEvent.bookingId);
+      yield* _mapBookingCheckIntoState(
+          bookingEvent.bookingId, bookingEvent.timeLocationId);
     }
   }
 
@@ -195,9 +196,11 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     }
   }
 
-  Stream<BookingState> _mapBookingCheckIntoState(int bookingId) async* {
+  Stream<BookingState> _mapBookingCheckIntoState(
+      int bookingId, int timeLocationId) async* {
     try {
-      final isSuccess = await this.bookingRepository.checkIn(bookingId);
+      final isSuccess =
+          await this.bookingRepository.checkIn(bookingId, timeLocationId);
       yield BookingStateCheckInSuccess(isSuccess: isSuccess);
     } catch (e) {
       yield BookingStateFailure(error: e.toString());

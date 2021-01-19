@@ -3,6 +3,7 @@ import 'package:customer_app_java_support/blocs/authen_blocs/authentication_even
 import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:customer_app_java_support/globals.dart';
 import 'package:customer_app_java_support/respositories/customer_repository.dart';
+import 'package:customer_app_java_support/screens/profile_screens/change_password_screen.dart';
 import 'package:customer_app_java_support/screens/profile_screens/profile_detail_screen.dart';
 import 'package:customer_app_java_support/widgets/profile_screen/profile_body_info.dart';
 import 'package:customer_app_java_support/widgets/profile_screen/profile_body_info_loading.dart';
@@ -120,6 +121,43 @@ class _BodyState extends State<Body> {
                       },
                     ),
                     ProfileMenuItem(
+                      iconSrc: "assets/icons/lock.svg",
+                      title: "Đổi mật khẩu",
+                      press: () {
+                        Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                                transitionDuration:
+                                    Duration(milliseconds: 1000),
+                                transitionsBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secAnimation,
+                                    Widget child) {
+                                  animation = CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.fastLinearToSlowEaseIn);
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(1, 0),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  );
+                                },
+                                pageBuilder: (BuildContext context,
+                                    Animation<double> animation,
+                                    Animation<double> secAnimation) {
+                                  return BlocProvider(
+                                      create: (context) => CustomerBloc(
+                                          customerRepository:
+                                              _customerRepository),
+                                      child: ChangePasswordScreen(
+                                        username: state.customer.username,
+                                      ));
+                                })).then((value) => _loadProfile());
+                      },
+                    ),
+                    ProfileMenuItem(
                       iconSrc: "assets/icons/logout.svg",
                       title: "Đăng xuất",
                       press: () {
@@ -127,6 +165,9 @@ class _BodyState extends State<Body> {
                             .add(LoggedOut());
                       },
                     ),
+                    SizedBox(
+                      height: 20,
+                    )
                   ],
                 ),
               ),

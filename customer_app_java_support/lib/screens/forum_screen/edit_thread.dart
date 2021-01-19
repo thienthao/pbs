@@ -156,7 +156,12 @@ class _EditThreadScreenState extends State<EditThreadScreen> {
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: TextFormField(
                   focusNode: threadTitleFocusNode,
-                  validator: _checkEmpty,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Tiêu đề không thể để trống';
+                    }
+                    return null;
+                  },
                   controller: threadTitle,
                   keyboardType: TextInputType.text,
                   style: TextStyle(
@@ -164,7 +169,7 @@ class _EditThreadScreenState extends State<EditThreadScreen> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.all(10.0),
-                    hintText: 'Tên bài đăng',
+                    hintText: 'Tiêu đề',
                     hintStyle: TextStyle(
                       fontSize: 16.0,
                       color: Colors.grey,
@@ -181,7 +186,12 @@ class _EditThreadScreenState extends State<EditThreadScreen> {
                 child: TextFormField(
                   controller: threadContent,
                   focusNode: threadContentFocusNode,
-                  validator: _checkEmpty,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Nội dung không thể bỏ trống.';
+                    }
+                    return null;
+                  },
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   style: TextStyle(

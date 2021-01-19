@@ -1,9 +1,10 @@
 import 'dart:io';
 
-import 'package:photographer_app_java_support/models/location_bloc_model.dart';
-import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+
+import 'package:photographer_app_java_support/models/location_bloc_model.dart';
+import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 
 abstract class PhotographerEvent extends Equatable {
   const PhotographerEvent();
@@ -49,6 +50,25 @@ class PhotographerEventGetLocations extends PhotographerEvent {
   PhotographerEventGetLocations({this.ptgId});
 }
 
+class PhotographerEventChangePassword extends PhotographerEvent {
+  final String username;
+  final String oldPassword;
+  final String newPassword;
+  PhotographerEventChangePassword({
+    this.username,
+    this.oldPassword,
+    this.newPassword,
+  });
+}
+
+class PhotographerEventRecoveryPassword extends PhotographerEvent {
+  final String username;
+  final String email;
+  PhotographerEventRecoveryPassword({
+    this.username,
+    this.email,
+  });
+}
 
 class PhotographerEventRequested extends PhotographerEvent {
   final Photographer photographer;

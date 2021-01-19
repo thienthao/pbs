@@ -463,14 +463,18 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                         if (listTimeAndLocation.length > 1) {
                                           for (var item
                                               in listTimeAndLocation) {
-                                            if (DateFormat('dd/MM/yyyy').format(
-                                                    DateTime.parse(
-                                                        model.start)) ==
-                                                DateFormat('dd/MM/yyyy').format(
-                                                    DateTime.parse(
-                                                        item.start))) {
-                                              notDuplicate = false;
-                                              return;
+                                            if (item !=
+                                                listTimeAndLocation[
+                                                    mapEntry.key]) {
+                                              if (DateFormat('dd/MM/yyyy')
+                                                      .format(DateTime.parse(
+                                                          model.start)) ==
+                                                  DateFormat('dd/MM/yyyy')
+                                                      .format(DateTime.parse(
+                                                          item.start))) {
+                                                notDuplicate = false;
+                                                return;
+                                              }
                                             }
                                           }
                                         }

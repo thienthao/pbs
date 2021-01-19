@@ -190,48 +190,66 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ],
                           ),
+                          SizedBox(height: 10),
                           Container(
-                            alignment: Alignment.centerRight,
+                            alignment: Alignment.centerLeft,
                             child: FlatButton(
                               onPressed: () {},
                               padding: EdgeInsets.only(right: 0.0),
-                              child: Text(
-                                'Quên mật khẩu?',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: 20.0,
-                            child: Row(
-                              children: <Widget>[
-                                Theme(
-                                  data: ThemeData(
-                                      unselectedWidgetColor: Colors.white),
-                                  child: Checkbox(
-                                    value: remember,
-                                    checkColor: Colors.green,
-                                    activeColor: Colors.white,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        remember = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                Text(
-                                  'Nhớ mật khẩu',
+                              child: FlatButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'Quên mật khẩu?',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                   ),
-                                )
-                              ],
+                                ),
+                              ),
                             ),
                           ),
+                          // Container(
+                          //   alignment: Alignment.centerRight,
+                          //   child: FlatButton(
+                          //     onPressed: () {},
+                          //     padding: EdgeInsets.only(right: 0.0),
+                          //     child: Text(
+                          //       'Quên mật khẩu?',
+                          //       style: TextStyle(
+                          //         color: Colors.white,
+                          //         fontWeight: FontWeight.w600,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          // Container(
+                          //   height: 20.0,
+                          //   child: Row(
+                          //     children: <Widget>[
+                          //       Theme(
+                          //         data: ThemeData(
+                          //             unselectedWidgetColor: Colors.white),
+                          //         child: Checkbox(
+                          //           value: remember,
+                          //           checkColor: Colors.green,
+                          //           activeColor: Colors.white,
+                          //           onChanged: (value) {
+                          //             setState(() {
+                          //               remember = value;
+                          //             });
+                          //           },
+                          //         ),
+                          //       ),
+                          //       Text(
+                          //         'Nhớ mật khẩu',
+                          //         style: TextStyle(
+                          //           color: Colors.white,
+                          //           fontWeight: FontWeight.w600,
+                          //         ),
+                          //       )
+                          //     ],
+                          //   ),
+                          // ),
                           Container(
                             padding: EdgeInsets.symmetric(vertical: 25.0),
                             width: double.infinity,

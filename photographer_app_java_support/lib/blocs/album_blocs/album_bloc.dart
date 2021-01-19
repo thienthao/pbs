@@ -36,6 +36,8 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
           albumEvent.albumId, albumEvent.imageId);
     } else if (albumEvent is AlbumEventAddAnImageForAnAlbum) {
       yield* _mapAddImageLoadedToState(albumEvent.albumId, albumEvent.image);
+    } else if (albumEvent is AlbumEventDeleteAlbum) {
+      yield* _mapDeleteAlbumLoadedToState(albumEvent.albumId);
     }
   }
 
@@ -72,6 +74,7 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
 
   Stream<AlbumState> _mapUpdateAlbumInfoLoadedToState(
       AlbumBlocModel album) async* {
+    yield AlbumStateLoading();
     try {
       final isSuccess = await this.albumRepository.updateAlbumInfo(album);
       yield AlbumStateUpdatedSuccess(isSuccess: isSuccess);
@@ -96,6 +99,16 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
       final isSuccess =
           await this.albumRepository.removeImage(albumId, imageId);
       yield AlbumStateRemoveImageSuccess(isSuccess: isSuccess);
+    } catch (e) {
+      yield AlbumStateFailure(error: e.toString());
+    }
+  }
+
+  Stream<AlbumState> _mapDeleteAlbumLoadedToState(int albumId) async* {
+    yield AlbumStateLoading();
+    try {
+      final isSuccess = await this.albumRepository.deleteAlbum(albumId);
+      yield AlbumStateDeleteAlbumSuccess(isSuccess: isSuccess);
     } catch (e) {
       yield AlbumStateFailure(error: e.toString());
     }

@@ -1,19 +1,21 @@
 import 'package:equatable/equatable.dart';
+import 'package:photographer_app_java_support/models/booking_bloc_model.dart';
+import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 
 class ReportBlocModel extends Equatable {
   final int id;
   final String title;
   final String reason;
-  final int reporterId;
-  final int reportedId;
+  final Photographer photographer;
   final String createdAt;
+  final BookingBlocModel booking;
 
   const ReportBlocModel({
     this.id,
     this.title,
     this.reason,
-    this.reporterId,
-    this.reportedId,
+    this.booking,
+    this.photographer,
     this.createdAt,
   });
 
@@ -22,8 +24,8 @@ class ReportBlocModel extends Equatable {
         id,
         title,
         reason,
-        reporterId,
-        reportedId,
+        booking,
+        photographer,
         createdAt,
       ];
 }

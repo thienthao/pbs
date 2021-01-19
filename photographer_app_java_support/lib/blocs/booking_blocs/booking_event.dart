@@ -63,7 +63,8 @@ class BookingEventCancel extends BookingEvent {
 
 class BookingEventCheckIn extends BookingEvent {
   final int bookingId;
-  BookingEventCheckIn({this.bookingId});
+  final int timeLocationId;
+  BookingEventCheckIn({this.bookingId, this.timeLocationId});
 }
 
 class BookingEventLoadSuccess extends BookingEvent {

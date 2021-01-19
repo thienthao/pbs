@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:http/http.dart' as http;
+import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:intl/intl.dart' as intl;
 
 class SearchPtgService extends StatefulWidget {
   @override
@@ -32,6 +34,7 @@ class _SearchPtgServiceState extends State<SearchPtgService>
       CommentRepository(httpClient: http.Client());
   CalendarRepository _calendarRepository =
       CalendarRepository(httpClient: http.Client());
+  intl.NumberFormat oCcy = intl.NumberFormat("#,##0", "vi_VN");
   bool isInit = true;
   List<Tab> _tabList = [
     Tab(
@@ -179,13 +182,49 @@ class _SearchPtgServiceState extends State<SearchPtgService>
                       ),
                     ),
                     SizedBox(width: 20.0),
-                    Text(
-                      photographer.fullname,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          photographer.fullname,
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '${photographer.ratingCount}',
+                              style: TextStyle(
+                                fontSize: 12.0,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            SmoothStarRating(
+                                allowHalfRating: false,
+                                onRated: (v) {},
+                                starCount: 5,
+                                rating: photographer.ratingCount ?? 0.0,
+                                size: 15.0,
+                                isReadOnly: true,
+                                defaultIconData: Icons.star_border,
+                                filledIconData: Icons.star,
+                                halfFilledIconData: Icons.star_half,
+                                color: Colors.amber,
+                                borderColor: Colors.amber,
+                                spacing: 0.0),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -285,10 +324,25 @@ class _SearchPtgServiceState extends State<SearchPtgService>
                             SizedBox(
                               height: 5.0,
                             ),
+                            Row(
+                              children: [
+                                Text('Giá: '),
+                                Text(
+                                  '${oCcy.format(package.price)} đồng',
+                                  style: TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 5.0,
+                            ),
                             Text(
                               ' tạo bởi ${package.photographer.fullname}',
-                              style:
-                                  TextStyle(fontSize: 11.0, color: Colors.grey),
+                              style: TextStyle(
+                                  fontSize: 12.0, color: Colors.black87),
                             ),
                           ],
                         ),

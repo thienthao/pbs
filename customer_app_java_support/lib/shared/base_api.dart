@@ -22,7 +22,9 @@ class BaseApi {
 
   static const String THREAD_TOPIC_URL = BASE_URL + 'thread-topics';
 
-  static const String LOGIN_URL = BASE_URL + 'auth/signin';
+  static const String AUTH_URL = BASE_URL + 'auth';
 
-  static const String SIGNUP_URL = BASE_URL + 'auth/signup';
+  static const String LOGIN_URL = AUTH_URL + '/signin';
+
+  static const String SIGNUP_URL = AUTH_URL + '/signup';
 }

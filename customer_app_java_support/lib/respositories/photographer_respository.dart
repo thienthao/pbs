@@ -33,15 +33,16 @@ class PhotographerRepository {
 
       final List<Photographer> photographers = list.map((photographer) {
         return Photographer(
-          id: photographer['id'],
-          fullname: photographer['fullname'].toString(),
-          avatar: photographer['avatar'].toString(),
-          booked: photographer['booked'],
-          description: photographer['description'],
-          ratingCount: photographer['ratingCount'] == 0.0
-              ? 4.7
-              : photographer['ratingCount'],
-        );
+            id: photographer['id'],
+            fullname: photographer['fullname'].toString(),
+            avatar: photographer['avatar'].toString(),
+            booked: photographer['booked'],
+            description: photographer['description'],
+            ratingCount: photographer['ratingCount'] == 0.0
+                ? 4.7
+                : photographer['ratingCount'],
+            averagePackagePrice: photographer['averagePackagePrice'],
+            distance: photographer['distance']);
       }).toList();
       return photographers;
     } else if (response.statusCode == 401) {
@@ -63,15 +64,16 @@ class PhotographerRepository {
 
       final List<Photographer> photographers = list.map((photographer) {
         return Photographer(
-          id: photographer['id'],
-          fullname: photographer['fullname'].toString(),
-          avatar: photographer['avatar'].toString(),
-          booked: photographer['booked'],
-          description: photographer['description'],
-          ratingCount: photographer['ratingCount'] == 0.0
-              ? 4.7
-              : photographer['ratingCount'],
-        );
+            id: photographer['id'],
+            fullname: photographer['fullname'].toString(),
+            avatar: photographer['avatar'].toString(),
+            booked: photographer['booked'],
+            description: photographer['description'],
+            ratingCount: photographer['ratingCount'] == 0.0
+                ? 0.0
+                : photographer['ratingCount'],
+            averagePackagePrice: photographer['averagePackagePrice'],
+            distance: photographer['distance']);
       }).toList();
       return photographers;
     } else if (response.statusCode == 401) {
@@ -156,9 +158,10 @@ class PhotographerRepository {
           id: photographer['id'],
           fullname: photographer['fullname'].toString(),
           avatar: photographer['avatar'].toString(),
-          ratingCount: photographer['ratingCount'] == 0.0
-              ? 4.7
+          ratingCount: photographer['ratingCount'] == null
+              ? 0.0
               : photographer['ratingCount'],
+          averagePackagePrice: photographer['averagePackagePrice'],
         );
       }).toList();
 

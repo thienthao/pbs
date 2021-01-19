@@ -1,4 +1,4 @@
-class ReportTemplateModel{
+class ReportTemplateModel {
   int id;
   String title;
 
@@ -16,7 +16,7 @@ List<ReportTemplateModel> reports = [
   ),
   ReportTemplateModel(
     id: 03,
-    title: 'Thái độ tiêu cực.',
+    title: 'Photographer không trả ảnh.',
   ),
   ReportTemplateModel(
     id: 04,

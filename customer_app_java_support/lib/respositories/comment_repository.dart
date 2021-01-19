@@ -18,7 +18,7 @@ class CommentRepository {
 
   Future<List<CommentBlocModel>> getCommentByPhotographerId(int id) async {
     final response = await this.httpClient.get(
-        BaseApi.BOOKING_URL + '/photographer/$id/comments?size=3',
+        BaseApi.BOOKING_URL + '/photographer/$id/comments?size=10',
         headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
 
     if (response.statusCode == 200) {

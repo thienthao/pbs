@@ -242,24 +242,6 @@ class _MoreAlbumScreenState extends State<MoreAlbumScreen> {
           icon: Icon(Icons.arrow_back_ios, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: <Widget>[
-          PopupMenuButton<int>(
-            icon: Icon(
-              Icons.sort,
-              color: Colors.black87,
-            ),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 1,
-                child: Text("Được đánh giá cao"),
-              ),
-              PopupMenuItem(
-                value: 2,
-                child: Text("Tải lên gần đây"),
-              ),
-            ],
-          ),
-        ],
         centerTitle: true,
         elevation: 2.0,
         backgroundColor: Color(0xFFF3F5F7),
@@ -272,13 +254,6 @@ class _MoreAlbumScreenState extends State<MoreAlbumScreen> {
           Expanded(
             child: BlocBuilder<AlbumBloc, AlbumState>(
                 builder: (context, albumState) {
-              //     if (albumState is AlbumStateLoading) {
-              //   return Center(
-              //     child: CircularProgressIndicator(
-              //       strokeWidth: 1.5,
-              //     ),
-              //   );
-              // }
               if (albumState is AlbumStateInifiniteFetchedSuccess) {
                 if (albumState.albums.isEmpty) {
                   return Text(

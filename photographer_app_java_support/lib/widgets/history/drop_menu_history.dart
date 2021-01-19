@@ -14,8 +14,9 @@ class Status {
       Status(3, 'Sắp diễn ra', 'ongoing'),
       Status(4, 'Đang hậu kì', 'editing'),
       Status(5, 'Hoàn thành', 'done'),
-      Status(6, 'Đã hủy', 'canceled'),
-      Status(7, 'Đã từ chối', 'rejected'),
+      Status(6, 'Chờ hủy', 'cancelling'),
+      Status(7, 'Đã hủy', 'canceled'),
+      Status(8, 'Đã từ chối', 'rejected'),
     ];
   }
 }

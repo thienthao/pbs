@@ -93,4 +93,41 @@ class CustomerRepository {
     }
     return result;
   }
+
+  Future<bool> changePassword(
+      String username, String oldPassword, String newPassword) async {
+    var resBody = {};
+
+    resBody["username"] = username;
+    resBody["oldPassword"] = oldPassword;
+    resBody["newPassword"] = newPassword;
+    String str = json.encode(resBody);
+    print(str);
+    final response = await httpClient.put(BaseApi.AUTH_URL + '/changePassword',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
+        },
+        body: str);
+
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      var message = {
+        "newPassword": "",
+        "oldPassword": "",
+        "message": "",
+      };
+      message['newPassword'] = data['newPassword'] ?? '';
+      message['oldPassword'] = data['oldPassword'] ?? '';
+      message['message'] = data['message'] ?? '';
+      throw Exception(message);
+    }
+
+    return result;
+  }
 }

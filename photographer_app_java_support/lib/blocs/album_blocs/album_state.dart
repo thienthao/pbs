@@ -52,6 +52,18 @@ class AlbumStateRemoveImageSuccess extends AlbumState {
   String toString() => 'Image Remove State {Image Remove: $isSuccess }';
 }
 
+class AlbumStateDeleteAlbumSuccess extends AlbumState {
+  final bool isSuccess;
+  AlbumStateDeleteAlbumSuccess({this.isSuccess});
+  @override
+  List<Object> get props => [isSuccess];
+
+  @override
+  String toString() => 'Album Remove State {Album Remove: $isSuccess }';
+}
+
+
+
 class AlbumStateSuccess extends AlbumState {
   final List<AlbumBlocModel> albums;
   const AlbumStateSuccess({@required this.albums}) : assert(albums != null);

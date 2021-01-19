@@ -72,7 +72,7 @@ class AlbumRepository {
 
   Future<List<AlbumBlocModel>> getAlbumOfPhotographer(int id) async {
     final response = await this.httpClient.get(
-        BaseApi.ALBUM_URL + '/photographer/$globalPtgId/?page=0&size=15',
+        BaseApi.ALBUM_URL + '/photographer/$globalPtgId/?page=0&size=30',
         headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken});
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
@@ -191,6 +191,25 @@ class AlbumRepository {
       throw Exception('Unauthorized');
     } else {
       throw Exception('Error at update album info');
+    }
+    return isUpdated;
+  }
+
+  Future<bool> deleteAlbum(int albumId) async {
+    final response = await this.httpClient.delete(
+      BaseApi.ALBUM_URL + '/$albumId',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'
+      },
+    );
+    bool isUpdated = false;
+    if (response.statusCode == 200) {
+      isUpdated = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error at delete album');
     }
     return isUpdated;
   }

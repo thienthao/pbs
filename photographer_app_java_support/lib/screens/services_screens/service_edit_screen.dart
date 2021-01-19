@@ -500,22 +500,22 @@ class _EditServiceState extends State<EditService> {
                             ),
                             SizedBox(height: 30.0),
 
-                            Text(
-                              'Phương thức giao hàng: *',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15.0),
-                            ),
-                            SizedBox(height: 10.0),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                checkbox(app, delivery[app]),
-                                checkbox(meet, delivery[meet]),
-                              ],
-                            ),
-                            SizedBox(height: 30.0),
+                            // // Text(
+                            // //   'Phương thức giao hàng: *',
+                            // //   style: TextStyle(
+                            // //       color: Theme.of(context).primaryColor,
+                            // //       fontWeight: FontWeight.bold,
+                            // //       fontSize: 15.0),
+                            // // ),
+                            // // SizedBox(height: 10.0),
+                            // // Column(
+                            // //   mainAxisAlignment: MainAxisAlignment.start,
+                            // //   children: [
+                            // //     checkbox(app, delivery[app]),
+                            // //     checkbox(meet, delivery[meet]),
+                            // //   ],
+                            // // ),
+                            // SizedBox(height: 30.0),
                             Text(
                               'Chi tiết dịch vụ: *',
                               style: TextStyle(

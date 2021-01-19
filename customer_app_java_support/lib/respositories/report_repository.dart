@@ -16,12 +16,20 @@ class ReportRepository {
 
   Future<bool> postReport(ReportBlocModel report) async {
     var resBody = {};
+    var customerResBody = {};
+    var bookingResBody = {};
 
     resBody["title"] = report.title;
+
     resBody["reason"] = report.reason;
-    resBody["reporterId"] = report.reporterId;
-    resBody["reportedId"] = report.reportedId;
+
+    customerResBody["id"] = report.customer.id ?? globalCusId;
+    resBody["reporter"] = customerResBody;
+
     resBody["createdAt"] = report.createdAt;
+
+    bookingResBody["id"] = report.booking.id;
+    resBody["booking"] = bookingResBody;
 
     String str = json.encode(resBody);
     print(str);

@@ -26,6 +26,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
 
   Stream<CommentState> _mapCommentsByPhotographerIdLoadedToState(
       int id) async* {
+    yield CommentStateLoading();
     try {
       final comments =
           await this.commentRepository.getCommentByPhotographerId(id);
@@ -36,6 +37,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
   }
 
   Stream<CommentState> _mapCommentsByBookingIdLoadedToState(int id) async* {
+    yield CommentStateLoading();
     try {
       final comments = await this.commentRepository.getCommentByBookingId(id);
       yield CommentStateSuccess(comments: comments);

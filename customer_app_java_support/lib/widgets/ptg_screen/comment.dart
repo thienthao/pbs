@@ -19,7 +19,8 @@ class CommentWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 CircleAvatar(
-                  backgroundImage: NetworkImage(comment.avatar),
+                  backgroundImage: NetworkImage(comment.avatar ??
+                      'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'),
                   radius: 25,
                 ),
                 Container(
@@ -74,7 +75,7 @@ class CommentWidget extends StatelessWidget {
                                     fontWeight: FontWeight.bold)),
                             TextSpan(
                                 text: comment.fullname == null
-                                    ? 'Commentor'
+                                    ? 'Ẩn danh'
                                     : comment.fullname,
                                 style:
                                     TextStyle(fontWeight: FontWeight.normal)),

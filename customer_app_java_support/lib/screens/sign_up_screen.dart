@@ -19,6 +19,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController repassword = TextEditingController();
+  TextEditingController fullname = TextEditingController();
+  TextEditingController phone = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   void signup() {
     String username = this.username.text;
@@ -26,17 +28,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String password = this.password.text;
     // ignore: unused_local_variable
     String repassword = this.repassword.text;
-    UserRegister userRegister =
-        UserRegister(username: username, email: email, password: password);
+    String fullname = this.fullname.text;
+    String phone = this.phone.text;
+    UserRegister userRegister = UserRegister(
+        username: username,
+        email: email,
+        password: password,
+        fullname: fullname,
+        phone: phone);
     BlocProvider.of<RegisterBloc>(context)
         .add(SignUp(userRegister: userRegister));
   }
 
   String checkUsername(String username) {
+    RegExp regExp = new RegExp('^[^._!@#\$%^&*()][^?*].*[^._!@#\$%^&*()]\$');
     if (username.isEmpty) {
-      return 'Vui lòng nhập tên đăng nhập của bạn';
+      return 'Thông tin này là bắt buộc';
     } else if (!(username.length >= 8 && username.length <= 20)) {
       return 'Tên đăng nhập phải từ 8 - 20 kí tự.';
+    } else if (!regExp.hasMatch(username)) {
+      return 'Không thể có kí tự "_" hoặc "." ở đầu hoặc cuối.';
     }
     return null;
   }
@@ -45,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     RegExp regExp = new RegExp(
         '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})\$');
     if (email.isEmpty) {
-      return 'Vui lòng nhập email của bạn';
+      return 'Thông tin này là bắt buộc';
     } else if (!regExp.hasMatch(email)) {
       return 'Email phải theo định dạng, ví dụ: pbs@fpt.edu.vn';
     }
@@ -56,19 +67,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
     RegExp regExp = new RegExp(
         '^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@\$!%*#?&])[A-Za-z\\d@\$!%*#?&]{8,}\$');
     if (password.isEmpty) {
-      return 'Vui lòng không để trống trường này.';
+      return 'Thông tin này là bắt buộc';
     } else if (!regExp.hasMatch(password)) {
-      return 'Mật khẩu phải có tối thiểu 8 kí tự, 1 chữ cái, 1 số và 1 kí tự đặt biệt.';
+      return 'Tối thiểu 8 kí tự, 1 chữ cái, 1 số và 1 kí tự đặt biệt.';
     }
     return null;
   }
 
   String checkRePassword(String repassword) {
     if (repassword.isEmpty) {
-      return 'Vui lòng không để trống trường này.';
+      return 'Thông tin này là bắt buộc';
     } else if (repassword.trim().toUpperCase() !=
         password.text.trim().toUpperCase()) {
       return 'Mật khẩu không khớp.';
+    }
+    return null;
+  }
+
+  String checkPhone(String phone) {
+    RegExp regExp = new RegExp('(84|0[3|5|7|8|9])+([0-9]{8,9})',
+        caseSensitive: false, multiLine: false);
+    if (phone.isEmpty) {
+      return 'Thông tin này là bắt buộc.';
+    } else if (!regExp.hasMatch(phone)) {
+      return 'Số điện thoại phải theo định dạng của Việt Nam.';
+    } else if (phone.length > 11) {
+      return 'Số điện thoại phải theo định dạng của Việt Nam.';
+    }
+    return null;
+  }
+
+  String checkName(String fullname) {
+    RegExp regExp =
+        new RegExp('[^A-Za-zàáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẸẺẼÊỀẾỂỄỆĐÌÍĨỈỊÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỴỶỸÝ ]+', caseSensitive: false, multiLine: false);
+    if (fullname.isEmpty) {
+      return 'Thông tin này là bắt buộc.';
+    } else if (regExp.hasMatch(fullname)) {
+      return 'Chỉ có thể sử dụng chữ cái cho tên.';
     }
     return null;
   }
@@ -103,6 +138,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
 
         if (state is RegisterSuccess) {
+          Navigator.popUntil(context, (route) => route.isFirst);
           Flushbar(
             flushbarPosition: FlushbarPosition.TOP,
             flushbarStyle: FlushbarStyle.FLOATING,
@@ -208,7 +244,54 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         Icons.person,
                                         color: Theme.of(context).primaryColor,
                                       ),
-                                      hintText: 'Nhập tên tài khoản',
+                                      hintText: 'Từ 8 - 20 kí tự',
+                                      hintStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Họ & Tên',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 15.0),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey[400],
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ]),
+                                  child: TextFormField(
+                                    validator: checkName,
+                                    controller: fullname,
+                                    keyboardType: TextInputType.name,
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          EdgeInsets.only(top: 14.0),
+                                      prefixIcon: Icon(
+                                        Icons.perm_contact_cal_sharp,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      hintText: 'Ví dụ: Nguyễn Văn A',
                                       hintStyle: TextStyle(
                                         color: Colors.black87,
                                       ),
@@ -243,7 +326,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   child: TextFormField(
                                     validator: checkEmail,
                                     controller: email,
-                                    keyboardType: TextInputType.text,
+                                    keyboardType: TextInputType.emailAddress,
                                     style: TextStyle(
                                       color: Colors.black87,
                                     ),
@@ -255,7 +338,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         Icons.email,
                                         color: Theme.of(context).primaryColor,
                                       ),
-                                      hintText: 'Nhập email',
+                                      hintText: 'Ví dụ: abc@xzy.com',
+                                      hintStyle: TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Số điện thoại',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 15.0),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  height: 60.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey[400],
+                                            offset: Offset(0.0, 2.0),
+                                            blurRadius: 6.0)
+                                      ]),
+                                  child: TextFormField(
+                                    validator: checkPhone,
+                                    autocorrect: true,
+                                    controller: phone,
+                                    keyboardType: TextInputType.phone,
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          EdgeInsets.only(top: 14.0),
+                                      prefixIcon: Icon(
+                                        Icons.call,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      hintText: 'Ví dụ: 01234567890',
                                       hintStyle: TextStyle(
                                         color: Colors.black87,
                                       ),
@@ -302,7 +433,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         Icons.lock,
                                         color: Theme.of(context).primaryColor,
                                       ),
-                                      hintText: 'Nhập mật khẩu của bạn',
+                                      hintText: 'Từ 8 kí tự trở lên',
                                       hintStyle: TextStyle(
                                         color: Colors.black87,
                                       ),

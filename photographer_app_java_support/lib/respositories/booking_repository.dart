@@ -35,7 +35,8 @@ class BookingRepository {
         CustomerBlocModel customer = CustomerBlocModel(
             id: tempCustomer['id'],
             fullname: tempCustomer['fullname'],
-            avatar: tempCustomer['avatar']);
+            avatar: tempCustomer['avatar'] ??
+                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png');
         return BookingBlocModel(
           id: booking['id'],
           status: booking['bookingStatus'],
@@ -85,7 +86,8 @@ class BookingRepository {
             id: tempCustomer['id'],
             fullname: tempCustomer['fullname'],
             phone: tempCustomer['phone'],
-            avatar: tempCustomer['avatar']);
+            avatar: tempCustomer['avatar'] ??
+                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png');
 
         final tempTimeAndLocations = booking['timeLocationDetails'] as List;
         bool isMultiDay = false;
@@ -262,9 +264,10 @@ class BookingRepository {
         final tempCustomer = booking['booking']['customer'] as Map;
         CustomerBlocModel customer = CustomerBlocModel(
             id: tempCustomer['id'],
-            fullname: tempCustomer['fullname'],
+            fullname: tempCustomer['fullname'] ?? 'Ẩn danh',
             phone: tempCustomer['phone'],
-            avatar: tempCustomer['avatar']);
+            avatar: tempCustomer['avatar'] ??
+                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png');
 
         final tempTimeAndLocations =
             booking['booking']['timeLocationDetails'] as List;
@@ -352,16 +355,18 @@ class BookingRepository {
       CustomerBlocModel customer = CustomerBlocModel(
           id: tempCustomer['id'],
           phone: tempCustomer['phone'],
-          fullname: tempCustomer['fullname'],
-          avatar: tempCustomer['avatar']);
+          fullname: tempCustomer['fullname'] ?? 'Ẩn danh',
+          avatar: tempCustomer['avatar'] ??
+              'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png');
 
       final tempPhotographer = data['photographer'] as Map;
       Photographer photographer = Photographer(
           id: tempPhotographer['id'],
           phone: tempPhotographer['phone'],
-          fullname: tempPhotographer['fullname'],
+          fullname: tempPhotographer['fullname'] ?? 'Ẩn danh',
           ratingCount: tempPhotographer['ratingCount'],
-          avatar: tempPhotographer['avatar']);
+          avatar: tempPhotographer['avatar'] ??
+              'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png');
 
       final tempPackage = data['servicePackage'] as Map;
       PackageBlocModel package = PackageBlocModel(
@@ -369,11 +374,11 @@ class BookingRepository {
         name: tempPackage['name'],
       );
 
-      final tempServices = data['servicePackage']['services'] as List;
+      final tempServices = data['bookingDetails'] as List;
 
       final List<String> services = new List();
       for (final service in tempServices) {
-        services.add(service['name']);
+        services.add(service['serviceName']);
       }
 
       final tempTimeAndLocations = data['timeLocationDetails'] as List;
@@ -386,7 +391,9 @@ class BookingRepository {
             end: item['end'],
             formattedAddress: item['formattedAddress'],
             latitude: item['lat'],
-            longitude: item['lon']);
+            longitude: item['lon'],
+            isCheckin: item['isCheckin'],
+            qrCheckinCode: item['qrCheckinCode']);
       }).toList();
       final booking = BookingBlocModel(
           id: data['id'],
@@ -687,9 +694,9 @@ class BookingRepository {
     return result;
   }
 
-  Future<bool> checkIn(int bookingId) async {
+  Future<bool> checkIn(int bookingId, int timeAndLocationId) async {
     final response = await httpClient.put(
-      BaseApi.BOOKING_URL + '/checkin/$bookingId',
+      BaseApi.BOOKING_URL + '/checkin/$bookingId/$timeAndLocationId',
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
@@ -702,7 +709,7 @@ class BookingRepository {
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized');
     } else {
-      throw Exception('Error at cancel a booking');
+      throw Exception('Error at checkin a qr code');
     }
 
     return result;

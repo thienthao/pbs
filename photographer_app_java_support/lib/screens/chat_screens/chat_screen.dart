@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:photographer_app_java_support/constant/chat_name.dart';
+import 'package:flutter/material.dart';
 import 'package:photographer_app_java_support/functions/glowRemoveScrollBehaviour.dart';
 import 'package:photographer_app_java_support/services/chat_service.dart';
 import 'package:photographer_app_java_support/widgets/chat_screen/flat_action_btn.dart';
@@ -12,7 +11,8 @@ class ChatPage extends StatefulWidget {
   static final String id = "ChatPage";
   final String chatRoomId;
   final String avatar;
-  const ChatPage({this.chatRoomId, this.avatar});
+  final String myName;
+  const ChatPage({this.chatRoomId, this.avatar, @required this.myName});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -36,7 +36,7 @@ class _ChatPageState extends State<ChatPage> {
                 itemBuilder: (context, index) {
                   return FlatChatMessage(
                     message: snapshot.data.documents[index].data()["message"],
-                    messageType: Constants.myName ==
+                    messageType: widget.myName ==
                             snapshot.data.documents[index].data()["sendBy"]
                         ? MessageType.sent
                         : MessageType.received,
@@ -50,7 +50,7 @@ class _ChatPageState extends State<ChatPage> {
   addMessage() {
     if (messageEditingController.text.isNotEmpty) {
       Map<String, dynamic> chatMessageMap = {
-        "sendBy": Constants.myName,
+        "sendBy": widget.myName,
         "message": messageEditingController.text,
         'time': DateTime.now().millisecondsSinceEpoch,
       };
@@ -97,12 +97,12 @@ class _ChatPageState extends State<ChatPage> {
               title: widget.chatRoomId
                   .toString()
                   .replaceAll("_", "")
-                  .replaceAll(Constants.myName, ""),
+                  .replaceAll(widget.myName, ""),
               suffixWidget: FlatProfileImage(
                 size: 35.0,
                 onlineIndicator: true,
-                imageUrl:
-                     widget.avatar,
+                imageUrl: widget.avatar ??
+                    'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
                 onPressed: () {
                   print("Clicked Profile Image");
                 },

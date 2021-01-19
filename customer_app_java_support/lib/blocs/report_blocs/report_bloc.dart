@@ -22,6 +22,7 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
   }
 
   Stream<ReportState> _mapPostReportToState(ReportBlocModel report) async* {
+    yield ReportStateLoading();
     try {
       final isPosted = await this.reportRepository.postReport(report);
       yield ReportStatePostedSuccess(isPosted: isPosted);
