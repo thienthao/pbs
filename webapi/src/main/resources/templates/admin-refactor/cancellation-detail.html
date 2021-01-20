@@ -6,6 +6,7 @@
 </head>
 <body>
 <div th:fragment="content">
+    <div class="loading">Loading&#8230;</div>
     <div class="row">
         <div class="tab-content col-md-12">
             <div class="main-card mb-3 card">
@@ -61,15 +62,12 @@
         //@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}
 
 
-        $('#submit-form').submit((e) => {
+        $('#submit-form').submit(async (e) => {
             e.preventDefault();
             const cancellationId = [[${cancellation.id}]]
-            $.ajax({
-                type:"post",
-                url: '/admin/cancellations/' + cancellationId,
-                success: function(result){
-                    $('#admin-content').load('/admin/cancellations/' + cancellationId);
-                }
+            const url = '/admin/cancellations/' + cancellationId
+            await customDialog(LABEL_TITLE_CONFIRMATION, LABEL_CONFIRM_DELETE, LABEL_BTN_YES, LABEL_BTN_NO, function () {
+                sendRequest('POST', url, url)
             });
         });
 

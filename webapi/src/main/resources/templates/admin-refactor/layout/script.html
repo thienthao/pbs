@@ -30,7 +30,13 @@
 <script id="main-script" type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
 <script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/modal.js}"></script>
 <script type="text/javascript"  th:src="@{/admin-refactor/langs/vi.js}"></script>
-
+<script>
+     <!--    Constant -->
+     var LABEL_TITLE_CONFIRMATION = "Vui lòng xác nhận"
+     var LABEL_CONFIRM_DELETE = "Bạn có thực sự muốn xóa?"
+     var LABEL_BTN_YES = "Có"
+     var LABEL_BTN_NO = "Không"
+</script>
 <script th:inline="javascript">
 
     let pathname = '';
@@ -309,7 +315,65 @@
 
         return [year, month, day].join('-');
     }
+    function sendRequest(method, url, callbackUrl) {
+        console.log("Method: " + method +' - URL: '+ url)
+        $.ajax({
+            async: true,
+            method: method,
+            url: url
+        }).done(function (result) {
+            setTimeout(function () {
+                $('#admin-content').load(callbackUrl);
+            }, 1000);
+        });
+    }
 
+    function customDialog(title, msg, labelYes, labelNo, callback) {
+        var $content = "<div class='dialog-ovelay'>" +
+            "<div class='dialog'><header>" +
+            " <h3> " + title + " </h3> " +
+            "<i class='fa fa-close'></i>" +
+            "</header>" +
+            "<div class='dialog-msg'>" +
+            " <p> " + msg + " </p> " +
+            "</div>" +
+            "<footer>" +
+            "<div class='controls'>" +
+            " <button class='button button-default c-btn-yes'>" + labelYes + "</button> " +
+            " <button class='button button-danger c-btn-no'>" + labelNo + "</button> " +
+            "</div>" +
+            "</footer>" +
+            "</div>" +
+            "</div>";
+        $('body').prepend($content);
+        $('.c-btn-yes').click(async function () {
+            $('.loading').css('display', 'inline-block');
+            callback();
+            $(this).parents('.dialog-ovelay').fadeOut(500, function () {
+                $(this).remove();
+            });
+        });
+        $('.c-btn-no, .fa-close').click(function () {
+            $(this).parents('.dialog-ovelay').fadeOut(500, function () {
+                $(this).remove();
+            });
+        });
+    }
+
+    function onSearchCategory(searchValue) {
+        $('.cate-item').each(function(i)
+        {
+            const cateVal = $(this).clone()    //clone the element
+                .children() //again go back to selected element
+                .text()
+                .toLowerCase()
+                .trim();
+            $(this).css("display", "block");
+            if(!cateVal.includes(searchValue.toLowerCase())){
+                $(this).css("display", "none");
+            }
+        });
+    }
     // $('input[name="dates"]').daterangepicker();
 </script>
 <script src="https://kit.fontawesome.com/1d0e1945ca.js" crossorigin="anonymous"></script>
