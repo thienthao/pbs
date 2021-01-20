@@ -102,4 +102,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("update User user set user.isEnabled=true where user.id=:userId")
     User enable(Long userId);
+
+    User findByEmailAndIsDeletedFalseAndIsBlockedFalse(String email);
 }

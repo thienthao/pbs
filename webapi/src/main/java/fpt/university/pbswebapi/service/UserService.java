@@ -1,16 +1,16 @@
 package fpt.university.pbswebapi.service;
 
-import fpt.university.pbswebapi.dto.AccountVerificationEmailContext;
-import fpt.university.pbswebapi.dto.NotiRequest;
-import fpt.university.pbswebapi.dto.UserDto;
+import fpt.university.pbswebapi.dto.*;
 import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.entity.VerificationToken;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.exception.InvalidTokenException;
 import fpt.university.pbswebapi.exception.NotFoundException;
 import fpt.university.pbswebapi.helper.DateHelper;
+import fpt.university.pbswebapi.helper.StringUtils;
 import fpt.university.pbswebapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +34,12 @@ public class UserService {
     private final EmailService emailService;
 
     private final FCMService fcmService;
+
+    @Value("${app.secure.token.validity}")
+    private int accountActivationTokenValidity;
+
+    @Value("${app.secure.token.password_reset}")
+    private int ResetPasswordTokenValidity;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -87,7 +93,7 @@ public class UserService {
     }
 
     public void sendRegistrationConfirmationEmail(User user, String baseURL) throws MessagingException {
-        VerificationToken verificationToken = tokenService.createVerificationToken();
+        VerificationToken verificationToken = tokenService.createVerificationToken(accountActivationTokenValidity);
         verificationToken.setUser(user);
         tokenService.saveToken(verificationToken);
 
@@ -95,16 +101,23 @@ public class UserService {
         emailContext.init(user);
         emailContext.setToken(verificationToken.getToken());
         emailContext.buildVerificationUrl(baseURL, verificationToken.getToken());
-        emailService.sendVerificationMail(emailContext);
+        emailService.sendMail(emailContext);
+    }
+
+    public void sendResetPasswordConfirmationEmail(User user, String baseURL) throws MessagingException {
+        VerificationToken resetPasswordToken = tokenService.createVerificationToken(ResetPasswordTokenValidity);
+        resetPasswordToken.setUser(user);
+        tokenService.saveToken(resetPasswordToken);
+
+        ResetPasswordEmailContext resetPasswordEmailContext = new ResetPasswordEmailContext();
+        resetPasswordEmailContext.init(user);
+        resetPasswordEmailContext.setToken(resetPasswordToken.getToken());
+        resetPasswordEmailContext.buildVerificationUrl(baseURL, resetPasswordToken.getToken());
+        emailService.sendMail(resetPasswordEmailContext);
     }
 
     public boolean verifyUserAccount(String token) throws InvalidTokenException {
-        VerificationToken verificationToken = tokenService.findByToken(token);
-        if (ObjectUtils.isEmpty(verificationToken) ||
-                !verificationToken.getToken().equals(token) ||
-                verificationToken.isExpired()) {
-            throw new InvalidTokenException("Mã xác nhận không hợp lệ.");
-        }
+        VerificationToken verificationToken = validateToken(token);
         User user = userRepository.getOne(verificationToken.getUser().getId());
         if (ObjectUtils.isEmpty(user)) {
             return false;
@@ -112,6 +125,29 @@ public class UserService {
         user.setIsEnabled(true);
         userRepository.save(user);
         tokenService.removeToken(verificationToken);
+        return true;
+    }
+
+    public boolean resetPassword(String token) throws InvalidTokenException, MessagingException {
+        VerificationToken verificationToken = validateToken(token);
+        User user = userRepository.getOne(verificationToken.getUser().getId());
+        if (ObjectUtils.isEmpty(user)) {
+            return false;
+        }
+
+        // Create new password qualified with password regex pattern for user and save to DB
+        // Remove verification token after new password has been save to DB
+        final String newPassword = StringUtils.generateRandomPassword();
+        System.out.println(newPassword);
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
+        tokenService.removeToken(verificationToken);
+
+        // Send new password to user email
+        NewPasswordEmailContext emailContext = new NewPasswordEmailContext();
+        emailContext.init(user);
+        emailContext.buildEmailContent(user.getFullname(), newPassword);
+        emailService.sendMail(emailContext);
         return true;
     }
 
@@ -125,6 +161,16 @@ public class UserService {
         }
         existedUser.setPassword(encoder.encode(userDto.getNewPassword()));
         return userRepository.save(existedUser);
+    }
+
+    private VerificationToken validateToken(String token) throws InvalidTokenException {
+        VerificationToken verificationToken = tokenService.findByToken(token);
+        if (ObjectUtils.isEmpty(verificationToken) ||
+                !verificationToken.getToken().equals(token) ||
+                verificationToken.isExpired()) {
+            throw new InvalidTokenException("Mã xác nhận không hợp lệ.");
+        }
+        return verificationToken;
     }
 
     private Page<User> getCustomerByDate(Pageable pageable, String start, String end) {
