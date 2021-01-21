@@ -9,6 +9,7 @@ public abstract class AbstractEmailContext {
     private String to;
     private String subject;
     private String email;
+    private String content;
     private Map<String, Object> context;
 
     public AbstractEmailContext() {
@@ -48,6 +49,14 @@ public abstract class AbstractEmailContext {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public Map<String, Object> getContext() {

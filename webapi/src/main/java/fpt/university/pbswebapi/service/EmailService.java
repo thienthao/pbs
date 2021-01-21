@@ -24,31 +24,16 @@ public class EmailService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendVerificationMail(AbstractEmailContext email) throws MessagingException {
+    public void sendMail(AbstractEmailContext email) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,
                 MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
 
-        String fullname = email.getContext().get("fullname").toString();
-        String verifyURL = email.getContext().get("verificationURL").toString();
-        String emailContent = buildEmailContent(fullname, verifyURL);
-
         helper.setTo(email.getTo());
         helper.setSubject(email.getSubject());
         helper.setFrom(sendFrom);
-        helper.setText(emailContent, true);
+        helper.setText(email.getContent(), true);
         javaMailSender.send(mimeMessage);
-    }
-
-    private String buildEmailContent(String fullname, String verifyURL) {
-        String emailContent = "Xin chào <b>[[name]]</b>,<br>"
-                + "Vui lòng nhấn vào đường dẫn bên dưới để kích hoạt tài khoản của bạn:<br>"
-                + "<h3><a href=\"[[URL]]\" target=\"_self\">KÍCH HOẠT TÀI KHOẢN</a></h3>"
-                + "Cảm ơn,<br>"
-                + "PBS Admin";
-        emailContent = emailContent.replace("[[name]]", fullname);
-        emailContent = emailContent.replace("[[URL]]", verifyURL);
-        return emailContent;
     }
 }

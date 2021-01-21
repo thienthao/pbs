@@ -54,4 +54,13 @@ public class CronJobService {
         }
     }
 
+    @Scheduled(cron = "${app.batch.cron.booking_remind_cron}")
+    public void sendBookingRemind() {
+        System.out.println("This is booking remind cron job, start at 7am and 9pm on everyday.");
+    }
+
+    @Scheduled(cron = "${app.batch.cron.booking_pending_cron}")
+    public void checkPendingBookingHourly() {
+        System.out.println("This is booking pending checker cron job, start at every hour");
+    }
 }

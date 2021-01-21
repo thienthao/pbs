@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.controller;
 
+import fpt.university.pbswebapi.dto.ResetPasswordDto;
 import fpt.university.pbswebapi.dto.UserDto;
 import fpt.university.pbswebapi.entity.ERole;
 import fpt.university.pbswebapi.entity.Role;
@@ -18,6 +19,7 @@ import fpt.university.pbswebapi.security.jwt.JwtUtils;
 import fpt.university.pbswebapi.security.services.UserDetailsImpl;
 import fpt.university.pbswebapi.service.PhotographerService;
 import fpt.university.pbswebapi.service.UserService;
+import fpt.university.pbswebapi.service.VerificationTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,13 +55,15 @@ public class AuthController {
 
     private final UserService userService;
 
+    private final VerificationTokenService tokenService;
+
     public AuthController(AuthenticationManager authenticationManager,
                           UserRepository userRepository,
                           PhotographerService photographerService,
                           RoleRepository roleRepository,
                           PasswordEncoder encoder,
                           JwtUtils jwtUtils,
-                          UserService userService) {
+                          UserService userService, VerificationTokenService tokenService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.photographerService = photographerService;
@@ -67,20 +71,21 @@ public class AuthController {
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.userService = userService;
+        this.tokenService = tokenService;
     }
 
     @GetMapping(value = "/register/verify")
     public ResponseEntity<?> verifyUserAccount(@RequestParam String token) {
-        if (token == null && token.isBlank()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Mã xác nhận không được trống."));
+        if (!isValidToken(token)) {
+            throw new BadRequestException("Mã xác nhận không được trống.");
         }
         try {
             if (userService.verifyUserAccount(token)) {
                 return ResponseEntity.ok().body(new MessageResponse("Tài khoản đã được kích hoạt thành công."));
             } else {
-                return ResponseEntity.badRequest().body(new MessageResponse("Tài khoản kích hoạt thất bại."));
+                throw new BadRequestException("Tài khoản kích hoạt thất bại.");
             }
-        } catch (InvalidTokenException e) {
+        } catch (InvalidTokenException | BadRequestException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(e.getMessage()));
@@ -209,6 +214,61 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    @PostMapping(value = "/password/request")
+    public ResponseEntity<?> requestResetPassword(@RequestBody @Valid ResetPasswordDto resetPasswordDto,
+                                                  Errors errors,
+                                                  HttpServletRequest request) {
+        Map<String, String> errorsMap = handleValidationError(errors);
+        if (errorsMap != null && !errorsMap.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorsMap);
+        }
+        try {
+            User user = userRepository.findByEmailAndIsDeletedFalseAndIsBlockedFalse(resetPasswordDto.getEmail());
+            if (user == null) {
+                return ResponseEntity.badRequest().body("Email không tồn tại hoặc chưa hợp lệ!");
+            }
+            userService.sendResetPasswordConfirmationEmail(user, StringUtils.getBaseUrl(request));
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/password/reset")
+    public ResponseEntity<?> resetPassword(@RequestParam String token) {
+        if (!isValidToken(token)) {
+            throw new BadRequestException("Mã xác nhận không được trống.");
+        }
+        try {
+            if (userService.resetPassword(token)) {
+                return ResponseEntity.ok().body(new MessageResponse("Yêu cầu thay đổi mật khẩu thành công."));
+            } else {
+                throw new BadRequestException("Yêu cầu thay đổi mật khẩu thất bại.");
+            }
+        } catch (InvalidTokenException | BadRequestException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping(value = "/tokens/clear")
+    public ResponseEntity<?> clearToken() {
+        try {
+            tokenService.removeAllExpiredToken();
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    private boolean isValidToken(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        return true;
     }
 
     private Map<String, String> handleValidationError(Errors errors) {
