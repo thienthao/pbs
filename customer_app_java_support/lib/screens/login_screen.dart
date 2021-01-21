@@ -2,13 +2,18 @@ import 'package:customer_app_java_support/blocs/authen_blocs/login_bloc.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_event.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/login_state.dart';
 import 'package:customer_app_java_support/blocs/authen_blocs/user_repository.dart';
+import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:customer_app_java_support/blocs/register_blocs/register_bloc.dart';
+import 'package:customer_app_java_support/respositories/customer_repository.dart';
+import 'package:customer_app_java_support/screens/forget_password_screen.dart';
 import 'package:customer_app_java_support/screens/sign_up_screen.dart';
+import 'package:customer_app_java_support/shared/slide_navigator.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   final UserRepository userRepository;
@@ -20,6 +25,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  CustomerRepository _customerRepository =
+      CustomerRepository(httpClient: http.Client());
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool remember = false;
@@ -197,7 +204,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () {},
                               padding: EdgeInsets.only(right: 0.0),
                               child: FlatButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  slideNavigator(
+                                      context,
+                                      MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                              create: (context) => CustomerBloc(
+                                                  customerRepository:
+                                                      _customerRepository))
+                                        ],
+                                        child: ForgetPasswordScreen(),
+                                      ));
+                                },
                                 child: Text(
                                   'Quên mật khẩu?',
                                   style: TextStyle(

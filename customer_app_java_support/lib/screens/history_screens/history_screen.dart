@@ -114,6 +114,7 @@ class _BookHistoryState extends State<BookHistory> {
                         : bookingState.hasReachedEnd,
                     blocBookings: bookingState.bookings,
                     isEdited: (bool isEdit) {
+                      print('history $isEdit');
                       if (isEdit) {
                         _loadBookingsByPaging(statusForFilter);
                       }

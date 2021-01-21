@@ -436,6 +436,7 @@ class _BookingManyState extends State<BookingMany> {
                                     ),
                                   ],
                                   child: BookingManyDetailEdit(
+                                    timeAnticipate: selectedPackage.timeAnticipate,
                                     ptgId: widget.photographer.id,
                                     model: listTimeAndLocation[mapEntry.key],
                                     onUpdateList:

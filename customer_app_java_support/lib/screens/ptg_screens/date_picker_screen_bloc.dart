@@ -39,8 +39,10 @@ class _BlocDatePickerState extends State<BlocDatePicker> {
   _checkOutOfWorkingDate(TimeOfDay timeOfDay) async {
     TimeOfDay newTime =
         TimeOfDay(hour: timeOfDay.hour + 1, minute: timeOfDay.minute);
+    DateTime newDateTime = DateTime(DateTime.now().year, DateTime.now().month,
+        DateTime.now().day, newTime.hour, newTime.minute);
     BlocProvider.of<WarningBloc>(context).add(WarningEventCheckOutOfWorkingTime(
-        ptgId: widget.ptgId, time: newTime.format(context)));
+        ptgId: widget.ptgId, time: DateFormat('HH:mm').format(newDateTime)));
   }
 
   _getTimeWarning(String dateTime) async {

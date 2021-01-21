@@ -107,6 +107,75 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 )));
   }
 
+  Widget buildForgotToCheckIn() {
+    DateTime lastestDay =
+        DateTime.parse(bookingObj.listTimeAndLocations.last.start).toLocal();
+    for (var item in bookingObj.listTimeAndLocations) {
+      if (DateTime.parse(item.start).toLocal().isAfter(lastestDay)) {
+        lastestDay = DateTime.parse(item.start);
+      }
+    }
+
+    bool check = false;
+    for (var i = 0; i < bookingObj.listTimeAndLocations.length; i++) {
+      if (bookingObj.listTimeAndLocations[i].isCheckin) {
+        check = true;
+      } else {
+        check = false;
+      }
+    }
+
+    if (!check) {
+      if (lastestDay.isBefore(DateTime.now().toLocal())) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: GestureDetector(
+              onTap: () {
+                _showConfirmCheckInAlert();
+              },
+              child: Center(
+                child: Text(
+                  'Gửi yêu cầu check-in toàn bộ cho khách hàng.',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline),
+                ),
+              )),
+        );
+      } else {
+        return SizedBox();
+      }
+    } else {
+      return SizedBox();
+    }
+  }
+
+  Widget buildQrCodeStatus(String inputDate, Widget qrWidget) {
+    String date =
+        DateFormat('dd/MM/yyyy').format(DateTime.parse(inputDate).toLocal());
+    String now = DateFormat('dd/MM/yyyy').format(DateTime.now().toLocal());
+
+    if (date.compareTo(now) > 0) {
+      return Text('Tương lai',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+            color: Colors.lightGreen[100],
+          ));
+    } else if (date.compareTo(now) < 0) {
+      return Text('Quá hạn',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+            color: Colors.red[300],
+          ));
+    } else {
+      return qrWidget;
+    }
+  }
+
   Widget buildQrCodeWidget(List<TimeAndLocationBlocModel> listTimeAndLocation) {
     return Column(
       children: listTimeAndLocation.asMap().entries.map((MapEntry map) {
@@ -148,15 +217,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         alignment: Alignment.centerRight,
                         child: Padding(
                           padding: const EdgeInsets.only(right: 8.0),
-                          child: InkWell(
-                            onTap: () {
-                              scanQR(listTimeAndLocation[map.key].qrCheckinCode,
-                                  listTimeAndLocation[map.key].id);
-                            },
-                            child: Icon(
-                              Icons.qr_code_scanner_rounded,
-                              size: 30,
-                              color: Colors.lightBlueAccent,
+                          child: buildQrCodeStatus(
+                            listTimeAndLocation[map.key].start,
+                            InkWell(
+                              onTap: () {
+                                scanQR(
+                                    listTimeAndLocation[map.key].qrCheckinCode,
+                                    listTimeAndLocation[map.key].id);
+                              },
+                              child: Icon(
+                                Icons.qr_code_scanner_rounded,
+                                size: 30,
+                                color: Colors.lightBlueAccent,
+                              ),
                             ),
                           ),
                         ),
@@ -591,6 +664,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   _checkIn(int bookingId, int timeLocationId) async {
     BlocProvider.of<BookingBloc>(context).add(BookingEventCheckIn(
         bookingId: bookingId, timeLocationId: timeLocationId));
+  }
+
+  _checkInAllRequest(int bookingId) async {
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventSendCheckInAllRequest(bookingId: bookingId));
   }
 
   getCurrentLocation() async {
@@ -1048,6 +1126,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
             ),
             buildQrCodeWidget(bookingObj.listTimeAndLocations),
+            buildForgotToCheckIn(),
             SizedBox(
               height: 20,
             ),
@@ -2117,6 +2196,28 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           }
                         }
 
+                        if (state is BookingStateCheckInAllRequestLoading) {
+                          _showLoadingAlert();
+                        }
+
+                        if (state is BookingStateCheckInAllRequestSuccess) {
+                          Navigator.pop(context);
+                          _loadBookingDetail();
+                          _showSuccessAlert();
+                        }
+
+                        if (state is BookingStateCheckInAllRequestFailure) {
+                          Navigator.pop(context);
+                          String error =
+                              state.error.replaceAll('Exception: ', '');
+                          if (error.toUpperCase() == 'UNAUTHORIZED') {
+                            _showUnauthorizedDialog();
+                          } else {
+                            _showFailAlert('Thất bại',
+                                'Đã có lỗi xảy ra trong lúc gửi yêu cầu!');
+                          }
+                        }
+
                         if (state is BookingStateCheckInSuccess) {
                           _loadBookingDetail();
                         }
@@ -2625,6 +2726,102 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(
                 'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showConfirmCheckInAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/question.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Xác nhận',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Xác nhận gửi yêu cầu check-in toàn bộ cho khách hàng?',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+                _checkInAllRequest(bookingObj.id);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
+              buttonCancelText: Text(
+                'Hủy bỏ',
+                style: TextStyle(color: Colors.black87),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Gửi yêu cầu thành công!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
                 style: TextStyle(color: Colors.white),
               ),
             ));

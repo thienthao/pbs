@@ -102,7 +102,8 @@ class AlbumRepository {
         return AlbumBlocModel(
           id: album['id'],
           name: album['name'].toString(),
-          thumbnail: album['thumbnail'].toString(),
+          thumbnail: album['thumbnail'] ??
+              'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png',
           description: album['description'].toString(),
           location: album['location'].toString().length == 0
               ? 'Sapa'

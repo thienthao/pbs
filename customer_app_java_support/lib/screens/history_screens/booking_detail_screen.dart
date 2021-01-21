@@ -1146,8 +1146,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       photographer:
                           Photographer(id: bookingObj.photographer.id),
                       package: bookingObj.package);
-                  BlocProvider.of<BookingBloc>(context).add(
-                      BookingEventCancel(booking: booking, cusId: globalCusId));
+                  if (bookingObj.status.toUpperCase() == 'PENDING') {
+                    BlocProvider.of<BookingBloc>(context).add(
+                        BookingEventCancelPendingBooking(
+                            booking: booking, cusId: globalCusId));
+                  } else {
+                    BlocProvider.of<BookingBloc>(context).add(
+                        BookingEventCancel(
+                            booking: booking, cusId: globalCusId));
+                  }
                 }
               },
             ),
@@ -1737,6 +1744,28 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             _showUnauthorizedDialog();
                           }
                         }
+
+                        if (bookingState is BookingStateCancelInProgress) {
+                          _showLoadingAlert();
+                        }
+                        if (bookingState is BookingStateCanceledSuccess) {
+                          widget.isEdited(true);
+                          Navigator.pop(context);
+                          _showSuccessAlert();
+                          _loadBookingDetail();
+                        }
+
+                        if (bookingState
+                            is BookingStateCanceledPendingBookingSuccess) {
+                          Navigator.pop(context);
+                          _showPendingBookingCancelSuccessAlert();
+                          widget.isEdited(true);
+                        }
+
+                        if (bookingState is BookingStateCancelFailure) {
+                          Navigator.pop(context);
+                          _showFailDialog();
+                        }
                       },
                       builder: (context, bookingState) {
                         if (bookingState is BookingDetailStateSuccess) {
@@ -1745,9 +1774,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
                           if (bookingState.booking == null) {
                             return Text(
-                              'Đà Lạt',
+                              'Không lấy được thông tin cuộc hẹn',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 17.0,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -2177,12 +2206,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           }
                         }
 
-                        if (bookingState is BookingStateCancelInProgress) {
-                          return BookingDetailLoading();
-                        }
-                        if (bookingState is BookingStateCanceledSuccess) {
-                          _loadBookingDetail();
-                        }
                         if (bookingState is BookingStateLoading) {
                           return BookingDetailLoading();
                         }
@@ -2278,6 +2301,132 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               onlyOkButton: true,
               onOkButtonPressed: () {
                 _logOut();
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showPendingBookingCancelSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Cuộc hẹn này đã được hủy.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                widget.isEdited(true);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                });
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showSuccessAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/done_booking.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Hoàn thành',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Yêu cầu của bạn đã được gửi. Hệ thống sẽ xử lý và phản hồi lại thông qua email này.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Đồng ý',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showLoadingAlert() async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return Dialog(
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Material(
+                type: MaterialType.card,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                child: Image.asset(
+                  'assets/images/loading_2.gif',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Future<void> _showFailDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thất bại',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Đã có lỗi xảy ra trong lúc gửi yêu cầu.',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                Navigator.pop(context);
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(

@@ -199,7 +199,8 @@ class BookingRepository {
             latitude: item['lat'],
             longitude: item['lon'],
             isCheckin: item['isCheckin'] ?? false,
-            qrCheckinCode: item['qrCheckinCode'] ?? 'http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/525');
+            qrCheckinCode: item['qrCheckinCode'] ??
+                'http://194.59.165.195:8080/pbs-webapi/api/bookings/checkin/525');
       }).toList();
 
       final booking = BookingBlocModel(
@@ -379,6 +380,47 @@ class BookingRepository {
     return result;
   }
 
+  Future<bool> cancelPendingBooking(BookingBlocModel booking, int cusId) async {
+    var resBody = {};
+    var ptgResBody = {};
+    var cusResBody = {};
+    var packageResBody = {};
+
+    resBody["id"] = booking.id;
+
+    resBody["customerCanceledReason"] = booking.customerCanceledReason;
+
+    ptgResBody["id"] = booking.photographer.id;
+    resBody["photographer"] = ptgResBody;
+
+    packageResBody["id"] = booking.package.id;
+    resBody["servicePackage"] = packageResBody;
+
+    cusResBody["id"] = cusId;
+    resBody["customer"] = cusResBody;
+
+    String str = json.encode(resBody);
+    print(str);
+    final response =
+        await httpClient.put(BaseApi.BOOKING_URL + '/cancel/customer',
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
+            },
+            body: str);
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      throw Exception(data);
+    }
+
+    return result;
+  }
+
   Future<bool> cancelBooking(BookingBlocModel booking, int cusId) async {
     var resBody = {};
     var ptgResBody = {};
@@ -457,5 +499,26 @@ class BookingRepository {
     } else {
       throw Exception('Error getting Photographer Calendar');
     }
+  }
+
+  Future<bool> checkInAll(int bookingId) async {
+    final response = await httpClient.put(
+      BaseApi.BOOKING_URL + '/checkin-all/$bookingId',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken
+      },
+    );
+
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error accept check-in all request');
+    }
+
+    return result;
   }
 }

@@ -110,6 +110,10 @@ class _NavScreenState extends State<NavScreen> {
                 notificationRepository: _notificationRepository)
               ..add(NotificationEventInitial()),
           ),
+          BlocProvider(
+            create: (context) =>
+                BookingBloc(bookingRepository: _bookingRepository),
+          ),
         ],
         child: EventScreen(),
       ),

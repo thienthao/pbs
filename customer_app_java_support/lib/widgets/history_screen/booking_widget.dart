@@ -34,6 +34,7 @@ class _BookingWidgetState extends State<BookingWidget> {
       CommentRepository(httpClient: http.Client());
   ReportRepository _reportRepository =
       ReportRepository(httpClient: http.Client());
+  bool isEdited = false;
   Text statusFormat(String status) {
     String text = status;
     Color color = Colors.black;
@@ -140,10 +141,12 @@ class _BookingWidgetState extends State<BookingWidget> {
                                 bookingId: booking.id,
                                 isEdited: (bool _isEdited) {
                                   widget.isEdited(_isEdited);
+                                  isEdited = _isEdited;
+                                  print('booking widget $_isEdited');
                                 },
                               ),
                             );
-                          }));
+                          })).then((value) => widget.isEdited(isEdited));
                 },
                 child: Container(
                   margin: EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),

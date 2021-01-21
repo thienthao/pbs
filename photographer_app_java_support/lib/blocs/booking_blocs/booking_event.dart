@@ -67,6 +67,13 @@ class BookingEventCheckIn extends BookingEvent {
   BookingEventCheckIn({this.bookingId, this.timeLocationId});
 }
 
+class BookingEventSendCheckInAllRequest extends BookingEvent {
+  final int bookingId;
+  BookingEventSendCheckInAllRequest({this.bookingId});
+}
+
+
+
 class BookingEventLoadSuccess extends BookingEvent {
   BookingEventLoadSuccess(List<BookingBlocModel> list);
 }

@@ -1,9 +1,9 @@
+import 'package:customer_app_java_support/blocs/customer_blocs/customers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
-import 'package:photographer_app_java_support/blocs/photographer_blocs/photographers.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   @override
@@ -17,8 +17,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   void recoverPassword() {
     String email = this.email.text;
-    BlocProvider.of<PhotographerBloc>(context)
-        .add(PhotographerEventRecoveryPassword(email: email));
+    BlocProvider.of<CustomerBloc>(context)
+        .add(CustomerEventRecoveryPassword(email: email));
   }
 
   String checkEmail(String email) {
@@ -34,19 +34,19 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PhotographerBloc, PhotographerState>(
+    return BlocListener<CustomerBloc, CustomerState>(
         listener: (context, state) {
-          if (state is PhotographerStateFailure) {
+          if (state is CustomerStateFailure) {
             Navigator.pop(context);
             _showFailDialog();
           }
 
-          if (state is PhotographerStateRecoveryPasswordSuccess) {
+          if (state is CustomerStateRecoveryPasswordSuccess) {
             Navigator.pop(context);
             _showSuccessAlert();
           }
 
-          if (state is PhotographerStateLoading) {
+          if (state is CustomerStateLoading) {
             _showLoadingAlert();
           }
         },
@@ -77,7 +77,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     child: SingleChildScrollView(
                       physics: BouncingScrollPhysics(),
                       padding: EdgeInsets.symmetric(
-                          horizontal: 40.0, vertical: 70.0),
+                          horizontal: 40.0, vertical: 20.0),
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -92,7 +92,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                               ),
                             ),
                             SizedBox(
-                              height: 30,
+                              height: 50,
                             ),
                             Text(
                               'Quên mật khẩu',

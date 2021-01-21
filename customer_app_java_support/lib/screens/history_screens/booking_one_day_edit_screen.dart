@@ -25,6 +25,7 @@ import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:weather_icons/weather_icons.dart';
 
 class ReturnTypeModel {
   int id;
@@ -139,7 +140,9 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
 
   _getWeatherWarning() async {
     BlocProvider.of<WarningBloc>(context).add(WarningEventGetWeatherWarning(
-        dateTime: DateFormat('yyyy-MM-dd').format(DateTime.parse(startDate)),
+        timeAnticipate: packageResult.timeAnticipate,
+        dateTime:
+            DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(startDate)),
         latLng: selectedLatLng));
   }
 
@@ -867,18 +870,21 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                         Navigator.pop(context);
                         if (state.notice == null) {
                           _editBooking();
-                        } else if (state.notice.humidity == null ||
-                            state.notice.noti == null ||
-                            state.notice.outlook == null ||
-                            state.notice.temperature == null ||
-                            state.notice.windSpeed == null) {
-                          _editBooking();
-                          return;
-                        } else {
-                          _showWeatherWarning(state.notice);
+                        } else if (state.notice.isHourly) {
+                          _showWeatherWarningHourlyAlert(state.notice);
+                        } else if (!state.notice.isHourly) {
+                          if (state.notice.humidity == null ||
+                              state.notice.noti == null ||
+                              state.notice.outlook == null ||
+                              state.notice.temperature == null ||
+                              state.notice.windSpeed == null) {
+                            _editBooking();
+                            return;
+                          } else {
+                            _showWeatherWarning(state.notice);
+                          }
                         }
                       }
-
                       if (state is WarningStateFailure) {
                         Navigator.pop(context);
                         String error =
@@ -945,39 +951,420 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
         barrierDismissible: false,
         context: context,
         useRootNavigator: false,
-        builder: (BuildContext aContext) => AssetGiffyDialog(
-              image: Image.asset(
-                'assets/images/alert.gif',
-                fit: BoxFit.cover,
+        builder: (BuildContext aContext) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter state) {
+            return Dialog(
+              elevation: 0.0,
+              backgroundColor: Colors.transparent,
+              child: SingleChildScrollView(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Material(
+                    type: MaterialType.card,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5)),
+                    elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(shape: BoxShape.circle),
+                          child: Image.asset('assets/images/alert.gif',
+                              height: 150,
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Text(
+                              'Nhắc nhở',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 200,
+                          child: ListView(
+                            physics: BouncingScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Center(
+                                child: Text(
+                                  notice.location,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(notice.date,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18)),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                '☁ ${convertOutLookToVietnamese(notice.outlook)}   🌡${notice.temperature.round()}°C\n💧${notice.humidity.round()}%       ༄ ${notice.windSpeed.roundToDouble()} m/s\n\n${notice.noti}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RaisedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  color: Colors.grey[200],
+                                  focusColor: Colors.white,
+                                  splashColor: Colors.grey[200],
+                                  highlightColor: Colors.grey[200],
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      side:
+                                          BorderSide(color: Colors.grey[200])),
+                                  child: Text('Hủy bỏ')),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              RaisedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  },
+                                  color: Theme.of(context).accentColor,
+                                  focusColor: Colors.white,
+                                  splashColor: Theme.of(context).accentColor,
+                                  highlightColor: Theme.of(context).accentColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).accentColor)),
+                                  child: Text(
+                                    'Đồng ý',
+                                    style: TextStyle(color: Colors.white),
+                                  ))
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              entryAnimation: EntryAnimation.DEFAULT,
-              title: Text(
-                'Nhắc nhở',
-                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+            );
+          });
+        });
+  }
+
+  Widget convertOutLookToIcon(String outlook) {
+    BoxedIcon icon;
+    switch (outlook) {
+      case 'freezing':
+        icon = BoxedIcon(WeatherIcons.day_snow);
+        break;
+      case 'ice':
+        icon = BoxedIcon(WeatherIcons.day_snow);
+        break;
+      case 'rainy':
+        icon = BoxedIcon(WeatherIcons.day_rain);
+        break;
+      case 'cloudy':
+        icon = BoxedIcon(WeatherIcons.day_cloudy);
+        break;
+      case 'clear':
+        icon = BoxedIcon(WeatherIcons.day_sunny_overcast);
+        break;
+      case 'sunny':
+        icon = BoxedIcon(WeatherIcons.day_sunny);
+        break;
+    }
+    return icon;
+  }
+
+  Widget buildNoticeHourly(Map time) {
+    var widget = <Widget>[];
+    time.forEach((key, value) {
+      widget.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Column(
+          children: [
+            Text(key),
+            SizedBox(
+              height: 5,
+            ),
+            convertOutLookToIcon(value['outlook']),
+            SizedBox(
+              height: 5,
+            ),
+            Text('${value['temperature']}°C'),
+            SizedBox(
+              height: 5,
+            ),
+            Icon(
+              value['isSuitable'] ? Icons.done_rounded : Icons.close_rounded,
+              color: value['isSuitable'] ? Colors.green[400] : Colors.red[300],
+              size: 30,
+            )
+          ],
+        ),
+      ));
+    });
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: widget,
+      ),
+    );
+  }
+
+  Widget _buildNoticeHourlyDetail(Map time) {
+    var widget = <Widget>[];
+    time.forEach((key, value) {
+      widget.add(Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Column(
+          children: [
+            Divider(
+              indent: 10,
+              endIndent: 10,
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Thời gian:',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(key,
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            Divider(
+              indent: 20,
+              endIndent: 20,
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Nhiệt độ:'),
+                Text('${value['temperature']}°C'),
+              ],
+            ),
+            Divider(
+              indent: 20,
+              endIndent: 20,
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Độ ẩm:'),
+                Text('${value['humidity']}%'),
+              ],
+            ),
+            Divider(
+              indent: 20,
+              endIndent: 20,
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Tốc độ gió:'),
+                Text('${value['windSpeed']} m/s'),
+              ],
+            ),
+          ],
+        ),
+      ));
+    });
+    return Column(
+      children: widget,
+    );
+  }
+
+  Future<void> _showWeatherWarningHourlyAlert(WeatherBlocModel notice) async {
+    return showDialog<void>(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (BuildContext aContext) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter state) {
+            return Dialog(
+              elevation: 0.0,
+              backgroundColor: Colors.transparent,
+              child: SingleChildScrollView(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.75,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Material(
+                    type: MaterialType.card,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5)),
+                    elevation: Theme.of(context).dialogTheme.elevation ?? 24.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(shape: BoxShape.circle),
+                          child: Image.asset('assets/images/alert.gif',
+                              height: 150,
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Text(
+                              'Nhắc nhở',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 200,
+                          child: ListView(
+                            physics: BouncingScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Center(
+                                child: Text(
+                                  notice.location,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(notice.date,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22)),
+                              ),
+                              Text(
+                                notice.overall
+                                    ? 'Thời tiết huận lợi để chụp ảnh'
+                                    : 'Thời tiết không thuận lợi cho chụp ảnh',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              Divider(
+                                indent: 10,
+                                endIndent: 10,
+                                height: 20,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: buildNoticeHourly(notice.time),
+                              ),
+                              _buildNoticeHourlyDetail(notice.time),
+                              Divider(
+                                indent: 10,
+                                endIndent: 10,
+                                height: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RaisedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  color: Colors.grey[200],
+                                  focusColor: Colors.white,
+                                  splashColor: Colors.grey[200],
+                                  highlightColor: Colors.grey[200],
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      side:
+                                          BorderSide(color: Colors.grey[200])),
+                                  child: Text('Hủy bỏ')),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              RaisedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  },
+                                  color: Theme.of(context).accentColor,
+                                  focusColor: Colors.white,
+                                  splashColor: Theme.of(context).accentColor,
+                                  highlightColor: Theme.of(context).accentColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).accentColor)),
+                                  child: Text(
+                                    'Đồng ý',
+                                    style: TextStyle(color: Colors.white),
+                                  ))
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              description: Text(
-                '☁ ${convertOutLookToVietnamese(notice.outlook)}   🌡${notice.temperature.round()}°C\n💧${notice.humidity.round()}%       ༄ ${notice.windSpeed.roundToDouble()} m/s\n${notice.noti}',
-                textAlign: TextAlign.center,
-                style: TextStyle(),
-              ),
-              onOkButtonPressed: () {
-                Navigator.pop(context);
-                _editBooking();
-              },
-              onCancelButtonPressed: () {
-                Navigator.pop(context);
-              },
-              buttonOkColor: Theme.of(context).primaryColor,
-              buttonOkText: Text(
-                'Đồng ý',
-                style: TextStyle(color: Colors.white),
-              ),
-              buttonCancelColor: Theme.of(context).scaffoldBackgroundColor,
-              buttonCancelText: Text(
-                'Trở lại',
-                style: TextStyle(color: Colors.black87),
-              ),
-            ));
+            );
+          });
+        });
   }
 
   Future<void> _showBookingSuccessAlert() async {

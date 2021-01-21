@@ -47,11 +47,21 @@ class BookingEventCancel extends BookingEvent {
   BookingEventCancel({this.booking, this.cusId});
 }
 
+class BookingEventCancelPendingBooking extends BookingEvent {
+  final BookingBlocModel booking;
+  final int cusId;
+  BookingEventCancelPendingBooking({this.booking, this.cusId});
+}
+
 class BookingEventGetBookingOnDate extends BookingEvent {
   final int ptgId;
   final String date;
-
   BookingEventGetBookingOnDate({this.ptgId, this.date});
+}
+
+class BookingEventCheckInAll extends BookingEvent {
+  final int bookingId;
+  BookingEventCheckInAll({this.bookingId});
 }
 
 class BookingEventLoadSuccess extends BookingEvent {
