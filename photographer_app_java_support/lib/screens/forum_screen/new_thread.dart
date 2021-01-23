@@ -162,7 +162,7 @@ class _NewThreadState extends State<NewThread> {
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.all(10.0),
-                  hintText: 'Bình luận của bạn...',
+                  hintText: 'Nội dung...',
                   hintStyle: TextStyle(
                     fontSize: 16.0,
                     color: Colors.grey,
@@ -171,71 +171,6 @@ class _NewThreadState extends State<NewThread> {
               ),
             ),
             SizedBox(height: 60.0),
-            Divider(
-              height: 0.5,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 20.0),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Hình ảnh',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => getImage(),
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 10.0),
-                      width: 100.0,
-                      height: 100.0,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10.0),
-                        child: Center(
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.add,
-                              color: Colors.black54,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Wrap(
-                      spacing: 7,
-                      runSpacing: 7,
-                      children: List.generate(_images.length, (index) {
-                        return Hero(
-                          tag: _images[index],
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10.0),
-                            child: Image(
-                              image: FileImage(_images[index]),
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

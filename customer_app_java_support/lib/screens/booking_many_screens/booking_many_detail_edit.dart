@@ -502,7 +502,7 @@ class _BookingManyDetailEditState extends State<BookingManyDetailEdit> {
                               ),
                               Text(
                                 notice.overall
-                                    ? 'Thời tiết huận lợi để chụp ảnh'
+                                    ? 'Thời tiết thuận lợi để chụp ảnh'
                                     : 'Thời tiết không thuận lợi cho chụp ảnh',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.black),

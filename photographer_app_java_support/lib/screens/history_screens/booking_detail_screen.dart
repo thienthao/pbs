@@ -157,14 +157,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         DateFormat('dd/MM/yyyy').format(DateTime.parse(inputDate).toLocal());
     String now = DateFormat('dd/MM/yyyy').format(DateTime.now().toLocal());
 
-    if (date.compareTo(now) > 0) {
-      return Text('Tương lai',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontStyle: FontStyle.italic,
-            color: Colors.lightGreen[100],
-          ));
-    } else if (date.compareTo(now) < 0) {
+    // if (date.compareTo(now) > 0) {
+    //   return Text('Tương lai',
+    //       style: TextStyle(
+    //         fontWeight: FontWeight.bold,
+    //         fontStyle: FontStyle.italic,
+    //         color: Colors.lightGreen[100],
+    //       ));
+    // } else
+
+    if (date.compareTo(now) < 0) {
       return Text('Quá hạn',
           style: TextStyle(
             fontWeight: FontWeight.bold,

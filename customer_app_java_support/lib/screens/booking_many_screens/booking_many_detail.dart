@@ -108,25 +108,23 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
               if (state is WarningStateLoading) {
                 _showLoadingAlert();
               }
+
               if (state is WarningStateGetWeatherWarningSuccess) {
                 Navigator.pop(context);
-                if (state is WarningStateGetWeatherWarningSuccess) {
+                if (state.notice == null) {
                   Navigator.pop(context);
-                  if (state.notice == null) {
+                } else if (state.notice.isHourly) {
+                  _showWeatherWarningHourlyAlert(state.notice);
+                } else if (!state.notice.isHourly) {
+                  if (state.notice.humidity == null ||
+                      state.notice.noti == null ||
+                      state.notice.outlook == null ||
+                      state.notice.temperature == null ||
+                      state.notice.windSpeed == null) {
                     Navigator.pop(context);
-                  } else if (state.notice.isHourly) {
-                    _showWeatherWarningHourlyAlert(state.notice);
-                  } else if (!state.notice.isHourly) {
-                    if (state.notice.humidity == null ||
-                        state.notice.noti == null ||
-                        state.notice.outlook == null ||
-                        state.notice.temperature == null ||
-                        state.notice.windSpeed == null) {
-                      Navigator.pop(context);
-                      return;
-                    } else {
-                      _showWeatherWarning(state.notice);
-                    }
+                    return;
+                  } else {
+                    _showWeatherWarning(state.notice);
                   }
                 }
               }
@@ -642,7 +640,7 @@ class _BookingManyDetailState extends State<BookingManyDetail> {
                               ),
                               Text(
                                 notice.overall
-                                    ? 'Thời tiết huận lợi để chụp ảnh'
+                                    ? 'Thời tiết thuận lợi để chụp ảnh'
                                     : 'Thời tiết không thuận lợi cho chụp ảnh',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(color: Colors.black),
