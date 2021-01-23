@@ -11,6 +11,7 @@ import fpt.university.pbswebapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -132,6 +133,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setBookingStatus(EBookingStatus.ONGOING);
+        savedBooking.setPreviousStatus(EBookingStatus.PENDING);
         List<TimeLocationDetail> tlds = generateCheckinCode(savedBooking.getTimeLocationDetails(), savedBooking.getId());
         savedBooking.setTimeLocationDetails(tlds);
         Booking result = bookingRepository.save(savedBooking);
@@ -153,6 +155,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setBookingStatus(EBookingStatus.REJECTED);
+        savedBooking.setBookingStatus(EBookingStatus.PENDING);
         savedBooking.setRejectedReason(booking.getRejectedReason());
         Booking result = bookingRepository.save(savedBooking);
 
@@ -173,6 +176,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setUpdatedAt(new Date());
+        savedBooking.setPreviousStatus(booking.getBookingStatus());
         savedBooking.setBookingStatus(EBookingStatus.CANCELLING_CUSTOMER);
         savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
@@ -205,6 +209,7 @@ public class BookingService {
         Booking savedBooking = bookingRepository.findById(booking.getId()).get();
 
         savedBooking.setUpdatedAt(new Date());
+        savedBooking.setPreviousStatus(booking.getBookingStatus());
         savedBooking.setBookingStatus(EBookingStatus.CANCELLING_PHOTOGRAPHER);
         savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
         Booking result = bookingRepository.save(savedBooking);
@@ -233,66 +238,17 @@ public class BookingService {
         return result;
     }
 
-    public Booking cancelForCustomer(Booking booking) {
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-
-        savedBooking.setUpdatedAt(new Date());
-        savedBooking.setBookingStatus(EBookingStatus.CANCELLED_CUSTOMER);
-        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
-        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
-        Booking result = bookingRepository.save(savedBooking);
-        User user = userRepository.findById(booking.getCustomer().getId()).get();
-        User photographer = userRepository.findById(booking.getPhotographer().getId()).get();
-
-        NotiRequest notiRequest = new NotiRequest();
-        notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
-        notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
-        notiRequest.setToken(photographer.getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
-
-        Notification notification = new Notification();
-        notification.setReceiverId(photographer.getId());
-        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
-        notification.setTitle(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
-        notification.setContent(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
-        notification.setBookingId(result.getId());
-        notificationRepository.save(notification);
-
-        return result;
-    }
-
-    public Booking cancelForPhotographer(Booking booking) {
-        // if status not hop ly
-        // check co dung nguoi ko
-        Booking savedBooking = bookingRepository.findById(booking.getId()).get();
-//        if(isBookingOfUser(savedBooking.getPhotographer().getId()) == false && isBookingOfUser(savedBooking.getCustomer().getId()) == false) {
-//            throw new BadRequestException("Booking not found - Code 2");
-//        }
-
-        savedBooking.setUpdatedAt(new Date());
-        savedBooking.setBookingStatus(EBookingStatus.CANCELLED_PHOTOGRAPHER);
-        savedBooking.setCustomerCanceledReason(booking.getCustomerCanceledReason());
-        savedBooking.setPhotographerCanceledReason(booking.getPhotographerCanceledReason());
-        Booking result = bookingRepository.save(savedBooking);
-        User user = userRepository.findById(booking.getPhotographer().getId()).get();
-        User customer = userRepository.findById(booking.getCustomer().getId()).get();
-
-
-        NotiRequest notiRequest = new NotiRequest();
-        notiRequest.setTitle("Rất tiếc, cuộc hẹn đã bị hủy");
-        notiRequest.setBody(user.getFullname() + " đã hủy cuộc hẹn.");
-        notiRequest.setToken(customer.getDeviceToken());
-        fcmService.pushNotification(notiRequest, booking.getId());
-
-        Notification notification = new Notification();
-        notification.setReceiverId(customer.getId());
-        notification.setNotificationType(ENotificationType.BOOKING_STATUS);
-        notification.setTitle(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
-        notification.setContent(user.getFullname() + " đã gửi yêu cầu hủy cuộc hẹn");
-        notification.setBookingId(result.getId());
-        notificationRepository.save(notification);
-
-        return result;
+    public ResponseEntity<?> cancelPendingBooking(Booking booking) {
+        try {
+            booking = bookingRepository.findById(booking.getId()).get();
+            if (booking.getBookingStatus() != EBookingStatus.PENDING) {
+                return ResponseEntity.badRequest().body("Chỉ có thể hủy khi trạng thái đơn hẹn là chờ xác nhận");
+            }
+            bookingRepository.deleteById(booking.getId());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Đơn hẹn này không tồn tại");
+        }
     }
 
     public Booking editing(Booking booking) {
@@ -303,6 +259,7 @@ public class BookingService {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.EDITING);
+        savedBooking.setPreviousStatus(EBookingStatus.ONGOING);
         Booking result = bookingRepository.save(savedBooking);
 
         User customer = userRepository.findById(booking.getCustomer().getId()).get();
@@ -343,6 +300,7 @@ public class BookingService {
 //        }
 
         savedBooking.setBookingStatus(EBookingStatus.DONE);
+        savedBooking.setPreviousStatus(EBookingStatus.EDITING);
         savedBooking.setReturningLink(booking.getReturningLink());
         savedBooking.setComment(booking.getComment());
         savedBooking.setRating(booking.getRating());
@@ -626,7 +584,7 @@ public class BookingService {
             for (int i = 0; i < hours.size(); i++) {
                 LocalTime hour = hours.get(i);
                 HttpResponse<String> response = ClimaAPIHelper.getWeatherResponseAtTime(lat, lon, date.toString(), hour.toString());
-                WeatherNoti weatherNoti = ClimaAPIHelper.getWeatherNoti(response, date);
+                WeatherNoti weatherNoti = ClimaAPIHelper.getWeatherNotiHourly(response);
                 if(weatherNoti.getIsSuitable()) {
                     suitable += 1;
                 } else {
@@ -641,6 +599,8 @@ public class BookingService {
             }
             result.setDate(date);
             result.setTime(time);
+            result.setLocation(MapHelper.getLocation(lat, lon));
+            result.setIsHourly(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -733,6 +693,8 @@ public class BookingService {
     }
 
     public WeatherNoti getWeatherInfo(String datetime, Double lat, Double lon) {
+        LocalDateTime localDateTime = DateHelper.convertToLocalDateTimeViaString(datetime);
+        LocalDate localDate = localDateTime.toLocalDate();
         WeatherNoti result = new WeatherNoti();
         try {
             String outlook = "";
@@ -740,13 +702,13 @@ public class BookingService {
             String humid = "";
             String wind = "";
 
-            HttpResponse<String> response = ClimaAPIHelper.getWeatherResponse(lat, lon, datetime);
+            HttpResponse<String> response = ClimaAPIHelper.getWeatherResponse(lat, lon, localDate.toString());
             ObjectMapper objectMapper = new ObjectMapper();
             Clima[] climas = objectMapper.readValue(response.body(), Clima[].class);
             for(int i = 0; i < climas.length; i++) {
 //                mapTemp(climas[i].getTemp());
                 Clima clima = climas[i];
-                if(ClimaAPIHelper.mapDate(clima.getObservation()).equalsIgnoreCase(datetime)) {
+                if(ClimaAPIHelper.mapDate(clima.getObservation()).equalsIgnoreCase(localDate.toString())) {
                     Temp temp = ClimaAPIHelper.mapTemp(clima.getTemp());
                     Humidity humidity = ClimaAPIHelper.mapHumidity(clima.getHumidity());
                     WindSpeed windSpeed = ClimaAPIHelper.mapWindSpeed(clima.getWindSpeed());
@@ -756,12 +718,14 @@ public class BookingService {
                     outlook = ClimaAPIHelper.mapOutlook(clima.getCode());
 
                     WeatherBayesian ba = new WeatherBayesian();
-                    ba.readTable();
                     result.setNoti(ba.compared(outlook, temperature, humid, wind));
                     result.setOutlook(outlook);
                     result.setTemperature(ClimaAPIHelper.getTempDouble(temp));
                     result.setHumidity(ClimaAPIHelper.getHumidityDouble(humidity));
                     result.setWindSpeed(ClimaAPIHelper.getWindSpeedDouble(windSpeed));
+                    result.setIsHourly(false);
+                    result.setLocation(MapHelper.getLocation(lat, lon));
+                    result.setDate(localDate.toString());
                 }
             }
         } catch (Exception e) {
@@ -993,7 +957,7 @@ public class BookingService {
     }
 
     public Page<Booking> findAll(Pageable pageable) {
-        return bookingRepository.findAll(pageable);
+        return bookingRepository.findAllOrderByCreatedAt(pageable);
     }
 
     public boolean isBookingOfUser(String username, Long bookingId) {

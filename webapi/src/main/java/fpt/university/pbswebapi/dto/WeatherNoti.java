@@ -11,6 +11,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class WeatherNoti {
 
+    private Boolean isHourly;
+
+    private String location;
+
+    private String date;
+
     private String noti;
 
     private String outlook;

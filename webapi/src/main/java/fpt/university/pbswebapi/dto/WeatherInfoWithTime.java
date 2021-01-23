@@ -16,6 +16,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class WeatherInfoWithTime {
 
+    private Boolean isHourly;
+
     private LocalDate date;
 
     private String location;

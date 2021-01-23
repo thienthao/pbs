@@ -20,6 +20,54 @@ public class ClimaAPIHelper {
     private static final String APIKEY2 = "LNi5rDEQAC5YoagsDYJJckE2g2eLfUgp";
     private static final String APIKEY3 = "nDVs44XgBuVQLHARVgHnB1JCmJQuRp8E";
 
+    public static Double mapTempHourly(Object temp) {
+        Double result = 0.0;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.convertValue(temp, Map.class);
+            result = Double.parseDouble(map.get("value").toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static Double mapHumidityHourly(Object humidity) {
+        Double result = 0.0;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.convertValue(humidity, Map.class);
+            result = Double.parseDouble(map.get("value").toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static Double mapWindSpeedHourly(Object windSpeed) {
+        Double result = 0.0;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.convertValue(windSpeed, Map.class);
+            result = Double.parseDouble(map.get("value").toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static String mapWeatherCodeHourly(Object weatherCode) {
+        String result = "";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.convertValue(weatherCode, Map.class);
+            result = map.get("value").toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static Temp mapTemp(List<Object> temp) {
         Temp result = new Temp();
         for(Object obj : temp) {
@@ -148,6 +196,18 @@ public class ClimaAPIHelper {
         }
     }
 
+    public static String getTempHourly(Double value) {
+        if(value > 27) {
+            return "hot";
+        } else if (value <= 27 && value >= 22) {
+            return "mild";
+        } else if (value <= 22 && value >= 16){
+            return "cool";
+        } else {
+            return "cold";
+        }
+    }
+
     public static Double getTempDouble(Temp temp) {
         return (temp.getMax() + temp.getMin()) / (double) 2;
     }
@@ -163,12 +223,34 @@ public class ClimaAPIHelper {
         }
     }
 
+    public static String getHumidityHourly(Double value) {
+        if(value > 60) {
+            return "high";
+        } else if (value >= 40 && value <= 60){
+            return "normal";
+        } else {
+            return "low";
+        }
+    }
+
     public static Double getHumidityDouble(Humidity humidity) {
         return (humidity.getMax() + humidity.getMin()) / (double) 2;
     }
 
     public static String getWindSpeed(WindSpeed windSpeed) {
         Double value = (windSpeed.getMax() + windSpeed.getMin()) / (double) 2;
+        if(value > 10.6) {
+            return "strong";
+        } else if (value <= 10.6 && value >= 5.3){
+            return "fresh";
+        } else if (value >= 0 && value <= 5.3) {
+            return "gentle";
+        } else {
+            return "zero";
+        }
+    }
+
+    public static String getWindSpeedHourly(Double value) {
         if(value > 10.6) {
             return "strong";
         } else if (value <= 10.6 && value >= 5.3){
@@ -226,16 +308,54 @@ public class ClimaAPIHelper {
         return result;
     }
 
+    public static WeatherNoti getWeatherNotiHourly(HttpResponse<String> weatherResponse) {
+        WeatherNoti result = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ClimaHourly[] climaHourlys = objectMapper.readValue(weatherResponse.body(), ClimaHourly[].class);
+            ClimaHourly climaHourly = climaHourlys[0];
+
+            String outlook = "";
+            String temperature = "";
+            String humid = "";
+            String wind = "";
+            WeatherBayesian ba = new WeatherBayesian();
+
+            Double temp = ClimaAPIHelper.mapTempHourly(climaHourly.getTemp());
+            Double humidity = ClimaAPIHelper.mapHumidityHourly(climaHourly.getHumidity());
+            Double windSpeed = ClimaAPIHelper.mapWindSpeedHourly(climaHourly.getWindSpeed());
+            temperature = ClimaAPIHelper.getTempHourly(temp);
+            humid = ClimaAPIHelper.getHumidityHourly(humidity);
+            wind = ClimaAPIHelper.getWindSpeedHourly(windSpeed);
+            outlook = ClimaAPIHelper.mapOutlook(climaHourly.getCode());
+
+            Boolean isSuitable = ba.comparedV2(outlook, temperature, humid, wind);
+            if(isSuitable != null) {
+                result = new WeatherNoti();
+                result.setIsSuitable(isSuitable);
+                result.setOutlook(outlook);
+                result.setTemperature(temp);
+                result.setHumidity(humidity);
+                result.setWindSpeed(windSpeed);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public static HttpResponse<String> getWeatherResponseAtTime(Double lat, Double lon, String date, String time) {
         HttpResponse<String> response = null;
         try {
             HttpClient httpClient = HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_2)
                     .build();
-            String url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/daily?" +
-                    "lat={0}&lon={1}&" +
-                    "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                    "start_time={2}T{3}&apikey={4}", lat, lon, date, time, APIKEY1);
+            String url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/hourly?" +
+                    "lat={0}&lon={1}" +
+                    "&fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si" +
+                    "&start_time={2}T{3}Z&end_time={2}T{3}Z" +
+                    "&apikey={4}",
+                    lat, lon, date, time, APIKEY1);
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()
                     .uri(URI.create(url))
@@ -244,10 +364,12 @@ public class ClimaAPIHelper {
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if(response.statusCode() != 200) {
-                url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/daily?" +
-                        "lat={0}&lon={1}&" +
-                        "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                        "start_time={2}T{3}&apikey={4}", lat, lon, date, time, APIKEY2);
+                url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/hourly?" +
+                                "lat={0}&lon={1}" +
+                                "&fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si" +
+                                "&start_time={2}T{3}Z&end_time={2}T{3}Z" +
+                                "&apikey={4}",
+                        lat, lon, date, time, APIKEY2);
                 request = HttpRequest.newBuilder()
                         .GET()
                         .uri(URI.create(url))
@@ -256,10 +378,12 @@ public class ClimaAPIHelper {
                 response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200) {
-                    url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/daily?" +
-                            "lat={0}&lon={1}&" +
-                            "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                            "start_time={2}T{3}&apikey={4}", lat, lon, date, time, APIKEY3);
+                    url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/hourly?" +
+                                    "lat={0}&lon={1}" +
+                                    "&fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si" +
+                                    "&start_time={2}T{3}Z&end_time={2}T{3}Z" +
+                                    "&apikey={4}",
+                            lat, lon, date, time, APIKEY3);
                     request = HttpRequest.newBuilder()
                             .GET()
                             .uri(URI.create(url))
@@ -274,10 +398,12 @@ public class ClimaAPIHelper {
                 HttpClient httpClient = HttpClient.newBuilder()
                         .version(HttpClient.Version.HTTP_2)
                         .build();
-                String url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/daily?" +
-                        "lat={0}&lon={1}&" +
-                        "fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si&" +
-                        "start_time={2}T{3}&apikey={4}", lat, lon, date, time, APIKEY3);
+                String url = MessageFormat.format("https://api.climacell.co/v3/weather/forecast/hourly?" +
+                                "lat={0}&lon={1}" +
+                                "&fields=temp%2Chumidity%2Cwind_speed%2Cweather_code&unit_system=si" +
+                                "&start_time={2}T{3}Z&end_time={2}T{3}Z" +
+                                "&apikey={4}",
+                        lat, lon, date, time, APIKEY3);
                 HttpRequest request = HttpRequest.newBuilder()
                         .GET()
                         .uri(URI.create(url))

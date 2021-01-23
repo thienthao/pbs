@@ -124,10 +124,10 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-footer">
+            <div class="modal-body d-flex justify-content-center align-items-center">
                 <input type="text" class="form-control" id="remove-category-id" hidden>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary">Xác nhận</button>
+                <button type="submit" class="btn btn-primary ml-1">Xác nhận</button>
             </div>
         </form>
     </div>
@@ -201,14 +201,98 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-footer">
+            <div class="modal-body d-flex justify-content-center align-items-center">
                 <input type="text" class="form-control" id="remove-topic-id" hidden>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary">Xác nhận</button>
+                <button type="submit" class="btn btn-primary ml-1">Xác nhận</button>
             </div>
         </form>
     </div>
 </div>
 <!-- end remove topic modal -->
+
+<!-- Warn modal 2 -->
+<div class="modal" id="warn-mail-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="warn-mail-form" class="modal-content w-120">
+            <div class="modal-header">
+                <h5 class="modal-title">Gửi cảnh báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="warn-user-name" class="col-form-label">Người nhận</label>
+                        <input type="text" class="form-control" required id="warn-user-name" readonly>
+                        <input type="text" class="form-control" id="warn-user-id" hidden>
+                        <label for="warn-user-title" class="col-form-label">Tiêu đề</label>
+                        <input type="text" class="form-control" id="warn-user-title" value="PBS - Cảnh báo hủy hẹn" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="editor" class="form-control">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button id="warn-user-submit" type="submit" class="btn btn-primary">
+                    Gửi
+                    <span style="display: none;" id="warn-user-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end warn modal 2 -->
+
+
+<!-- cancellation approve modal -->
+<div class="modal" id="cancellation-approve-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" id="cancellation-approve-form">
+            <div class="modal-header">
+                <h5 class="modal-title">Chấp thuận đơn hủy này?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <input type="text" class="form-control" id="cancellation-approve-id" hidden>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary ml-1" id="cancellation-approve-submit">
+                    Xác nhận
+                    <span style="display: none;" id="cancellation-approve-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end cancellation approve modal -->
+
+<!-- update variable -->
+<div class="modal" id="update-variable-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" id="update-variable-form">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật trọng số?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <input type="text" class="form-control" hidden>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary ml-1" id="update-variable-submit">
+                    Xác nhận
+                    <span style="display: none;" id="update-variable-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end update variable  -->
 </body>
 </html>

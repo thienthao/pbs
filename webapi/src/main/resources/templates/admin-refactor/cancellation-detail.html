@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Cancellation Detail</title>
+    <title>Chi tiết đơn hủy hẹn</title>
 </head>
 <body>
 <div th:fragment="content">
@@ -17,8 +17,12 @@
                     </div>
                     <div>
                         <div class="form-inline">
-                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
-                                                                                                  class="mr-sm-2">Người hủy</label><input type="text" th:value="${cancellation.owner.fullname}" class="form-control" readonly></div>
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group">
+                                <label class="mr-sm-2">Người hủy:</label>
+                                <a type="text" class="form-control" th:href="@{/admin/v2/users/{userId}(userId=${cancellation.owner.id})}" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${cancellation.owner.fullname}">
+                                    Cao Tiến
+                                </a>
+                            </div>
                             <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Lý do hủy
                             </label><input type="text" class="form-control" th:value="${cancellation.reason}" readonly></div>
                         </div>
@@ -45,12 +49,8 @@
                         </div>
                         <div class="divider"></div>
                         <div class="form-inline">
-                            <form id="submit-form" th:action="@{/admin/cancellations/{id}(id = ${cancellation.id})}" method="post">
-                                <button class="mt-2 btn btn-primary" type="submit">Chấp thuận</button>
-                            </form>
-                            <form id="warn-form" class="ml-2" method="post" th:action="@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}">
-                                <button type="submit" class="mt-2 btn btn-primary" id="btn-mail">Gửi cảnh báo</button>
-                            </form>
+                            <button class="mt-2 btn btn-primary mr-1" type="submit" data-toggle="modal" data-target="#cancellation-approve-modal">Chấp thuận</button>
+                            <button type="button" class="mt-2 btn btn-primary ml-1" data-toggle="modal" data-target="#warn-mail-modal">Gửi cảnh báo</button>
                         </div>
                     </div>
                 </div>
@@ -58,27 +58,96 @@
         </div>
     </div>
     <script th:inline="javascript">
-
         //@{/admin/cancellations-warn/{id}(id = ${cancellation.id})}
 
 
         $('#submit-form').submit(async (e) => {
             e.preventDefault();
             const cancellationId = [[${cancellation.id}]]
-            const url = '/admin/cancellations/' + cancellationId
-            await customDialog(LABEL_TITLE_CONFIRMATION, LABEL_CONFIRM_DELETE, LABEL_BTN_YES, LABEL_BTN_NO, function () {
+            const url = pathname + '/admin/cancellations/' + cancellationId
+            await customDialog(LABEL_TITLE_CONFIRMATION, LABEL_CONFIRM_APPROVE, LABEL_BTN_YES, LABEL_BTN_NO, function () {
                 sendRequest('POST', url, url)
             });
         });
 
-        $('#warn-form').submit((e) => {
+        $('#cancellation-approve-form').submit(async (e) => {
             e.preventDefault();
+            $('#cancellation-approve-spinner').show();
+            $('#cancellation-approve-submit').prop('disabled', true);
             const cancellationId = [[${cancellation.id}]]
+            const url = pathname + '/admin/api/cancellations/' + cancellationId;
             $.ajax({
                 type:"post",
-                url: '/admin/cancellations/' + cancellationId,
+                url: url,
+                data: {topic: 's'},
                 success: function(result){
-                    $('#admin-content').load('/admin/cancellations/' + cancellationId);
+                    $('#admin-content').load(pathname + '/admin/cancellations/' + cancellationId);
+                    $('#cancellation-approve-modal').trigger('click');
+                    $('#cancellation-approve-submit').prop('disabled', false);
+                    $('#cancellation-approve-spinner').hide();
+                    $.toast({
+                        text: "Đã chấp thuận đơn hủy", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                },
+                error: function(err) {
+                    $('#cancellation-approve-modal').trigger('click');
+                    $('#cancellation-approve-submit').prop('disabled', false);
+                    $('#cancellation-approve-spinner').hide();
+                }
+            });
+        });
+
+        $('#warn-mail-form').submit(async (e) => {
+            e.preventDefault();
+            $.toast().reset('all');
+            $('#warn-user-spinner').show();
+            $('#warn-user-submit').prop('disabled', true);
+            const cancellationId = [[${cancellation.id}]]
+            const url = pathname + '/admin/api/cancellations-warn/' + cancellationId;
+            const mail = $('#editor').val();
+            alert(mail);
+            $.ajax({
+                type:"post",
+                url: url,
+                contentType: "application/x-www-form-urlencoded;charset=utf-8",
+                data: JSON.stringify({mail: mail}),
+                success: function(result){
+                    $('#admin-content').load(pathname + '/admin/cancellations/' + cancellationId);
+                    $('#warn-mail-modal').trigger('click');
+                    $('#warn-user-submit').prop('disabled', false);
+                    $('#warn-user-spinner').hide();
+                    $.toast({
+                        text: "Đã gửi cảnh báo người dùng", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                },
+                error: function(err) {
+                    $('#warn-mail-modal').trigger('click');
+                    $('#warn-user-submit').prop('disabled', false);
+                    $('#warn-user-spinner').hide();
                 }
             });
         });
@@ -89,6 +158,32 @@
             $('.arrow').remove();
             $('#admin-content').load('/admin/bookings/' + bookingId + '?'  + $.param({cancellationId: cancellationId}));
         }
+    </script>
+
+    <script th:inline="javascript">
+
+        $('#cancellation-approve-modal').on('show.bs.modal', function(e) {
+            const cancellationId = [[${cancellation.id}]];
+
+            $(e.currentTarget).find('#cancellation-approve-id').val(cancellationId);
+        });
+
+        $('#warn-mail-modal').on('show.bs.modal', function(e) {
+            const cancellationOwner = [[${cancellation.owner.fullname}]];
+            const cancellationOwnerEmail = [[${cancellation.owner.email}]];
+            const ownerId = [[${cancellation.owner.id}]];
+
+            $(e.currentTarget).find('#warn-user-name').val(cancellationOwnerEmail);
+            $(e.currentTarget).find('#warn-user-id').val(ownerId);
+            //populate the textbox
+            tinymce.get("editor").setContent(
+                `<p>Xin chào ${cancellationOwner}!</p>
+                <p>Đây là cảnh báo vì đơn hủy hẹn của bạn là không hợp lý, gây ra nhiều khó khăn cho người dùng còn lại.</p>
+                <p>Đơn hủy vẫn sẽ được tiếp nhận, tuy nhiên nếu tiếp tục hành vi có thể dẫn đến việc tài khoản của bạn bị vô hiệu hóa.</p>
+                 <p>Trân trọng</p>
+                 <p>PBS</p> `);
+        });
+
     </script>
 </div>
 </body>

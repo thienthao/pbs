@@ -24,7 +24,7 @@ public class NotificationController {
 
     @PostMapping("/{bookingId}")
     public ResponseEntity<?> sendCheckinConfirmation(@PathVariable("bookingId") Long bookingId) {
-        notificationService.createConfirmationNotification(bookingId);;
+        notificationService.createConfirmationNotification(bookingId);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 

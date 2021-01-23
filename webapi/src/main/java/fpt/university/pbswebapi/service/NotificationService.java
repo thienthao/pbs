@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.service;
 
+import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.ENotificationType;
 import fpt.university.pbswebapi.entity.Notification;
@@ -17,11 +18,13 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final BookingRepository bookingRepository;
+    private final FCMService fcmService;
 
     @Autowired
-    public NotificationService(NotificationRepository notificationRepository, BookingRepository bookingRepository) {
+    public NotificationService(NotificationRepository notificationRepository, BookingRepository bookingRepository, FCMService fcmService) {
         this.notificationRepository = notificationRepository;
         this.bookingRepository = bookingRepository;
+        this.fcmService = fcmService;
     }
 
     public List<Notification> findNotiWhereUserId(Long receiverId) {
@@ -85,8 +88,14 @@ public class NotificationService {
         notification.setNotificationType(ENotificationType.CONFIRMATION_REQUEST);
         notification.setBookingId(booking.getId());
         notification.setCreatedAt(new Date());
-        notification.setReceiverId(booking.getPhotographer().getId());
+        notification.setReceiverId(booking.getCustomer().getId());
         notification.setIsRead(false);
         notificationRepository.save(notification);
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Xác nhận cuộc hẹn");
+        notiRequest.setBody(booking.getPhotographer().getFullname() + " đã gửi yêu cầu xác nhận buổi chụp đã hoàn thành.");
+        notiRequest.setToken(booking.getCustomer().getDeviceToken());
+        fcmService.pushNotification(notiRequest, booking.getId());
     }
 }

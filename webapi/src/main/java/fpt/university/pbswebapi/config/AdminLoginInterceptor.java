@@ -12,16 +12,16 @@ public class AdminLoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object o) throws Exception {
-//        String requestServletPath = request.getServletPath();
-//        if (requestServletPath.startsWith("/admin") && null == request.getSession().getAttribute("loginUser")) {
-//            request.getSession().setAttribute("errorMsg", "Please login again");
-//            response.sendRedirect(request.getContextPath() + "/admin/login");
-//            return false;
-//        } else {
-//            request.getSession().removeAttribute("errorMsg");
-//            return true;
-//        }
-        return true;
+        String requestServletPath = request.getServletPath();
+        if (requestServletPath.startsWith("/admin") && null == request.getSession().getAttribute("loginUser")) {
+            request.getSession().setAttribute("errorMsg", "Xin hãy nhập tên đăng nhập và mật khẩu");
+            response.sendRedirect(request.getContextPath() + "/admin/login");
+            return false;
+        } else {
+            request.getSession().removeAttribute("errorMsg");
+            return true;
+        }
+//        return true;
     }
 
     @Override

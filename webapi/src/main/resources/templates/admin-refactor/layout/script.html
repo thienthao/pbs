@@ -27,13 +27,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-filestyle/2.1.0/bootstrap-filestyle.min.js" integrity="sha512-HfRdzrvve5p31VKjxBhIaDhBqreRXt4SX3i3Iv7bhuoeJY47gJtFTRWKUpjk8RUkLtKZUhf87ONcKONAROhvIw==" crossorigin="anonymous"></script>
 <script src="https://cdn.tiny.cloud/1/xiscx5rnb5bpcun87f48v884z4q30sska46zscxommfv9e3f/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"
+        integrity="sha512-zlWWyZq71UMApAjih4WkaRpikgY9Bz1oXIW5G0fED4vk14JjGlQ1UmkGM392jEULP8jbNMiwLWdM8Z87Hu88Fw=="
+        crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.css"
+      integrity="sha512-8D+M+7Y6jVsEa7RD6Kv/Z7EImSpNpQllgaEIQAtqHcI0H6F4iZknRj0Nx1DCdB+TwBaS+702BGWYC0Ze2hpExQ=="
+      crossorigin="anonymous" />
 <script id="main-script" type="text/javascript" th:src="@{/admin-refactor/assets/scripts/main.js}"></script>
 <script type="text/javascript" th:src="@{/admin-refactor/assets/scripts/modal.js}"></script>
 <script type="text/javascript"  th:src="@{/admin-refactor/langs/vi.js}"></script>
 <script>
      <!--    Constant -->
-     var LABEL_TITLE_CONFIRMATION = "Vui lòng xác nhận"
-     var LABEL_CONFIRM_DELETE = "Bạn có thực sự muốn xóa?"
+     var LABEL_TITLE_CONFIRMATION = "Xác nhận"
+     var LABEL_CONFIRM_APPROVE = "Chấp thuận đơn hủy này?"
+     var LABEL_CONFIRM_WARN = "Gửi cảnh báo cho người dùng và chuyển trạng thái đơn hẹn thành Hủy?"
      var LABEL_BTN_YES = "Có"
      var LABEL_BTN_NO = "Không"
 </script>
@@ -66,6 +73,10 @@
         buttonText : ' Select a File'
     });
     $(document).ready(function () {
+
+        $('#logout-a').click(() => {
+            window.location.href = pathname + '/admin/logout';
+        });
 
         $('#header-card').click(() => {
             $('#admin-content').load(pathname + '/admin/dashboard-nav');
@@ -118,15 +129,15 @@
         $('#selection').change(getContent);
 
         function getContent() {
-            const url = pathname + '/admin/dashboard-nav';
+            // const url = pathname + '/admin/dashboard-nav';
             // const url = pathname + '/admin/returning-types';
             // const url = pathname + '/admin/topics';
             // var url = '/admin/categories';
             // var url = '/admin/v2/threads/1';
             // var url = '/admin/v2/threads';
-            // var url = '/admin/variables';
+            var url = '/admin/variables';
             // var url = '/admin/v2/users/168';
-            // var url = '/admin/cancellations/1';
+            // var url = pathname + '/admin/cancellations/1';
             // var url = '/admin/cancellations';
 
             // var url = '/admin/returning-types';
@@ -138,7 +149,7 @@
             // var url = '/admin/bookings/405?cancellationId=1';
 
             //load fragment and replace content
-            $(pathname + '#admin-content').load(url);
+            $('#admin-content').load(url);
         }
     })
 </script>
@@ -148,14 +159,19 @@
     tinymce.init({
         selector: 'textarea#editor',
         menubar: false,
-        language: 'vi'
+        language: 'vi',
+        height: 300,
+        entity_encoding : "raw"
     });
 </script>
 <script>
     tinymce.init({
         selector: "textarea#editor",
         skin: "bootstrap",
-        plugins: "lists, link, image, media",
+        plugins: "lists, link, image, media, autoresize",
+        height: 300,
+        branding: false,
+        statusbar: false,
         toolbar:
             "h1 h2 bold italic strikethrough blockquote bullist numlist backcolor | link image media | removeformat help",
         menubar: false,
@@ -316,7 +332,6 @@
         return [year, month, day].join('-');
     }
     function sendRequest(method, url, callbackUrl) {
-        console.log("Method: " + method +' - URL: '+ url)
         $.ajax({
             async: true,
             method: method,
@@ -338,13 +353,14 @@
             " <p> " + msg + " </p> " +
             "</div>" +
             "<footer>" +
-            "<div class='controls'>" +
+            "<div class='controls d-flex flex-row'>" +
             " <button class='button button-default c-btn-yes'>" + labelYes + "</button> " +
             " <button class='button button-danger c-btn-no'>" + labelNo + "</button> " +
             "</div>" +
             "</footer>" +
             "</div>" +
             "</div>";
+        // $('#topic-remove-modal').modal('show');
         $('body').prepend($content);
         $('.c-btn-yes').click(async function () {
             $('.loading').css('display', 'inline-block');

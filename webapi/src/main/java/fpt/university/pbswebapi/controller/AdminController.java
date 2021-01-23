@@ -5,17 +5,24 @@ import fpt.university.pbswebapi.dto.UserBookingInfo;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.repository.*;
+import fpt.university.pbswebapi.security.services.UserDetailsImpl;
 import fpt.university.pbswebapi.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +50,9 @@ public class AdminController {
     private ThreadTopicRepository threadTopicRepository;
 
     @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
     public AdminController(CategoryRepository categoryRepository, ReturningTypeRepository returningTypeRepository, UserRepository userRepository, UserService userService, ThreadService threadService, BookingService bookingService, CancellationService cancellationService, VariableService variableService, BookingRepository bookingRepository, RatingService ratingService, ReportService reportService, CategoryService categoryService, ThreadTopicRepository threadTopicRepository) {
         this.categoryRepository = categoryRepository;
         this.returningTypeRepository = returningTypeRepository;
@@ -61,6 +71,14 @@ public class AdminController {
 
     @GetMapping("/login")
     public String login(Model model, String error, String logout) {
+        return "admin-rework/login";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        request.getSession().removeAttribute("loginUserId");
+        request.getSession().removeAttribute("loginUser");
+        request.getSession().removeAttribute("errorMsg");
         return "admin-rework/login";
     }
 
@@ -341,8 +359,9 @@ public class AdminController {
     }
 
     @PostMapping("/cancellations-warn/{id}")
-    public String warnAndShowCancellationDetail(@PathVariable Long id) {
-//        cancellationService.warn(id);
+    public String warnAndShowCancellationDetail(@PathVariable Long id, Model model) {
+        cancellationService.warn(id, "");
+        model.addAttribute("cancellation", cancellationService.findById(id));
         return "admin-refactor/cancellation-detail :: content";
     }
 

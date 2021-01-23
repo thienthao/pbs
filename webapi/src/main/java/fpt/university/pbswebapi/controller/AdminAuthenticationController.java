@@ -32,7 +32,7 @@ public class AdminAuthenticationController {
                         HttpSession session) {
 
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-            session.setAttribute("errorMsg", "Please provide username and passwork");
+            session.setAttribute("errorMsg", "Xin nhập tên đăng nhập và mật khẩu");
             return "admin-rework/login";
         }
 
@@ -43,14 +43,14 @@ public class AdminAuthenticationController {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             User user = userRepository.findById(userDetails.getId()).get();
             if(!user.getRole().getRole().toString().equalsIgnoreCase("ROLE_ADMIN")) {
-                session.setAttribute("errorMsg", "Login failed");
+                session.setAttribute("errorMsg", "Đăng nhập thất bại");
                 return "admin-rework/login";
             }
             session.setAttribute("loginUser", userDetails.getUsername());
             session.setAttribute("loginUserId", userDetails.getId());
             return "redirect:/admin/dashboard";
         } catch (Exception e) {
-            session.setAttribute("errorMsg", "Login failed");
+            session.setAttribute("errorMsg", "Đăng nhập thất bại");
             return "admin-rework/login";
         }
 

@@ -13,6 +13,8 @@ import static java.util.Collections.reverseOrder;
 @Component
 public class LinearlySorting {
 
+    private final int MAX_SCALE = 100;
+
     private CustomRepository customRepository;
 
     private VariableRepository variableRepository;
@@ -61,17 +63,17 @@ public class LinearlySorting {
             User photographer = unsorted.get(i);
 
             // cal rating
-            float rating = (float) (photographer.getRatingCount() / 5.0);
+            float rating = (float) (photographer.getRatingCount() / 5.0) * MAX_SCALE;
 
             // cal price
             float priceRatio = (float) (photographer.getAveragePackagePrice() / sumPrice);
-            float price = (float) (1.0 - priceRatio);
+            float price = (float) (1.0 - priceRatio) * MAX_SCALE;
 
             // cal distance
             float distanceRatio = (float) (photographer.getDistance() / sumDistance);
-            float distance = (float) 1.0 - distanceRatio;
+            float distance = (float) (1.0 - distanceRatio) * MAX_SCALE;
 
-            float score = (float) ((ratingWeight * rating) + (priceWeight * price) + (distanceWeight * distance));
+            float score = (ratingWeight * rating) + (priceWeight * price) + (distanceWeight * distance);
 
             result.put(photographer, score);
         }

@@ -135,7 +135,7 @@
                     </div>
             </td>
             <td class="text-center">
-                <div class="badge badge-warning" th:text="${booking.bookingStatus}">Chờ xác nhận</div>
+                <div class="badge badge-warning" th:text="${@thymeleafHelper.convertStatus(booking.bookingStatus)}">Chờ xác nhận</div>
             </td>
             <td class="text-center">
                 <a th:onclick="'toBookingDetail('+ ${booking.id} +')'" id="PopoverCustomT-1" class="btn btn-primary btn-sm text-white">Chi tiết</a>

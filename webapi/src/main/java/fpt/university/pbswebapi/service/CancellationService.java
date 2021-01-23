@@ -160,12 +160,14 @@ public class CancellationService {
         cancellationRepository.save(cancellationRequest);
         if(cancellationRequest.getOwner().getRole().getRole() == ERole.ROLE_CUSTOMER) {
             Booking savedBooking = bookingRepository.findById(cancellationRequest.getBooking().getId()).get();
+            savedBooking.setPreviousStatus(savedBooking.getBookingStatus());
             savedBooking.setBookingStatus(EBookingStatus.CANCELLED_CUSTOMER);
             savedBooking.setUpdatedAt(new Date());
             bookingRepository.save(savedBooking);
             noti(cancellationRequest);
         } else {
             Booking savedBooking = bookingRepository.findById(cancellationRequest.getBooking().getId()).get();
+            savedBooking.setPreviousStatus(savedBooking.getBookingStatus());
             savedBooking.setBookingStatus(EBookingStatus.CANCELLED_PHOTOGRAPHER);
             savedBooking.setUpdatedAt(new Date());
             bookingRepository.save(savedBooking);
@@ -173,15 +175,73 @@ public class CancellationService {
         }
     }
 
-    public void warn(Long id) {
+    public void warn(Long id, String mail) {
         CancellationRequest cancellationRequest = cancellationRepository.findById(id).get();
         if(cancellationRequest.getOwner().getRole().getRole() == ERole.ROLE_CUSTOMER) {
 //            mailCustomer(cancellationRequest);
-            warnCustomer(cancellationRequest);
+//            warnCustomer(cancellationRequest);
+//            informPhotographerAboutWarnedCustomer(cancellationRequest);
         } else {
 //            mailPhotographer(cancellationRequest);
-            warnPhotographer(cancellationRequest);
+//            warnPhotographer(cancellationRequest);
+//            informCustomerAboutWarnedPhotographer(cancellationRequest);
         }
+        cancellationRequest.setIsSolve(true);
+        cancellationRepository.save(cancellationRequest);
+        Booking booking = bookingRepository.findById(cancellationRequest.getBooking().getId()).get();
+        booking.setPreviousStatus(booking.getBookingStatus());
+        booking.setBookingStatus(EBookingStatus.CANCELLED_ADMIN);
+        bookingRepository.save(booking);
+    }
+
+    private void informCustomerAboutWarnedPhotographer(CancellationRequest cancellationRequest) {
+        User customer = userRepository.findById(cancellationRequest.getBooking().getCustomer().getId()).get();
+        User photographer = userRepository.findById(cancellationRequest.getBooking().getPhotographer().getId()).get();
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notiRequest.setBody("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notiRequest.setToken(photographer.getDeviceToken());
+        fcmService.pushNotification(notiRequest, cancellationRequest.getBooking().getId());
+
+        NotiRequest notiRequest1 = new NotiRequest();
+        notiRequest1.setTitle("Cuộc hẹn với " + photographer.getFullname() + " đã bị hủy! Tuy nhiên " + photographer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notiRequest1.setBody("Cuộc hẹn với " + photographer.getFullname() + " đã bị hủy! Tuy nhiên " + photographer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notiRequest1.setToken(photographer.getDeviceToken());
+        fcmService.pushNotification(notiRequest1, cancellationRequest.getBooking().getId());
+
+        Notification notification1 = new Notification();
+        notification1.setReceiverId(customer.getId());
+        notification1.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification1.setTitle("Cuộc hẹn với " + photographer.getFullname() + " đã bị hủy! Tuy nhiên " + photographer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notification1.setContent("Cuộc hẹn với " + photographer.getFullname() + " đã bị hủy! Tuy nhiên " + photographer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notification1.setBookingId(cancellationRequest.getBooking().getId());
+        notificationRepository.save(notification1);
+    }
+
+    private void informPhotographerAboutWarnedCustomer(CancellationRequest cancellationRequest) {
+        User customer = userRepository.findById(cancellationRequest.getBooking().getCustomer().getId()).get();
+        User photographer = userRepository.findById(cancellationRequest.getBooking().getPhotographer().getId()).get();
+
+        NotiRequest notiRequest = new NotiRequest();
+        notiRequest.setTitle("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notiRequest.setBody("Thông báo, cuộc hẹn với " + photographer.getFullname() + " đã bị hủy");
+        notiRequest.setToken(customer.getDeviceToken());
+        fcmService.pushNotification(notiRequest, cancellationRequest.getBooking().getId());
+
+        NotiRequest notiRequest1 = new NotiRequest();
+        notiRequest1.setTitle("Cuộc hẹn với " + customer.getFullname() + " đã bị hủy! Tuy nhiên " + customer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notiRequest1.setBody("Cuộc hẹn với " + customer.getFullname() + " đã bị hủy! Tuy nhiên " + customer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notiRequest1.setToken(photographer.getDeviceToken());
+        fcmService.pushNotification(notiRequest1, cancellationRequest.getBooking().getId());
+
+        Notification notification1 = new Notification();
+        notification1.setReceiverId(photographer.getId());
+        notification1.setNotificationType(ENotificationType.BOOKING_STATUS);
+        notification1.setTitle("Cuộc hẹn với " + customer.getFullname() + " đã bị hủy! Tuy nhiên " + customer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notification1.setContent("Cuộc hẹn với " + customer.getFullname() + " đã bị hủy! Tuy nhiên " + customer.getFullname() +" đã bị cảnh cáo sau khi hủy hẹn không hợp lý với bạn, rất mong bạn thông cảm!");
+        notification1.setBookingId(cancellationRequest.getBooking().getId());
+        notificationRepository.save(notification1);
     }
 
     public void warnCustomer(CancellationRequest cancellationRequest) {

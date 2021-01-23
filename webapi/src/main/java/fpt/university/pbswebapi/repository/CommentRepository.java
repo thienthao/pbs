@@ -1,6 +1,7 @@
 package fpt.university.pbswebapi.repository;
 
 import fpt.university.pbswebapi.entity.BookingComment;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,12 @@ public interface CommentRepository extends JpaRepository<BookingComment, Long> {
     List<BookingComment> findAllByUserId(long userId);
 
     List<BookingComment> findAllByBookingId(long bookingId);
+
+    @Query("select c " +
+            "from BookingComment c " +
+            "order by c.commentedAt desc," +
+            "c.rating asc ")
+    Page<BookingComment> findCommentOrderByCommentedAt(Pageable pageable);
 
     @Query("select c " +
             "from BookingComment c " +

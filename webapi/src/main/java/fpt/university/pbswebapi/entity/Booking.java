@@ -24,6 +24,10 @@ public class Booking {
     @Column(name = "booking_status")
     private EBookingStatus bookingStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "previous_status")
+    private EBookingStatus previousStatus;
+
     @Column(name = "start_date")
     private Date startDate;
 

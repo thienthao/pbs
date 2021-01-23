@@ -18,6 +18,6 @@ public class RatingService {
     }
 
     public Page<BookingComment> getAll(Pageable pageable) {
-        return commentRepository.findAll(pageable);
+        return commentRepository.findCommentOrderByCommentedAt(pageable);
     }
 }

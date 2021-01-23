@@ -2,10 +2,7 @@ package fpt.university.pbswebapi.helper;
 
 import fpt.university.pbswebapi.entity.DayOfWeek;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -15,6 +12,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DateHelper {
+
+    public static Boolean isThisInside108Hour(String datetime) {
+        LocalDateTime localDateTime = convertToLocalDateTimeViaString(datetime);
+        LocalDateTime now = LocalDateTime.now();
+
+        long diff = ChronoUnit.HOURS.between(now, localDateTime);
+
+        if(diff > 108) {
+            return false;
+        }
+
+        return true;
+    }
 
     public static LocalTime getTimeFromLocalDateTime(LocalDateTime localDateTime) {
         return localDateTime.toLocalTime();

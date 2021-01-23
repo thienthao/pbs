@@ -26,6 +26,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("FROM Booking b where b.startDate > current_date")
     Page<Booking> sortByStartDate(Pageable paging);
 
+    @Query("select b from Booking b order by b.createdAt desc")
+    Page<Booking> findAllOrderByCreatedAt(Pageable paging);
+
 
 //    Page<Booking> findAllByBookingStatusEqualsAndCustomerIdOrBookingStatusEqualsAndPhotographerId(EBookingStatus bookingStatus, Pageable paging, Long customerId, Long photographerId);
 

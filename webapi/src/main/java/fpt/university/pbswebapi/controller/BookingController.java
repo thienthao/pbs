@@ -1,11 +1,10 @@
 package fpt.university.pbswebapi.controller;
 
-import fpt.university.pbswebapi.dto.BookingWithWarningDetail;
-import fpt.university.pbswebapi.dto.BookingWithWarningDto;
-import fpt.university.pbswebapi.dto.CommentDto;
+import fpt.university.pbswebapi.dto.*;
 import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.BookingComment;
 import fpt.university.pbswebapi.entity.EBookingStatus;
+import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.payload.own.response.MessageResponse;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.CustomRepository;
@@ -290,14 +289,17 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.warnTiming(ptgId, datetime), HttpStatus.OK);
     }
 
-    @GetMapping("/weather-warning")
+    @GetMapping("/test/weather-warning")
     public ResponseEntity<?> warnWeather(@RequestParam("datetime") String datetime, @RequestParam("lat") Double lat, @RequestParam("lon") Double lon) {
         return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, lat, lon), HttpStatus.OK);
     }
 
-    @GetMapping("/test/weather-warning")
+    @GetMapping("/weather-warning")
     public ResponseEntity<?> testWeather(@RequestParam("datetime") String datetime, @RequestParam("timeAnticipate") int timeAnticipate, @RequestParam("lat") Double lat, @RequestParam("lon") Double lon) {
-        return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, timeAnticipate, lat, lon), HttpStatus.OK);
+        if(DateHelper.isThisInside108Hour(datetime)) {
+            return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, timeAnticipate, lat, lon), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(bookingService.getWeatherInfo(datetime, lat, lon), HttpStatus.OK);
     }
 
     @PostMapping
@@ -309,11 +311,8 @@ public class BookingController {
     }
 
     @PutMapping("/cancel/customer")
-    public ResponseEntity<Booking> cancelForCustomer(@RequestBody Booking booking) {
-        if (booking.getBookingStatus() != EBookingStatus.PENDING) {
-            return ResponseEntity.badRequest().build();
-        }
-        return new ResponseEntity<Booking>(bookingService.cancelForCustomer(booking), HttpStatus.OK);
+    public ResponseEntity<?> cancelForCustomer(@RequestBody Booking booking) {
+        return bookingService.cancelPendingBooking(booking);
     }
 
     @PutMapping("/cancellation-submit/customer")
@@ -322,11 +321,8 @@ public class BookingController {
     }
 
     @PutMapping("/cancel/photographer")
-    public ResponseEntity<Booking> cancelForPhotographer(@RequestBody Booking booking) {
-        if (booking.getBookingStatus() != EBookingStatus.PENDING) {
-            return ResponseEntity.badRequest().build();
-        }
-        return new ResponseEntity<Booking>(bookingService.cancelForPhotographer(booking), HttpStatus.OK);
+    public ResponseEntity<?> cancelForPhotographer(@RequestBody Booking booking) {
+        return bookingService.cancelPendingBooking(booking);
     }
 
     @PutMapping("/cancellation-submit/photographer")
