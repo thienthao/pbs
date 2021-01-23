@@ -38,6 +38,8 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
     } else if (photographerEvent is PhotographerEventChangePassword) {
       yield* _mapChangePassword(photographerEvent.username,
           photographerEvent.oldPassword, photographerEvent.newPassword);
+    } else if (photographerEvent is PhotographerEventRecoveryPassword) {
+      yield* _mapRecoverPassword(photographerEvent.email);
     }
   }
 
@@ -115,6 +117,17 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
           .photographerRepository
           .changePassword(username, oldPassword, newPassword);
       yield PhotographerStateChangedPasswordSuccess(isSuccess: isSuccess);
+    } catch (_) {
+      yield PhotographerStateFailure(error: _.toString());
+    }
+  }
+
+  Stream<PhotographerState> _mapRecoverPassword(String email) async* {
+    yield PhotographerStateLoading();
+    try {
+      final isSuccess =
+          await this.photographerRepository.recoverPassword(email);
+      yield PhotographerStateRecoveryPasswordSuccess(isSuccess: isSuccess);
     } catch (_) {
       yield PhotographerStateFailure(error: _.toString());
     }

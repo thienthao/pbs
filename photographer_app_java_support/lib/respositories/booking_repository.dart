@@ -714,4 +714,25 @@ class BookingRepository {
 
     return result;
   }
+
+  Future<bool> checkInAll(int bookingId) async {
+    final response = await httpClient.post(
+      BaseApi.NOTIFICATION_URL + '/$bookingId/',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+      },
+    );
+
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error send check-in all request');
+    }
+
+    return result;
+  }
 }

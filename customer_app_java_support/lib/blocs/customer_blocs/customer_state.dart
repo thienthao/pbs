@@ -39,6 +39,11 @@ class CustomerStateChangedPasswordSuccess extends CustomerState {
   CustomerStateChangedPasswordSuccess({this.isSuccess});
 }
 
+class CustomerStateRecoveryPasswordSuccess extends CustomerState {
+  final bool isSuccess;
+  CustomerStateRecoveryPasswordSuccess({this.isSuccess});
+}
+
 class CustomerStateFailure extends CustomerState {
   final String error;
   CustomerStateFailure({

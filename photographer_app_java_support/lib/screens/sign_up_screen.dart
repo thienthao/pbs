@@ -96,8 +96,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   String checkName(String fullname) {
-    RegExp regExp =
-        new RegExp('[^A-Za-zàáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẸẺẼÊỀẾỂỄỆĐÌÍĨỈỊÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỴỶỸÝ ]+', caseSensitive: false, multiLine: false);
+    RegExp regExp = new RegExp(
+        '[^A-Za-zàáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳỵỷỹýÀÁÃẠẢĂẮẰẲẴẶÂẤẦẨẪẬÈÉẸẺẼÊỀẾỂỄỆĐÌÍĨỈỊÒÓÕỌỎÔỐỒỔỖỘƠỚỜỞỠỢÙÚŨỤỦƯỨỪỬỮỰỲỴỶỸÝ ]+',
+        caseSensitive: false,
+        multiLine: false);
     if (fullname.isEmpty) {
       return 'Thông tin này là bắt buộc.';
     } else if (regExp.hasMatch(fullname)) {
@@ -196,6 +198,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Icon(Icons.arrow_back,
+                                    size: 30, color: Colors.white),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
                             Text(
                               'Đăng kí',
                               style: TextStyle(

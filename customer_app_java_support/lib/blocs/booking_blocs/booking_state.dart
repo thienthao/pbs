@@ -61,6 +61,37 @@ class BookingStateCanceledSuccess extends BookingState {
       'BookingStateCreatedSuccess { Booking Canceled: $isSuccess }';
 }
 
+class BookingStateCancelFailure extends BookingState {
+  final String error;
+  BookingStateCancelFailure({
+    this.error,
+  });
+}
+
+class BookingStateCanceledPendingBookingSuccess extends BookingState {
+  final bool isSuccess;
+  BookingStateCanceledPendingBookingSuccess({@required this.isSuccess});
+
+  @override
+  List<Object> get props => [isSuccess];
+
+  @override
+  String toString() =>
+      'BookingStateCanceledPendingBookingSuccess { Booking Canceled: $isSuccess }';
+}
+
+class BookingStateCheckInAllSuccess extends BookingState {
+  final bool isSuccess;
+  BookingStateCheckInAllSuccess({@required this.isSuccess});
+
+  @override
+  List<Object> get props => [isSuccess];
+
+  @override
+  String toString() =>
+      'BookingStateCheckInAllSuccess { Booking Check In All: $isSuccess }';
+}
+
 class BookingStateSuccess extends BookingState {
   final List<BookingBlocModel> bookings;
   const BookingStateSuccess({@required this.bookings})

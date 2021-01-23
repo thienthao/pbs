@@ -33,6 +33,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     } else if (bookingEvent is BookingEventCancel) {
       yield* _mapBookingCanceledtoState(
           bookingEvent.booking, bookingEvent.cusId);
+    } else if (bookingEvent is BookingEventCancelPendingBooking) {
+      yield* _mapBookingCanceledPendingBookingtoState(
+          bookingEvent.booking, bookingEvent.cusId);
     } else if (bookingEvent is BookingEventGetBookingOnDate) {
       yield* _mapGetBookingByDayToState(bookingEvent.ptgId, bookingEvent.date);
     } else if (bookingEvent is BookingEventFetchInfinite &&
@@ -42,6 +45,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     } else if (bookingEvent is BookingRestartEvent) {
       bookingCurrentPage = 0;
       yield BookingStateLoading();
+    } else if (bookingEvent is BookingEventCheckInAll) {
+      yield* _mapCheckInAllToState(bookingEvent.bookingId);
     }
   }
 
@@ -90,15 +95,27 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     }
   }
 
+  Stream<BookingState> _mapBookingCanceledPendingBookingtoState(
+      BookingBlocModel booking, int cusId) async* {
+    yield BookingStateCancelInProgress();
+    try {
+      final isSuccess =
+          await this.bookingRepository.cancelPendingBooking(booking, cusId);
+      yield BookingStateCanceledPendingBookingSuccess(isSuccess: isSuccess);
+    } catch (error) {
+      yield BookingStateCancelFailure(error: error.toString());
+    }
+  }
+
   Stream<BookingState> _mapBookingCanceledtoState(
       BookingBlocModel booking, int cusId) async* {
-    yield BookingStateLoading();
+    yield BookingStateCancelInProgress();
     try {
       final isSuccess =
           await this.bookingRepository.cancelBooking(booking, cusId);
       yield BookingStateCanceledSuccess(isSuccess: isSuccess);
     } catch (error) {
-      yield BookingStateFailure(error: error.toString());
+      yield BookingStateCancelFailure(error: error.toString());
     }
   }
 
@@ -140,6 +157,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
               hasReachedEnd: false);
         }
       }
+    } catch (error) {
+      yield BookingStateFailure(error: error.toString());
+    }
+  }
+
+  Stream<BookingState> _mapCheckInAllToState(int bookingId) async* {
+    yield BookingStateLoading();
+    try {
+      final isSuccess = await this.bookingRepository.checkInAll(bookingId);
+      yield BookingStateCheckInAllSuccess(isSuccess: isSuccess);
     } catch (error) {
       yield BookingStateFailure(error: error.toString());
     }

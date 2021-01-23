@@ -218,4 +218,32 @@ class PhotographerRepository {
 
     return result;
   }
+
+  Future<bool> recoverPassword(String email) async {
+    var resBody = {};
+
+    resBody["email"] = email;
+
+    String str = json.encode(resBody);
+    print(str);
+    final response =
+        await httpClient.post(BaseApi.AUTH_URL + '/password/request',
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              HttpHeaders.authorizationHeader: 'Bearer ' + globalPtgToken
+            },
+            body: str);
+
+    bool result = false;
+    if (response.statusCode == 200) {
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      throw Exception(data['message']);
+    }
+
+    return result;
+  }
 }

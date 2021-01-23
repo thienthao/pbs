@@ -21,10 +21,11 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
     } else if (warningEvent is WarningEventGetLocationWarning) {
       yield* _mapLocationWarningFetchToState(warningEvent.booking);
     } else if (warningEvent is WarningEventGetWeatherWarning) {
-      yield* _mapWeatherWarningFetchToState(
-          warningEvent.dateTime, warningEvent.latLng);
+      yield* _mapWeatherWarningFetchToState(warningEvent.dateTime,
+          warningEvent.latLng, warningEvent.timeAnticipate);
     } else if (warningEvent is WarningEventCheckOutOfWorkingTime) {
-      yield* _mapCheckOutOfWorkingDayToState(warningEvent.time, warningEvent.ptgId);
+      yield* _mapCheckOutOfWorkingDayToState(
+          warningEvent.time, warningEvent.ptgId);
     }
   }
 
@@ -66,11 +67,12 @@ class WarningBloc extends Bloc<WarningEvent, WarningState> {
   }
 
   Stream<WarningState> _mapWeatherWarningFetchToState(
-      String dateTime, LatLng latLng) async* {
+      String dateTime, LatLng latLng, int timeAnticipate) async* {
     yield WarningStateLoading();
     try {
-      final notice =
-          await this.warningRepository.getWeatherWarning(dateTime, latLng);
+      final notice = await this
+          .warningRepository
+          .getWeatherWarning(dateTime, latLng, timeAnticipate);
       yield WarningStateGetWeatherWarningSuccess(notice: notice);
     } catch (error) {
       yield WarningStateFailure(error: error.toString());

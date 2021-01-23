@@ -23,7 +23,7 @@ class WarningRepository {
     final response = await this.httpClient.get(
         BaseApi.PHOTOGRAPHER_URL + '/$ptgId/working-days/check?time=$time',
         headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
-
+    print(time);
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       return data;
@@ -122,22 +122,31 @@ class WarningRepository {
   }
 
   Future<WeatherBlocModel> getWeatherWarning(
-      String dateTime, LatLng latLng) async {
+      String dateTime, LatLng latLng, int timeAnticipate) async {
     final response = await this.httpClient.get(
         BaseApi.BOOKING_URL +
-            '/weather-warning?datetime=$dateTime&lat=${latLng.latitude}&lon=${latLng.longitude}',
+            '/weather-warning?datetime=$dateTime&lat=${latLng.latitude}&lon=${latLng.longitude}&timeAnticipate=$timeAnticipate',
         headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
 
+    print(response.request.url);
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
-      print(data['noti']);
+
+      final listTime = data['time'] as Map;
+      print(listTime);
       WeatherBlocModel weatherNotice = WeatherBlocModel(
           noti: data['noti'],
           humidity: data['humidity'],
           outlook: data['outlook'],
           temperature: data['temperature'],
-          windSpeed: data['windSpeed']);
-      print(weatherNotice.noti);
+          windSpeed: data['windSpeed'],
+          time: listTime,
+          date: data['date'],
+          isHourly: data['isHourly'],
+          isSuitable: data['isSuitable'],
+          location: data['location'],
+          overall: data['overall']);
+      print(weatherNotice.time);
       return weatherNotice;
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized');

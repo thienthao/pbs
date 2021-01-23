@@ -62,10 +62,8 @@ class PhotographerEventChangePassword extends PhotographerEvent {
 }
 
 class PhotographerEventRecoveryPassword extends PhotographerEvent {
-  final String username;
   final String email;
   PhotographerEventRecoveryPassword({
-    this.username,
     this.email,
   });
 }

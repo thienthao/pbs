@@ -46,12 +46,6 @@ class _EditThreadScreenState extends State<EditThreadScreen> {
     BlocProvider.of<ThreadBloc>(context).add(EditThread(thread: thread));
   }
 
-  String _checkEmpty(String value) {
-    if (value.isEmpty) {
-      return 'Không thể bỏ trống trường này!';
-    }
-    return null;
-  }
 
   _unFocus() {
     threadTitleFocusNode.unfocus();

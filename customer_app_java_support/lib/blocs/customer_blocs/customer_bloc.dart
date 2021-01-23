@@ -29,6 +29,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     } else if (customerEvent is CustomerEventChangePassword) {
       yield* _mapChangePassword(customerEvent.username,
           customerEvent.oldPassword, customerEvent.newPassword);
+    } else if (customerEvent is CustomerEventRecoveryPassword) {
+      yield* _mapRecoverPassword(customerEvent.email);
     }
   }
 
@@ -71,6 +73,16 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       yield CustomerStateChangedPasswordSuccess(isSuccess: isSuccess);
     } catch (error) {
       yield CustomerStateChangePasswordFailure(error: error);
+    }
+  }
+
+  Stream<CustomerState> _mapRecoverPassword(String email) async* {
+    yield CustomerStateLoading();
+    try {
+      final isSuccess = await this.customerRepository.recoverPassword(email);
+      yield CustomerStateRecoveryPasswordSuccess(isSuccess: isSuccess);
+    } catch (_) {
+      yield CustomerStateFailure(error: _.toString());
     }
   }
 }

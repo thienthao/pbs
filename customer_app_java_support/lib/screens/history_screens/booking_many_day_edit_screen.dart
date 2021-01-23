@@ -456,6 +456,7 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                       ),
                                     ],
                                     child: BookingManyDetailEdit(
+                                      timeAnticipate: selectedPackage.timeAnticipate,
                                       ptgId: widget.photographer.id,
                                       model: listTimeAndLocation[mapEntry.key],
                                       onUpdateList:

@@ -40,3 +40,11 @@ class CustomerEventChangePassword extends CustomerEvent {
     this.newPassword,
   });
 }
+
+
+class CustomerEventRecoveryPassword extends CustomerEvent {
+  final String email;
+  CustomerEventRecoveryPassword({
+    this.email,
+  });
+}

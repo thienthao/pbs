@@ -70,6 +70,7 @@ dependencies:
   giffy_dialog: ^1.7.0
   shared_preferences: ^0.5.12+2
   weather_icons: ^2.0.2
+  overlay_screen: ^1.2.0+1
   flutter:
     sdk: flutter
 
