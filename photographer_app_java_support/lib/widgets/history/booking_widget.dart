@@ -69,6 +69,9 @@ class _BookingWidgetState extends State<BookingWidget> {
     } else if (status.toUpperCase().trim() == 'CANCELLED_PHOTOGRAPHER') {
       text = 'Đã hủy';
       color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'EXPIRED') {
+      text = 'Quá hạn';
+      color = Colors.red[300];
     } else {
       text = 'Không xác định';
       color = Colors.black26;

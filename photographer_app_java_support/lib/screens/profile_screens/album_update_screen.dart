@@ -176,6 +176,11 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
                 Navigator.pop(context);
                 _showDeleteSuccessAlert();
               }
+
+              if (state is AlbumStateFailure) {
+                Navigator.pop(context);
+                _showFailDialog();
+              }
               if (state is AlbumStateFailure) {
                 Navigator.pop(context);
                 _showFailDialog();

@@ -17,6 +17,7 @@ class Status {
       Status(6, 'Chờ hủy', 'cancelling'),
       Status(7, 'Đã hủy', 'canceled'),
       Status(8, 'Đã từ chối', 'rejected'),
+      Status(9, 'Quá hạn', 'expired')
     ];
   }
 }

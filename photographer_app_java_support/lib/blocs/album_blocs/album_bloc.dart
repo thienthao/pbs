@@ -87,9 +87,9 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
     try {
       final isSuccess =
           await this.albumRepository.addImageForAlbum(albumId, image);
-      yield AlbumStateRemoveImageSuccess(isSuccess: isSuccess);
+      yield AlbumStateAddImageSuccess(isSuccess: isSuccess);
     } catch (e) {
-      yield AlbumStateFailure(error: e.toString());
+      yield AlbumStateAddImageFailure(error: e.toString());
     }
   }
 
@@ -100,7 +100,7 @@ class AlbumBloc extends Bloc<AlbumEvent, AlbumState> {
           await this.albumRepository.removeImage(albumId, imageId);
       yield AlbumStateRemoveImageSuccess(isSuccess: isSuccess);
     } catch (e) {
-      yield AlbumStateFailure(error: e.toString());
+      yield AlbumStateRemoveImageFailure(error: e.toString());
     }
   }
 

@@ -74,6 +74,21 @@ class AlbumStateSuccess extends AlbumState {
   String toString() => 'AlbumsLoadSuccess { album: $albums }';
 }
 
+
+class AlbumStateAddImageFailure extends AlbumState {
+  final String error;
+  AlbumStateAddImageFailure({
+    this.error,
+  });
+}
+
+class AlbumStateRemoveImageFailure extends AlbumState {
+  final String error;
+  AlbumStateRemoveImageFailure({
+    this.error,
+  });
+}
+
 class AlbumStateFailure extends AlbumState {
   final String error;
   AlbumStateFailure({

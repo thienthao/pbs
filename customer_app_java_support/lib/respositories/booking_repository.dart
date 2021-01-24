@@ -95,7 +95,7 @@ class BookingRepository {
     }
     final response = await this.httpClient.get(BaseApi.BOOKING_URL + extendUrl,
         headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
-    print(baseUrl + extendUrl);
+    print(BaseApi.BOOKING_URL + extendUrl);
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
       final list = data['bookings'] as List;
@@ -104,25 +104,36 @@ class BookingRepository {
         final tempPhotographer = booking['photographer'] as Map;
         final tempTimeAndLocations = booking['timeLocationDetails'] as List;
         bool isMultiDay = false;
-        if (tempTimeAndLocations.length > 1) {
-          isMultiDay = true;
+        List<TimeAndLocationBlocModel> listTimeAndLocations;
+        if (tempTimeAndLocations != null) {
+          if (tempTimeAndLocations.length > 1) {
+            isMultiDay = true;
+          }
+          listTimeAndLocations = tempTimeAndLocations.map((item) {
+            return TimeAndLocationBlocModel(
+                id: item['id'],
+                start: item['start'],
+                end: item['end'],
+                formattedAddress: item['formattedAddress'],
+                latitude: item['lat'],
+                longitude: item['lon']);
+          }).toList();
+        } else {
+          listTimeAndLocations = new List<TimeAndLocationBlocModel>();
+          listTimeAndLocations.add(TimeAndLocationBlocModel(
+              id: 1,
+              start: '2021-01-25T12:00:00.000+07:00',
+              end: '2021-01-25T12:00:00.000+07:00',
+              formattedAddress: 'Không xác định',
+              latitude: 0,
+              longitude: 0));          
         }
+
         Photographer photographer = Photographer(
             id: tempPhotographer['id'],
             fullname: tempPhotographer['fullname'],
             ratingCount: tempPhotographer['ratingCount'],
             avatar: tempPhotographer['avatar']);
-
-        final List<TimeAndLocationBlocModel> listTimeAndLocations =
-            tempTimeAndLocations.map((item) {
-          return TimeAndLocationBlocModel(
-              id: item['id'],
-              start: item['start'],
-              end: item['end'],
-              formattedAddress: item['formattedAddress'],
-              latitude: item['lat'],
-              longitude: item['lon']);
-        }).toList();
 
         return BookingBlocModel(
           id: booking['id'],

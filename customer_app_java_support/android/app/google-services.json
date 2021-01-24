@@ -1,63 +1,34 @@
 {
   "project_info": {
-    "project_number": "389514123999",
-    "firebase_url": "https://pbs-webapi.firebaseio.com",
-    "project_id": "pbs-webapi",
-    "storage_bucket": "pbs-webapi.appspot.com"
+    "project_number": "342231312762",
+    "firebase_url": "https://pbs-webapi-292ac-default-rtdb.firebaseio.com",
+    "project_id": "pbs-webapi-292ac",
+    "storage_bucket": "pbs-webapi-292ac.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:389514123999:android:3ade3c6a3a93f4f508e76a",
-        "android_client_info": {
-          "package_name": "com.example.customer_app_1_11"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyA4gwS_YxnbF6yMrX13LJBdi9eKv0timiw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:389514123999:android:84c46e7bae1738d808e76a",
+        "mobilesdk_app_id": "1:342231312762:android:3cb4c22aaf72a71c560ec3",
         "android_client_info": {
           "package_name": "com.example.customer_app_java_support"
         }
       },
       "oauth_client": [
         {
-          "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+          "client_id": "342231312762-0m5p9mo3v0gpf4355gu8qkop5o5kcfj6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA4gwS_YxnbF6yMrX13LJBdi9eKv0timiw"
+          "current_key": "AIzaSyDZRG-cwWJ66mN8RIlrEYNzMZLcHvjonAA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+              "client_id": "342231312762-0m5p9mo3v0gpf4355gu8qkop5o5kcfj6.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -66,27 +37,27 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:389514123999:android:71d236491081260508e76a",
+        "mobilesdk_app_id": "1:342231312762:android:c9d8afea8ff3e417560ec3",
         "android_client_info": {
-          "package_name": "com.example.photographer_app_v211"
+          "package_name": "com.example.photographer_app_java_support"
         }
       },
       "oauth_client": [
         {
-          "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+          "client_id": "342231312762-0m5p9mo3v0gpf4355gu8qkop5o5kcfj6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA4gwS_YxnbF6yMrX13LJBdi9eKv0timiw"
+          "current_key": "AIzaSyDZRG-cwWJ66mN8RIlrEYNzMZLcHvjonAA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "389514123999-ng0ql6bgn7ttalj3vq03gg59rdmev0ol.apps.googleusercontent.com",
+              "client_id": "342231312762-0m5p9mo3v0gpf4355gu8qkop5o5kcfj6.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
