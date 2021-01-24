@@ -11,5 +11,6 @@ public enum EBookingStatus {
     CANCELLED_CUSTOMER,
     CANCELLED_PHOTOGRAPHER,
     CANCELLED_ADMIN,
-    DONE
+    DONE,
+    EXPIRED
 }

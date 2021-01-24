@@ -1,6 +1,8 @@
 package fpt.university.pbswebapi.service;
 
+import fpt.university.pbswebapi.dto.AccountVerificationEmailContext;
 import fpt.university.pbswebapi.dto.NotiRequest;
+import fpt.university.pbswebapi.dto.WarningEmailContext;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.repository.BookingRepository;
@@ -32,14 +34,16 @@ public class CancellationService {
     private final NotificationRepository notificationRepository;
     private final FCMService fcmService;
     private final BookingRepository bookingRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public CancellationService(CancellationRepository cancellationRepository, UserRepository userRepository, NotificationRepository notificationRepository, FCMService fcmService, BookingRepository bookingRepository) {
+    public CancellationService(CancellationRepository cancellationRepository, UserRepository userRepository, NotificationRepository notificationRepository, FCMService fcmService, BookingRepository bookingRepository, EmailService emailService) {
         this.cancellationRepository = cancellationRepository;
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
         this.fcmService = fcmService;
         this.bookingRepository = bookingRepository;
+        this.emailService = emailService;
     }
 
     private Page<CancellationRequest> getAllSolve(Pageable pageable) {
@@ -185,6 +189,14 @@ public class CancellationService {
 //            mailPhotographer(cancellationRequest);
 //            warnPhotographer(cancellationRequest);
 //            informCustomerAboutWarnedPhotographer(cancellationRequest);
+        }
+        try {
+            WarningEmailContext emailContext = new WarningEmailContext();
+            emailContext.init(cancellationRequest.getOwner());
+            emailContext.buildEmailContent(cancellationRequest.getOwner().getFullname());
+            emailService.sendMail(emailContext);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         cancellationRequest.setIsSolve(true);
         cancellationRepository.save(cancellationRequest);

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 public interface TimeLocationDetailRepository extends JpaRepository<TimeLocationDetail, Long> {
 
@@ -13,4 +14,6 @@ public interface TimeLocationDetailRepository extends JpaRepository<TimeLocation
     @Modifying
     @Query("update TimeLocationDetail tld set tld.isCheckin=true where tld.id=:tldId")
     void checkin(Long tldId);
+
+    List<TimeLocationDetail> findAllByBookingId(Long bookingId);
 }

@@ -38,9 +38,10 @@ public class BookingService {
     private final NotificationRepository notificationRepository;
     private final FileStore fileStore;
     private final TimeLocationDetailRepository tldRepository;
+    private final CustomRepository customRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository, FileStore fileStore, TimeLocationDetailRepository tldRepository) {
+    public BookingService(BookingRepository bookingRepository, CommentRepository commentRepository, UserRepository userRepository, FCMService fcmService, NotificationService notificationService, CancellationRepository cancellationRepository, NotificationRepository notificationRepository, FileStore fileStore, TimeLocationDetailRepository tldRepository, CustomRepository customRepository) {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
@@ -50,6 +51,7 @@ public class BookingService {
         this.notificationRepository = notificationRepository;
         this.fileStore = fileStore;
         this.tldRepository = tldRepository;
+        this.customRepository = customRepository;
     }
 
     public Booking checkDistance(Booking booking) {
@@ -319,8 +321,8 @@ public class BookingService {
         return result;
     }
 
-    public Page<Booking> findByStatus(EBookingStatus status, Pageable paging, Long userId) {
-        return bookingRepository.byStatus(status, paging, userId);
+    public List<Booking> findByStatus(String status, Long userId) {
+        return customRepository.queryBookingByStatusAndUserId(userId, status);
     }
 
     public Page<Booking> findByStatusForCustomer(EBookingStatus status, Pageable paging, Long customerId) {
