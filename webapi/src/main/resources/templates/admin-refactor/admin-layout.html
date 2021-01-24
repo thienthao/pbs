@@ -43,14 +43,16 @@
                 <div>
                     <div class="form-group">
                         <label for="add-category-name" class="col-form-label">Thể loại:</label>
-                        <input type="text" class="form-control" id="add-category-name" oninvalid="this.setCustomValidity('Xin hãy nhập thể loại')"
+                        <input type="text" class="form-control" id="add-category-name"
+                               oninvalid="this.setCustomValidity('Xin hãy nhập thể loại')"
                                oninput="setCustomValidity('')" required>
                     </div>
                     <div class="form-group">
                         <label class="col-form-label">Icon:</label>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="form-control input-file-dummy" placeholder="Tập tin" aria-describedby="fileHelp">
+                        <input type="text" class="form-control input-file-dummy" placeholder="Tập tin"
+                               aria-describedby="fileHelp">
                         <div class="valid-feedback order-last">Tập tin hợp lệ</div>
                         <div class="invalid-feedback order-last">Xin chọn tập tin</div>
                         <label class="input-group-append mb-0">
@@ -93,7 +95,8 @@
                         <label class="col-form-label">Icon:</label>
                     </div>
                     <div class="input-group">
-                        <input type="text" class="form-control input-file-dummy" placeholder="Tập tin" aria-describedby="fileHelp">
+                        <input type="text" class="form-control input-file-dummy" placeholder="Tập tin"
+                               aria-describedby="fileHelp">
                         <div class="valid-feedback order-last">Tập tin hợp lệ</div>
                         <div class="invalid-feedback order-last">Xin chọn tập tin</div>
                         <label class="input-group-append mb-0">
@@ -107,7 +110,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                <button type="submit" class="btn btn-primary">
+                    Cập nhật
+                    <span style="display: none;" id="category-edit-spinner" class="spinner-border spinner-border-sm"
+                          role="status" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
@@ -127,7 +134,11 @@
             <div class="modal-body d-flex justify-content-center align-items-center">
                 <input type="text" class="form-control" id="remove-category-id" hidden>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary ml-1">Xác nhận</button>
+                <button type="submit" class="btn btn-primary ml-1">
+                    Xác nhận
+                    <span style="display: none;" id="category-remove-spinner" class="spinner-border spinner-border-sm"
+                          role="status" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
@@ -148,14 +159,19 @@
                 <div>
                     <div class="form-group">
                         <label for="add-category-name" class="col-form-label">Chủ đề:</label>
-                        <input type="text" class="form-control" id="add-topic-name" oninvalid="this.setCustomValidity('Xin hãy nhập thể loại')"
+                        <input type="text" class="form-control" id="add-topic-name"
+                               oninvalid="this.setCustomValidity('Xin hãy nhập thể loại')"
                                oninput="setCustomValidity('')" required>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary">Tạo</button>
+                <button type="submit" class="btn btn-primary">
+                    Tạo
+                    <span style="display: none;" id="topic-add-spinner"
+                          class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
@@ -176,7 +192,8 @@
                 <div>
                     <div class="form-group">
                         <label for="add-category-name" class="col-form-label">Chủ đề:</label>
-                        <input type="text" class="form-control" id="edit-topic-name" oninvalid="this.setCustomValidity('Xin hãy nhập chủ đề')"
+                        <input type="text" class="form-control" id="edit-topic-name"
+                               oninvalid="this.setCustomValidity('Xin hãy nhập chủ đề')"
                                oninput="setCustomValidity('')" required>
                         <input type="text" class="form-control" id="edit-topic-id" hidden>
                     </div>
@@ -184,7 +201,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                <button type="submit" class="btn btn-primary" id="topic-edit-submit">
+                    Cập nhật
+                    <span style="display: none;" id="topic-edit-spinner"
+                          class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></button>
             </div>
         </form>
     </div>
@@ -204,12 +224,64 @@
             <div class="modal-body d-flex justify-content-center align-items-center">
                 <input type="text" class="form-control" id="remove-topic-id" hidden>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="submit" class="btn btn-primary ml-1">Xác nhận</button>
+                <button type="submit" class="btn btn-primary ml-1" id="topic-remove-submit">
+                    Xác nhận
+                    <span style="display: none;" id="topic-remove-spinner"
+                          class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
 </div>
 <!-- end remove topic modal -->
+
+<!-- ban thread modal -->
+<div class="modal" id="thread-ban-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" id="thread-ban-form">
+            <div class="modal-header">
+                <h5 class="modal-title">Chặn bài viết này?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <input type="text" class="form-control" id="thread-ban-id" hidden>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary ml-1" id="thread-ban-submit">
+                    Xác nhận
+                    <span style="display: none;" id="thread-ban-spinner"
+                          class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end ban thread modal -->
+
+<!-- unban thread modal -->
+<div class="modal" id="thread-unban-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" id="thread-unban-form">
+            <div class="modal-header">
+                <h5 class="modal-title">Gỡ chặn bài viết này?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <input type="text" class="form-control" id="thread-unban-id" hidden>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary ml-1" id="thread-unban-submit">
+                    Xác nhận
+                    <span style="display: none;" id="thread-unban-spinner"
+                          class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end unban thread modal -->
 
 <!-- Warn modal 2 -->
 <div class="modal" id="warn-mail-modal" tabindex="-1" aria-hidden="true">
@@ -228,7 +300,8 @@
                         <input type="text" class="form-control" required id="warn-user-name" readonly>
                         <input type="text" class="form-control" id="warn-user-id" hidden>
                         <label for="warn-user-title" class="col-form-label">Tiêu đề</label>
-                        <input type="text" class="form-control" id="warn-user-title" value="PBS - Cảnh báo hủy hẹn" required>
+                        <input type="text" class="form-control" id="warn-user-title" value="PBS - Cảnh báo hủy hẹn"
+                               required>
                     </div>
                     <div class="form-group">
                         <textarea id="editor" class="form-control">
@@ -240,7 +313,8 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
                 <button id="warn-user-submit" type="submit" class="btn btn-primary">
                     Gửi
-                    <span style="display: none;" id="warn-user-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span style="display: none;" id="warn-user-spinner" class="spinner-border spinner-border-sm"
+                          role="status" aria-hidden="true"></span>
                 </button>
             </div>
         </form>
@@ -264,7 +338,8 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
                 <button type="submit" class="btn btn-primary ml-1" id="cancellation-approve-submit">
                     Xác nhận
-                    <span style="display: none;" id="cancellation-approve-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span style="display: none;" id="cancellation-approve-spinner"
+                          class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 </button>
             </div>
         </form>
@@ -287,7 +362,8 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
                 <button type="submit" class="btn btn-primary ml-1" id="update-variable-submit">
                     Xác nhận
-                    <span style="display: none;" id="update-variable-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span style="display: none;" id="update-variable-spinner" class="spinner-border spinner-border-sm"
+                          role="status" aria-hidden="true"></span>
                 </button>
             </div>
         </form>

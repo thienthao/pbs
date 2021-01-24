@@ -40,6 +40,7 @@ class ChatMethods {
         .catchError((e) {
       print(e.toString());
     });
+    
   }
 
   Future<bool> checkChatRoomExist(String chatRoomId) async {

@@ -10,12 +10,8 @@
         <div class="tab-content col-md-12">
             <div class="main-card mb-3 card">
                 <div class="card-body d-flex flex-row-reverse"><div class="media forum-item">
-                    <form id="ban-form" th:if="${thread.isBan == false}">
-                        <input class="btn btn-danger" type="submit" value="Chặn bài viết">
-                    </form>
-                    <form id="unban-form" th:if="${thread.isBan == true}">
-                        <input class="btn btn-success" type="submit" value="Gỡ chặn bài viết">
-                    </form>
+                    <input th:if="${thread.isBan == false}" class="btn btn-danger" type="button" value="Chặn bài viết" data-toggle="modal" data-target="#thread-ban-modal">
+                    <input th:if="${thread.isBan == true}" class="btn btn-success" type="button" value="Gỡ chặn bài viết" data-toggle="modal" data-target="#thread-unban-modal">
                 </div>
                 </div>
             </div>
@@ -33,26 +29,106 @@
     </div>
     <script th:inline="javascript">
 
-        $('#ban-form').submit((e) => {
+        $('#thread-ban-form').submit((e) => {
             e.preventDefault();
             const threadId = [[${thread.id}]];
+            $('#thread-ban-spinner').show();
+            $('#thread-ban-submit').prop('disabled', true);
             $.ajax({
                 type:"post",
-                url: '/admin/v2/threads/' + threadId + '/ban',
+                url: pathname + '/admin/v2/threads/' + threadId + '/ban',
                 success: function(result){
-                    $('#admin-content').load('/admin/v2/threads/' + threadId);
+                    $.toast({
+                        text: "Chặn bài viết thành công", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                    $('#admin-content').load(pathname + '/admin/v2/threads/' + threadId);
+                    $('#thread-ban-modal').trigger('click');
+                    $('#thread-ban-submit').prop('disabled', false);
+                    $('#thread-ban-spinner').hide();
+                },
+                error: function (err) {
+                    $.toast({
+                        text: "Chặn bài viết thất bại", // Text that is to be shown in the toast
+                        icon: 'error', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                    $('#thread-ban-modal').trigger('click');
+                    $('#thread-ban-submit').prop('disabled', false);
+                    $('#thread-ban-spinner').hide();
                 }
             });
         });
 
-        $('#unban-form').submit((e) => {
+        $('#thread-unban-form').submit((e) => {
             e.preventDefault();
             const threadId = [[${thread.id}]];
+            $('#thread-unban-spinner').show();
+            $('#thread-unban-submit').prop('disabled', true);
             $.ajax({
                 type:"post",
-                url: '/admin/v2/threads/' + threadId + '/unban',
+                url: pathname + '/admin/v2/threads/' + threadId + '/unban',
                 success: function(result){
-                    $('#admin-content').load('/admin/v2/threads/' + threadId);
+                    $.toast({
+                        text: "Gỡ chặn bài viết thành công", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                    $('#admin-content').load(pathname + '/admin/v2/threads/' + threadId);
+                    $('#thread-unban-modal').trigger('click');
+                    $('#thread-unban-submit').prop('disabled', false);
+                    $('#thread-unban-spinner').hide();
+                },
+                error: function (err) {
+                    $.toast({
+                        text: "Gỡ chặn bài viết thất bại", // Text that is to be shown in the toast
+                        icon: 'error', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                    $('#thread-unban-modal').trigger('click');
+                    $('#thread-unban-submit').prop('disabled', false);
+                    $('#thread-unban-spinner').hide();
                 }
             });
         });

@@ -229,6 +229,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     } else if (status.toUpperCase().trim() == 'CANCELLED_PHOTOGRAPHER') {
       text = 'Đã hủy - Photographer';
       color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'EXPIRED') {
+      text = 'Quá hạn';
+      color = Colors.red[300];
     } else {
       text = 'Không xác định';
       color = Colors.black26;
@@ -1720,6 +1723,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               listener: (context, state) {
                 if (state is ReportStatePostedSuccess) {
                   if (state.isPosted) {
+                    _reportTextController.clear();
                     popUp(context, 'Báo cáo', 'Gửi báo cáo thành công!');
                   }
                 }

@@ -67,7 +67,7 @@
             else {
                 $.ajax({
                     type:"post",
-                    url: '/api/categories',
+                    url: pathname + '/api/categories',
                     data: JSON.stringify({"category": categoryName}),
                     contentType:'application/json',
                     success: function(result){
@@ -76,7 +76,7 @@
 
                         $.ajax({
                             type: "POST",
-                            url: '/api/categories/' + result.id + '/upload',
+                            url: pathname + '/api/categories/' + result.id + '/upload',
                             data: fd,
                             contentType: false,
                             processData: false,
@@ -99,13 +99,38 @@
             e.preventDefault();
             const categoryId = $("#edit-category-id").val()
             const categoryName = $("#edit-category-name").val()
+
+            $('#category-edit-spinner').show();
+            $('#category-edit-submit').prop('disabled', true);
             $.ajax({
                 type:"post",
-                url: '/admin/categories/' + categoryId,
+                url: pathname + '/admin/categories/' + categoryId,
                 data: {category: categoryName},
                 success: function(result){
-                    $('#admin-content').load('/admin/categories');
+                    $('#admin-content').load(pathname + '/admin/categories');
                     $('#category-edit-modal').trigger('click');
+                    $('#category-edit-submit').prop('disabled', false);
+                    $('#category-edit-spinner').hide();
+                    $.toast({
+                        text: "Chỉnh sửa thành công", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                },
+                error: function(err) {
+                    $('#category-edit-modal').trigger('click');
+                    $('#category-edit-submit').prop('disabled', false);
+                    $('#category-edit-spinner').hide();
                 }
             });
 
@@ -121,7 +146,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: '/api/categories/' + categoryId + '/upload',
+                        url: pathname + '/api/categories/' + categoryId + '/upload',
                         data: fd,
                         contentType: false,
                         processData: false,
@@ -145,17 +170,52 @@
         $('#category-remove-form').submit((e) => {
             e.preventDefault();
             const categoryId = $("#remove-category-id").val()
+            $('#category-remove-submit').prop('disabled', true);
+            $('#category-remove-spinner').show();
             $.ajax({
                 type:"delete",
-                url: '/api/categories/' + categoryId,
+                url: pathname + '/api/categories/' + categoryId,
                 success: function(result){
                     if(result == true) {
-                        alert('Xóa thể loại thành công');
-                        $('#admin-content').load('/admin/categories');
+                        $.toast({
+                            text: "Xoá thể loại thành công", // Text that is to be shown in the toast
+                            icon: 'success', // Type of toast icon
+                            showHideTransition: 'fade', // fade, slide or plain
+                            allowToastClose: true, // Boolean value true or false
+                            hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                            stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                            position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                            textAlign: 'left',  // Text alignment i.e. left, right or center
+                            loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                            beforeShow: function () {}, // will be triggered before the toast is shown
+                            afterShown: function () {}, // will be triggered after the toat has been shown
+                            beforeHide: function () {}, // will be triggered before the toast gets hidden
+                            afterHidden: function () {}  // will be triggered after the toast has been hidden
+                        });
+                        $('#admin-content').load(pathname + '/admin/categories');
                         $('#category-remove-modal').trigger('click');
+                        $('#category-remove-submit').prop('disabled', false);
+                        $('#category-remove-spinner').hide();
                     } else {
-                        alert('Không thể xóa thể loại vì người dùng đang sử dụng');
+                        $.toast({
+                            text: "Không thể xóa thể loại vì người dùng đang sử dụng", // Text that is to be shown in the toast
+                            icon: 'error', // Type of toast icon
+                            showHideTransition: 'fade', // fade, slide or plain
+                            allowToastClose: true, // Boolean value true or false
+                            hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                            stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                            position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                            textAlign: 'left',  // Text alignment i.e. left, right or center
+                            loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                            beforeShow: function () {}, // will be triggered before the toast is shown
+                            afterShown: function () {}, // will be triggered after the toat has been shown
+                            beforeHide: function () {}, // will be triggered before the toast gets hidden
+                            afterHidden: function () {}  // will be triggered after the toast has been hidden
+                        });
                         $('#category-remove-modal').trigger('click');
+                        $('#category-remove-submit').prop('disabled', false);
+                        $('#category-remove-spinner').hide();
+
                     }
                 }
             });
@@ -194,7 +254,7 @@
         function toBookingDetail(id) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            const url = '/admin/bookings/' + id;
+            const url = pathname + '/admin/bookings/' + id;
             $('#admin-content').load(url);
         }
 

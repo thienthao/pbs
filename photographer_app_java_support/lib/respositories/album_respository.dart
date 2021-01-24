@@ -215,6 +215,33 @@ class AlbumRepository {
     return isUpdated;
   }
 
+  Future<bool> addThumbnailForAlbum(int albumId, File image) async {
+    var request = http.MultipartRequest(
+        "POST", Uri.parse(BaseApi.ALBUM_URL + '$globalPtgId/$albumId/upload'));
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'});
+    {
+      request.files.add(http.MultipartFile(
+          'file',
+          File(image.path).readAsBytes().asStream(),
+          File(image.path).lengthSync(),
+          filename: image.path.split("/").last,
+          contentType: new MediaType('image', 'jpeg')));
+    }
+
+    final response = await request.send();
+    bool result = false;
+    if (response.statusCode == 201) {
+      print("Uploaded!");
+      result = true;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error at add thumbnail!');
+    }
+    return result;
+  }
+
   Future<bool> addImageForAlbum(int albumId, File image) async {
     var request = http.MultipartRequest(
         "PUT", Uri.parse(BaseApi.ALBUM_URL + '/$albumId/images'));

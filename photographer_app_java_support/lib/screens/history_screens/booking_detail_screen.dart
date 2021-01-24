@@ -1344,6 +1344,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     } else if (status.toUpperCase().trim() == 'CANCELLED_PHOTOGRAPHER') {
       text = 'Đã hủy';
       color = Colors.black54;
+    } else if (status.toUpperCase().trim() == 'EXPIRED') {
+      text = 'Quá hạn';
+      color = Colors.red[300];
     } else {
       text = 'Không xác định';
       color = Colors.black26;
@@ -2162,16 +2165,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             return BlocListener<ReportBloc, ReportState>(
               listener: (context, state) {
                 if (state is ReportStateLoading) {
-                  print('cunt cunt cunt cunt');
+                  _showLoadingAlert();
                 }
                 if (state is ReportStatePostedSuccess) {
-                  setState(() {});
-                  print('cunt cunt cunt cunt ${state.isPosted}');
+                  Navigator.pop(context);
                   if (state.isPosted) {
+                    _reportTextController.clear();
                     popUp(context, 'Báo cáo', 'Gửi báo cáo thành công!');
                   }
                 }
                 if (state is ReportStateFailure) {
+                  Navigator.pop(context);
                   String error = state.error.replaceAll('Exception: ', '');
                   if (error.toUpperCase() == 'UNAUTHORIZED') {
                     _showUnauthorizedDialog();

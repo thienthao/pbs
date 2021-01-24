@@ -54,8 +54,11 @@
                                     <button th:id="${{obj.id}}" type="button" class="btn btn-success btn-circle btn-md mr-1" th:data-topic-id="${{obj.id}}" th:data-topic-name="${{obj.topic}}" data-toggle="modal" data-target="#topic-edit-modal">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button th:id="${{obj.id}}" type="button" class="btn btn-danger btn-circle btn-md" th:data-topic-id="${{obj.id}}" data-toggle="modal" data-target="#topic-remove-modal">
+                                    <button th:if="${obj.isAvailable == true}" th:id="${{obj.id}}" type="button" class="btn btn-danger btn-circle btn-md" th:data-topic-id="${{obj.id}}" data-toggle="modal" data-target="#topic-remove-modal">
                                         <i class="fas fa-minus-circle"></i>
+                                    </button>
+                                    <button th:if="${obj.isAvailable  == false}" th:id="${{obj.id}}" type="button" class="btn btn-danger btn-circle btn-md" th:data-topic-id="${{obj.id}}" data-toggle="modal" data-target="#topic-remove-modal">
+                                        <i class="fas fa-calculator"></i>
                                     </button>
                                 </div>
                             </td>
@@ -107,13 +110,52 @@
             e.preventDefault();
             const topicId = $("#edit-topic-id").val()
             const topicName = $("#edit-topic-name").val()
+            $('#topic-edit-spinner').show();
+            $('#topic-edit-submit').prop('disabled', true);
             $.ajax({
                 type:"post",
                 url: pathname + '/admin/topics/' + topicId,
                 data: {topic: topicName},
                 success: function(result){
+                    $.toast({
+                        text: "Chỉnh sửa chủ đè thành công", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
                     $('#admin-content').load(pathname + '/admin/topics');
                     $('#topic-edit-modal').trigger('click');
+                    $('#topic-edit-submit').prop('disabled', false);
+                    $('#topic-edit-spinner').hide();
+                },
+                error: function(err) {
+                    $.toast({
+                        text: "Đã có lỗi xảy ra trong lúc chỉnh sửa", // Text that is to be shown in the toast
+                        icon: 'error', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                    $('#topic-edit-modal').trigger('click');
+                    $('#topic-edit-submit').prop('disabled', false);
+                    $('#topic-edit-spinner').hide();
                 }
             });
         });
@@ -134,17 +176,73 @@
         $('#topic-remove-form').submit((e) => {
             e.preventDefault();
             const topicId = $("#remove-topic-id").val()
+            $('#topic-remove-spinner').show();
+            $('#topic-remove-submit').prop('disabled', true);
             $.ajax({
                 type:"delete",
                 url: pathname + '/api/admin/topics/' + topicId,
                 success: function(result){
                     if(result == true) {
-                        $('#admin-content').load('/admin/topics');
+                        $.toast({
+                            text: "Vô hiệu hóa chủ đề thành công", // Text that is to be shown in the toast
+                            icon: 'success', // Type of toast icon
+                            showHideTransition: 'fade', // fade, slide or plain
+                            allowToastClose: true, // Boolean value true or false
+                            hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                            stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                            position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                            textAlign: 'left',  // Text alignment i.e. left, right or center
+                            loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                            beforeShow: function () {}, // will be triggered before the toast is shown
+                            afterShown: function () {}, // will be triggered after the toat has been shown
+                            beforeHide: function () {}, // will be triggered before the toast gets hidden
+                            afterHidden: function () {}  // will be triggered after the toast has been hidden
+                        });
+                        $('#admin-content').load(pathname + '/admin/topics');
                         $('#topic-remove-modal').trigger('click');
+                        $('#topic-remove-submit').prop('disabled', false);
+                        $('#topic-remove-spinner').hide();
+
                     } else {
-                        alert('Không thể xóa thể loại vì đang có bài viết ở thể loại này');
+                        $.toast({
+                            text: "Không thể vô hiệu hóa chủ đề vì đang có bài viết ở thể loại này", // Text that is to be shown in the toast
+                            icon: 'error', // Type of toast icon
+                            showHideTransition: 'fade', // fade, slide or plain
+                            allowToastClose: true, // Boolean value true or false
+                            hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                            stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                            position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                            textAlign: 'left',  // Text alignment i.e. left, right or center
+                            loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                            beforeShow: function () {}, // will be triggered before the toast is shown
+                            afterShown: function () {}, // will be triggered after the toat has been shown
+                            beforeHide: function () {}, // will be triggered before the toast gets hidden
+                            afterHidden: function () {}  // will be triggered after the toast has been hidden
+                        });
                         $('#topic-remove-modal').trigger('click');
+                        $('#topic-remove-submit').prop('disabled', false);
+                        $('#topic-remove-spinner').hide();
                     }
+                },
+                error: function(err) {
+                    $.toast({
+                        text: "Vô hiệu hóa chủ đề thất bại", // Text that is to be shown in the toast
+                        icon: 'error', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                    $('#topic-remove-modal').trigger('click');
+                    $('#topic-remove-submit').prop('disabled', false);
+                    $('#topic-remove-spinner').hide();
                 }
             });
         });
