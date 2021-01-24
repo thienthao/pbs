@@ -178,16 +178,16 @@ public class BookingController {
             Page<Booking> pageBookings;
             if(status == null) {
                 pageBookings = bookingService.findAllOfPhotographer(paging, photographerId);
+                bookings = pageBookings.getContent();
+            } else  {
+                bookings = bookingService.findByStatus(status, photographerId);
             }
-            else
-                pageBookings = bookingService.findAllOfPhotographerByStatus(EBookingStatus.valueOf(status.toUpperCase()), paging, photographerId);
 
-            bookings = pageBookings.getContent();
             Map<String, Object> response = new HashMap<>();
             response.put("bookings", bookings);
-            response.put("currentPage", pageBookings.getNumber());
-            response.put("totalItems", pageBookings.getTotalElements());
-            response.put("totalPages", pageBookings.getTotalPages());
+            response.put("currentPage", 0);
+            response.put("totalItems", 0);
+            response.put("totalPages", 0);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -246,16 +246,17 @@ public class BookingController {
             Page<Booking> pageBookings;
             if(status == null) {
                 pageBookings = bookingService.findAll(paging, getCurrentUserId());
+                bookings = pageBookings.getContent();
             }
-            else
-                pageBookings = bookingService.findByStatus(EBookingStatus.valueOf(status.toUpperCase()), paging, customerId);
+            else  {
+                bookings = bookingService.findByStatus(status, customerId);
+            }
 
-            bookings = pageBookings.getContent();
             Map<String, Object> response = new HashMap<>();
             response.put("bookings", bookings);
-            response.put("currentPage", pageBookings.getNumber());
-            response.put("totalItems", pageBookings.getTotalElements());
-            response.put("totalPages", pageBookings.getTotalPages());
+            response.put("currentPage", 0);
+            response.put("totalItems", 0);
+            response.put("totalPages", 0);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {

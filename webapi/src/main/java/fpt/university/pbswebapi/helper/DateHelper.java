@@ -46,8 +46,13 @@ public class DateHelper {
         return LocalDateTime.parse(datetime, localDateTimeFormmater);
     }
 
+    public static Date convertSQLDateViaString(String datetime) {
+        LocalDateTime localDateTime = LocalDateTime.parse(datetime.replace(" ", "T"));
+        return DateHelper.convertToDateViaInstant(localDateTime);
+    }
+
     public static Date convertToDateViaString(String datetime) {
-        DateTimeFormatter localDateTimeFormmater = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter localDateTimeFormmater = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime localDateTime = LocalDateTime.parse(datetime, localDateTimeFormmater);
         return DateHelper.convertToDateViaInstant(localDateTime);
     }

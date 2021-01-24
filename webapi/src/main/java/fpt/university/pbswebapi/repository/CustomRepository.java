@@ -1,9 +1,8 @@
 package fpt.university.pbswebapi.repository;
 
 import fpt.university.pbswebapi.config.HibernateConfig;
-import fpt.university.pbswebapi.entity.Album;
-import fpt.university.pbswebapi.entity.Image;
-import fpt.university.pbswebapi.entity.User;
+import fpt.university.pbswebapi.entity.*;
+import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.helper.NumberHelper;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -24,11 +23,21 @@ public class CustomRepository {
 
     private static SessionFactory factory = HibernateConfig.getSessionFactory();
 
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private CategoryRepository categoryRepository;
+    private ServicePackageRepository packageRepository;
+    private ReturningTypeRepository returningTypeRepository;
+    private TimeLocationDetailRepository timeLocationDetailRepository;
+    private BookingDetailRepository bookingDetailRepository;
+
+    public CustomRepository(UserRepository userRepository, CategoryRepository categoryRepository, ServicePackageRepository packageRepository, ReturningTypeRepository returningTypeRepository, TimeLocationDetailRepository timeLocationDetailRepository, BookingDetailRepository bookingDetailRepository) {
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.packageRepository = packageRepository;
+        this.returningTypeRepository = returningTypeRepository;
+        this.timeLocationDetailRepository = timeLocationDetailRepository;
+        this.bookingDetailRepository = bookingDetailRepository;
+    }
 
     public Float getSumPrice() {
         float result = (float) 0.0;
@@ -462,6 +471,92 @@ public class CustomRepository {
             }
             transaction.commit();
         } catch (HibernateException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return results;
+    }
+
+    public List<Booking> queryBookingByStatusAndUserId(Long userId, String status) {
+        List<Booking> results = new ArrayList<>();
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        try {
+            transaction = session.beginTransaction();
+            String sql =    "select b.id, b.booking_status, b.created_at, b.customer_canceled_reason, b.photographer_canceled_reason, b.price," +
+                            "b.rejected_reason, b.service_name, b.updated_at, b.customer_id, b.photographer_id," +
+                            "b.package_id, b.returning_type_id, b.edit_deadline, b.time_anticipate, b.returning_link, b.previous_status " +
+                    "from bookings b " +
+                    "where b.photographer_id = " + userId + " and b.booking_status like '" + status + "%' \n" +
+                    "or b.customer_id = " + userId + " and b.booking_status like '" + status + "%'" +
+                    "order by b.id desc, b.created_at desc;";
+            Query query = session.createSQLQuery(sql);
+            List<Object []> bookings = query.getResultList();
+
+            for (Object[] a : bookings) {
+                Booking booking = new Booking();
+                booking.setId(Long.parseLong(a[0].toString()));
+                if(a[1] != null)
+                    booking.setBookingStatus(EBookingStatus.valueOf(a[1].toString().toUpperCase()));
+                if(a[2] != null)
+                    booking.setCreatedAt(DateHelper.convertSQLDateViaString(a[2].toString()));
+                if(a[3] != null)
+                    booking.setCustomerCanceledReason(a[3].toString());
+                if(a[4] != null)
+                    booking.setPhotographerCanceledReason(a[4].toString());
+                if(a[5] != null)
+                    booking.setPrice(Integer.parseInt(a[5].toString()));
+                if(a[6] != null)
+                    booking.setRejectedReason(a[6].toString());
+                if(a[7] != null) {
+                    booking.setServiceName(a[7].toString());
+                }
+                if(a[8] != null) {
+                    booking.setUpdatedAt(DateHelper.convertSQLDateViaString(a[8].toString()));
+                }
+                if(a[9] != null) {
+                    Long customerId = Long.parseLong(a[9].toString());
+                    User customer = userRepository.findById(customerId).get();
+                    booking.setCustomer(customer);
+                }
+                if(a[10] != null) {
+                    Long photographerId = Long.parseLong(a[10].toString());
+                    User photographer = userRepository.findById(photographerId).get();
+                    booking.setPhotographer(photographer);
+                }
+                if(a[11] != null) {
+                    Long packageId = Long.parseLong(a[11].toString());
+                    ServicePackage servicePackage = packageRepository.findById(packageId).get();
+                    booking.setServicePackage(servicePackage);
+                }
+                if(a[12] != null) {
+                    Integer returningTypeId = Integer.parseInt(a[12].toString());
+                    ReturningType returningType = returningTypeRepository.findById(returningTypeId);
+                    booking.setReturningType(returningType);
+                }
+                if(a[13] != null) {
+                    booking.setEditDeadline(DateHelper.convertSQLDateViaString(a[13].toString()));
+                }
+                if(a[14] != null) {
+                    booking.setTimeAnticipate(Integer.parseInt(a[14].toString()));
+                }
+                if(a[15] != null) {
+                    booking.setReturningLink(a[15].toString());
+                }
+                if(a[16] != null) {
+                    booking.setPreviousStatus(EBookingStatus.valueOf(a[16].toString().toUpperCase()));
+                }
+                booking.setTimeLocationDetails(timeLocationDetailRepository.findAllByBookingId(booking.getId()));
+                booking.setBookingDetails(bookingDetailRepository.findAllByBookingId(booking.getId()));
+                results.add(booking);
+            }
+            transaction.commit();
+        } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }

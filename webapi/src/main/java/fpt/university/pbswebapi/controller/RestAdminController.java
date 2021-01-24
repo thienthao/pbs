@@ -4,6 +4,7 @@ import fpt.university.pbswebapi.repository.ReturningTypeRepository;
 import fpt.university.pbswebapi.repository.ThreadRepository;
 import fpt.university.pbswebapi.repository.ThreadTopicRepository;
 import fpt.university.pbswebapi.service.CancellationService;
+import fpt.university.pbswebapi.service.EmailService;
 import fpt.university.pbswebapi.service.VariableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

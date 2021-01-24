@@ -1,5 +1,6 @@
 package fpt.university.pbswebapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +22,9 @@ public class BookingDetail {
 
     @Column(name = "service_description")
     private String serviceDescription;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Booking booking;
 }

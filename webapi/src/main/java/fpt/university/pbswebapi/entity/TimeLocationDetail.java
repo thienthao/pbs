@@ -1,5 +1,7 @@
 package fpt.university.pbswebapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,6 +44,11 @@ public class TimeLocationDetail {
 
     @Column(name = "qr_checkin_code")
     private String qrCheckinCode;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Booking booking;
 
     @Override
     public String toString() {
