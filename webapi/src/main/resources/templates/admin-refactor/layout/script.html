@@ -135,7 +135,7 @@
             // var url = '/admin/categories';
             // var url = '/admin/v2/threads/1';
             // var url = '/admin/v2/threads';
-            var url = '/admin/variables';
+            // var url = '/admin/variables';
             // var url = '/admin/v2/users/168';
             // var url = pathname + '/admin/cancellations/1';
             // var url = '/admin/cancellations';
@@ -144,7 +144,7 @@
             // var url = '/admin/categories';
             // var url = '/admin/bookings';
             // var url = '/admin/ratings';
-            // var url = '/admin/reports';
+            const url = pathname + '/admin/reports';
             // var url = '/admin/cancellations';
             // var url = '/admin/bookings/405?cancellationId=1';
 
@@ -163,10 +163,46 @@
         height: 300,
         entity_encoding : "raw"
     });
+
+    tinymce.init({
+        selector: 'textarea#report-editor',
+        menubar: false,
+        language: 'vi',
+        height: 300,
+        entity_encoding : "raw"
+    });
 </script>
 <script>
     tinymce.init({
         selector: "textarea#editor",
+        skin: "bootstrap",
+        plugins: "lists, link, image, media, autoresize",
+        height: 300,
+        branding: false,
+        statusbar: false,
+        toolbar:
+            "h1 h2 bold italic strikethrough blockquote bullist numlist backcolor | link image media | removeformat help",
+        menubar: false,
+        setup: (editor) => {
+            // Apply the focus effect
+            editor.on("init", () => {
+                editor.getContainer().style.transition =
+                    "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out";
+            });
+            editor.on("focus", () => {
+                (editor.getContainer().style.boxShadow =
+                    "0 0 0 .2rem rgba(0, 123, 255, .25)"),
+                    (editor.getContainer().style.borderColor = "#80bdff");
+            });
+            editor.on("blur", () => {
+                (editor.getContainer().style.boxShadow = ""),
+                    (editor.getContainer().style.borderColor = "");
+            });
+        },
+    });
+
+    tinymce.init({
+        selector: "textarea#report-editor",
         skin: "bootstrap",
         plugins: "lists, link, image, media, autoresize",
         height: 300,

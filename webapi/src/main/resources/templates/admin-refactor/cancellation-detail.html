@@ -117,7 +117,6 @@
             const cancellationId = [[${cancellation.id}]]
             const url = pathname + '/admin/api/cancellations-warn/' + cancellationId;
             const mail = $('#editor').val();
-            alert(mail);
             $.ajax({
                 type:"post",
                 url: url,

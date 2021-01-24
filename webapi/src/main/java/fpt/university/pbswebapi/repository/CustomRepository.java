@@ -4,12 +4,14 @@ import fpt.university.pbswebapi.config.HibernateConfig;
 import fpt.university.pbswebapi.entity.*;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.helper.NumberHelper;
+import fpt.university.pbswebapi.service.CronJobService;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @Repository
 public class CustomRepository {
+    private static final Logger logger = LoggerFactory.getLogger(CustomRepository.class);
 
     private static SessionFactory factory = HibernateConfig.getSessionFactory();
 
@@ -1111,6 +1114,32 @@ public class CustomRepository {
                 transaction.rollback();
             }
             e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return result;
+    }
+
+    public int setExpiredPendingBookingAfter24Hours() {
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        int result = 0;
+
+        try {
+            transaction = session.beginTransaction();
+            String sql = "update bookings b " +
+                    "set b.booking_status = 'EXPIRED', b.previous_status = 'PENDING', b.rejected_reason = 'Đã quá 24 giờ' " +
+                    "where b.booking_status = 'PENDING' and datediff(b.created_at, now()) != 0;";
+            Query query = session.createSQLQuery(sql);
+            result = query.executeUpdate();
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            logger.error(e.getMessage());
         } finally {
             session.close();
         }

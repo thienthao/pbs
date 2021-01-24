@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Report Detail</title>
+    <title>Chi tiết báo cáo</title>
 </head>
 <body>
 <div th:fragment="content">
@@ -39,10 +39,8 @@
                                 </div>
                             </div>
                             <div class="divider"></div>
-                            <button class="mt-2 btn btn-primary" type="submit">Xác nhận đã xem</button>
-                            <form method="post" th:action="@{/admin/cancellations-warn/{id}(id = ${report.id})}">
-                                <button type="button" class="mt-2 btn btn-primary" id="btn-mail">Gửi cảnh báo</button>
-                            </form>
+                            <button class="mt-2 btn btn-primary" type="button" data-toggle="modal" data-target="#report-seen-modal">Xác nhận đã xem</button>
+                            <button type="button" class="mt-2 btn btn-primary" data-toggle="modal" data-target="#report-warn-modal">Gửi cảnh báo</button>
                         </form>
                     </div>
                 </div>
@@ -51,11 +49,108 @@
     </div>
     <script th:inline="javascript">
 
+        $('#report-warn-form').submit(async (e) => {
+            e.preventDefault();
+            $.toast().reset('all');
+            $('#report-warn-spinner').show();
+            $('#report-warn-submit').prop('disabled', true);
+            const reportId = [[${report.id}]]
+            const url = pathname + '/admin/api/report-warn/' + reportId;
+            // const mail = $('#editor').val();
+            $.ajax({
+                type:"post",
+                url: url,
+                contentType: "application/x-www-form-urlencoded;charset=utf-8",
+                // data: JSON.stringify({mail: mail}),
+                success: function(result){
+                    $('#admin-content').load(pathname + '/admin/reports/' + reportId);
+                    $('#report-warn-modal').trigger('click');
+                    $('#report-warn-submit').prop('disabled', false);
+                    $('#report-warn-spinner').hide();
+                    $.toast({
+                        text: "Đã gửi cảnh báo người dùng", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                },
+                error: function(err) {
+                    $('#report-warn-modal').trigger('click');
+                    $('#report-warn-submit').prop('disabled', false);
+                    $('#report-warn-spinner').hide();
+                }
+            });
+        });
+
+        $('#report-warn-modal').on('show.bs.modal', function(e) {
+            const reporterFullname = [[${report.reporter.fullname}]];
+            const reporterEmail = [[${report.reporter.email}]];
+            const reporterId = [[${report.reporter.id}]];
+
+            $(e.currentTarget).find('#report-warn-name').val(reporterEmail);
+            $(e.currentTarget).find('#report-warn-id').val(reporterId);
+            // populate the textbox
+            tinymce.get("report-editor").setContent(
+                `<p>Xin chào ${reporterFullname}!</p>
+                <p>Đây là cảnh báo vì đơn hủy hẹn của bạn là không hợp lý, gây ra nhiều khó khăn cho người dùng còn lại.</p>
+                <p>Đơn hủy vẫn sẽ được tiếp nhận, tuy nhiên nếu tiếp tục hành vi có thể dẫn đến việc tài khoản của bạn bị vô hiệu hóa.</p>
+                 <p>Trân trọng</p>
+                 <p>PBS</p> `);
+        });
+
+        $('#report-seen-form').submit(async (e) => {
+            e.preventDefault();
+            $.toast().reset('all');
+            $('#report-seen-spinner').show();
+            $('#report-seen-submit').prop('disabled', true);
+            const reportId = [[${report.id}]]
+            const url = pathname + '/admin/api/report-seen/' + reportId;
+            $.ajax({
+                type:"post",
+                url: url,
+                success: function(result){
+                    $('#admin-content').load(pathname + '/admin/reports/' + reportId);
+                    $('#report-seen-modal').trigger('click');
+                    $('#report-seen-submit').prop('disabled', false);
+                    $('#report-seen-spinner').hide();
+                    $.toast({
+                        text: "Đã xác nhận đơn báo cáo", // Text that is to be shown in the toast
+                        icon: 'success', // Type of toast icon
+                        showHideTransition: 'fade', // fade, slide or plain
+                        allowToastClose: true, // Boolean value true or false
+                        hideAfter: 3000, // false to make it sticky or number representing the miliseconds as time after which toast needs to be hidden
+                        stack: false, // false if there should be only one toast at a time or a number representing the maximum number of toasts to be shown at a time
+                        position: 'top-right', // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values
+                        textAlign: 'left',  // Text alignment i.e. left, right or center
+                        loader: false,  // Whether to show loader or not. True by default// Background color of the toast loader
+                        beforeShow: function () {}, // will be triggered before the toast is shown
+                        afterShown: function () {}, // will be triggered after the toat has been shown
+                        beforeHide: function () {}, // will be triggered before the toast gets hidden
+                        afterHidden: function () {}  // will be triggered after the toast has been hidden
+                    });
+                },
+                error: function(err) {
+                    $('#report-seen-modal').trigger('click');
+                    $('#report-seen-submit').prop('disabled', false);
+                    $('#report-seen-spinner').hide();
+                }
+            });
+        });
+
 
         function toBookingDetail(bookingId) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            $('#admin-content').load('/admin/bookings/' + bookingId);
+            $('#admin-content').load(pathname + '/admin/bookings/' + bookingId);
         }
     </script>
 </div>

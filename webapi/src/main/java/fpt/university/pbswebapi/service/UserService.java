@@ -205,4 +205,10 @@ public class UserService {
         Date to = DateHelper.convertToDateViaInstant(localTo);
         return userRepository.getPhotographerAndCustomerByDate(pageable, from, to);
     }
+
+    public void notifyChat(Long senderId, Long receiverId) {
+        User sender = userRepository.findById(senderId).get();
+        User receiver = userRepository.findById(receiverId).get();
+        fcmService.pushNotificationChat(receiver.getDeviceToken(), sender.getFullname(), sender.getId(), receiver.getId());
+    }
 }

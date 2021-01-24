@@ -9,6 +9,7 @@ import fpt.university.pbswebapi.entity.User;
 import fpt.university.pbswebapi.exception.BadRequestException;
 import fpt.university.pbswebapi.repository.BookingRepository;
 import fpt.university.pbswebapi.repository.UserRepository;
+import fpt.university.pbswebapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +24,16 @@ import java.util.List;
 public class UserController {
 
     private static DecimalFormat df = new DecimalFormat("#.##");
-    private UserRepository userRepository;
 
-    @Autowired
+    private UserRepository userRepository;
+    private UserService userService;
     private BookingRepository bookingRepository;
 
     @Autowired
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, UserService userService, BookingRepository bookingRepository) {
         this.userRepository = userRepository;
+        this.userService = userService;
+        this.bookingRepository = bookingRepository;
     }
 
     @PostMapping("/{userId}/devicetoken")
@@ -85,6 +88,16 @@ public class UserController {
     public ResponseEntity<?> findOne(@PathVariable Long id) {
         User user = userRepository.findById(id).get();
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/{senderId}/{receiverId}")
+    public ResponseEntity<?> notifyChat(@PathVariable("senderId") Long senderId, @PathVariable Long receiverId) {
+        try {
+            userService.notifyChat(senderId, receiverId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("G");
+        }
     }
 
 

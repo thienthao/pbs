@@ -5,6 +5,7 @@ import fpt.university.pbswebapi.repository.ThreadRepository;
 import fpt.university.pbswebapi.repository.ThreadTopicRepository;
 import fpt.university.pbswebapi.service.CancellationService;
 import fpt.university.pbswebapi.service.EmailService;
+import fpt.university.pbswebapi.service.ReportService;
 import fpt.university.pbswebapi.service.VariableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,14 +21,16 @@ public class RestAdminController {
     private ThreadRepository threadRepository;
     private CancellationService cancellationService;
     private VariableService variableService;
+    private ReportService reportService;
 
     @Autowired
-    public RestAdminController(ReturningTypeRepository returningTypeRepository, ThreadTopicRepository topicRepository, ThreadRepository threadRepository, CancellationService cancellationService, VariableService variableService) {
+    public RestAdminController(ReturningTypeRepository returningTypeRepository, ThreadTopicRepository topicRepository, ThreadRepository threadRepository, CancellationService cancellationService, VariableService variableService, ReportService reportService) {
         this.returningTypeRepository = returningTypeRepository;
         this.topicRepository = topicRepository;
         this.threadRepository = threadRepository;
         this.cancellationService = cancellationService;
         this.variableService = variableService;
+        this.reportService = reportService;
     }
 
     @RequestMapping("/admin/returning-types")
@@ -46,7 +49,7 @@ public class RestAdminController {
     }
 
     @PostMapping("/admin/api/cancellations/{id}")
-    public ResponseEntity<?> showCancellationDetailAfterApprove(@PathVariable Long id) {
+    public ResponseEntity<?> approveCancellation(@PathVariable Long id) {
         try {
             cancellationService.approve(id);
             return ResponseEntity.ok().build();
@@ -56,9 +59,29 @@ public class RestAdminController {
     }
 
     @PostMapping("/admin/api/cancellations-warn/{id}")
-    public ResponseEntity<?> warnAndShowCancellationDetail(@PathVariable Long id, @RequestBody String mail) {
+    public ResponseEntity<?> warnCancellation(@PathVariable Long id, @RequestBody String mail) {
         try {
             cancellationService.warn(id, mail);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return new ResponseEntity<>("Đã có lỗi xảy ra", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/admin/api/report-seen/{id}")
+    public ResponseEntity<?> seenReport(@PathVariable Long id) {
+        try {
+            reportService.seen(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return new ResponseEntity<>("Đã có lỗi xảy ra", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/admin/api/report-warn/{id}")
+    public ResponseEntity<?> warnUserOnReport(@PathVariable Long id) {
+        try {
+            reportService.warn(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return new ResponseEntity<>("Đã có lỗi xảy ra", HttpStatus.INTERNAL_SERVER_ERROR);

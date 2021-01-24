@@ -294,5 +294,65 @@
     </div>
 </div>
 <!-- end update variable  -->
+
+<!-- seen report modal -->
+<div class="modal" id="report-seen-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" id="report-seen-form">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận đã xem báo cáo này?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <input type="text" class="form-control" id="report-seen-id" hidden>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary ml-1" id="report-seen-submit">
+                    Xác nhận
+                    <span style="display: none;" id="report-seen-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end seen report modal -->
+
+<!-- Warn report modal 2 -->
+<div class="modal" id="report-warn-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="report-warn-form" class="modal-content w-120">
+            <div class="modal-header">
+                <h5 class="modal-title">Gửi cảnh báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="form-group">
+                        <label for="report-warn-name" class="col-form-label">Người nhận</label>
+                        <input type="text" class="form-control" required id="report-warn-name" readonly>
+                        <input type="text" class="form-control" id="report-warn-id" hidden>
+                        <label for="warn-user-title" class="col-form-label">Tiêu đề</label>
+                        <input type="text" class="form-control" id="report-warn-title" value="PBS - Cảnh báo hủy hẹn" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="report-editor" class="form-control">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button id="report-warn-submit" type="submit" class="btn btn-primary">
+                    Gửi
+                    <span style="display: none;" id="report-warn-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end warn report modal 2 -->
 </body>
 </html>

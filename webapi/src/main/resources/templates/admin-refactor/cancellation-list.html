@@ -118,8 +118,8 @@
         function toCancellationDetail(atag, id) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            const url = '/admin/cancellations/' + id;
-            $(pathname + '#admin-content').load(url);
+            const url = pathname + '/admin/cancellations/' + id;
+            $('#admin-content').load(url);
         }
 
         // th:href="@{/admin/cancellations/{id}(id=${obj.id})}"

@@ -5,6 +5,9 @@ import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.EBookingStatus;
 import fpt.university.pbswebapi.helper.DateHelper;
 import fpt.university.pbswebapi.repository.BookingRepository;
+import fpt.university.pbswebapi.repository.CustomRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -16,16 +19,19 @@ import java.util.List;
 
 @Service
 public class CronJobService {
+    private static final Logger logger = LoggerFactory.getLogger(CronJobService.class);
 
     private BookingService bookingService;
     private BookingRepository bookingRepository;
     private FCMService fcmService;
+    private CustomRepository customRepository;
 
     @Autowired
-    public CronJobService(BookingService bookingService, BookingRepository bookingRepository, FCMService fcmService) {
+    public CronJobService(BookingService bookingService, BookingRepository bookingRepository, FCMService fcmService, CustomRepository customRepository) {
         this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
         this.fcmService = fcmService;
+        this.customRepository = customRepository;
     }
 
     @Scheduled(fixedRate=60*60*1000)
@@ -56,11 +62,12 @@ public class CronJobService {
 
     @Scheduled(cron = "${app.batch.cron.booking_remind_cron}")
     public void sendBookingRemind() {
-        System.out.println("This is booking remind cron job, start at 7am and 9pm on everyday.");
+        logger.info("This is booking remind cron job, start at 7am and 9pm on everyday.");
     }
 
     @Scheduled(cron = "${app.batch.cron.booking_pending_cron}")
     public void checkPendingBookingHourly() {
-        System.out.println("This is booking pending checker cron job, start at every hour");
+        logger.info("Set expired pending bookings");
+        customRepository.setExpiredPendingBookingAfter24Hours();
     }
 }

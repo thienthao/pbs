@@ -62,4 +62,22 @@ public class FCMService {
         }
         return response;
     }
+
+    public String pushNotificationChat(String receiverToken, String senderFullname, Long senderId, Long receiverId) {
+        Message message = Message.builder()
+                .setToken(receiverToken)
+                .setNotification(Notification.builder().setTitle("Tin nhắn mới")
+                        .setBody(senderFullname + " đã gửi tin nhắn cho bạn").build())
+                .putData("sender", senderId.toString())
+                .putData("receiver", receiverId.toString())
+                .putData("click_action", "FLUTTER_NOTIFICATION_CLICK")
+                .build();
+        String response = null;
+        try {
+            response = FirebaseMessaging.getInstance().send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return response;
+    }
 }
