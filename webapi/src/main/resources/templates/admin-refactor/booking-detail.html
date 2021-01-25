@@ -14,13 +14,13 @@
                         <form>
                             <div class="form-inline">
                                 <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng:</label>
-                                    <a th:href="@{/admin/v2/users/{userId}(userId=${booking.customer.id})}" data-toggle="tooltip" title="Chi tiết" data-placement="top" th:text="${booking.customer.fullname}">Uyển Nhi</a></div>
+                                    <a th:onclick="'toUserDetail(' + ${booking.customer.id} +')'" data-toggle="tooltip" title="Chi tiết" data-placement="top" th:text="${booking.customer.fullname}">Uyển Nhi</a></div>
                             </div>
                             <div class="divider"></div>
                             <div class="form-inline">
                                 <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label
-                                                                                                      class="mr-sm-2">Thợ ảnh
-                                </label><a th:href="@{/admin/v2/users/{userId}(userId=${booking.photographer.id})}" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${booking.photographer.fullname}">
+                                                                                                      class="mr-sm-2">Thợ ảnh:
+                                </label><a th:onclick="'toUserDetail(' + ${booking.photographer.id} +')'" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${booking.photographer.fullname}">
                                     Cao Tiến
                                 </a></div>
                             </div>
@@ -137,9 +137,16 @@
     </div>
     <script>
 
+        function toUserDetail(userId) {
+            const url = pathname + '/admin/v2/users/' + userId;
+            $('#admin-content').load(url);
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+        }
+
         function toCancellationDetail(atag, id) {
 
-            const url = '/admin/cancellations/' + id;
+            const url = pathname + '/admin/cancellations/' + id;
             $('#admin-content').load(url);
             $('.tooltip-inner').remove();
             $('.arrow').remove();

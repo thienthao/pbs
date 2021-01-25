@@ -7,6 +7,7 @@ import fpt.university.pbswebapi.dto.AlbumJson;
 import fpt.university.pbswebapi.dto.NotiRequest;
 import fpt.university.pbswebapi.dto.PackageJson;
 import fpt.university.pbswebapi.entity.Album;
+import fpt.university.pbswebapi.entity.Booking;
 import fpt.university.pbswebapi.entity.ServicePackage;
 import fpt.university.pbswebapi.helper.DtoMapper;
 import fpt.university.pbswebapi.helper.QRCodeHelper;
@@ -25,6 +26,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -110,6 +113,16 @@ public class TestController {
     @PreAuthorize("hasRole('ADMIN')")
     public String adminAccess() {
         return "Admin content";
+    }
+
+    @GetMapping("/testcron")
+    public Map<Integer, List<Booking>> test() {
+        Map<Integer, List<Booking>> result = new TreeMap<>();
+        result.put(1, customRepository.getOngoingBookingFrom00To12());
+        result.put(2, customRepository.getOngoingBookingFrom1201To2359());
+        result.put(3, customRepository.getEditingBookingFrom00To12());
+        result.put(4, customRepository.getEditingBookingFrom1201To2359());
+        return result;
     }
 
 }

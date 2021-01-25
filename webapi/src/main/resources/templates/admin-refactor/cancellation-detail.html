@@ -19,7 +19,7 @@
                         <div class="form-inline">
                             <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group">
                                 <label class="mr-sm-2">Người hủy:</label>
-                                <a type="text" class="form-control" th:href="@{/admin/v2/users/{userId}(userId=${cancellation.owner.id})}" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${cancellation.owner.fullname}">
+                                <a type="text" class="form-control" th:onclick="'toUserDetail(' + ${cancellation.owner.id} +')'" data-toggle="tooltip" data-placement="top" title="Chi tiết" th:text="${cancellation.owner.fullname}">
                                     Cao Tiến
                                 </a>
                             </div>
@@ -28,9 +28,9 @@
                         </div>
                         <div class="divider"></div>
                         <div class="form-inline">
-                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng</label><input type="text" th:value="${cancellation.booking.customer.fullname}" class="form-control" readonly></div>
+                            <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Khách hàng</label><a type="text" class="form-control" th:onclick="'toUserDetail(' + ${cancellation.booking.customer.id} +')'" th:text="${cancellation.booking.customer.fullname}" ></a></div>
                             <div class="mb-2 mr-sm-2 mb-sm-0 position-relative form-group"><label class="mr-sm-2">Thợ ảnh
-                            </label><input type="text" class="form-control" th:value="${cancellation.booking.photographer.fullname}" readonly></div>
+                            </label><a type="text" class="form-control" th:onclick="'toUserDetail(' + ${cancellation.booking.photographer.id} +')'" th:text="${cancellation.booking.photographer.fullname}" ></a></div>
                         </div>
                         <div class="divider"></div>
                         <div class="form-inline">
@@ -155,7 +155,7 @@
         function toBookingDetail(bookingId, cancellationId) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            $('#admin-content').load('/admin/bookings/' + bookingId + '?'  + $.param({cancellationId: cancellationId}));
+            $('#admin-content').load(pathname + '/admin/bookings/' + bookingId + '?'  + $.param({cancellationId: cancellationId}));
         }
     </script>
 
@@ -183,6 +183,14 @@
                  <p>PBS</p> `);
         });
 
+    </script>
+    <script>
+        function toUserDetail(userId) {
+            const url = pathname + '/admin/v2/users/' + userId;
+            $('#admin-content').load(url);
+            $('.tooltip-inner').remove();
+            $('.arrow').remove();
+        }
     </script>
 </div>
 </body>

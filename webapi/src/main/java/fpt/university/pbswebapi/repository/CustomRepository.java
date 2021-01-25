@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -474,92 +475,6 @@ public class CustomRepository {
             }
             transaction.commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
-        return results;
-    }
-
-    public List<Booking> queryBookingByStatusAndUserId(Long userId, String status) {
-        List<Booking> results = new ArrayList<>();
-        Session session = factory.openSession();
-        Transaction transaction = null;
-
-        try {
-            transaction = session.beginTransaction();
-            String sql =    "select b.id, b.booking_status, b.created_at, b.customer_canceled_reason, b.photographer_canceled_reason, b.price," +
-                            "b.rejected_reason, b.service_name, b.updated_at, b.customer_id, b.photographer_id," +
-                            "b.package_id, b.returning_type_id, b.edit_deadline, b.time_anticipate, b.returning_link, b.previous_status " +
-                    "from bookings b " +
-                    "where b.photographer_id = " + userId + " and b.booking_status like '" + status + "%' \n" +
-                    "or b.customer_id = " + userId + " and b.booking_status like '" + status + "%'" +
-                    "order by b.id desc, b.created_at desc;";
-            Query query = session.createSQLQuery(sql);
-            List<Object []> bookings = query.getResultList();
-
-            for (Object[] a : bookings) {
-                Booking booking = new Booking();
-                booking.setId(Long.parseLong(a[0].toString()));
-                if(a[1] != null)
-                    booking.setBookingStatus(EBookingStatus.valueOf(a[1].toString().toUpperCase()));
-                if(a[2] != null)
-                    booking.setCreatedAt(DateHelper.convertSQLDateViaString(a[2].toString()));
-                if(a[3] != null)
-                    booking.setCustomerCanceledReason(a[3].toString());
-                if(a[4] != null)
-                    booking.setPhotographerCanceledReason(a[4].toString());
-                if(a[5] != null)
-                    booking.setPrice(Integer.parseInt(a[5].toString()));
-                if(a[6] != null)
-                    booking.setRejectedReason(a[6].toString());
-                if(a[7] != null) {
-                    booking.setServiceName(a[7].toString());
-                }
-                if(a[8] != null) {
-                    booking.setUpdatedAt(DateHelper.convertSQLDateViaString(a[8].toString()));
-                }
-                if(a[9] != null) {
-                    Long customerId = Long.parseLong(a[9].toString());
-                    User customer = userRepository.findById(customerId).get();
-                    booking.setCustomer(customer);
-                }
-                if(a[10] != null) {
-                    Long photographerId = Long.parseLong(a[10].toString());
-                    User photographer = userRepository.findById(photographerId).get();
-                    booking.setPhotographer(photographer);
-                }
-                if(a[11] != null) {
-                    Long packageId = Long.parseLong(a[11].toString());
-                    ServicePackage servicePackage = packageRepository.findById(packageId).get();
-                    booking.setServicePackage(servicePackage);
-                }
-                if(a[12] != null) {
-                    Integer returningTypeId = Integer.parseInt(a[12].toString());
-                    ReturningType returningType = returningTypeRepository.findById(returningTypeId);
-                    booking.setReturningType(returningType);
-                }
-                if(a[13] != null) {
-                    booking.setEditDeadline(DateHelper.convertSQLDateViaString(a[13].toString()));
-                }
-                if(a[14] != null) {
-                    booking.setTimeAnticipate(Integer.parseInt(a[14].toString()));
-                }
-                if(a[15] != null) {
-                    booking.setReturningLink(a[15].toString());
-                }
-                if(a[16] != null) {
-                    booking.setPreviousStatus(EBookingStatus.valueOf(a[16].toString().toUpperCase()));
-                }
-                booking.setTimeLocationDetails(timeLocationDetailRepository.findAllByBookingId(booking.getId()));
-                booking.setBookingDetails(bookingDetailRepository.findAllByBookingId(booking.getId()));
-                results.add(booking);
-            }
-            transaction.commit();
-        } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -1130,7 +1045,7 @@ public class CustomRepository {
             transaction = session.beginTransaction();
             String sql = "update bookings b " +
                     "set b.booking_status = 'EXPIRED', b.previous_status = 'PENDING', b.rejected_reason = 'Đã quá 24 giờ' " +
-                    "where b.booking_status = 'PENDING' and datediff(b.created_at, now()) != 0;";
+                    "where b.booking_status = 'PENDING' and datediff(b.created_at, CONVERT_TZ(current_timestamp(),'+00:00', '+07:00')) != 0;";
             Query query = session.createSQLQuery(sql);
             result = query.executeUpdate();
 
@@ -1144,6 +1059,266 @@ public class CustomRepository {
             session.close();
         }
         return result;
+    }
+
+    public List<Booking> queryBookingByStatusAndUserId(Long userId, String status) {
+        List<Booking> results = new ArrayList<>();
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        try {
+            transaction = session.beginTransaction();
+            String sql =    "select b.id, b.booking_status, b.created_at, b.customer_canceled_reason, b.photographer_canceled_reason, b.price," +
+                    "b.rejected_reason, b.service_name, b.updated_at, b.customer_id, b.photographer_id," +
+                    "b.package_id, b.returning_type_id, b.edit_deadline, b.time_anticipate, b.returning_link, b.previous_status " +
+                    "from bookings b " +
+                    "where b.photographer_id = " + userId + " and b.booking_status like '" + status + "%' \n" +
+                    "or b.customer_id = " + userId + " and b.booking_status like '" + status + "%'" +
+                    "order by b.id desc, b.created_at desc;";
+            Query query = session.createSQLQuery(sql);
+            List<Object []> bookings = query.getResultList();
+
+            for (Object[] a : bookings) {
+                Booking booking = new Booking();
+                booking.setId(Long.parseLong(a[0].toString()));
+                if(a[1] != null)
+                    booking.setBookingStatus(EBookingStatus.valueOf(a[1].toString().toUpperCase()));
+                if(a[2] != null)
+                    booking.setCreatedAt(DateHelper.convertSQLDateViaString(a[2].toString()));
+                if(a[3] != null)
+                    booking.setCustomerCanceledReason(a[3].toString());
+                if(a[4] != null)
+                    booking.setPhotographerCanceledReason(a[4].toString());
+                if(a[5] != null)
+                    booking.setPrice(Integer.parseInt(a[5].toString()));
+                if(a[6] != null)
+                    booking.setRejectedReason(a[6].toString());
+                if(a[7] != null) {
+                    booking.setServiceName(a[7].toString());
+                }
+                if(a[8] != null) {
+                    booking.setUpdatedAt(DateHelper.convertSQLDateViaString(a[8].toString()));
+                }
+                if(a[9] != null) {
+                    Long customerId = Long.parseLong(a[9].toString());
+                    User customer = userRepository.findById(customerId).get();
+                    booking.setCustomer(customer);
+                }
+                if(a[10] != null) {
+                    Long photographerId = Long.parseLong(a[10].toString());
+                    User photographer = userRepository.findById(photographerId).get();
+                    booking.setPhotographer(photographer);
+                }
+                if(a[11] != null) {
+                    Long packageId = Long.parseLong(a[11].toString());
+                    ServicePackage servicePackage = packageRepository.findById(packageId).get();
+                    booking.setServicePackage(servicePackage);
+                }
+                if(a[12] != null) {
+                    Integer returningTypeId = Integer.parseInt(a[12].toString());
+                    ReturningType returningType = returningTypeRepository.findById(returningTypeId);
+                    booking.setReturningType(returningType);
+                }
+                if(a[13] != null) {
+                    booking.setEditDeadline(DateHelper.convertSQLDateViaString(a[13].toString()));
+                }
+                if(a[14] != null) {
+                    booking.setTimeAnticipate(Integer.parseInt(a[14].toString()));
+                }
+                if(a[15] != null) {
+                    booking.setReturningLink(a[15].toString());
+                }
+                if(a[16] != null) {
+                    booking.setPreviousStatus(EBookingStatus.valueOf(a[16].toString().toUpperCase()));
+                }
+                booking.setTimeLocationDetails(timeLocationDetailRepository.findAllByBookingId(booking.getId()));
+                booking.setBookingDetails(bookingDetailRepository.findAllByBookingId(booking.getId()));
+                results.add(booking);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return results;
+    }
+
+    public List<Booking> getOngoingBookingFrom00To12() {
+        List<Booking> results = new ArrayList<>();
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        LocalDateTime from = DateHelper.getDateAt00();
+        LocalDateTime to = DateHelper.getDateAt12();
+
+        try {
+            transaction = session.beginTransaction();
+            String sql =  "select distinct b.id, b.customer_id, b.photographer_id " +
+                    "from bookings b " +
+                    "inner join time_location_detail tld on tld.booking_id = b.id " +
+                    "where b.booking_status = 'ONGOING' and tld.start between '" + from.toString() + "' and '" + to.toString() + "';";
+            Query query = session.createSQLQuery(sql);
+            List<Object []> bookings = query.getResultList();
+
+            for (Object[] a : bookings) {
+                Booking booking = new Booking();
+                booking.setId(Long.parseLong(a[0].toString()));
+                if(a[1] != null) {
+                    Long customerId = Long.parseLong(a[1].toString());
+                    User customer = userRepository.findById(customerId).get();
+                    booking.setCustomer(customer);
+                }
+                if(a[2] != null) {
+                    Long photographerId = Long.parseLong(a[2].toString());
+                    User photographer = userRepository.findById(photographerId).get();
+                    booking.setPhotographer(photographer);
+                }
+                results.add(booking);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return results;
+    }
+
+    public List<Booking> getOngoingBookingFrom1201To2359() {
+        List<Booking> results = new ArrayList<>();
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        LocalDateTime from = DateHelper.getDateAt1201();
+        LocalDateTime to = DateHelper.getDateAt2359();
+
+        try {
+            transaction = session.beginTransaction();
+            String sql =  "select distinct b.id, b.customer_id, b.photographer_id " +
+                    "from bookings b " +
+                    "inner join time_location_detail tld on tld.booking_id = b.id " +
+                    "where b.booking_status = 'ONGOING' and tld.start between '" + from.toString() + "' and '" + to.toString() + "';";
+            Query query = session.createSQLQuery(sql);
+            List<Object []> bookings = query.getResultList();
+
+            for (Object[] a : bookings) {
+                Booking booking = new Booking();
+                booking.setId(Long.parseLong(a[0].toString()));
+                if(a[1] != null) {
+                    Long customerId = Long.parseLong(a[1].toString());
+                    User customer = userRepository.findById(customerId).get();
+                    booking.setCustomer(customer);
+                }
+                if(a[2] != null) {
+                    Long photographerId = Long.parseLong(a[2].toString());
+                    User photographer = userRepository.findById(photographerId).get();
+                    booking.setPhotographer(photographer);
+                }
+                results.add(booking);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return results;
+    }
+
+    public List<Booking> getEditingBookingFrom00To12() {
+        List<Booking> results = new ArrayList<>();
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        LocalDateTime from = DateHelper.getDateAt00();
+        LocalDateTime to = DateHelper.getDateAt12();
+
+        try {
+            transaction = session.beginTransaction();
+            String sql =  "select distinct b.id, b.customer_id, b.photographer_id " +
+                    "from bookings b " +
+                    "where b.booking_status = 'EDITING' and b.edit_deadline between '" + from.toString() + "' and '" + to.toString() + "';";
+            Query query = session.createSQLQuery(sql);
+            List<Object []> bookings = query.getResultList();
+
+            for (Object[] a : bookings) {
+                Booking booking = new Booking();
+                booking.setId(Long.parseLong(a[0].toString()));
+                if(a[1] != null) {
+                    Long customerId = Long.parseLong(a[1].toString());
+                    User customer = userRepository.findById(customerId).get();
+                    booking.setCustomer(customer);
+                }
+                if(a[2] != null) {
+                    Long photographerId = Long.parseLong(a[2].toString());
+                    User photographer = userRepository.findById(photographerId).get();
+                    booking.setPhotographer(photographer);
+                }
+                results.add(booking);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return results;
+    }
+
+    public List<Booking> getEditingBookingFrom1201To2359() {
+        List<Booking> results = new ArrayList<>();
+        Session session = factory.openSession();
+        Transaction transaction = null;
+
+        LocalDateTime from = DateHelper.getDateAt1201();
+        LocalDateTime to = DateHelper.getDateAt2359();
+
+        try {
+            transaction = session.beginTransaction();
+            String sql =  "select distinct b.id, b.customer_id, b.photographer_id " +
+                    "from bookings b " +
+                    "where b.booking_status = 'EDITING' and b.edit_deadline between '" + from.toString() + "' and '" + to.toString() + "';";
+            Query query = session.createSQLQuery(sql);
+            List<Object []> bookings = query.getResultList();
+
+            for (Object[] a : bookings) {
+                Booking booking = new Booking();
+                booking.setId(Long.parseLong(a[0].toString()));
+                if(a[1] != null) {
+                    Long customerId = Long.parseLong(a[1].toString());
+                    User customer = userRepository.findById(customerId).get();
+                    booking.setCustomer(customer);
+                }
+                if(a[2] != null) {
+                    Long photographerId = Long.parseLong(a[2].toString());
+                    User photographer = userRepository.findById(photographerId).get();
+                    booking.setPhotographer(photographer);
+                }
+                results.add(booking);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+        return results;
     }
 
 }

@@ -127,4 +127,26 @@ public class DateHelper {
         //dead code
         return java.time.DayOfWeek.SUNDAY;
     }
+
+    public static LocalDateTime getDateAt00() {
+        LocalDate now = LocalDate.now();
+        LocalDate tomorrow = now.plus(1, ChronoUnit.DAYS);
+        return tomorrow.atTime(00, 00);
+    }
+
+    public static LocalDateTime getDateAt12() {
+        LocalDate now = LocalDate.now();
+        LocalDate tomorrow = now.plus(1, ChronoUnit.DAYS);
+        return tomorrow.atTime(12, 00);
+    }
+
+    public static LocalDateTime getDateAt1201() {
+        LocalDate localDate = LocalDate.now();
+        return localDate.atTime(12, 01);
+    }
+
+    public static LocalDateTime getDateAt2359() {
+        LocalDate localDate = LocalDate.now();
+        return localDate.atTime(23, 59);
+    }
 }

@@ -914,8 +914,8 @@ public class BookingService {
         switch (status) {
             case "ALL":
                 return findAllByUserIdBetweenDate(userId, pageable, start, end);
-            case "CANCELLED":
-                return findAllCancelledBookingByUserIdBetweenDate(userId, pageable, start, end);
+//            case "CANCELLED":
+//                return findAllCancelledBookingByUserIdBetweenDate(userId, pageable, start, end);
             default:
                 return findAllByStatusAndUserIdBetweenDate(userId, pageable, status, start, end);
         }
@@ -928,8 +928,8 @@ public class BookingService {
         switch (status) {
             case "ALL":
                 return bookingRepository.findAllByUserId(userId, pageable);
-            case "CANCELLED":
-                return bookingRepository.findAllCancelledBookingByUserId(userId, pageable);
+//            case "CANCELLED":
+//                return bookingRepository.findAllCancelledBookingByUserId(userId, pageable);
             default:
                 return bookingRepository.findAllByStatusAndUserId(userId, pageable, status);
         }

@@ -13,16 +13,19 @@
                 <div class="card-header">Khách hàng đánh giá
                     <div class="btn-actions-pane-right">
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
-                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
+                            <a style="display: none;" id="rating-date" th:href="@{/admin/ratings(page=${page.number},size=${size})}">10 kết quả</a>
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                     class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Lọc</button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" th:classappend="${filter} == 'not_solve' ? disabled : ''" tabindex="-1" onclick="filterStatusNodeal(this)">Chưa xử lý</a>
-                                <a class="dropdown-item" th:classappend="${filter} == 'solve' ? disabled : ''" tabindex="0" onclick="filterStatusAlreadydeal(this)">Đã xử lý</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'one' ? disabled : ''" tabindex="-1" onclick="filterStatusOne(this)">0 - 1</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'two' ? disabled : ''" tabindex="0" onclick="filterStatusTwo(this)">1 - 2</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'three' ? disabled : ''" tabindex="0" onclick="filterStatusThree(this)">2 - 3</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'four' ? disabled : ''" tabindex="0" onclick="filterStatusFour(this)">3 - 4</a>
+                                <a class="dropdown-item" th:classappend="${filter} == 'five' ? disabled : ''" tabindex="0" onclick="filterStatusFive(this)">4 - 5</a>
                                 <a class="dropdown-item" th:classappend="${filter} == 'all' ? disabled : ''" tabindex="0" onclick="filterStatusAll(this)">Tất cả</a>
                             </div>
                         </div>
-                        <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                        <div id="reportrange-rating" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
                             <i class="fa fa-calendar"></i>&nbsp;
                             <span></span> <i class="fa fa-caret-down"></i>
                         </div>
@@ -71,7 +74,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center" th:text="${obj.rating}">08:00 12/20/2020</td>
+                            <td class="text-center" th:text="${obj.rating}">5</td>
                             <td class="text-center" th:text="${obj.comment}">08:00 12/20/2020</td>
                             <td>
                                 <div class="widget-content p-0">
@@ -99,12 +102,12 @@
                 <div class="d-block text-center card-footer">
                     <nav aria-label="..." class="d-flex justify-content-center">
                         <ul class="pagination pagination-sm">
-                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="cancellation-list-a-paging-previous">Trước</a></li>
+                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="rating-list-a-paging-previous">Trước</a></li>
                             <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
                                 <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
                                 <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
                             </th:block>
-                            <li th:if="${page.hasNext()}" class="page-item"><a id="cancellation-list-a-paging-next">Sau</a></li>
+                            <li th:if="${page.hasNext()}" class="page-item"><a id="rating-list-a-paging-next">Sau</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -116,7 +119,7 @@
         function toBookingDetail(bookingId) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            const url = '/admin/bookings/' + bookingId;
+            const url = pathname + '/admin/bookings/' + bookingId;
             $('#admin-content').load(url);
         }
 
@@ -130,48 +133,59 @@
 
         // th:href="@{/admin/cancellations(page=${page.number},size=10,start=${start},end=${end},filter=${filter})}"
         function limitRecord10(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecord20(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecord50(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecordAll(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
-        // th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=not_solve)}"
-        function filterStatusNodeal(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'not_solve'}));
+        function filterStatusOne(atag) {
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'one'}));
         }
 
-        function filterStatusAlreadydeal(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'solve'}));
+        function filterStatusTwo(atag) {
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'two'}));
+        }
+
+        function filterStatusThree(atag) {
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'three'}));
+        }
+
+        function filterStatusFour(atag) {
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'four'}));
+        }
+
+        function filterStatusFive(atag) {
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'five'}));
         }
 
         function filterStatusAll(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
         }
 
         function toPage(atag) {
             let page = atag.text;
             page = page - 1;
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/ratings?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         $(document).ready(()=>{
 
-            $('#cancellation-list-a-paging-previous').click(() => {
-                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#rating-list-a-paging-previous').click(() => {
+                $('#admin-content').load(pathname + '/admin/ratings?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
             });
 
-            $('#cancellation-list-a-paging-next').click(() => {
-                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#rating-list-a-paging-next').click(() => {
+                $('#admin-content').load(pathname + '/admin/ratings?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
             });
         });
     </script>
@@ -247,13 +261,13 @@
 
             function cb(start, end) {
                 if(start.toString().localeCompare('Invalid date')) {
-                    $('#reportrange-cancellation span').html(formatDate(start) + ' - ' + formatDate(end));
+                    $('#reportrange-rating span').html(formatDate(start) + ' - ' + formatDate(end));
                 } else {
-                    $('#reportrange-cancellation span').html('Tất cả');
+                    $('#reportrange-rating span').html('Tất cả');
                 }
             }
 
-            $('#reportrange-cancellation').daterangepicker({
+            $('#reportrange-rating').daterangepicker({
                 startDate: isValidDate(start) ? start : moment(),
                 endDate: isValidDate(end) ? end : moment(),
                 ranges: {
@@ -270,7 +284,7 @@
 
             cb(start, end);
             if(!isValidDate(start)) {
-                $('#reportrange-cancellation span').html('Tất cả');
+                $('#reportrange-rating span').html('Tất cả');
             }
             $(".applyBtn").text("Chọn");
             $(".cancelBtn").text("Hủy");
@@ -278,15 +292,15 @@
 
         });
 
-        $('#reportrange-cancellation').on('apply.daterangepicker', function(ev, picker) {
-            var startDate = $('#reportrange-cancellation').data('daterangepicker').startDate._d;
-            var endDate = $('#reportrange-cancellation').data('daterangepicker').endDate._d;
+        $('#reportrange-rating').on('apply.daterangepicker', function(ev, picker) {
+            var startDate = $('#reportrange-rating').data('daterangepicker').startDate._d;
+            var endDate = $('#reportrange-rating').data('daterangepicker').endDate._d;
             if(isValidDate(startDate)) {
                 let filter = [[${filter}]];
-                $('#admin-content').load(document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
+                $('#admin-content').load(pathname + document.getElementById('rating-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
             } else {
                 let filter = [[${filter}]];
-                $('#admin-content').load(document.getElementById('cancellation-date').href + `&filter=` + filter.toString());
+                $('#admin-content').load(pathname + document.getElementById('rating-date').href + `&filter=` + filter.toString());
             }
         });
 

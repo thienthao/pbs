@@ -289,7 +289,7 @@ public class AdminController {
 
     @GetMapping("/ratings")
     public String showRatingList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
-        model.addAttribute("page", ratingService.getAll(pageable));
+        model.addAttribute("page", ratingService.getRatings(pageable, start, end, filter));
         model.addAttribute("start", start);
         model.addAttribute("end", end);
         model.addAttribute("filter", filter);
@@ -376,7 +376,7 @@ public class AdminController {
 
     @GetMapping("/reports")
     public String showReportList(@PageableDefault(size = 10) Pageable pageable, @RequestParam(defaultValue = "") String start, @RequestParam(defaultValue = "") String end, @RequestParam(defaultValue = "not_solve") String filter, Model model) {
-        model.addAttribute("page", reportService.getAll(pageable));
+        model.addAttribute("page", reportService.getReports(pageable, start, end, filter));
         model.addAttribute("start", start);
         model.addAttribute("end", end);
         model.addAttribute("filter", filter);

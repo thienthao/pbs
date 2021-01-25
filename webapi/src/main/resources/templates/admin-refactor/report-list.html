@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Report List</title>
+    <title>Danh sách báo cáo</title>
 </head>
 <body>
 <div th:fragment="content">
@@ -13,7 +13,7 @@
                 <div class="card-header">Báo cáo từ người dùng
                     <div class="btn-actions-pane-right">
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
-                            <a style="display: none;" id="cancellation-date" th:href="@{/admin/cancellations(page=${page.number},size=${size})}">10 kết quả</a>
+                            <a style="display: none;" id="report-date" th:href="@{/admin/reports(page=${page.number},size=${size})}">10 kết quả</a>
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                     class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Lọc</button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
@@ -22,7 +22,7 @@
                                 <a class="dropdown-item" th:classappend="${filter} == 'all' ? disabled : ''" tabindex="0" onclick="filterStatusAll(this)">Tất cả</a>
                             </div>
                         </div>
-                        <div id="reportrange-cancellation" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                        <div id="reportrange-report" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
                             <i class="fa fa-calendar"></i>&nbsp;
                             <span></span> <i class="fa fa-caret-down"></i>
                         </div>
@@ -61,7 +61,7 @@
                                         <div class="widget-content-left mr-3">
                                             <div class="widget-content-left">
                                                 <img width="40" class="rounded-circle"
-                                                     th:src="${obj.reporter.avatar}" alt="user avatar">
+                                                     th:src="${obj.reporter.avatar}" alt="Ảnh">
                                             </div>
                                         </div>
                                         <div class="widget-content-left flex2">
@@ -99,12 +99,12 @@
                 <div class="d-block text-center card-footer">
                     <nav aria-label="..." class="d-flex justify-content-center">
                         <ul class="pagination pagination-sm">
-                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="cancellation-list-a-paging-previous">Trước</a></li>
+                            <li th:if="${page.hasPrevious()}" class="page-item"><a id="report-list-a-paging-previous">Trước</a></li>
                             <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
                                 <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
                                 <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
                             </th:block>
-                            <li th:if="${page.hasNext()}" class="page-item"><a id="cancellation-list-a-paging-next">Sau</a></li>
+                            <li th:if="${page.hasNext()}" class="page-item"><a id="report-list-a-paging-next">Sau</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -116,7 +116,7 @@
         function toReportDetail(atag, id) {
             $('.tooltip-inner').remove();
             $('.arrow').remove();
-            const url = '/admin/reports/' + id;
+            const url = pathname + '/admin/reports/' + id;
             $('#admin-content').load(url);
         }
 
@@ -130,48 +130,48 @@
 
         // th:href="@{/admin/cancellations(page=${page.number},size=10,start=${start},end=${end},filter=${filter})}"
         function limitRecord10(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: 10, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecord20(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: 20, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecord50(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: 50, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         function limitRecordAll(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: 1000, page: [[${page.number}]], start: [[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         // th:href="@{/admin/cancellations(page=${page.number},size=${size},start=${start},end=${end},filter=not_solve)}"
         function filterStatusNodeal(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'not_solve'}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'not_solve'}));
         }
 
         function filterStatusAlreadydeal(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'solve'}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'solve'}));
         }
 
         function filterStatusAll(atag) {
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: [[${page.size}]], page: 0, start: [[${start}]], end: [[${end}]], filter: 'all'}));
         }
 
         function toPage(atag) {
             let page = atag.text;
             page = page - 1;
-            $('#admin-content').load('/admin/cancellations?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#admin-content').load(pathname + '/admin/reports?'  + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
         }
 
         $(document).ready(()=>{
 
-            $('#cancellation-list-a-paging-previous').click(() => {
-                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#report-list-a-paging-previous').click(() => {
+                $('#admin-content').load(pathname + '/admin/reports?' + $.param({page: [[${page.number-1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
             });
 
-            $('#cancellation-list-a-paging-next').click(() => {
-                $('#admin-content').load('/admin/cancellations?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
+            $('#report-list-a-paging-next').click(() => {
+                $('#admin-content').load(pathname + '/admin/reports?' + $.param({page: [[${page.number+1}]],size: [[${page.size}]], start:[[${start}]], end: [[${end}]], filter: [[${filter}]]}));
             });
         });
     </script>
@@ -247,13 +247,13 @@
 
             function cb(start, end) {
                 if(start.toString().localeCompare('Invalid date')) {
-                    $('#reportrange-cancellation span').html(formatDate(start) + ' - ' + formatDate(end));
+                    $('#reportrange-report span').html(formatDate(start) + ' - ' + formatDate(end));
                 } else {
-                    $('#reportrange-cancellation span').html('Tất cả');
+                    $('#reportrange-report span').html('Tất cả');
                 }
             }
 
-            $('#reportrange-cancellation').daterangepicker({
+            $('#reportrange-report').daterangepicker({
                 startDate: isValidDate(start) ? start : moment(),
                 endDate: isValidDate(end) ? end : moment(),
                 ranges: {
@@ -270,7 +270,7 @@
 
             cb(start, end);
             if(!isValidDate(start)) {
-                $('#reportrange-cancellation span').html('Tất cả');
+                $('#reportrange-report span').html('Tất cả');
             }
             $(".applyBtn").text("Chọn");
             $(".cancelBtn").text("Hủy");
@@ -278,15 +278,15 @@
 
         });
 
-        $('#reportrange-cancellation').on('apply.daterangepicker', function(ev, picker) {
-            var startDate = $('#reportrange-cancellation').data('daterangepicker').startDate._d;
-            var endDate = $('#reportrange-cancellation').data('daterangepicker').endDate._d;
+        $('#reportrange-report').on('apply.daterangepicker', function(ev, picker) {
+            var startDate = $('#reportrange-report').data('daterangepicker').startDate._d;
+            var endDate = $('#reportrange-report').data('daterangepicker').endDate._d;
             if(isValidDate(startDate)) {
                 let filter = [[${filter}]];
-                $('#admin-content').load(document.getElementById('cancellation-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
+                $('#admin-content').load(pathname + document.getElementById('report-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&filter=` + filter.toString());
             } else {
                 let filter = [[${filter}]];
-                $('#admin-content').load(document.getElementById('cancellation-date').href + `&filter=` + filter.toString());
+                $('#admin-content').load(pathname + document.getElementById('report-date').href + `&filter=` + filter.toString());
             }
         });
 

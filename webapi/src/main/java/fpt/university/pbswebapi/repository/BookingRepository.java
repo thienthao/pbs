@@ -65,7 +65,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("select distinct b FROM Booking b " +
             "inner join b.timeLocationDetails tld " +
             "where b.photographer.id = :userId and tld.start>=:start and tld.start<=:end " +
-            "or b.customer.id = :userId and tld.start>=:start and tld.start<=:end")
+            "or b.customer.id = :userId and tld.start>=:start and tld.start<=:end " +
+            "order by b.createdAt")
     Page<Booking> findAllByUserIdBetweenDate(Long userId, Pageable pageable, Date start, Date end);
 
     @Query("select distinct b FROM Booking b " +
