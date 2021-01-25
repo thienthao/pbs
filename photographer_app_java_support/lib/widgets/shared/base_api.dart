@@ -4,6 +4,8 @@ class BaseApi {
   //photographer, calendar, profile
   static const String PHOTOGRAPHER_URL = BASE_URL + 'photographers';
 
+  static const String USER_URL = BASE_URL + 'users';
+
   static const String PACKAGE_URL = BASE_URL + 'packages';
 
   static const String ALBUM_URL = BASE_URL + 'albums';

@@ -1,5 +1,9 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:customer_app_java_support/locator.dart';
+import 'package:customer_app_java_support/models/customer_bloc_model.dart';
+import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:customer_app_java_support/respositories/customer_repository.dart';
+import 'package:customer_app_java_support/respositories/photographer_respository.dart';
 import 'package:customer_app_java_support/routing_constants.dart';
 import 'package:customer_app_java_support/services/navigation_service.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -13,6 +17,7 @@ class PushNotificationService {
   final NavigationService _navigationService = locator<NavigationService>();
   final referenceDatabase = FirebaseDatabase.instance;
   final http.Client httpClient = http.Client();
+
   SharedPreferences prefs;
 
   Future init() async {
@@ -37,15 +42,25 @@ class PushNotificationService {
       onMessage: (Map<String, dynamic> msg) async {
         print("onMessage ne");
         print('onMessage: $msg');
-        ref
-            .child('Notification_$cusId')
-            .push()
-            .child('NotificationContent')
-            .set(msg)
-            .asStream();
+
+        var senderId = msg['data'] as Map;
+
+        if (senderId['sender'] == null) {
+          ref
+              .child('Notification_$cusId')
+              .push()
+              .child('NotificationContent')
+              .set(msg)
+              .asStream();
+        }
 
         BotToast.showSimpleNotification(
           title: msg["notification"]["body"],
+          enableSlideOff: true,
+          onTap: () {
+            
+            _seralizeAndNavigate(msg);
+          },    
           backgroundColor: Colors.grey[100],
           titleStyle: TextStyle(
               color: Colors.black, fontFamily: "Quicksand", fontSize: 16.0),
@@ -76,11 +91,20 @@ class PushNotificationService {
     );
   }
 
-  void _seralizeAndNavigate(Map<String, dynamic> message) {
+  getChatRoomId(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
+
+  void _seralizeAndNavigate(Map<String, dynamic> message) async {
     var notificationData = message['data'];
     var view = notificationData['view'];
     var bookingId = notificationData['bookingId'];
-
+    var senderId = notificationData['sender'];
+    var receiverId = notificationData['receiver'];
     if (view != null) {
       if (view == 'booking_detail') {
         print("co zo serialize");
@@ -89,6 +113,27 @@ class PushNotificationService {
       if (view == 'booking_history') {
         _navigationService.navigateTo(BookingHistory);
       }
+    }
+    if (senderId != null) {
+      final CustomerRepository _customerRepository =
+          CustomerRepository(httpClient: http.Client());
+      final PhotographerRepository _photographerRepository =
+          PhotographerRepository(httpClient: http.Client());
+      final customer =
+          await _customerRepository.getProfileById(int.parse(receiverId));
+      final photographer = await _photographerRepository
+          .getPhotographerbyId(int.parse(senderId));
+
+      var chatInfo = {
+        "photographer_id": photographer.id,
+        "photographer_name": photographer.fullname,
+        "photographer_avatar": photographer.avatar,
+        "customer_id": customer.id,
+        "customer_name": customer.fullname,
+        "customer_avatar": customer.avatar,
+      };
+
+      _navigationService.navigateTo(Chat, arguments: chatInfo);
     }
   }
 }

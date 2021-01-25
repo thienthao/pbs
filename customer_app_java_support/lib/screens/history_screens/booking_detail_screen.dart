@@ -1979,6 +1979,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                                   builder:
                                                                       (context) =>
                                                                           ChatPage(
+                                                                            senderId: bookingState.booking.customer.id,
+                                                                            receiverId: bookingState.booking.photographer.id,
                                                                             avatar:
                                                                                 bookingObj.photographer.avatar,
                                                                             chatRoomId:

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 
 class ChatMethods {
+  final http.Client httpClient = http.Client();
   Future<void> addUserInfo(userData) async {
     FirebaseFirestore.instance
         .collection("users")
@@ -31,7 +33,8 @@ class ChatMethods {
   }
 
   // ignore: missing_return
-  Future<void> addMessage(String chatRoomId, chatMessageData) {
+  Future<void> addMessage(
+      String chatRoomId, chatMessageData, senderId, receiverId) {
     FirebaseFirestore.instance
         .collection("chatRoom")
         .doc(chatRoomId)
@@ -40,7 +43,10 @@ class ChatMethods {
         .catchError((e) {
       print(e.toString());
     });
-    
+    httpClient.post(
+      "http://194.59.165.195:8080/pbs-webapi/api/users/$senderId/$receiverId",
+      headers: {"Content-Type": "application/json; charset=UTF-8"},
+    );
   }
 
   Future<bool> checkChatRoomExist(String chatRoomId) async {

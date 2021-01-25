@@ -12,7 +12,14 @@ class ChatPage extends StatefulWidget {
   final String chatRoomId;
   final String avatar;
   final String myName;
-  const ChatPage({this.chatRoomId, this.avatar, @required this.myName});
+  final int senderId;
+  final int receiverId;
+  const ChatPage(
+      {this.chatRoomId,
+      this.avatar,
+      @required this.myName,
+      this.senderId,
+      this.receiverId});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -55,7 +62,8 @@ class _ChatPageState extends State<ChatPage> {
         'time': DateTime.now().millisecondsSinceEpoch,
       };
 
-      ChatMethods().addMessage(widget.chatRoomId, chatMessageMap);
+      ChatMethods().addMessage(widget.chatRoomId, chatMessageMap,
+          widget.senderId, widget.receiverId);
 
       setState(() {
         messageEditingController.text = "";

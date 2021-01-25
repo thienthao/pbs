@@ -4,10 +4,11 @@
         <div class="col-lg-3 col-xlg-4 col-md-5">
             <div class="card">
                 <div class="card-body">
-                    <div class="m-t-30 text-center"> <img th:src="${user.avatar}" class="img-circle" alt="Ảnh đại diện"
-                                                          width="150">
+                    <div class="m-t-30 text-center"><img th:src="${user.avatar}" class="img-circle" alt="Ảnh đại diện"
+                                                         width="150">
                         <h4 class="card-title m-t-10 mt-2" th:text="${user.fullname}">Cao Tiến</h4>
-                        <h6 class="card-subtitle" th:text="${@thymeleafHelper.convertRole(user.role.role)}">Photographer</h6>
+                        <h6 class="card-subtitle" th:text="${@thymeleafHelper.convertRole(user.role.role)}">
+                            Photographer</h6>
                     </div>
                 </div>
                 <hr>
@@ -30,8 +31,9 @@
                 <div>
                     <hr>
                 </div>
-                <div class="card-body"> <small class="text-muted">Email </small>
-                    <h6 th:text="${user.email}">caotien@gmail.com</h6> <small class="text-muted p-t-30 db">Số điện thoại</small>
+                <div class="card-body"><small class="text-muted">Email </small>
+                    <h6 th:text="${user.email}">caotien@gmail.com</h6> <small class="text-muted p-t-30 db">Số điện
+                        thoại</small>
                     <h6 th:text="${user.phone}">0903917982</h6>
                 </div>
                 <div class="divider"></div>
@@ -39,7 +41,8 @@
                     <h6 class="font-weight-bold">Trạng thái tài khoản</h6>
                     <h6 class="badge badge-warning" th:if="${user.isBlocked==true}">Đã bị chặn</h6>
                     <h6 class="badge badge-warning" th:if="${user.isEnabled==false}">Chưa kích hoạt</h6>
-                    <h6 class="badge badge-info" th:if="${user.isEnabled==true && user.isBlocked==false}">Bình thường</h6>
+                    <h6 class="badge badge-info" th:if="${user.isEnabled==true && user.isBlocked==false}">Bình
+                        thường</h6>
                 </div>
                 <div class="divider"></div>
                 <div class="text-center form-inline align-items-center justify-content-center">
@@ -50,128 +53,463 @@
                         <button th:if="${user.isBlocked==true}" class="btn btn-success" type="submit">Gỡ chặn</button>
                     </form>
                     <form id="enable-form" class="mb-2 text-center">
-                        <button th:if="${user.isEnabled==false}" class="btn btn-success" type="submit">Kích hoạt tài khoản</button>
+                        <button th:if="${user.isEnabled==false}" class="btn btn-success" type="submit">Kích hoạt tài
+                            khoản
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
         <div class="flex-fill">
-            <div class="main-card mb-3 card">
-                <div class="card-header"><div th:text="'Lịch hẹn của ' + ${user.fullname}">Lịch hẹn của Cao Tiến</div>
-                    <div class="btn-actions-pane-right">
+            <!--            tab-->
+            <div class="main-card mb-3 tab-card">
+                <div class="card-header tab-card-header">
+
+                    <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" id="booking-tab" data-toggle="tab" href="#booking" role="tab"
+                               aria-controls="Booking" aria-selected="true">
+                                <div th:text="'Lịch hẹn của ' + ${user.fullname}">Lịch hẹn của Cao Tiến</div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="album-tab" data-toggle="tab" href="#album" role="tab"
+                               aria-controls="Album" aria-selected="false">
+                                <div th:text="'Album của ' + ${user.fullname}">Album của Cao Tiến</div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="service-tab" data-toggle="tab" href="#service" role="tab"
+                               aria-controls="Service" aria-selected="false">
+                                <div th:text="'Dịch vụ của ' + ${user.fullname}">Dịch vụ của Cao Tiến</div>
+                            </a>
+                        </li>
+                    </ul>
+<!--                    <div th:if="{user.role.role != 'ROLE_PHOTOGRAPHER'}" th:text="'Dịch vụ của ' + ${user.fullname}">Dịch vụ của Cao Tiến</div>-->
+
+
+
+                    <!--                    end tab-->
+
+                    <!--                    booking-filter-->
+                    <div id="booking-filter-area" class="btn-actions-pane-right">
                         <div id="reportrange-userdetail" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
                             <i class="fa fa-calendar"></i>&nbsp;
                             <span></span> <i class="fa fa-caret-down"></i>
                         </div>
                         <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
                         <div role="group" class="btn-group-sm btn-group">
-                            <a style="display: none;" id="userdetail-date" th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number},size=${size})}">10 kết quả</a>
+                            <a style="display: none;" id="userdetail-date"
+                               th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number},size=${size})}">10
+                                kết quả</a>
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
-                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Trạng thái</button>
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Trạng thái
+                            </button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
-                                <a th:classappend="${status} == 'ALL' ? disabled : ''" onclick="filterStatusAll()" tabindex="-1" class="dropdown-item">Tất cả</a>
-                                <a th:classappend="${status} == 'PENDING' ? disabled : ''" onclick="filterStatusPending()" tabindex="0" class="dropdown-item">Chờ xác nhận</a>
-                                <a th:classappend="${status} == 'ONGOING' ? disabled : ''" onclick="filterStatusOngoing()" tabindex="0" class="dropdown-item">Sắp diễn ra</a>
-                                <a th:classappend="${status} == 'CANCELLING' ? disabled : ''" onclick="filterStatusCancelling()" tabindex="0" class="dropdown-item">Chờ hủy</a>
-                                <a th:classappend="${status} == 'CANCELLED' ? disabled : ''" onclick="filterStatusCancelled()" tabindex="0" class="dropdown-item">Đã hủy</a>
-                                <a th:classappend="${status} == 'DONE' ? disabled : ''" onclick="filterStatusDone()" tabindex="0" class="dropdown-item">Đã hoàn thành</a>
-                                <a th:classappend="${status} == 'REJECTED' ? disabled : ''" onclick="filterStatusRejected()" tabindex="0" class="dropdown-item">Đã từ chối</a>
-                                <a th:classappend="${status} == 'EXPIRED' ? disabled : ''" onclick="filterStatusExpired()" tabindex="0" class="dropdown-item">Đã quá hạn</a>
+                                <a th:classappend="${status} == 'ALL' ? disabled : ''" onclick="filterStatusAll()"
+                                   tabindex="-1" class="dropdown-item">Tất cả</a>
+                                <a th:classappend="${status} == 'PENDING' ? disabled : ''"
+                                   onclick="filterStatusPending()" tabindex="0" class="dropdown-item">Chờ xác nhận</a>
+                                <a th:classappend="${status} == 'ONGOING' ? disabled : ''"
+                                   onclick="filterStatusOngoing()" tabindex="0" class="dropdown-item">Sắp diễn ra</a>
+                                <a th:classappend="${status} == 'CANCELLING' ? disabled : ''"
+                                   onclick="filterStatusCancelling()" tabindex="0" class="dropdown-item">Chờ hủy</a>
+                                <a th:classappend="${status} == 'CANCELLED' ? disabled : ''"
+                                   onclick="filterStatusCancelled()" tabindex="0" class="dropdown-item">Đã hủy</a>
+                                <a th:classappend="${status} == 'DONE' ? disabled : ''" onclick="filterStatusDone()"
+                                   tabindex="0" class="dropdown-item">Đã hoàn thành</a>
+                                <a th:classappend="${status} == 'REJECTED' ? disabled : ''"
+                                   onclick="filterStatusRejected()" tabindex="0" class="dropdown-item">Đã từ chối</a>
+                                <a th:classappend="${status} == 'EXPIRED' ? disabled : ''"
+                                   onclick="filterStatusExpired()" tabindex="0" class="dropdown-item">Đã quá hạn</a>
                             </div>
                         </div>
                         <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
                             <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
                                     class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
                             <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1" onclick="limitRecord10()">10 kết quả</a>
-                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0" onclick="limitRecord20()">20 kết quả</a>
-                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0" onclick="limitRecord50()">50 kết quả</a>
-                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0" onclick="limitRecordAll()">Tất cả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1"
+                                   onclick="limitRecord10()">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecord20()">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecord50()">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecordAll()">Tất cả</a>
                             </div>
                         </div>
                     </div>
+                    <!--                    end booking-filter-->
+                    <!--                    album-filter-->
+                    <div id="album-filter-area" class="btn-actions-pane-right">
+                        <div id="reportrange-userdetail" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                            <i class="fa fa-calendar"></i>&nbsp;
+                            <span></span> <i class="fa fa-caret-down"></i>
+                        </div>
+                        <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
+                        <div role="group" class="btn-group-sm btn-group">
+                            <a style="display: none;" id="userdetail-date"
+                               th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number},size=${size})}">10
+                                kết quả</a>
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Trạng thái
+                            </button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
+                                <a th:classappend="${status} == 'ALL' ? disabled : ''" onclick="filterStatusAll()"
+                                   tabindex="-1" class="dropdown-item">Tất cả</a>
+                                <a th:classappend="${status} == 'PENDING' ? disabled : ''"
+                                   onclick="filterStatusPending()" tabindex="0" class="dropdown-item">Chờ xác nhận</a>
+                                <a th:classappend="${status} == 'ONGOING' ? disabled : ''"
+                                   onclick="filterStatusOngoing()" tabindex="0" class="dropdown-item">Sắp diễn ra</a>
+                                <a th:classappend="${status} == 'CANCELLING' ? disabled : ''"
+                                   onclick="filterStatusCancelling()" tabindex="0" class="dropdown-item">Chờ hủy</a>
+                                <a th:classappend="${status} == 'CANCELLED' ? disabled : ''"
+                                   onclick="filterStatusCancelled()" tabindex="0" class="dropdown-item">Đã hủy</a>
+                                <a th:classappend="${status} == 'DONE' ? disabled : ''" onclick="filterStatusDone()"
+                                   tabindex="0" class="dropdown-item">Đã hoàn thành</a>
+                                <a th:classappend="${status} == 'REJECTED' ? disabled : ''"
+                                   onclick="filterStatusRejected()" tabindex="0" class="dropdown-item">Đã từ chối</a>
+                                <a th:classappend="${status} == 'EXPIRED' ? disabled : ''"
+                                   onclick="filterStatusExpired()" tabindex="0" class="dropdown-item">Đã quá hạn</a>
+                            </div>
+                        </div>
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1"
+                                   onclick="limitRecord10()">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecord20()">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecord50()">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecordAll()">Tất cả</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!--                    end album-filter-->
+                    <!--                    service-filter-->
+                    <div id="service-filter-area" class="btn-actions-pane-right">
+                        <div id="reportrange-userdetail" class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">
+                            <i class="fa fa-calendar"></i>&nbsp;
+                            <span></span> <i class="fa fa-caret-down"></i>
+                        </div>
+                        <!-- <input class="mb-2 mr-2 dropdown-toggle btn btn-outline-info" name="dates"/> -->
+                        <div role="group" class="btn-group-sm btn-group">
+                            <a style="display: none;" id="userdetail-date"
+                               th:href="@{/admin/v2/users/{userId}(userId=${user.id},page=${page.number},size=${size})}">10
+                                kết quả</a>
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info">Trạng thái
+                            </button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
+                                <a th:classappend="${status} == 'ALL' ? disabled : ''" onclick="filterStatusAll()"
+                                   tabindex="-1" class="dropdown-item">Tất cả</a>
+                                <a th:classappend="${status} == 'PENDING' ? disabled : ''"
+                                   onclick="filterStatusPending()" tabindex="0" class="dropdown-item">Chờ xác nhận</a>
+                                <a th:classappend="${status} == 'ONGOING' ? disabled : ''"
+                                   onclick="filterStatusOngoing()" tabindex="0" class="dropdown-item">Sắp diễn ra</a>
+                                <a th:classappend="${status} == 'CANCELLING' ? disabled : ''"
+                                   onclick="filterStatusCancelling()" tabindex="0" class="dropdown-item">Chờ hủy</a>
+                                <a th:classappend="${status} == 'CANCELLED' ? disabled : ''"
+                                   onclick="filterStatusCancelled()" tabindex="0" class="dropdown-item">Đã hủy</a>
+                                <a th:classappend="${status} == 'DONE' ? disabled : ''" onclick="filterStatusDone()"
+                                   tabindex="0" class="dropdown-item">Đã hoàn thành</a>
+                                <a th:classappend="${status} == 'REJECTED' ? disabled : ''"
+                                   onclick="filterStatusRejected()" tabindex="0" class="dropdown-item">Đã từ chối</a>
+                                <a th:classappend="${status} == 'EXPIRED' ? disabled : ''"
+                                   onclick="filterStatusExpired()" tabindex="0" class="dropdown-item">Đã quá hạn</a>
+                            </div>
+                        </div>
+                        <div role="group" class="btn-group-sm btn-group dropdown-menu-left">
+                            <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown"
+                                    class="mb-2 mr-2 dropdown-toggle btn btn-outline-info"></button>
+                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" th:classappend="${size} == 10 ? disabled : ''" tabindex="-1"
+                                   onclick="limitRecord10()">10 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 20 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecord20()">20 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 50 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecord50()">50 kết quả</a>
+                                <a class="dropdown-item" th:classappend="${size} == 1000 ? disabled : ''" tabindex="0"
+                                   onclick="limitRecordAll()">Tất cả</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!--                    end area-filter-->
                 </div>
-                <div class="table-responsive">
-                    <table class="align-middle mb-0 table table-borderless table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th>Khách hàng</th>
-                            <th class="text-center">Thời gian hẹn</th>
-                            <th class="text-center">Thợ chụp</th>
-                            <th class="text-center">Trạng thái</th>
-                            <th class="text-center">Tác vụ</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="booking: ${page.content}">
-                            <td class="text-center text-muted" th:text="${booking.id}">#345</td>
-                            <td>
-                                <div class="widget-content p-0">
-                                    <div class="widget-content-wrapper">
-                                        <div class="widget-content-left mr-3">
-                                            <div class="widget-content-left">
-                                                <img width="40" class="rounded-circle" th:src="${booking.customer.avatar}"
-                                                     alt="">
+                <div class="tab-content" id="myTabContent">
+
+                    <!--                    tab-booking-->
+                    <div class="table-responsive tab-pane fade show active p-3 " id="booking" role="tabpanel"
+                         aria-labelledby="booking-tab">
+                        <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Khách hàng</th>
+                                <th class="text-center">Thời gian hẹn</th>
+                                <th class="text-center">Thợ chụp</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-center">Tác vụ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="booking: ${page.content}">
+                                <td class="text-center text-muted" th:text="${booking.id}">#345</td>
+                                <td>
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left mr-3">
+                                                <div class="widget-content-left">
+                                                    <img width="40" class="rounded-circle"
+                                                         th:src="${booking.customer.avatar}"
+                                                         alt="">
+                                                </div>
+                                            </div>
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading" th:text="${booking.customer.fullname}">Uyển
+                                                    Nhi
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="widget-content-left flex2">
-                                            <div class="widget-heading" th:text="${booking.customer.fullname}">Uyển Nhi</div>
+                                    </div>
+                                </td>
+                                <td class="text-center"
+                                    th:text="${#dates.format(booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">
+                                    08:00 12/20/2020
+                                </td>
+                                <td>
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left mr-3">
+                                                <div class="widget-content-left">
+                                                    <img width="40" class="rounded-circle"
+                                                         th:src="${booking.photographer.avatar}" alt="">
+                                                </div>
+                                            </div>
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading" th:text="${booking.photographer.fullname}">
+                                                    Cao Tiến
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                </td>
-                <td class="text-center" th:text="${#dates.format(booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">08:00 12/20/2020</td>
-                <td>
-                    <div class="widget-content p-0">
-                        <div class="widget-content-wrapper">
-                            <div class="widget-content-left mr-3">
-                                <div class="widget-content-left">
-                                    <img width="40" class="rounded-circle" th:src="${booking.photographer.avatar}" alt="">
-                                </div>
-                            </div>
-                            <div class="widget-content-left flex2">
-                                <div class="widget-heading" th:text="${booking.photographer.fullname}">Cao Tiến</div>
-                            </div>
-                        </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="badge badge-warning"
+                                         th:text="${@thymeleafHelper.convertStatus(booking.bookingStatus)}">Chờ xác nhận
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <a th:onclick="'toBookingDetail('+ ${booking.id} +')'" id="PopoverCustomT-1"
+                                       class="btn btn-primary btn-sm text-white">Chi tiết</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-            </td>
-            <td class="text-center">
-                <div class="badge badge-warning" th:text="${@thymeleafHelper.convertStatus(booking.bookingStatus)}">Chờ xác nhận</div>
-            </td>
-            <td class="text-center">
-                <a th:onclick="'toBookingDetail('+ ${booking.id} +')'" id="PopoverCustomT-1" class="btn btn-primary btn-sm text-white">Chi tiết</a>
-            </td>
-            </tr>
-            </tbody>
-            </table>
-        </div>
-        <div class="d-block text-center card-footer">
-            <nav aria-label="..." class="d-flex justify-content-center">
-                <ul class="pagination pagination-sm">
-                    <li th:if="${page.hasPrevious()}" class="page-item"><a id="user-booking-list-a-paging-previous">Trước</a></li>
-                    <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
-                        <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span></li>
-                        <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a></li>
-                    </th:block>
-                    <li th:if="${page.hasNext()}" class="page-item"><a id="user-booking-list-a-paging-next">Sau</a></li>
-                </ul>
-            </nav>
+                    <!--                    end-tab-booking-->
+
+                    <!--                    tab-album-->
+                    <div class="table-responsive tab-pane fade show p-3 " id="album" role="tabpanel"
+                         aria-labelledby="album-tab">
+                        <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Album</th>
+                                <th class="text-center">Thời gian hẹn</th>
+                                <th class="text-center">Thợ chụp</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-center">Tác vụ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="booking: ${page.content}">
+                                <td class="text-center text-muted" th:text="${booking.id}">#345</td>
+                                <td>
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left mr-3">
+                                                <div class="widget-content-left">
+                                                    <img width="40" class="rounded-circle"
+                                                         th:src="${booking.customer.avatar}"
+                                                         alt="">
+                                                </div>
+                                            </div>
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading" th:text="${booking.customer.fullname}">Uyển
+                                                    Nhi
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center"
+                                    th:text="${#dates.format(booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">
+                                    08:00 12/20/2020
+                                </td>
+                                <td>
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left mr-3">
+                                                <div class="widget-content-left">
+                                                    <img width="40" class="rounded-circle"
+                                                         th:src="${booking.photographer.avatar}" alt="">
+                                                </div>
+                                            </div>
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading" th:text="${booking.photographer.fullname}">
+                                                    Cao Tiến
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="badge badge-warning"
+                                         th:text="${@thymeleafHelper.convertStatus(booking.bookingStatus)}">Chờ xác nhận
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <a th:onclick="'toBookingDetail('+ ${booking.id} +')'" id="PopoverCustomT-1"
+                                       class="btn btn-primary btn-sm text-white">Chi tiết</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--                    end-tab-album-->
+
+                    <!--                    tab-service-->
+                    <div class="table-responsive tab-pane fade show p-3 " id="service" role="tabpanel"
+                         aria-labelledby="service-tab">
+                        <table class="align-middle mb-0 table table-borderless table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Dịch vụ</th>
+                                <th class="text-center">Thời gian hẹn</th>
+                                <th class="text-center">Thợ chụp</th>
+                                <th class="text-center">Trạng thái</th>
+                                <th class="text-center">Tác vụ</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="booking: ${page.content}">
+                                <td class="text-center text-muted" th:text="${booking.id}">#345</td>
+                                <td>
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left mr-3">
+                                                <div class="widget-content-left">
+                                                    <img width="40" class="rounded-circle"
+                                                         th:src="${booking.customer.avatar}"
+                                                         alt="">
+                                                </div>
+                                            </div>
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading" th:text="${booking.customer.fullname}">Uyển
+                                                    Nhi
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center"
+                                    th:text="${#dates.format(booking.timeLocationDetails.get(0).start, 'HH:mm dd-MM-yyyy')}">
+                                    08:00 12/20/2020
+                                </td>
+                                <td>
+                                    <div class="widget-content p-0">
+                                        <div class="widget-content-wrapper">
+                                            <div class="widget-content-left mr-3">
+                                                <div class="widget-content-left">
+                                                    <img width="40" class="rounded-circle"
+                                                         th:src="${booking.photographer.avatar}" alt="">
+                                                </div>
+                                            </div>
+                                            <div class="widget-content-left flex2">
+                                                <div class="widget-heading" th:text="${booking.photographer.fullname}">
+                                                    Cao Tiến
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="badge badge-warning"
+                                         th:text="${@thymeleafHelper.convertStatus(booking.bookingStatus)}">Chờ xác nhận
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <a th:onclick="'toBookingDetail('+ ${booking.id} +')'" id="PopoverCustomT-1"
+                                       class="btn btn-primary btn-sm text-white">Chi tiết</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--                    end-tab-service-->
+                </div>
+
+                <!--                booking paging-->
+                <div class="d-block text-center card-footer">
+                    <nav aria-label="..." class="d-flex justify-content-center">
+                        <ul class="pagination pagination-sm">
+                            <li th:if="${page.hasPrevious()}" class="page-item"><a
+                                    id="user-booking-list-a-paging-previous">Trước</a></li>
+                            <th:block th:each="i: ${#numbers.sequence(0, page.totalPages - 1)}">
+                                <li class="page-item"><span class="page-link disabled" th:if="${page.number == i}">[[${i}+1]]</span>
+                                </li>
+                                <li th:unless="${page.number == i}" class="page-item"><a onclick="toPage(this)">[[${i}+1]]</a>
+                                </li>
+                            </th:block>
+                            <li th:if="${page.hasNext()}" class="page-item"><a
+                                    id="user-booking-list-a-paging-next">Sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <!--                end booking paging-->
+
+            </div>
         </div>
     </div>
-</div>
-</div>
 
     <script th:inline="javascript">
+
+        $('#booking-tab').click((e) => {
+            e.preventDefault();
+            $('#booking-filter-area').show();
+            $('#album-filter-area').hide();
+            $('#service-filter-area').hide();
+
+        });
+
+        $('#album-tab').click((e) => {
+            e.preventDefault();
+            $('#booking-filter-area').hide();
+            $('#album-filter-area').show();
+            $('#service-filter-area').hide();
+        });
+
+        $('#service-tab').click((e) => {
+            e.preventDefault();
+            $('#booking-filter-area').hide();
+            $('#album-filter-area').hide();
+            $('#service-filter-area').show();
+        });
 
         $('#block-form').submit((e) => {
             e.preventDefault();
             const userId = [[${user.id}]];
             $.ajax({
-                type:"post",
-                url:  '/admin/v2/users/' + userId + '/block',
-                success: function(result){
-                    $('#admin-content').load(pathname +'/admin/v2/users/' + userId);
+                type: "post",
+                url: '/admin/v2/users/' + userId + '/block',
+                success: function (result) {
+                    $('#admin-content').load(pathname + '/admin/v2/users/' + userId);
                 }
             });
         });
@@ -180,9 +518,9 @@
             e.preventDefault();
             const userId = [[${user.id}]];
             $.ajax({
-                type:"post",
+                type: "post",
                 url: '/admin/v2/users/' + userId + '/unblock',
-                success: function(result){
+                success: function (result) {
                     $('#admin-content').load(pathname + '/admin/v2/users/' + userId);
                 }
             });
@@ -192,9 +530,9 @@
             e.preventDefault();
             const userId = [[${user.id}]];
             $.ajax({
-                type:"post",
+                type: "post",
                 url: '/admin/v2/users/' + userId + '/enable',
-                success: function(result){
+                success: function (result) {
                     $('#admin-content').load(pathname + '/admin/v2/users/' + userId);
                 }
             });
@@ -207,51 +545,123 @@
         }
 
         function limitRecord10() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?'  + $.param({size: 10, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: 10,
+                page: [[${page.number}]],
+                start: [[${start}]],
+                end: [[${end}]],
+                status: [[${status}]]
+            }));
         }
 
         function limitRecord20() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: 20, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: 20,
+                page: [[${page.number}]],
+                start: [[${start}]],
+                end: [[${end}]],
+                status: [[${status}]]
+            }));
         }
 
         function limitRecord50() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: 50, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: 50,
+                page: [[${page.number}]],
+                start: [[${start}]],
+                end: [[${end}]],
+                status: [[${status}]]
+            }));
         }
 
         function limitRecordAll() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: 1000, page: [[${page.number}]], start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: 1000,
+                page: [[${page.number}]],
+                start: [[${start}]],
+                end: [[${end}]],
+                status: [[${status}]]
+            }));
         }
 
         function filterStatusAll() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'ALL'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'ALL'
+            }));
         }
 
         function filterStatusPending() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'PENDING'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'PENDING'
+            }));
         }
 
         function filterStatusOngoing() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'ONGOING'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'ONGOING'
+            }));
         }
 
         function filterStatusCancelled() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'CANCELLED'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'CANCELLED'
+            }));
         }
 
         function filterStatusDone() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'DONE'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'DONE'
+            }));
         }
 
         function filterStatusRejected() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'REJECTED'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'REJECTED'
+            }));
         }
 
         function filterStatusExpired() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'EXPIRED'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'EXPIRED'
+            }));
         }
 
         function filterStatusCancelling() {
-            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: 0, start:[[${start}]], end: [[${end}]], status: 'CANCELLING'}));
+            $('#admin-content').load(pathname + '/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: 0,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: 'CANCELLING'
+            }));
         }
 
         // th:href="@{/admin/v2/users(page=${i},size=${page.size})}"
@@ -259,12 +669,26 @@
         function toPage(atag) {
             let page = atag.text;
             page = page - 1;
-            $('#admin-content').load('/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: page, start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+            $('#admin-content').load('/admin/v2/users/' + userId + '?' + $.param({
+                size: [[${page.size}]],
+                page: page,
+                start: [[${start}]],
+                end: [[${end}]],
+                status: [[${status}]]
+            }));
         }
 
-        $(document).ready(()=>{
+        $(document).ready(() => {
+            $('#album-filter-area').hide();
+            $('#service-filter-area').hide();
             $('#user-booking-list-a-paging-previous').click(() => {
-                $('#admin-content').load('/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: [[${page.number - 1}]], start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+                $('#admin-content').load('/admin/v2/users/' + userId + '?' + $.param({
+                    size: [[${page.size}]],
+                    page: [[${page.number - 1}]],
+                    start: [[${start}]],
+                    end: [[${end}]],
+                    status: [[${status}]]
+                }));
             });
 
             // $('.numm').click(() => {
@@ -273,9 +697,16 @@
             // });
 
             $('#user-booking-list-a-paging-next').click(() => {
-                $('#admin-content').load('/admin/v2/users/' + userId + '?' + $.param({size: [[${page.size}]], page: [[${page.number + 1}]], start:[[${start}]], end: [[${end}]], status: [[${status}]]}));
+                $('#admin-content').load('/admin/v2/users/' + userId + '?' + $.param({
+                    size: [[${page.size}]],
+                    page: [[${page.number + 1}]],
+                    start: [[${start}]],
+                    end: [[${end}]],
+                    status: [[${status}]]
+                }));
             });
         });
+
     </script>
 
     <script th:inline="javascript">
@@ -349,7 +780,7 @@
             var end = new Date([[${end}]]);
 
             function cb(start, end) {
-                if(start.toString().localeCompare('Invalid date')) {
+                if (start.toString().localeCompare('Invalid date')) {
                     $('#reportrange-userdetail span').html(formatDate(start) + ' - ' + formatDate(end));
                 } else {
                     $('#reportrange-userdetail span').html('Tất cả');
@@ -372,7 +803,7 @@
             }, cb);
 
             cb(start, end);
-            if(!isValidDate(start)) {
+            if (!isValidDate(start)) {
                 $('#reportrange-userdetail span').html('Tất cả');
             }
             $(".applyBtn").text("Chọn");
@@ -381,10 +812,10 @@
 
         });
 
-        $('#reportrange-userdetail').on('apply.daterangepicker', function(ev, picker) {
+        $('#reportrange-userdetail').on('apply.daterangepicker', function (ev, picker) {
             var startDate = $('#reportrange-userdetail').data('daterangepicker').startDate._d;
             var endDate = $('#reportrange-userdetail').data('daterangepicker').endDate._d;
-            if(isValidDate(startDate)) {
+            if (isValidDate(startDate)) {
                 let status = [[${status}]];
                 $('#admin-content').load(document.getElementById('userdetail-date').href + `&start=${formatDate(startDate)}&end=${formatDate(endDate)}&status=` + status.toString());
             } else {

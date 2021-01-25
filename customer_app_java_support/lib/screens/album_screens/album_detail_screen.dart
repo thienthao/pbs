@@ -406,35 +406,6 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                 SizedBox(
                   height: 5,
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.lens,
-                      size: 5.0,
-                    ),
-                    SizedBox(width: 5.0),
-                    RichText(
-                      text: TextSpan(
-                        text: '',
-                        style: TextStyle(
-                            color: Colors.black54, fontFamily: 'Quicksand'),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: 'Địa điểm: ',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text: '${widget.album.location}',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
                 RichText(
                   text: TextSpan(
                     text: '',

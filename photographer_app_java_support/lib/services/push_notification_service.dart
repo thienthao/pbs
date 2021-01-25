@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/locator.dart';
+import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
+import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
 import 'package:photographer_app_java_support/routing_constants.dart';
 import 'package:photographer_app_java_support/services/navigation_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,12 +21,11 @@ class PushNotificationService {
   final http.Client httpClient = http.Client();
   SharedPreferences prefs;
 
-
   Future init() async {
     prefs = await SharedPreferences.getInstance();
     int ptgId = prefs.getInt('photographerId');
 
-    if(ptgId != null) {
+    if (ptgId != null) {
       _fcm.getToken().then((token) {
         print('$ptgId _ $token');
         httpClient.post(
@@ -34,9 +36,7 @@ class PushNotificationService {
       });
     }
 
-
-  final ref = referenceDatabase.reference();
-
+    final ref = referenceDatabase.reference();
 
     // _fcm.unsubscribeFromTopic("topic");
     // _fcm.subscribeToTopic("photographer-topic");
@@ -46,20 +46,30 @@ class PushNotificationService {
       onMessage: (Map<String, dynamic> msg) async {
         print("onMessage ne");
         print('onMessage: $msg');
-        ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
+        var senderId = msg['data'] as Map;
+
+        if (senderId['sender'] == null) {
+          ref
+              .child('Notification_$globalPtgId')
+              .push()
+              .child('NotificationContent')
+              .set(msg)
+              .asStream();
+        }
 
         BotToast.showSimpleNotification(
           enableSlideOff: true,
           onTap: () {
             _seralizeAndNavigate(msg);
+          
           },
+          
           title: msg["notification"]["body"],
           backgroundColor: Colors.grey[100],
           titleStyle: TextStyle(
               color: Colors.black, fontFamily: "Quicksand", fontSize: 18.0),
           duration: Duration(seconds: 10),
           hideCloseButton: false,
-
         );
 
         // BotToast.showCustomNotification(toastBuilder: (widget) {
@@ -79,27 +89,36 @@ class PushNotificationService {
         //   fontSize: 16.0,
         // );
       },
-
       onLaunch: (Map<String, dynamic> msg) async {
         print('onLaunch: $msg');
         _seralizeAndNavigate(msg);
-        ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
+        ref
+            .child('Notification_$globalPtgId')
+            .push()
+            .child('NotificationContent')
+            .set(msg)
+            .asStream();
       },
       onResume: (Map<String, dynamic> msg) async {
         print('onResume: $msg');
 
         _seralizeAndNavigate(msg);
-        ref.child('Notification_$globalPtgId').push().child('NotificationContent').set(msg).asStream();
-
+        ref
+            .child('Notification_$globalPtgId')
+            .push()
+            .child('NotificationContent')
+            .set(msg)
+            .asStream();
       },
     );
   }
 
-  void _seralizeAndNavigate(Map<String, dynamic> message) {
+  void _seralizeAndNavigate(Map<String, dynamic> message) async {
     var notificationData = message['data'];
     var view = notificationData['view'];
     var bookingId = notificationData['bookingId'];
-
+    var senderId = notificationData['sender'];
+    var receiverId = notificationData['receiver'];
     if (view != null) {
       if (view == 'booking_detail') {
         print("co zo serialize");
@@ -108,6 +127,24 @@ class PushNotificationService {
       if (view == 'booking_history') {
         _navigationService.navigateTo(BookingHistory);
       }
+    }
+    if (senderId != null) {
+      final PhotographerRepository _photographerRepository =
+          PhotographerRepository(httpClient: http.Client());
+      final customer =
+          await _photographerRepository.getProfileById(int.parse(senderId));
+      final photographer = await _photographerRepository
+          .getPhotographerbyId(int.parse(receiverId));
+      var chatInfo = {
+        "photographer_id": photographer.id,
+        "photographer_name": photographer.fullname,
+        "photographer_avatar": photographer.avatar,
+        "customer_id": customer.id,
+        "customer_name": customer.fullname,
+        "customer_avatar": customer.avatar,
+      };
+
+      _navigationService.navigateTo(Chat, arguments: chatInfo);
     }
   }
 }

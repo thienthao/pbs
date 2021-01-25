@@ -100,12 +100,21 @@ class _BottomSheetDailyState extends State<BottomSheetDaily> {
     }
     final splitStringStartTime = widget.listWorkingDays[0].startTime.split(':');
     final splitStringEndTime = widget.listWorkingDays[0].endTime.split(':');
-    _timeStart = TimeOfDay(
-        hour: int.parse(splitStringStartTime[0]) - 1,
-        minute: int.parse(splitStringStartTime[1]));
-    _timeEnd = TimeOfDay(
-        hour: int.parse(splitStringEndTime[0]) -1,
-        minute: int.parse(splitStringEndTime[1]));
+    if (int.parse(splitStringStartTime[0]) == 0) {
+      _timeStart =
+          TimeOfDay(hour: 23, minute: int.parse(splitStringStartTime[1]));
+    } else {
+      _timeStart = TimeOfDay(
+          hour: int.parse(splitStringStartTime[0]) - 1,
+          minute: int.parse(splitStringStartTime[1]));
+    }
+    if (int.parse(splitStringEndTime[0]) == 0) {
+      _timeEnd = TimeOfDay(hour: 23, minute: int.parse(splitStringEndTime[1]));
+    } else {
+      _timeEnd = TimeOfDay(
+          hour: int.parse(splitStringEndTime[0]) - 1,
+          minute: int.parse(splitStringEndTime[1]));
+    }
   }
 
   @override

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:photographer_app_java_support/globals.dart';
+import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
 import 'package:photographer_app_java_support/models/location_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:flutter/material.dart';
@@ -245,5 +246,28 @@ class PhotographerRepository {
     }
 
     return result;
+  }
+
+    Future<CustomerBlocModel> getProfileById(int id) async {
+    // final albumsTemp = getAlbumOfPhotographer(id) as List;
+    final response = await this.httpClient.get(BaseApi.USER_URL + '/$id',
+        headers: {HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'});
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final customer = CustomerBlocModel(
+        id: data['id'],
+        avatar: data['avatar'],
+        email: data['email'],
+        phone: data['phone'],
+        username: data['username'],
+        description: data['description'],
+        fullname: data['fullname'],
+      );
+      return customer;
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized');
+    } else {
+      throw Exception('Error getting photographer');
+    }
   }
 }
