@@ -7,7 +7,6 @@ import 'package:customer_app_java_support/blocs/register_blocs/register_bloc.dar
 import 'package:customer_app_java_support/respositories/customer_repository.dart';
 import 'package:customer_app_java_support/screens/forget_password_screen.dart';
 import 'package:customer_app_java_support/screens/sign_up_screen.dart';
-import 'package:customer_app_java_support/shared/pop_up.dart';
 import 'package:customer_app_java_support/shared/slide_navigator.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';

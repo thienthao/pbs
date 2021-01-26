@@ -67,8 +67,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     }
     if (!mounted) return;
     setState(() {
-      if (barcodeScanRes == qrCode) {
+      if (barcodeScanRes.isEmpty || barcodeScanRes == null) {
+      } else if (barcodeScanRes == qrCode) {
         _checkIn(bookingObj.id, timeLocationId);
+      } else if (barcodeScanRes == 'Không thể nhận diện.') {
+        _showFailAlert(
+            'Thông báo', 'Không thể nhận diện.\n Xin vui lòng thử lại.');
       } else {
         _showFailAlert(
             'Cảnh báo', 'Mã QR này không hợp lệ.\n Xin vui lòng thử lại.');
@@ -101,6 +105,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => ChatPage(
+                  receiverId: bookingObj.customer.id,
+                  senderId: bookingObj.photographer.id,
                   avatar: bookingObj.customer.avatar,
                   chatRoomId: chatRoomId,
                   myName: myName ?? 'Thợ $globalPtgId',
@@ -153,10 +159,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }
 
   Widget buildQrCodeStatus(String inputDate, Widget qrWidget) {
-    String date =
-        DateFormat('dd/MM/yyyy').format(DateTime.parse(inputDate).toLocal());
-    String now = DateFormat('dd/MM/yyyy').format(DateTime.now().toLocal());
+    // String date =
+    //     DateFormat('dd/MM/yyyy').format(DateTime.parse(inputDate).toLocal());
+    // String now = DateFormat('dd/MM/yyyy').format(DateTime.now().toLocal());
 
+    DateTime dateTime = DateTime.parse(inputDate).toLocal();
+    DateTime dateTimeNow = DateTime.now().toLocal();
     // if (date.compareTo(now) > 0) {
     //   return Text('Tương lai',
     //       style: TextStyle(
@@ -166,7 +174,24 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     //       ));
     // } else
 
-    if (date.compareTo(now) < 0) {
+    if (dateTime.year < dateTimeNow.year) {
+      return Text('Quá hạn',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+            color: Colors.red[300],
+          ));
+    } else if (dateTime.year == dateTimeNow.year &&
+        dateTime.month < dateTimeNow.month) {
+      return Text('Quá hạn',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+            color: Colors.red[300],
+          ));
+    } else if (dateTime.year == dateTimeNow.year &&
+        dateTime.month == dateTimeNow.month &&
+        dateTime.day < dateTimeNow.day) {
       return Text('Quá hạn',
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -598,20 +623,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         check = true;
       } else {
         check = false;
+        _showFailAlert('Cảnh báo',
+            'Vui lòng check in gặp mặt khách hàng tất cả các ngày trước khi chuyển sang trạng thái Hậu kì');
+        return;
       }
     }
-    if (check) {
-      BookingBlocModel bookingTemp = BookingBlocModel(
-          id: _booking.id,
-          customer: CustomerBlocModel(id: _booking.customer.id),
-          package: _booking.package);
-      print('${bookingTemp.customer.id}');
-      BlocProvider.of<BookingBloc>(context)
-          .add(BookingEventMoveToEdit(booking: bookingTemp));
-    } else {
-      _showFailAlert('Cảnh báo',
-          'Vui lòng check in gặp mặt khách hàng tất cả các ngày trước khi chuyển sang trạng thái Hậu kì');
-    }
+
+    BookingBlocModel bookingTemp = BookingBlocModel(
+        id: _booking.id,
+        customer: CustomerBlocModel(id: _booking.customer.id),
+        package: _booking.package);
+    print('${bookingTemp.customer.id}');
+    BlocProvider.of<BookingBloc>(context)
+        .add(BookingEventMoveToEdit(booking: bookingTemp));
   }
 
   _moveToDoneBooking(BookingBlocModel _booking) async {
@@ -2372,6 +2396,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                                                   builder:
                                                                       (context) =>
                                                                           ChatPage(
+                                                                            receiverId:
+                                                                                bookingObj.customer.id,
+                                                                            senderId:
+                                                                                bookingObj.photographer.id,
                                                                             avatar:
                                                                                 bookingObj.customer.avatar,
                                                                             chatRoomId:

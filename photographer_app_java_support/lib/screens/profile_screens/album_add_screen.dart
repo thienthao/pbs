@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
+import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:photographer_app_java_support/blocs/category_blocs/categories.dart';
 import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/models/album_bloc_model.dart';
 import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 
 class AddAlbum extends StatefulWidget {
   @override
@@ -40,6 +42,7 @@ class _AddAlbumState extends State<AddAlbum> {
   List<CategoryBlocModel> listCategory = List<CategoryBlocModel>();
   List<DropdownMenuItem<CategoryBlocModel>> categoryDropDownMenuItems;
   CategoryBlocModel selectedCategory;
+  DateTime updatedDate;
 
   List<DropdownMenuItem<CategoryBlocModel>> buildCategoryDropdownMenuItems(
       List categories) {
@@ -94,16 +97,35 @@ class _AddAlbumState extends State<AddAlbum> {
     );
   }
 
+  bool validate() {
+    if (nameController.text.trim().isEmpty) {
+      popUp(context, 'Tên album bị trống', 'Không thể bỏ trống trường này');
+      return false;
+    } else if (dateController.text.trim().isEmpty) {
+      popUp(context, 'Ngày tạo bị trống', 'Không thể bỏ trống trường này');
+      return false;
+    } else if (_images.isEmpty) {
+      popUp(context, 'Ảnh bị trống', 'Không thể tạo album mà không có ảnh');
+      return false;
+    }
+    return true;
+  }
+
   _createAlbum() async {
-    _album = AlbumBlocModel(
-        name: nameController.text,
-        description: descriptionController.text,
-        category: selectedCategory,
-        photographer: Photographer(id: globalPtgId));
-    print(_album.name);
-    print(_images[0].path.split('/').last);
-    BlocProvider.of<AlbumBloc>(context).add(AlbumEventCreateAlbum(
-        album: _album, thumbnail: _thumbnail, images: _images));
+    if (validate()) {
+      _album = AlbumBlocModel(
+          name: nameController.text,
+          description: descriptionController.text,
+          category: selectedCategory,
+          createdAt: updatedDate == null
+              ? DateTime.now()
+              : DateFormat("yyyy-MM-dd'T'HH:mm").format(updatedDate),
+          photographer: Photographer(id: globalPtgId));
+      print(_album.name);
+      print(_images[0].path.split('/').last);
+      BlocProvider.of<AlbumBloc>(context).add(AlbumEventCreateAlbum(
+          album: _album, thumbnail: _thumbnail, images: _images));
+    }
   }
 
   @override
@@ -129,7 +151,7 @@ class _AddAlbumState extends State<AddAlbum> {
                 Navigator.pop(context);
                 _showSuccessAlert();
               }
-              if (state is AlbumStateLoading) {
+              if (state is AlbumStateFailure) {
                 Navigator.pop(context);
                 _showFailDialog();
               }
@@ -149,215 +171,234 @@ class _AddAlbumState extends State<AddAlbum> {
         centerTitle: true,
         elevation: 0.0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: ListView(
-          physics: BouncingScrollPhysics(),
-          children: [
-            SizedBox(height: 20.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Tên Album: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                TextField(
-                  controller: nameController,
-                  keyboardType: TextInputType.text,
-                  style: TextStyle(
-                    color: Colors.black87,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: ListView(
+            physics: BouncingScrollPhysics(),
+            children: [
+              SizedBox(height: 20.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Tên Album: *',
+                    style: TextStyle(color: Colors.black87, fontSize: 12.0),
                   ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(Icons.notes),
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText: 'Ví dụ: Album 01',
-                    hintStyle: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
+                  TextField(
+                    controller: nameController,
+                    keyboardType: TextInputType.text,
+                    style: TextStyle(
+                      color: Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      icon: Icon(Icons.notes),
+                      contentPadding: EdgeInsets.all(8.0),
+                      hintText: 'Ví dụ: Album 01',
+                      hintStyle: TextStyle(
+                        fontSize: 15.0,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Thời gian: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                TextField(
-                  controller: dateController,
-                  keyboardType: TextInputType.datetime,
-                  style: TextStyle(
-                    color: Colors.black87,
+                ],
+              ),
+              SizedBox(height: 30.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Thời gian: *',
+                    style: TextStyle(color: Colors.black87, fontSize: 12.0),
                   ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(Icons.calendar_today),
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText: 'Ví dụ: 01/01/2011',
-                    hintStyle: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
+                  InkWell(
+                    onTap: () {
+                      showDatePicker(
+                              cancelText: 'Hủy bỏ',
+                              confirmText: 'Xác nhận',
+                              errorFormatText: 'Sai định dạng',
+                              errorInvalidText: 'Ngày này không hợp lệ',
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1900, 1, 1),
+                              lastDate: DateTime(2200, 1, 1))
+                          .then((value) {
+                        updatedDate = value;
+                        dateController.text =
+                            DateFormat('dd/MM/yyyy').format(value);
+                      });
+                    },
+                    child: TextField(
+                      enabled: false,
+                      controller: dateController,
+                      keyboardType: TextInputType.datetime,
+                      style: TextStyle(
+                        color: Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        icon: Icon(Icons.calendar_today),
+                        contentPadding: EdgeInsets.all(8.0),
+                        hintText: 'Ví dụ: 01/01/2011',
+                        hintStyle: TextStyle(
+                          fontSize: 15.0,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
-            // Column(
-            //   crossAxisAlignment: CrossAxisAlignment.start,
-            //   children: <Widget>[
-            //     Text(
-            //       'Địa điểm: *',
-            //       style: TextStyle(color: Colors.black87, fontSize: 12.0),
-            //     ),
-            //     TextField(
-            //       controller: locationController,
-            //       enableSuggestions: true,
-            //       autocorrect: true,
-            //       keyboardType: TextInputType.text,
-            //       style: TextStyle(
-            //         color: Colors.black87,
-            //       ),
-            //       decoration: InputDecoration(
-            //         border: InputBorder.none,
-            //         icon: Icon(Icons.location_on),
-            //         contentPadding: EdgeInsets.all(8.0),
-            //         hintText: 'Ví dụ: Hà Nội',
-            //         hintStyle: TextStyle(
-            //           fontSize: 15.0,
-            //           color: Colors.grey,
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            // SizedBox(height: 30.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Mô tả: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                TextField(
-                  controller: descriptionController,
-                  keyboardType: TextInputType.text,
-                  style: TextStyle(
-                    color: Colors.black87,
+                ],
+              ),
+              SizedBox(height: 30.0),
+              // Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: <Widget>[
+              //     Text(
+              //       'Địa điểm: *',
+              //       style: TextStyle(color: Colors.black87, fontSize: 12.0),
+              //     ),
+              //     TextField(
+              //       controller: locationController,
+              //       enableSuggestions: true,
+              //       autocorrect: true,
+              //       keyboardType: TextInputType.text,
+              //       style: TextStyle(
+              //         color: Colors.black87,
+              //       ),
+              //       decoration: InputDecoration(
+              //         border: InputBorder.none,
+              //         icon: Icon(Icons.location_on),
+              //         contentPadding: EdgeInsets.all(8.0),
+              //         hintText: 'Ví dụ: Hà Nội',
+              //         hintStyle: TextStyle(
+              //           fontSize: 15.0,
+              //           color: Colors.grey,
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // SizedBox(height: 30.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Mô tả: *',
+                    style: TextStyle(color: Colors.black87, fontSize: 12.0),
                   ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(Icons.subject),
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText: 'Ví dụ: Album này ....',
-                    hintStyle: TextStyle(
-                      fontSize: 15.0,
-                      color: Colors.grey,
+                  TextField(
+                    controller: descriptionController,
+                    keyboardType: TextInputType.text,
+                    style: TextStyle(
+                      color: Colors.black87,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      icon: Icon(Icons.subject),
+                      contentPadding: EdgeInsets.all(8.0),
+                      hintText: 'Ví dụ: Album này ....',
+                      hintStyle: TextStyle(
+                        fontSize: 15.0,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Category: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                BlocListener<CategoryBloc, CategoryState>(
-                  listener: (context, state) {
-                    if (state is CategoryStateSuccess) {
-                      for (CategoryBlocModel category in state.categories) {
-                        if (!(category.id == 1)) {
-                          listCategory.add(category);
+                ],
+              ),
+              SizedBox(height: 30.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Category: *',
+                    style: TextStyle(color: Colors.black87, fontSize: 12.0),
+                  ),
+                  BlocListener<CategoryBloc, CategoryState>(
+                    listener: (context, state) {
+                      if (state is CategoryStateSuccess) {
+                        for (CategoryBlocModel category in state.categories) {
+                          if (!(category.id == 1)) {
+                            listCategory.add(category);
+                          }
                         }
+
+                        categoryDropDownMenuItems =
+                            buildCategoryDropdownMenuItems(listCategory);
+                        selectedCategory = categoryDropDownMenuItems[0].value;
+                        setState(() {});
                       }
-
-
-                      categoryDropDownMenuItems =
-                          buildCategoryDropdownMenuItems(listCategory);
-                      selectedCategory = categoryDropDownMenuItems[0].value;
-                      setState(() {});
-                    }
-                    if (state is CategoryStateLoading) {
-                      return CircularProgressIndicator();
-                    }
-                  },
-                  child: SizedBox(),
-                ),
-                _buildCategoryComboBox()
-              ],
-            ),
-            SizedBox(height: 30.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Ảnh: *',
-                  style: TextStyle(color: Colors.black87, fontSize: 12.0),
-                ),
-                GestureDetector(
-                  onTap: () => getImage(),
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 10.0),
-                    width: 100.0,
-                    height: 100.0,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10.0),
-                      child: Center(
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.add,
-                            color: Colors.black54,
+                      if (state is CategoryStateLoading) {
+                        return CircularProgressIndicator();
+                      }
+                    },
+                    child: SizedBox(),
+                  ),
+                  _buildCategoryComboBox()
+                ],
+              ),
+              SizedBox(height: 30.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Ảnh: *',
+                    style: TextStyle(color: Colors.black87, fontSize: 12.0),
+                  ),
+                  GestureDetector(
+                    onTap: () => getImage(),
+                    child: Container(
+                      margin: EdgeInsets.symmetric(vertical: 10.0),
+                      width: 100.0,
+                      height: 100.0,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
+                        child: Center(
+                          child: IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.add,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Wrap(
-                    spacing: 7,
-                    runSpacing: 7,
-                    children: List.generate(_images.length, (index) {
-                      return Hero(
-                        
-                        tag: _images[index],
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image(
-                            image: FileImage(_images[index]),
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
+                  SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Wrap(
+                      spacing: 7,
+                      runSpacing: 7,
+                      children: List.generate(_images.length, (index) {
+                        return Hero(
+                          tag: _images[index],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10.0),
+                            child: Image(
+                              image: FileImage(_images[index]),
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
 
   Future<void> _showSuccessAlert() async {
     return showDialog<void>(

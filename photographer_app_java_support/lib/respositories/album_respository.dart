@@ -109,7 +109,7 @@ class AlbumRepository {
               ? 'Sapa'
               : album['location'].toString(),
           likes: album['likes'] == null ? 223 : album['likes'],
-          createAt: album['createAt'],
+          createdAt: album['createdAt'],
           category: category,
           images: images,
           photographer: photographer,
@@ -157,26 +157,28 @@ class AlbumRepository {
     }
 
     String albumDto =
-        '{"id":"${album.id}","name":"${album.name}","description":"${album.description}","ptgId":$globalPtgId,"location":"${album.location}","categoryId":${album.category.id}}';
+        '{"id":"${album.id}","name":"${album.name}","createdAt":"${album.createdAt}","description":"${album.description}","ptgId":$globalPtgId,"location":"${album.location}","categoryId":${album.category.id}}';
     request.fields['stringAlbumDto'] = albumDto;
-
+    print(albumDto);
     final response = await request.send();
 
     bool result = false;
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       print("Uploaded!");
       result = true;
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized');
     } else {
+      print(response.statusCode);
       throw Exception('Error at create album!');
     }
+
     return result;
   }
 
   Future<bool> updateAlbumInfo(AlbumBlocModel album) async {
     String albumDto =
-        '{"id":"${album.id}","name":"${album.name}","description":"${album.description}","ptgId":$globalPtgId,"location":"${album.location}","categoryId":${album.category.id}}';
+        '{"id":"${album.id}","name":"${album.name}","createdAt":"${album.createdAt}","description":"${album.description}","ptgId":$globalPtgId,"location":"${album.location}","categoryId":${album.category.id}}';
     print(albumDto);
     final response =
         await this.httpClient.put(BaseApi.ALBUM_URL + '/${album.id}',
@@ -231,7 +233,7 @@ class AlbumRepository {
 
     final response = await request.send();
     bool result = false;
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       print("Uploaded!");
       result = true;
     } else if (response.statusCode == 401) {
@@ -258,12 +260,13 @@ class AlbumRepository {
 
     final response = await request.send();
     bool result = false;
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       print("Uploaded!");
       result = true;
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized');
     } else {
+      print(response.statusCode);
       throw Exception('Error at add image for album!');
     }
     return result;

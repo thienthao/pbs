@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:giffy_dialog/giffy_dialog.dart';
 import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
+import 'package:intl/intl.dart';
 import 'package:photographer_app_java_support/blocs/album_blocs/album.dart';
 import 'package:photographer_app_java_support/blocs/category_blocs/categories.dart';
 import 'package:photographer_app_java_support/models/album_bloc_model.dart';
 import 'package:photographer_app_java_support/models/category_bloc_model.dart';
 import 'package:photographer_app_java_support/screens/profile_screens/photo_view_screen.dart';
+import 'package:photographer_app_java_support/widgets/shared/pop_up.dart';
 import 'package:photographer_app_java_support/widgets/shared/scale_navigator.dart';
 
 class UpdateAlbum extends StatefulWidget {
@@ -92,18 +94,32 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
         .add(AlbumEventDeleteAlbum(albumId: widget.album.id));
   }
 
-  _updateAlbumInfo() async {
-    print(widget.album.id);
-    AlbumBlocModel albumBlocModel = AlbumBlocModel(
-      id: widget.album.id,
-      description: descriptionController.text,
-      location: locationController.text,
-      name: nameController.text,
-      category: selectedCategory,
-    );
+  bool validate() {
+    if (nameController.text.trim().isEmpty) {
+      popUp(context, 'Tên album bị trống', 'Không thể bỏ trống trường này');
+      return false;
+    } else if (dateController.text.trim().isEmpty) {
+      popUp(context, 'Ngày tạo bị trống', 'Không thể bỏ trống trường này');
+      return false;
+    }
+    return true;
+  }
 
-    BlocProvider.of<AlbumBloc>(context)
-        .add(AlbumEventUpdateInfo(album: albumBlocModel));
+  _updateAlbumInfo() async {
+    if (validate()) {
+      print(dateController.text);
+      AlbumBlocModel albumBlocModel = AlbumBlocModel(
+        id: widget.album.id,
+        description: descriptionController.text,
+        location: locationController.text,
+        name: nameController.text,
+        createdAt: DateFormat("yyyy-MM-dd'T'HH:mm").format(updatedDate),
+        category: selectedCategory,
+      );
+
+      BlocProvider.of<AlbumBloc>(context)
+          .add(AlbumEventUpdateInfo(album: albumBlocModel));
+    }
   }
 
   List<File> _images = [];
@@ -125,14 +141,19 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
   TextEditingController dateController = TextEditingController();
   TextEditingController locationController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  DateTime updatedDate;
 
   @override
   void initState() {
     super.initState();
     nameController.text = widget.album.name ?? '';
-    dateController.text = widget.album.createAt.toString() == 'null'
+    dateController.text = widget.album.createdAt.toString() == 'null'
         ? ''
-        : widget.album.createAt.toString();
+        : DateFormat('dd/MM/yyyy')
+            .format(DateTime.parse(widget.album.createdAt.toString()));
+    updatedDate = widget.album.createdAt == null
+        ? DateTime.now()
+        : DateTime.parse(widget.album.createdAt);
     locationController.text = widget.album.location ?? '';
     descriptionController.text =
         widget.album.description == 'null' ? '' : widget.album.description;
@@ -229,20 +250,47 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
                       'Thời gian: *',
                       style: TextStyle(color: Colors.black87, fontSize: 12.0),
                     ),
-                    TextField(
-                      controller: dateController,
-                      keyboardType: TextInputType.datetime,
-                      style: TextStyle(
-                        color: Colors.black87,
-                      ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        icon: Icon(Icons.calendar_today),
-                        contentPadding: EdgeInsets.all(8.0),
-                        hintText: 'Ví dụ: 01/01/2011',
-                        hintStyle: TextStyle(
-                          fontSize: 15.0,
-                          color: Colors.grey,
+                    InkWell(
+                      onTap: () {
+                        // showDateRangePicker(
+                        //         context: context,
+                        //         firstDate: DateTime.now(),
+                        //         lastDate:
+                        //             DateTime.now().add(Duration(days: 1)))
+                        //     .then((value) => print(value));
+                        showDatePicker(
+                                cancelText: 'Hủy bỏ',
+                                confirmText: 'Xác nhận',
+                                errorFormatText: 'Sai định dạng',
+                                errorInvalidText: 'Ngày này không hợp lệ',
+                                context: context,
+                                initialDate: widget.album.createdAt == null
+                                    ? DateTime.now()
+                                    : DateTime.parse(widget.album.createdAt),
+                                firstDate: DateTime(1900, 1, 1),
+                                lastDate: DateTime(2200, 1, 1))
+                            .then((value) {
+                          updatedDate = value;
+                          dateController.text =
+                              DateFormat('dd/MM/yyyy').format(value);
+                        });
+                      },
+                      child: TextField(
+                        enabled: false,
+                        controller: dateController,
+                        keyboardType: TextInputType.datetime,
+                        style: TextStyle(
+                          color: Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          icon: Icon(Icons.calendar_today),
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: 'Ví dụ: 01/01/2011',
+                          hintStyle: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -442,9 +490,19 @@ class _UpdateAlbumState extends State<UpdateAlbum> {
                                           onTap: () {
                                             // print(widget.album.images[index].id);
                                             print(widget.album.id);
-                                            _removeImageOfAnAlbum(
-                                                widget.album.images[index].id);
-                                            widget.album.images.removeAt(index);
+                                            if (widget.album.images.length ==
+                                                1) {
+                                              popUp(
+                                                  context,
+                                                  'Không thể xóa ảnh cuối',
+                                                  'Bạn không thể xóa bức ảnh cuối cùng trong album');
+                                            } else {
+                                              _removeImageOfAnAlbum(widget
+                                                  .album.images[index].id);
+                                              widget.album.images
+                                                  .removeAt(index);
+                                            }
+
                                             setState(() {});
                                           },
                                           child: ClipRRect(

@@ -1,3 +1,5 @@
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_bloc.dart';
+import 'package:customer_app_java_support/blocs/authen_blocs/authentication_event.dart';
 import 'package:customer_app_java_support/blocs/booking_blocs/bookings.dart';
 import 'package:customer_app_java_support/blocs/calendar_blocs/calendars.dart';
 import 'package:customer_app_java_support/blocs/comment_blocs/comments.dart';
@@ -180,6 +182,10 @@ class _BookingManyState extends State<BookingMany> {
     }
   }
 
+  _logOut() async {
+    BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,8 +220,14 @@ class _BookingManyState extends State<BookingMany> {
             }
             if (state is BookingStateFailure) {
               Navigator.pop(context);
-              _showBookingFailDialog();
-              popUp(context, 'Đặt lịch', 'Đặt lịch thất bại!!');
+              String error = state.error.replaceAll('Exception: ', '');
+
+              if (error.toUpperCase() == 'UNAUTHORIZED') {
+                _showUnauthorizedDialog();
+              } else {
+                _showBookingFailDialog();
+                popUp(context, 'Đặt hẹn', 'Gửi yêu cầu thất bại');
+              }
             }
           },
           child: ListView(
@@ -436,7 +448,8 @@ class _BookingManyState extends State<BookingMany> {
                                     ),
                                   ],
                                   child: BookingManyDetailEdit(
-                                    timeAnticipate: selectedPackage.timeAnticipate,
+                                    timeAnticipate:
+                                        selectedPackage.timeAnticipate,
                                     ptgId: widget.photographer.id,
                                     model: listTimeAndLocation[mapEntry.key],
                                     onUpdateList:
@@ -577,6 +590,19 @@ class _BookingManyState extends State<BookingMany> {
                                     TimeAndLocationBlocModel tempModel =
                                         listTimeAndLocation[mapEntry.key];
                                     listTimeAndLocation.removeAt(mapEntry.key);
+                                    DateTime tempLatestDate = DateTime.parse(
+                                        listTimeAndLocation[0].start);
+                                    for (var item in listTimeAndLocation) {
+                                      if (DateTime.parse(item.start)
+                                              .isAfter(tempLatestDate) ||
+                                          DateTime.parse(item.start)
+                                              .isAtSameMomentAs(
+                                                  tempLatestDate)) {
+                                        tempLatestDate =
+                                            DateTime.parse(item.start);
+                                      }
+                                    }
+                                    lastDate = tempLatestDate;
                                     Flushbar(
                                       flushbarPosition: FlushbarPosition.BOTTOM,
                                       flushbarStyle: FlushbarStyle.GROUNDED,
@@ -601,6 +627,18 @@ class _BookingManyState extends State<BookingMany> {
                                         onPressed: () {
                                           listTimeAndLocation.insert(
                                               tempKey, tempModel);
+                                          for (var item
+                                              in listTimeAndLocation) {
+                                            if (DateTime.parse(item.start)
+                                                    .isAfter(tempLatestDate) ||
+                                                DateTime.parse(item.start)
+                                                    .isAtSameMomentAs(
+                                                        tempLatestDate)) {
+                                              tempLatestDate =
+                                                  DateTime.parse(item.start);
+                                            }
+                                          }
+                                          lastDate = tempLatestDate;
                                           Navigator.pop(context);
                                           setState(() {});
                                         },
@@ -1037,6 +1075,38 @@ class _BookingManyState extends State<BookingMany> {
               onlyOkButton: true,
               onOkButtonPressed: () {
                 Navigator.pop(context);
+              },
+              buttonOkColor: Theme.of(context).primaryColor,
+              buttonOkText: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
+            ));
+  }
+
+  Future<void> _showUnauthorizedDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => AssetGiffyDialog(
+              image: Image.asset(
+                'assets/images/fail.gif',
+                fit: BoxFit.cover,
+              ),
+              entryAnimation: EntryAnimation.DEFAULT,
+              title: Text(
+                'Thông báo',
+                style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600),
+              ),
+              description: Text(
+                'Tài khoản không có quyền truy cập nội dung này!!',
+                textAlign: TextAlign.center,
+                style: TextStyle(),
+              ),
+              onlyOkButton: true,
+              onOkButtonPressed: () {
+                _logOut();
               },
               buttonOkColor: Theme.of(context).primaryColor,
               buttonOkText: Text(

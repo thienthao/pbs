@@ -792,8 +792,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                               ),
                               RaisedButton(
                                   onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
+                                    _createBooking();
                                   },
                                   color: Theme.of(context).accentColor,
                                   focusColor: Colors.white,
@@ -1058,6 +1057,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
       children: widget,
     );
   }
+
   Future<void> _showWeatherWarningHourlyAlert(WeatherBlocModel notice) async {
     return showDialog<void>(
         barrierDismissible: false,
@@ -1142,7 +1142,7 @@ class _BottomSheetShowState extends State<BottomSheetShow> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: buildNoticeHourly(notice.time),
                               ),
-                                _buildNoticeHourlyDetail(notice.time),
+                              _buildNoticeHourlyDetail(notice.time),
                               Divider(
                                 indent: 10,
                                 endIndent: 10,

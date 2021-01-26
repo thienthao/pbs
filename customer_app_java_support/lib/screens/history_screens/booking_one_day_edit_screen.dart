@@ -147,6 +147,8 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
   }
 
   bool _validateBooking() {
+    print(endDate);
+    print(lastDate);
     if (timeResult == 'Hãy chọn thời gian chụp') {
       popUp(context, 'Chọn thời gian chụp', 'Xin hãy chọn thời gian chụp');
       return false;
@@ -635,8 +637,8 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  DateFormat('dd/MM/yyyy hh:mm a')
-                                      .format(DateTime.parse(endDate)),
+                                  DateFormat('dd/MM/yyyy hh:mm a').format(
+                                      DateTime.parse(endDate).toLocal()),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -1053,7 +1055,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                               RaisedButton(
                                   onPressed: () {
                                     Navigator.pop(context);
-                                    Navigator.pop(context);
+                                    _editBooking();
                                   },
                                   color: Theme.of(context).accentColor,
                                   focusColor: Colors.white,
@@ -1336,7 +1338,7 @@ class _BookingOneDayEditScreenState extends State<BookingOneDayEditScreen> {
                               RaisedButton(
                                   onPressed: () {
                                     Navigator.pop(context);
-                                    Navigator.pop(context);
+                                    _editBooking();
                                   },
                                   color: Theme.of(context).accentColor,
                                   focusColor: Colors.white,

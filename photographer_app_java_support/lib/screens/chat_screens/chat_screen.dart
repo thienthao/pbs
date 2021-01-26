@@ -61,6 +61,7 @@ class _ChatPageState extends State<ChatPage> {
         "message": messageEditingController.text,
         'time': DateTime.now().millisecondsSinceEpoch,
       };
+      print('${widget.senderId} ${widget.receiverId}');
 
       ChatMethods().addMessage(widget.chatRoomId, chatMessageMap,
           widget.senderId, widget.receiverId);

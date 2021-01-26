@@ -197,7 +197,7 @@ class PhotographerRepository {
 
     resBody["username"] = username;
     resBody["oldPassword"] = oldPassword;
-    resBody["newPassWord"] = newPassWord;
+    resBody["newPassword"] = newPassWord;
     String str = json.encode(resBody);
     print(str);
     final response = await httpClient.put(BaseApi.AUTH_URL + '/changePassword',
@@ -248,7 +248,7 @@ class PhotographerRepository {
     return result;
   }
 
-    Future<CustomerBlocModel> getProfileById(int id) async {
+  Future<CustomerBlocModel> getProfileById(int id) async {
     // final albumsTemp = getAlbumOfPhotographer(id) as List;
     final response = await this.httpClient.get(BaseApi.USER_URL + '/$id',
         headers: {HttpHeaders.authorizationHeader: 'Bearer $globalPtgToken'});

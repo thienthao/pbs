@@ -112,6 +112,7 @@ class PhotographerBloc extends Bloc<PhotographerEvent, PhotographerState> {
 
   Stream<PhotographerState> _mapChangePassword(
       String username, String oldPassword, String newPassword) async* {
+    yield PhotographerStateLoading();
     try {
       final isSuccess = await this
           .photographerRepository

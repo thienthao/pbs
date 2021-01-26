@@ -136,7 +136,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           validator: _checkEmpty,
                           focusNode: oldPasswordFocusNode,
                           controller: oldPasswordTxtController,
-                          keyboardType: TextInputType.name,
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true,
                           style: TextStyle(
                             color: Colors.black87,
                           ),

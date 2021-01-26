@@ -358,7 +358,7 @@ class _ImageFullScreenState extends State<ImageFullScreen> {
                             color: Colors.black54, fontFamily: 'Quicksand'),
                         children: <TextSpan>[
                           TextSpan(
-                              text: 'Ngày chụp: ',
+                              text: 'Ngày tạo: ',
                               style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold)),

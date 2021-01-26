@@ -35,7 +35,7 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
       CalendarRepository(httpClient: http.Client());
   NumberFormat oCcy = NumberFormat("#,##0", "vi_VN");
   final ScrollController _scrollController = ScrollController();
-  final _scrollThreshold = 0.0;
+  // final _scrollThreshold = 0.0;
   bool _hasReachedEnd;
   Completer<void> _completer;
   @override
@@ -44,13 +44,13 @@ class _MorePtgScreenState extends State<MorePtgScreen> {
     _loadPhotographerInfinite();
     _completer = Completer<void>();
 
-    _scrollController.addListener(() {
-      final maxScrollExtent = _scrollController.position.maxScrollExtent;
-      final currentScroll = _scrollController.position.pixels;
-      if (maxScrollExtent - currentScroll <= _scrollThreshold) {
-        _loadPhotographerInfinite();
-      }
-    });
+    // _scrollController.addListener(() {
+    //   final maxScrollExtent = _scrollController.position.maxScrollExtent;
+    //   final currentScroll = _scrollController.position.pixels;
+    //   if (maxScrollExtent - currentScroll <= _scrollThreshold) {
+    //     _loadPhotographerInfinite();
+    //   }
+    // });
   }
 
   @override

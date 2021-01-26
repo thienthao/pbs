@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:bot_toast/bot_toast.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:photographer_app_java_support/globals.dart';
 import 'package:photographer_app_java_support/locator.dart';
-import 'package:photographer_app_java_support/models/customer_bloc_model.dart';
-import 'package:photographer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:photographer_app_java_support/respositories/photographer_respository.dart';
 import 'package:photographer_app_java_support/routing_constants.dart';
 import 'package:photographer_app_java_support/services/navigation_service.dart';
@@ -61,9 +60,7 @@ class PushNotificationService {
           enableSlideOff: true,
           onTap: () {
             _seralizeAndNavigate(msg);
-          
           },
-          
           title: msg["notification"]["body"],
           backgroundColor: Colors.grey[100],
           titleStyle: TextStyle(

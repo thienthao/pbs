@@ -9,7 +9,7 @@ class AlbumBlocModel extends Equatable {
   final String thumbnail;
   final String location;
   final String description;
-  final DateTime createAt;
+  final String createdAt;
   final bool isActive;
   final Photographer photographer;
   final int likes;
@@ -22,7 +22,7 @@ class AlbumBlocModel extends Equatable {
       this.location,
       this.thumbnail,
       this.description,
-      this.createAt,
+      this.createdAt,
       this.isActive,
       this.images,
       this.likes,
@@ -36,7 +36,7 @@ class AlbumBlocModel extends Equatable {
         location,
         thumbnail,
         description,
-        createAt,
+        createdAt,
         isActive,
         images,
         category,
@@ -51,7 +51,7 @@ class AlbumBlocModel extends Equatable {
         location: 'location' ?? 'album location',
         description: 'description' ?? 'test desc',
         thumbnail: 'thumbnail' ?? '',
-        createAt: 'createAt' ?? DateTime.october,
+        createdAt: 'createAt' ?? DateTime.october,
         isActive: 'isActive' ?? true,
         likes: 'likes' ?? 0,
         images: 'images' ?? [],

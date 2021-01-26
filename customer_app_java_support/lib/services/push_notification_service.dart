@@ -1,7 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:customer_app_java_support/locator.dart';
-import 'package:customer_app_java_support/models/customer_bloc_model.dart';
-import 'package:customer_app_java_support/models/photographer_bloc_model.dart';
 import 'package:customer_app_java_support/respositories/customer_repository.dart';
 import 'package:customer_app_java_support/respositories/photographer_respository.dart';
 import 'package:customer_app_java_support/routing_constants.dart';

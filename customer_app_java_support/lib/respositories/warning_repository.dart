@@ -23,7 +23,7 @@ class WarningRepository {
     final response = await this.httpClient.get(
         BaseApi.PHOTOGRAPHER_URL + '/$ptgId/working-days/check?time=$time',
         headers: {HttpHeaders.authorizationHeader: 'Bearer ' + globalCusToken});
-    print(time);
+    print(BaseApi.PHOTOGRAPHER_URL + '/$ptgId/working-days/check?time=$time');
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       return data;

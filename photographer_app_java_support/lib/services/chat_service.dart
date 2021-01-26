@@ -47,6 +47,9 @@ class ChatMethods {
       "http://194.59.165.195:8080/pbs-webapi/api/users/$senderId/$receiverId",
       headers: {"Content-Type": "application/json; charset=UTF-8"},
     );
+
+    print(
+        "http://194.59.165.195:8080/pbs-webapi/api/users/$senderId/$receiverId");
   }
 
   Future<bool> checkChatRoomExist(String chatRoomId) async {

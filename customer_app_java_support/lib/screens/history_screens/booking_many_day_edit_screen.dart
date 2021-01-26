@@ -456,7 +456,8 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                       ),
                                     ],
                                     child: BookingManyDetailEdit(
-                                      timeAnticipate: selectedPackage.timeAnticipate,
+                                      timeAnticipate:
+                                          selectedPackage.timeAnticipate,
                                       ptgId: widget.photographer.id,
                                       model: listTimeAndLocation[mapEntry.key],
                                       onUpdateList:
@@ -603,6 +604,19 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                     TimeAndLocationBlocModel tempModel =
                                         listTimeAndLocation[mapEntry.key];
                                     listTimeAndLocation.removeAt(mapEntry.key);
+                                    DateTime tempLatestDate = DateTime.parse(
+                                        listTimeAndLocation[0].start);
+                                    for (var item in listTimeAndLocation) {
+                                      if (DateTime.parse(item.start)
+                                              .isAfter(tempLatestDate) ||
+                                          DateTime.parse(item.start)
+                                              .isAtSameMomentAs(
+                                                  tempLatestDate)) {
+                                        tempLatestDate =
+                                            DateTime.parse(item.start);
+                                      }
+                                    }
+                                    lastDay = tempLatestDate;
                                     Flushbar(
                                       flushbarPosition: FlushbarPosition.BOTTOM,
                                       flushbarStyle: FlushbarStyle.GROUNDED,
@@ -627,6 +641,18 @@ class _BookingManyDayEditState extends State<BookingManyDayEdit> {
                                         onPressed: () {
                                           listTimeAndLocation.insert(
                                               tempKey, tempModel);
+                                          for (var item
+                                              in listTimeAndLocation) {
+                                            if (DateTime.parse(item.start)
+                                                    .isAfter(tempLatestDate) ||
+                                                DateTime.parse(item.start)
+                                                    .isAtSameMomentAs(
+                                                        tempLatestDate)) {
+                                              tempLatestDate =
+                                                  DateTime.parse(item.start);
+                                            }
+                                          }
+                                          lastDay = tempLatestDate;
                                           Navigator.pop(context);
                                           setState(() {});
                                         },
